@@ -25,9 +25,10 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
-use function sha1;
+use Teknoo\East\Website\Contracts\User\AuthDataInterface;
+use Teknoo\East\Website\Contracts\User\UserInterface;
+
 use function trim;
-use function uniqid;
 
 /**
  * Class to defined persisted user allow to be connected to the website. An user can have some roles, like admin,
@@ -36,7 +37,7 @@ use function uniqid;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class User implements ObjectInterface, DeletableInterface, TimestampableInterface
+class User implements ObjectInterface, UserInterface, DeletableInterface, TimestampableInterface
 {
     use ObjectTrait;
 
@@ -47,21 +48,14 @@ class User implements ObjectInterface, DeletableInterface, TimestampableInterfac
     /**
      * @var string[]
      */
-    private array $roles = [];
+    private iterable $roles = [];
 
     private string $email = '';
 
-    private ?string $password = null;
-
-    private ?string $originalPassword = null;
-
-    private string $salt = '';
-
-    public function __construct()
-    {
-        //initialize for new user
-        $this->salt = sha1(uniqid('', true));
-    }
+    /**
+     * @var iterable<AuthDataInterface>
+     */
+    private iterable $authData = [];
 
     public function getFirstName(): string
     {
@@ -93,17 +87,17 @@ class User implements ObjectInterface, DeletableInterface, TimestampableInterfac
     }
 
     /**
-     * @return array<string>
+     * @return iterable<string>
      */
-    public function getRoles(): array
+    public function getRoles(): iterable
     {
         return $this->roles;
     }
 
     /**
-     * @param array<string> $roles
+     * @param iterable<string> $roles
      */
-    public function setRoles(array $roles): User
+    public function setRoles(iterable $roles): User
     {
         $this->roles = $roles;
 
@@ -115,6 +109,11 @@ class User implements ObjectInterface, DeletableInterface, TimestampableInterfac
         return (string) $this->email;
     }
 
+    public function getUserIdentifier(): string
+    {
+        return $this->getEmail();
+    }
+
     public function setEmail(string $email): User
     {
         $this->email = $email;
@@ -122,61 +121,15 @@ class User implements ObjectInterface, DeletableInterface, TimestampableInterfac
         return $this;
     }
 
-    public function getPassword(): string
+    public function setAuthData(iterable $authData): User
     {
-        if (empty($this->originalPassword)) {
-            $this->originalPassword = $this->password;
-        }
-
-        return (string) $this->password;
-    }
-
-    public function getOriginalPassword(): string
-    {
-        return (string) $this->originalPassword;
-    }
-
-    public function hasUpdatedPassword(): bool
-    {
-        $originalPwd = $this->getOriginalPassword();
-        $pwd = $this->getPassword();
-
-        return empty($originalPwd) && !empty($pwd) || ($originalPwd != $pwd);
-    }
-
-    public function setPassword(?string $password): User
-    {
-        if (empty($this->originalPassword)) {
-            $this->originalPassword = $this->password;
-        }
-
-        $this->password = $password;
+        $this->authData = $authData;
 
         return $this;
     }
 
-    public function getSalt(): string
+    public function getAuthData(): iterable
     {
-        return (string) $this->salt;
-    }
-
-    public function setSalt(string $salt): User
-    {
-        $this->salt = $salt;
-
-        return $this;
-    }
-
-    public function getUsername(): string
-    {
-        return $this->getEmail();
-    }
-
-    public function eraseCredentials(): self
-    {
-        $this->password = '';
-        $this->originalPassword = '';
-
-        return $this;
+        return $this->authData;
     }
 }

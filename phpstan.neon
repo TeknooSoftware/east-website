@@ -1,12 +1,5 @@
 parameters:
     scopeClass: Teknoo\States\PHPStan\Analyser\Scope
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
-    reportUnmatchedIgnoredErrors: false
-    excludePaths:
-        - infrastructures/symfony/Object/LegacyUser.php
-        - infrastructures/symfony/Object/User.php
-        - infrastructures/symfony/Provider/UserProvider.php
     ignoreErrors:
         -
             message: '#Parameter \#1 \$translatableSetter of class [a-zA-Z0-9\\_]+ constructor expects \(callable\(\): mixed\)\|null#'
@@ -32,6 +25,9 @@ parameters:
         -
             message: '#[a-zA-Z0-9\\_]+::cook\(\) expects \(callable\(\): mixed\)|[a-zA-Z0-9\\_]+#'
             path: infrastructures/symfony/Resources/config/di.php
+        -
+            message: '#Method [a-zA-Z0-9\\_]+::getAuthenticatorClass\(\) should return class-string\<[a-zA-Z0-9\\_]+> but returns string#'
+            path: src/Object/StoredPassword.php
 services:
 	-
 		class: Teknoo\States\PHPStan\MethodsClassExtension
