@@ -41,5 +41,9 @@ interface DriverInterface
     /*
      * Read extended metadata configuration for a single mapped class
      */
+    /**
+     * @param ClassMetadata<mixed> $meta
+     * @param array<string, mixed> $config
+     */
     public function readExtendedMetadata(ClassMetadata $meta, array &$config): DriverInterface;
 }

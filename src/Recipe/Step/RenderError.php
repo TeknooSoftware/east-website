@@ -62,6 +62,9 @@ class RenderError
         $this->responseFactory = $responseFactory;
     }
 
+    /**
+     * @param array<string, mixed> $viewParameters
+     */
     public function __invoke(
         MessageInterface $message,
         ClientInterface $client,

@@ -121,6 +121,9 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
         return $this;
     }
 
+    /**
+     * @param iterable<AuthDataInterface> $authData
+     */
     public function setAuthData(iterable $authData): User
     {
         $this->authData = $authData;

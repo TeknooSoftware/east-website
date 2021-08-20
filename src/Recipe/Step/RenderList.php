@@ -30,6 +30,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
+use Teknoo\East\Website\Contracts\ObjectInterface;
 use Teknoo\East\Website\Middleware\ViewParameterInterface;
 use Teknoo\East\Website\Recipe\Step\Traits\TemplateTrait;
 use Teknoo\East\Website\View\ParametersBag;
@@ -58,6 +59,10 @@ class RenderList
         $this->responseFactory = $responseFactory;
     }
 
+    /**
+     * @param iterable<ObjectInterface> $objectsCollection
+     * @param array<string, mixed> $viewParameters
+     */
     public function __invoke(
         ServerRequestInterface $request,
         ClientInterface $client,

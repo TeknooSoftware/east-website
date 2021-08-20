@@ -49,6 +49,9 @@ use function is_callable;
  */
 class ExtensionMetadataFactory
 {
+    /**
+     * @param AbstractClassMetadataFactory<mixed> $classMetadataFactory
+     */
     public function __construct(
         private ObjectManager $objectManager,
         private AbstractClassMetadataFactory $classMetadataFactory,

@@ -11,12 +11,6 @@ parameters:
             message: '#Call to an undefined method [a-zA-Z0-9\\_]+::createQueryBuilder\(\)#'
             path: infrastructures/doctrine/Form/Type/*
         -
-            message: '#Comparison operation "<" between [0-9]+ and 50000 is always#'
-            path: infrastructures/symfony/Resources/config/di.php
-        -
-            message: '#Unreachable statement - code above always terminates.#'
-            path: infrastructures/symfony/Resources/config/di.php
-        -
             message: '#expects class-string<object>, string given#'
             path:  infrastructures/doctrine/Translatable/Mapping/ExtensionMetadataFactory.php
         -

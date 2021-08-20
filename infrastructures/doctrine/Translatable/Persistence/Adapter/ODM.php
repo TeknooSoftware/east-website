@@ -134,6 +134,9 @@ class ODM implements AdapterInterface
         $metadata->setIdentifierValue($translation, $idValue);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function generateInsertionArray(
         OdmClassMetadata $metadata,
         TranslationInterface $translation,
