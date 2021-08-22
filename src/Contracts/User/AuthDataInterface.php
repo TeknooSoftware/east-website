@@ -36,9 +36,6 @@ use Teknoo\East\Website\Contracts\ObjectInterface;
  */
 interface AuthDataInterface extends ObjectInterface
 {
-
-    public function getUser(): ?UserInterface;
-
     /**
      * @return class-string<AuthenticatorInterface>
      */

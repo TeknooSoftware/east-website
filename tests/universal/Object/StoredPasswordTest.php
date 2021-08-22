@@ -24,6 +24,7 @@
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Website\Contracts\User\AuthenticatorInterface;
 use Teknoo\East\Website\Contracts\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
@@ -56,13 +57,15 @@ class StoredPasswordTest extends TestCase
     public function testSetAuthenticatorClass()
     {
         $object = $this->buildObject();
+        $fakeClass = new class implements AuthenticatorInterface {
+        };
         self::assertInstanceOf(
             \get_class($object),
-            $object->setAuthenticatorClass('fooBar')
+            $object->setAuthenticatorClass(\get_class($fakeClass))
         );
 
         self::assertEquals(
-            'fooBar',
+            \get_class($fakeClass),
             $object->getAuthenticatorClass()
         );
     }
@@ -71,28 +74,6 @@ class StoredPasswordTest extends TestCase
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setAuthenticatorClass(new \stdClass());
-    }
-    
-    public function testGetUser()
-    {
-        self::assertInstanceOf(
-            UserInterface::class,
-            $this->generateObjectPopulated(['user' => $this->createMock(UserInterface::class)])->getUser()
-        );
-    }
-
-    public function testSetUser()
-    {
-        $object = $this->buildObject();
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setUser($this->createMock(UserInterface::class))
-        );
-
-        self::assertInstanceOf(
-            UserInterface::class,
-            $object->getUser()
-        );
     }
 
     public function testSetUserExceptionOnBadArgument()
@@ -247,6 +228,28 @@ class StoredPasswordTest extends TestCase
         self::assertEquals(
             'fooBar',
             $object->getSalt()
+        );
+    }
+
+    public function testGetAlgo()
+    {
+        self::assertEquals(
+            'fooBar',
+            $this->generateObjectPopulated(['algo' => 'fooBar'])->getAlgo()
+        );
+    }
+
+    public function testSetAlgo()
+    {
+        $object = $this->buildObject();
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->setAlgo('fooBar')
+        );
+
+        self::assertEquals(
+            'fooBar',
+            $object->getAlgo()
         );
     }
 

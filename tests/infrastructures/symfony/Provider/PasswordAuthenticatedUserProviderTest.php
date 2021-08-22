@@ -33,7 +33,7 @@ use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\User;
-use Teknoo\East\WebsiteBundle\Provider\UserProvider;
+use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\User as BaseUser;
 
@@ -42,7 +42,7 @@ use function interface_exists;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Provider\UserProvider
+ * @covers      \Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider
  */
 class UserProviderTest extends TestCase
 {
@@ -63,10 +63,10 @@ class UserProviderTest extends TestCase
         return $this->loader;
     }
 
-    public function buildProvider(): UserProvider
+    public function buildProvider(): PasswordAuthenticatedUserProvider
     {
         if (Kernel::VERSION_ID < 50000) {
-            return new class ($this->getLoader()) extends UserProvider implements UserProviderInterface {
+            return new class ($this->getLoader()) extends PasswordAuthenticatedUserProvider implements UserProviderInterface {
                 public function loadUserByUsername($username)
                 {
                     return $this->fetchUserByUsername($username);
@@ -74,7 +74,7 @@ class UserProviderTest extends TestCase
             };
         }
 
-        return new class ($this->getLoader()) extends UserProvider implements UserProviderInterface {
+        return new class ($this->getLoader()) extends PasswordAuthenticatedUserProvider implements UserProviderInterface {
             public function loadUserByUsername(string $username)
             {
                 return $this->fetchUserByUsername($username);

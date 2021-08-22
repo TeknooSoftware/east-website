@@ -38,7 +38,7 @@ use Teknoo\East\Website\Contracts\User\UserInterface;
 class StoredPassword implements AuthDataInterface
 {
     public function __construct(
-        private ?UserInterface $user = null,
+        private string $algo = '',
         private string $salt = '',
         private ?string $password = null,
         private ?string $originalPassword = null,
@@ -54,18 +54,6 @@ class StoredPassword implements AuthDataInterface
         }
     }
 
-    public function getUser(): ?UserInterface
-    {
-        return $this->user;
-    }
-
-    public function setUser(?UserInterface $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     public function getSalt(): string
     {
         return $this->salt;
@@ -74,6 +62,18 @@ class StoredPassword implements AuthDataInterface
     public function setSalt(string $salt): self
     {
         $this->salt = $salt;
+
+        return $this;
+    }
+
+    public function getAlgo(): string
+    {
+        return $this->algo;
+    }
+
+    public function setAlgo(string $algo): self
+    {
+        $this->algo = $algo;
 
         return $this;
     }

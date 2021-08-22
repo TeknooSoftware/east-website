@@ -25,12 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
+use RuntimeException;
 use Symfony\Component\Security\Core\User\EquatableInterface;
-use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 
-use function interface_exists;
 
 /**
  * Symfony user class, implementing Symfony interface and wrapping East Website User.
@@ -39,34 +40,30 @@ use function interface_exists;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class User implements UserInterface, EquatableInterface
+class PasswordAuthenticatedUser implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     public function __construct(
-        private BaseUser $user
+        private BaseUser $user,
+        protected StoredPassword $password,
     ) {
-        if (interface_exists(LegacyPasswordAuthenticatedUserInterface::class) && !$this instanceof LegacyUser) {
-            trigger_deprecation(
-                'teknoo/east-website',
-                '5.0',
-                'class "%s()" is deprecated, use \Teknoo\East\WebsiteBundle\Object\LegacyUser instead.',
-                __CLASS__
-            );
-        }
     }
 
-    public function getRoles()
+    /**
+     * @return iterable<string>
+     */
+    public function getRoles(): iterable
     {
         return $this->user->getRoles();
     }
 
     public function getPassword(): string
     {
-        return $this->user->getPassword();
+        return $this->password->getPassword();
     }
 
     public function getSalt()
     {
-        return $this->user->getSalt();
+        throw new RuntimeException("UserInterface::getSalt is deprecated");
     }
 
     /**
@@ -74,17 +71,17 @@ class User implements UserInterface, EquatableInterface
      */
     public function getUsername()
     {
-        return $this->user->getUsername();
+        return $this->user->getUserIdentifier();
     }
 
     public function getUserIdentifier(): string
     {
-        return $this->user->getUsername();
+        return $this->user->getUserIdentifier();
     }
 
     public function eraseCredentials(): self
     {
-        $this->user->eraseCredentials();
+        $this->password->eraseCredentials();
 
         return $this;
     }

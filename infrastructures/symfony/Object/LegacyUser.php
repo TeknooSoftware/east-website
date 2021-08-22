@@ -25,10 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * Symfony user class, implementing Symfony interface and wrapping East Website User.
@@ -39,10 +36,10 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class LegacyUser extends User implements LegacyPasswordAuthenticatedUserInterface
+class LegacyUser extends PasswordAuthenticatedUser implements LegacyPasswordAuthenticatedUserInterface
 {
     public function getSalt(): ?string
     {
-        return parent::getSalt();
+        return $this->password->getSalt();
     }
 }

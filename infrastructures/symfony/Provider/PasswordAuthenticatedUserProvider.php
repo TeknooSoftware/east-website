@@ -27,16 +27,13 @@ namespace Teknoo\East\WebsiteBundle\Provider;
 
 use ReflectionClass;
 use ReflectionException;
-use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
-use Teknoo\East\WebsiteBundle\Object\User;
-
-use function interface_exists;
+use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
  * Symfony user provider to load East Website's user from email.
@@ -45,7 +42,7 @@ use function interface_exists;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-abstract class UserProvider
+abstract class PasswordAuthenticatedUserProvider
 {
     public function __construct(
         private UserLoader $loader
@@ -63,16 +60,12 @@ abstract class UserProvider
         $this->loader->query(
             new UserByEmailQuery($username),
             new Promise(static function ($user) use (&$loadedUser) {
-                if (interface_exists(LegacyPasswordAuthenticatedUserInterface::class)) {
-                    $loadedUser = new LegacyUser($user);
-                } else {
-                    $loadedUser = new User($user);
-                }
+
             })
         );
 
         if (!$loadedUser) {
-            throw new UsernameNotFoundException(); //todo deprecated
+            throw new UserNotFoundException();
         }
 
         return $loadedUser;
@@ -80,7 +73,7 @@ abstract class UserProvider
 
     public function refreshUser(UserInterface $user): ?UserInterface
     {
-        if ($user instanceof User) {
+        if ($user instanceof PasswordAuthenticatedUser) {
             return $this->fetchUserByUsername($user->getUsername());
         }
 
@@ -88,12 +81,12 @@ abstract class UserProvider
     }
 
     /**
-     * @param class-string<User> $class
+     * @param class-string<PasswordAuthenticatedUser> $class
      * @throws ReflectionException
      */
     public function supportsClass($class): bool
     {
         $reflection = new ReflectionClass($class);
-        return $class === User::class || $reflection->isSubclassOf(User::class);
+        return $class === PasswordAuthenticatedUser::class || $reflection->isSubclassOf(PasswordAuthenticatedUser::class);
     }
 }

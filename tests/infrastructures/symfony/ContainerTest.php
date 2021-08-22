@@ -44,7 +44,7 @@ use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Middleware\LocaleMiddleware;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\User;
-use Teknoo\East\WebsiteBundle\Provider\UserProvider;
+use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormProcessing;
 use Teknoo\East\WebsiteBundle\Recipe\Step\RenderForm;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -114,8 +114,8 @@ class ContainerTest extends TestCase
         $container->set(UserLoader::class, $loader = $this->createMock(UserLoader::class));
 
         self::assertInstanceOf(
-            UserProvider::class,
-            $provider = $container->get(UserProvider::class)
+            PasswordAuthenticatedUserProvider::class,
+            $provider = $container->get(PasswordAuthenticatedUserProvider::class)
         );
 
         $user = new BaseUser();

@@ -38,7 +38,7 @@ use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\SearchFormLoaderInterface;
 use Teknoo\East\WebsiteBundle\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Loader\UserLoader;
-use Teknoo\East\WebsiteBundle\Provider\UserProvider;
+use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormHandling;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormProcessing;
 use Teknoo\East\WebsiteBundle\Recipe\Step\RedirectClient;
@@ -68,10 +68,10 @@ return [
         return $previous;
     }),
 
-    UserProvider::class => static function (ContainerInterface $container): UserProvider {
+    PasswordAuthenticatedUserProvider::class => static function (ContainerInterface $container): PasswordAuthenticatedUserProvider {
         $loader = $container->get(UserLoader::class);
 
-        return new class ($loader) extends UserProvider implements UserProviderInterface {
+        return new class ($loader) extends PasswordAuthenticatedUserProvider implements UserProviderInterface {
             /**
              * @param string $username
              * @return \Symfony\Component\Security\Core\User\UserInterface
