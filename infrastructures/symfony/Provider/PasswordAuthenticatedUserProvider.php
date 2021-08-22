@@ -29,6 +29,9 @@ use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
+use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\User;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
@@ -42,7 +45,7 @@ use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-abstract class PasswordAuthenticatedUserProvider
+class PasswordAuthenticatedUserProvider implements UserProviderInterface
 {
     public function __construct(
         private UserLoader $loader
@@ -54,13 +57,30 @@ abstract class PasswordAuthenticatedUserProvider
         return $this->fetchUserByUsername($username);
     }
 
+    public function loadUserByUsername(string $username)
+    {
+        return $this->fetchUserByUsername($username);
+    }
+
     protected function fetchUserByUsername(string $username): UserInterface
     {
         $loadedUser = null;
         $this->loader->query(
             new UserByEmailQuery($username),
-            new Promise(static function ($user) use (&$loadedUser) {
+            new Promise(static function (User $user) use (&$loadedUser) {
+                foreach ($user->getAuthData() as $authData) {
+                    if (!$authData instanceof StoredPassword) {
+                        continue;
+                    }
 
+                    if (!empty($authData->getSalt())) {
+                        $loadedUser = new LegacyUser($user, $authData);
+                    } else {
+                        $loadedUser = new PasswordAuthenticatedUser($user, $authData);
+                    }
+
+                    break;
+                }
             })
         );
 

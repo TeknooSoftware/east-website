@@ -24,7 +24,7 @@
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Contracts\User\AuthenticatorInterface;
+use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 use Teknoo\East\Website\Object\User;
 
@@ -187,11 +187,11 @@ class UserTest extends TestCase
         $object = $this->buildObject();
         self::assertInstanceOf(
             \get_class($object),
-            $object->setAuthData([$this->createMock(AuthenticatorInterface::class)])
+            $object->setAuthData([$this->createMock(AuthDataInterface::class)])
         );
 
         self::assertEquals(
-            [$this->createMock(AuthenticatorInterface::class)],
+            [$this->createMock(AuthDataInterface::class)],
             $object->getAuthData()
         );
     }

@@ -25,9 +25,12 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use RuntimeException;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Contracts\User\AuthenticatorInterface;
 use Teknoo\East\Website\Contracts\User\UserInterface;
+
+use function is_a;
 
 /**
  * Class to defined persisted user's password to authenticate it on a website
@@ -38,35 +41,14 @@ use Teknoo\East\Website\Contracts\User\UserInterface;
 class StoredPassword implements AuthDataInterface
 {
     public function __construct(
-        private string $algo = '',
-        private string $salt = '',
+        private ?string $algo = '',
         private ?string $password = null,
         private ?string $originalPassword = null,
-        private string $authenticatorClass = '',
+        private string $salt = '',
     ) {
-        //initialize for new user
-        if (empty($this->salt)) {
-            $this->salt = sha1(uniqid('', true));
-        }
-
-        if (!empty($this->authenticatorClass) && !\is_a($this->authenticatorClass, AuthenticatorInterface::class, true)) {
-            throw new \RuntimeException("{$this->authenticatorClass} is not an instance of AuthenticatorInterface");
-        }
     }
 
-    public function getSalt(): string
-    {
-        return $this->salt;
-    }
-
-    public function setSalt(string $salt): self
-    {
-        $this->salt = $salt;
-
-        return $this;
-    }
-
-    public function getAlgo(): string
+    public function getAlgo(): ?string
     {
         return $this->algo;
     }
@@ -109,26 +91,22 @@ class StoredPassword implements AuthDataInterface
         return $this;
     }
 
-    public function eraseCredentials(): self
+    public function getSalt(): string
     {
-        $this->password = '';
-        $this->originalPassword = '';
+        return $this->salt;
+    }
+
+    public function setSalt(string $salt): self
+    {
+        $this->salt = $salt;
 
         return $this;
     }
 
-    public function getAuthenticatorClass(): string
+    public function eraseCredentials(): self
     {
-        return $this->authenticatorClass;
-    }
-
-    public function setAuthenticatorClass(string $authenticatorClass): self
-    {
-        if (!empty($authenticatorClass) && !\is_a($authenticatorClass, AuthenticatorInterface::class, true)) {
-            throw new \RuntimeException("$authenticatorClass is not an instance of AuthenticatorInterface");
-        }
-
-        $this->authenticatorClass = $authenticatorClass;
+        $this->password = '';
+        $this->originalPassword = '';
 
         return $this;
     }

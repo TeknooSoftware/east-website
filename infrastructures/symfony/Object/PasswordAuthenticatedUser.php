@@ -25,7 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use RuntimeException;
+use BadMethodCallException;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherAwareInterface;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -40,7 +41,11 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class PasswordAuthenticatedUser implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
+class PasswordAuthenticatedUser implements
+    UserInterface,
+    PasswordAuthenticatedUserInterface,
+    PasswordHasherAwareInterface,
+    EquatableInterface
 {
     public function __construct(
         private BaseUser $user,
@@ -61,9 +66,14 @@ class PasswordAuthenticatedUser implements UserInterface, PasswordAuthenticatedU
         return $this->password->getPassword();
     }
 
+    public function getPasswordHasherName(): ?string
+    {
+        return $this->password->getAlgo();
+    }
+
     public function getSalt()
     {
-        throw new RuntimeException("UserInterface::getSalt is deprecated");
+        throw new BadMethodCallException("UserInterface::getSalt is deprecated");
     }
 
     /**

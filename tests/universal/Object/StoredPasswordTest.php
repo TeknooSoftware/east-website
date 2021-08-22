@@ -46,36 +46,6 @@ class StoredPasswordTest extends TestCase
         return new StoredPassword();
     }
 
-    public function testGetAuthenticatorClass()
-    {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['authenticatorClass' => 'fooBar'])->getAuthenticatorClass()
-        );
-    }
-
-    public function testSetAuthenticatorClass()
-    {
-        $object = $this->buildObject();
-        $fakeClass = new class implements AuthenticatorInterface {
-        };
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setAuthenticatorClass(\get_class($fakeClass))
-        );
-
-        self::assertEquals(
-            \get_class($fakeClass),
-            $object->getAuthenticatorClass()
-        );
-    }
-
-    public function testSetAuthenticatorClassExceptionOnBadArgument()
-    {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setAuthenticatorClass(new \stdClass());
-    }
-
     public function testSetUserExceptionOnBadArgument()
     {
         $this->expectException(\Throwable::class);

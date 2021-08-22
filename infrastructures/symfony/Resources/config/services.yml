@@ -9,7 +9,7 @@ parameters:
     teknoo.east.website.bundle.command.create_user.class: 'Teknoo\East\WebsiteBundle\Command\CreateUserCommand'
 
     #Writer
-    teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\UserWriter'
+    teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
 
     #Steps
     teknoo.east.website.bundle.allowed_forms: []
@@ -101,18 +101,18 @@ services:
         class: '%teknoo.east.website.bundle.command.create_user.class%'
         arguments:
             - '@Teknoo\East\Website\Writer\UserWriter'
-            - '@Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface'
+            - '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'
         tags:
             - { name: console.command }
         public: false
 
     #Writer
     teknoo.east.website.bundle.writer.user:
-        alias: 'Teknoo\East\WebsiteBundle\Writer\UserWriter'
+        alias: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
 
-    Teknoo\East\WebsiteBundle\Writer\UserWriter:
+    Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter:
         class: '%teknoo.east.website.bundle.writer.user.class%'
         arguments:
             - '@Teknoo\East\Website\Writer\UserWriter'
-            - '@Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface'
+            - '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'
 

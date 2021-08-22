@@ -68,20 +68,8 @@ return [
         return $previous;
     }),
 
-    PasswordAuthenticatedUserProvider::class => static function (ContainerInterface $container): PasswordAuthenticatedUserProvider {
-        $loader = $container->get(UserLoader::class);
-
-        return new class ($loader) extends PasswordAuthenticatedUserProvider implements UserProviderInterface {
-            /**
-             * @param string $username
-             * @return \Symfony\Component\Security\Core\User\UserInterface
-             */
-            public function loadUserByUsername(string $username)
-            {
-                return $this->fetchUserByUsername($username);
-            }
-        };
-    },
+    PasswordAuthenticatedUserProvider::class => create()
+        ->constructor(get(UserLoader::class)),
 
     SearchFormLoaderInterface::class => get(SearchFormLoader::class),
 

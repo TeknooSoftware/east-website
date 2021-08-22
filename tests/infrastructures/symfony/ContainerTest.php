@@ -39,10 +39,12 @@ use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
 use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Loader\UserLoader;
+use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Middleware\LocaleMiddleware;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
+use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Object\User;
 use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormProcessing;
@@ -120,6 +122,7 @@ class ContainerTest extends TestCase
 
         $user = new BaseUser();
         $user->setEmail('foo@bar');
+        $user->setAuthData([new StoredPassword()]);
 
         $loader->expects(self::once())
             ->method('query')
@@ -130,11 +133,7 @@ class ContainerTest extends TestCase
                 return $loader;
             });
 
-        if (interface_exists(LegacyPasswordAuthenticatedUserInterface::class)) {
-            $loadedUser = new LegacyUser($user);
-        } else {
-            $loadedUser = new User($user);
-        }
+        $loadedUser = new PasswordAuthenticatedUser($user, new StoredPassword());
 
         self::assertEquals(
             $loadedUser,

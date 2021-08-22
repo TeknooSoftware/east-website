@@ -24,22 +24,22 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Object;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Teknoo\East\WebsiteBundle\Object\User;
+use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Object\User
+ * @covers      \Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser
  */
-class UserTest extends TestCase
+class PasswordAuthenticatedUserTest extends TestCase
 {
-    /**
-     * @var BaseUser
-     */
-    private $user;
+    private ?BaseUser $user = null;
+
+    private ?StoredPassword $storedPassword = null;
 
     /**
      * @return BaseUser|\PHPUnit\Framework\MockObject\MockObject
@@ -48,20 +48,40 @@ class UserTest extends TestCase
     {
         if (!$this->user instanceof BaseUser) {
             $this->user = $this->createMock(BaseUser::class);
+
+            $this->user->expects(self::any())->method('getAuthData')->willReturn([$this->getStoredPassword()]);
         }
 
         return $this->user;
     }
 
-    public function buildObject(): User
+    /**
+     * @return StoredPassword|\PHPUnit\Framework\MockObject\MockObject
+     */
+    public function getStoredPassword(): StoredPassword
     {
-        return new User($this->getUser());
+        if (!$this->storedPassword instanceof StoredPassword) {
+            $this->storedPassword = $this->createMock(StoredPassword::class);
+        }
+
+        return $this->storedPassword;
+    }
+
+    public function buildObject(): PasswordAuthenticatedUser
+    {
+        return new PasswordAuthenticatedUser($this->getUser(), $this->getStoredPassword());
     }
 
     public function testExceptionWithBadUser()
     {
         $this->expectException(\TypeError::class);
-        new User(new \stdClass());
+        new PasswordAuthenticatedUser(new \stdClass(), $this->getStoredPassword());
+    }
+
+    public function testExceptionWithBadStoredPassword()
+    {
+        $this->expectException(\TypeError::class);
+        new PasswordAuthenticatedUser($this->getUser(), new \stdClass());
     }
 
     public function testGetRoles()
@@ -79,7 +99,7 @@ class UserTest extends TestCase
 
     public function testGetPassword()
     {
-        $this->getUser()
+        $this->getStoredPassword()
             ->expects(self::once())
             ->method('getPassword')
             ->willReturn('foo');
@@ -90,24 +110,30 @@ class UserTest extends TestCase
         );
     }
 
-    public function testGetSalt()
+    public function testGetPasswordHasherName()
     {
-        $this->getUser()
+        $this->getStoredPassword()
             ->expects(self::once())
-            ->method('getSalt')
-            ->willReturn('salt');
+            ->method('getAlgo')
+            ->willReturn('foo');
 
         self::assertEquals(
-            'salt',
-            $this->buildObject()->getSalt()
+            'foo',
+            $this->buildObject()->getPasswordHasherName()
         );
+    }
+
+    public function testGetSalt()
+    {
+        $this->expectException(\BadMethodCallException::class);
+        $this->buildObject()->getSalt();
     }
 
     public function testGetUsername()
     {
         $this->getUser()
             ->expects(self::once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('username');
 
         self::assertEquals(
@@ -120,7 +146,7 @@ class UserTest extends TestCase
     {
         $this->getUser()
             ->expects(self::once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('username');
 
         self::assertEquals(
@@ -131,13 +157,13 @@ class UserTest extends TestCase
 
     public function testEraseCredentials()
     {
-        $this->getUser()
+        $this->getStoredPassword()
             ->expects(self::once())
             ->method('eraseCredentials')
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            User::class,
+            PasswordAuthenticatedUserInterface::class,
             $this->buildObject()->eraseCredentials()
         );
     }
@@ -156,7 +182,7 @@ class UserTest extends TestCase
 
         $this->getUser()
             ->expects(self::any())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('myUserName');
 
         $user = $this->createMock(UserInterface::class);
@@ -178,10 +204,10 @@ class UserTest extends TestCase
         
         $this->getUser()
             ->expects(self::once())
-            ->method('getUsername')
+            ->method('getUserIdentifier')
             ->willReturn('myUserName');
 
-        $user = $this->createMock(User::class);
+        $user = $this->createMock(PasswordAuthenticatedUser::class);
         $user
             ->expects(self::any())
             ->method('getUsername')

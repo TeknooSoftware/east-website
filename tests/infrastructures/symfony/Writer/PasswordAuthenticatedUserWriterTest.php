@@ -24,20 +24,22 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Writer;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\User\AuthDataInterface;
+use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\WebsiteBundle\Writer\UserWriter;
+use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
 use Teknoo\East\Website\Writer\UserWriter as UniversalWriter;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Writer\UserWriter
+ * @covers      \Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter
  */
-class UserWriterTest extends TestCase
+class PasswordAuthenticatedUserWriterTest extends TestCase
 {
     /**
      * @var UniversalWriter
@@ -45,9 +47,9 @@ class UserWriterTest extends TestCase
     private $universalWriter;
 
     /**
-     * @var EncoderFactoryInterface
+     * @var UserPasswordHasherInterface
      */
-    private $encoderFactory;
+    private $userPasswordHasher;
 
     /**
      * @return UniversalWriter|\PHPUnit\Framework\MockObject\MockObject
@@ -62,22 +64,27 @@ class UserWriterTest extends TestCase
     }
 
     /**
-     * @return EncoderFactoryInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @return UserPasswordHasherInterface|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function getEncoderFactory(): EncoderFactoryInterface
+    public function getUserPasswordHasher(): UserPasswordHasherInterface
     {
-        if (!$this->encoderFactory instanceof EncoderFactoryInterface) {
-            $this->encoderFactory = $this->createMock(EncoderFactoryInterface::class);
+        if (!$this->userPasswordHasher instanceof UserPasswordHasherInterface) {
+            $this->userPasswordHasher = new class implements UserPasswordHasherInterface {
+                public function hashPassword(PasswordAuthenticatedUserInterface $user, string $plainPassword): string
+                {
+                    return 'fooBar';
+                }
+            };
         }
 
-        return $this->encoderFactory;
+        return $this->userPasswordHasher;
     }
 
-    public function buildWriter(): UserWriter
+    public function buildWriter(): PasswordAuthenticatedUserWriter
     {
-        return new UserWriter(
+        return new PasswordAuthenticatedUserWriter(
             $this->getUniversalWriter(),
-            $this->getEncoderFactory()
+            $this->getUserPasswordHasher()
         );
     }
 
@@ -100,8 +107,29 @@ class UserWriterTest extends TestCase
             ->method('fail');
 
         self::assertInstanceOf(
-            UserWriter::class,
+            PasswordAuthenticatedUserWriter::class,
             $this->buildWriter()->save($object, $promise)
+        );
+    }
+
+    public function testSaveWithUserWithNoStoredPassword()
+    {
+        $promise = $this->createMock(PromiseInterface::class);
+        $user = $this->createMock(BaseUser::class);
+        $authData = $this->createMock(AuthDataInterface::class);
+        $user->expects(self::any())
+            ->method('getAuthData')
+            ->willReturn([$authData]);
+
+        $this->getUniversalWriter()
+            ->expects(self::once())
+            ->method('save')
+            ->with($user, $promise)
+            ->willReturnSelf();
+
+        self::assertInstanceOf(
+            PasswordAuthenticatedUserWriter::class,
+            $this->buildWriter()->save($user, $promise)
         );
     }
 
@@ -109,14 +137,19 @@ class UserWriterTest extends TestCase
     {
         $promise = $this->createMock(PromiseInterface::class);
         $user = $this->createMock(BaseUser::class);
-        $user->expects(self::once())
+        $storedPassword = $this->createMock(StoredPassword::class);
+        $user->expects(self::any())
+            ->method('getAuthData')
+            ->willReturn([$storedPassword]);
+
+        $storedPassword->expects(self::once())
             ->method('hasUpdatedPassword')
             ->willReturn(false);
 
-        $user->expects(self::once())
+        $storedPassword->expects(self::once())
             ->method('eraseCredentials');
 
-        $user->expects(self::never())
+        $storedPassword->expects(self::never())
             ->method('setPassword');
 
         $this->getUniversalWriter()
@@ -126,7 +159,7 @@ class UserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            UserWriter::class,
+            PasswordAuthenticatedUserWriter::class,
             $this->buildWriter()->save($user, $promise)
         );
     }
@@ -135,28 +168,19 @@ class UserWriterTest extends TestCase
     {
         $promise = $this->createMock(PromiseInterface::class);
         $user = $this->createMock(BaseUser::class);
-        $encoder = $this->createMock(PasswordEncoderInterface::class);
+        $storedPassword = $this->createMock(StoredPassword::class);
+        $user->expects(self::any())
+            ->method('getAuthData')
+            ->willReturn([$storedPassword]);
 
-        $this->getEncoderFactory()
-            ->expects(self::any())
-            ->method('getEncoder')
-            ->willReturn($encoder);
-
-        $encoder->expects(self::once())
-            ->method('encodePassword')
-            ->willReturn('fooBar');
-
-        $user->expects(self::once())
+        $storedPassword->expects(self::once())
             ->method('hasUpdatedPassword')
             ->willReturn(true);
 
-        $user->expects(self::never())
+        $storedPassword->expects(self::never())
             ->method('eraseCredentials');
 
-        $user->expects(self::once())
-            ->method('getSalt');
-
-        $user->expects(self::once())
+        $storedPassword->expects(self::once())
             ->method('setPassword')
             ->with('fooBar')
             ->willReturnSelf();
@@ -168,7 +192,7 @@ class UserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            UserWriter::class,
+            PasswordAuthenticatedUserWriter::class,
             $this->buildWriter()->save($user, $promise)
         );
     }
@@ -185,7 +209,7 @@ class UserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            UserWriter::class,
+            PasswordAuthenticatedUserWriter::class,
             $this->buildWriter()->remove($object, $promise)
         );
     }
