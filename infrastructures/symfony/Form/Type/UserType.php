@@ -32,7 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Teknoo\East\WebsiteBundle\Object\User;
+use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
  * Symfony form to edit East Website User.
@@ -43,7 +43,7 @@ use Teknoo\East\WebsiteBundle\Object\User;
 class UserType extends AbstractType
 {
     /**
-     * @param FormBuilderInterface<User> $builder
+     * @param FormBuilderInterface<PasswordAuthenticatedUser> $builder
      * @param array<string, mixed> $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options): self

@@ -37,7 +37,7 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 interface FormProcessingInterface
 {
     public function __invoke(
-        $form,
+        mixed $form,
         ManagerInterface $manager,
         string $nextStep
     ): FormProcessingInterface;

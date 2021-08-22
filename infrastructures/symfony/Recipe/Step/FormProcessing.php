@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Recipe\Step;
 
+use Symfony\Component\Form\FormInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\FormProcessingInterface;
 
@@ -38,8 +39,11 @@ use Teknoo\East\Website\Contracts\Recipe\Step\FormProcessingInterface;
  */
 class FormProcessing implements FormProcessingInterface
 {
+    /**
+     * @param FormInterface $form
+     */
     public function __invoke(
-        $form,
+        mixed $form,
         ManagerInterface $manager,
         string $nextStep
     ): FormProcessingInterface {

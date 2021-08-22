@@ -19,9 +19,6 @@ parameters:
         -
             message: '#[a-zA-Z0-9\\_]+::cook\(\) expects \(callable\(\): mixed\)|[a-zA-Z0-9\\_]+#'
             path: infrastructures/symfony/Resources/config/di.php
-        -
-            message: '#Method [a-zA-Z0-9\\_]+::getAuthenticatorClass\(\) should return class-string\<[a-zA-Z0-9\\_]+> but returns string#'
-            path: src/Object/StoredPassword.php
 services:
 	-
 		class: Teknoo\States\PHPStan\MethodsClassExtension
