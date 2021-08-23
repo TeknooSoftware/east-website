@@ -40,13 +40,13 @@ use function is_a;
  */
 class StoredPassword implements AuthDataInterface
 {
-    public function __construct(
-        private ?string $algo = '',
-        private ?string $password = null,
-        private ?string $originalPassword = null,
-        private string $salt = '',
-    ) {
-    }
+    private ?string $algo = '';
+
+    private ?string $password = null;
+
+    private ?string $originalPassword = null;
+
+    private string $salt = '';
 
     public function getAlgo(): ?string
     {

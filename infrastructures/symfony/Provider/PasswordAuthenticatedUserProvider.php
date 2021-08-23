@@ -32,6 +32,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User;
+use Teknoo\East\WebsiteBundle\Object\AbstractUser;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
@@ -93,7 +94,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface
 
     public function refreshUser(UserInterface $user): ?UserInterface
     {
-        if ($user instanceof PasswordAuthenticatedUser) {
+        if ($user instanceof AbstractUser) {
             return $this->fetchUserByUsername($user->getUsername());
         }
 
@@ -101,13 +102,12 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface
     }
 
     /**
-     * @param class-string<PasswordAuthenticatedUser> $class
+     * @param class-string<AbstractUser> $class
      * @throws ReflectionException
      */
     public function supportsClass($class): bool
     {
         $reflection = new ReflectionClass($class);
-        return $class === PasswordAuthenticatedUser::class
-            || $reflection->isSubclassOf(PasswordAuthenticatedUser::class);
+        return $reflection->isSubclassOf(AbstractUser::class);
     }
 }

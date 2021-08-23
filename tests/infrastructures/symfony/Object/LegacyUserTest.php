@@ -25,15 +25,17 @@ namespace Teknoo\Tests\East\WebsiteBundle\Object;
 
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\WebsiteBundle\Object\AbstractUser;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
+ * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractUser
  * @covers      \Teknoo\East\WebsiteBundle\Object\LegacyUser
  */
-class LegacyUserTest extends PasswordAuthenticatedUserTest
+class LegacyUserTest extends AbstractUserTest
 {
     private ?BaseUser $user = null;
 
@@ -65,7 +67,7 @@ class LegacyUserTest extends PasswordAuthenticatedUserTest
         return $this->storedPassword;
     }
 
-    public function buildObject(): LegacyUser
+    public function buildObject(): AbstractUser
     {
         if (!interface_exists(LegacyPasswordAuthenticatedUserInterface::class)) {
             self::markTestSkipped();

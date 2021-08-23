@@ -24,10 +24,8 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Provider;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Object\StoredPassword;

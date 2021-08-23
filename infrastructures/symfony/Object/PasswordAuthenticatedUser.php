@@ -25,13 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use BadMethodCallException;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherAwareInterface;
-use Symfony\Component\Security\Core\User\EquatableInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Teknoo\East\Website\Object\StoredPassword;
-use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * Symfony user class, implementing Symfony interface and wrapping East Website User.
@@ -40,63 +34,10 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class PasswordAuthenticatedUser implements
-    UserInterface,
-    PasswordAuthenticatedUserInterface,
-    PasswordHasherAwareInterface,
-    EquatableInterface
+class PasswordAuthenticatedUser extends AbstractUser implements PasswordHasherAwareInterface
 {
-    public function __construct(
-        private BaseUser $user,
-        protected StoredPassword $password,
-    ) {
-    }
-
-    /**
-     * @return iterable<string>
-     */
-    public function getRoles(): iterable
-    {
-        return $this->user->getRoles();
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password->getPassword();
-    }
-
     public function getPasswordHasherName(): ?string
     {
         return $this->password->getAlgo();
-    }
-
-    public function getSalt()
-    {
-        throw new BadMethodCallException("UserInterface::getSalt is deprecated");
-    }
-
-    /**
-     * @return string
-     */
-    public function getUsername()
-    {
-        return $this->user->getUserIdentifier();
-    }
-
-    public function getUserIdentifier(): string
-    {
-        return $this->user->getUserIdentifier();
-    }
-
-    public function eraseCredentials(): self
-    {
-        $this->password->eraseCredentials();
-
-        return $this;
-    }
-
-    public function isEqualTo(UserInterface $user): bool
-    {
-        return $user instanceof self &&  $user->getUsername() === $this->getUsername();
     }
 }

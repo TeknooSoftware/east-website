@@ -27,15 +27,17 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\WebsiteBundle\Object\AbstractUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
+ * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractUser
  * @covers      \Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser
  */
-class PasswordAuthenticatedUserTest extends TestCase
+class PasswordAuthenticatedUserTest extends AbstractUserTest
 {
     private ?BaseUser $user = null;
 
@@ -67,7 +69,7 @@ class PasswordAuthenticatedUserTest extends TestCase
         return $this->storedPassword;
     }
 
-    public function buildObject(): PasswordAuthenticatedUser
+    public function buildObject(): AbstractUser
     {
         return new PasswordAuthenticatedUser($this->getUser(), $this->getStoredPassword());
     }
@@ -84,32 +86,6 @@ class PasswordAuthenticatedUserTest extends TestCase
         new PasswordAuthenticatedUser($this->getUser(), new \stdClass());
     }
 
-    public function testGetRoles()
-    {
-        $this->getUser()
-            ->expects(self::once())
-            ->method('getRoles')
-            ->willReturn(['foo','bar']);
-
-        self::assertEquals(
-            ['foo','bar'],
-            $this->buildObject()->getRoles()
-        );
-    }
-
-    public function testGetPassword()
-    {
-        $this->getStoredPassword()
-            ->expects(self::once())
-            ->method('getPassword')
-            ->willReturn('foo');
-
-        self::assertEquals(
-            'foo',
-            $this->buildObject()->getPassword()
-        );
-    }
-
     public function testGetPasswordHasherName()
     {
         $this->getStoredPassword()
@@ -120,101 +96,6 @@ class PasswordAuthenticatedUserTest extends TestCase
         self::assertEquals(
             'foo',
             $this->buildObject()->getPasswordHasherName()
-        );
-    }
-
-    public function testGetSalt()
-    {
-        $this->expectException(\BadMethodCallException::class);
-        $this->buildObject()->getSalt();
-    }
-
-    public function testGetUsername()
-    {
-        $this->getUser()
-            ->expects(self::once())
-            ->method('getUserIdentifier')
-            ->willReturn('username');
-
-        self::assertEquals(
-            'username',
-            $this->buildObject()->getUsername()
-        );
-    }
-
-    public function testGetUserIdentifier()
-    {
-        $this->getUser()
-            ->expects(self::once())
-            ->method('getUserIdentifier')
-            ->willReturn('username');
-
-        self::assertEquals(
-            'username',
-            $this->buildObject()->getUserIdentifier()
-        );
-    }
-
-    public function testEraseCredentials()
-    {
-        $this->getStoredPassword()
-            ->expects(self::once())
-            ->method('eraseCredentials')
-            ->willReturnSelf();
-
-        self::assertInstanceOf(
-            PasswordAuthenticatedUserInterface::class,
-            $this->buildObject()->eraseCredentials()
-        );
-    }
-
-    public function testExceptionOnIsEqualToWithBadUser()
-    {
-        $this->expectException(\TypeError::class);
-        $this->buildObject()->isEqualTo(new \stdClass());
-    }
-
-    public function testIsEqualToNotSameUserName()
-    {
-        if (!\method_exists(UserInterface::class, 'getUsername')) {
-            self::markTestSkipped('Method removed in Interface');
-        }
-
-        $this->getUser()
-            ->expects(self::any())
-            ->method('getUserIdentifier')
-            ->willReturn('myUserName');
-
-        $user = $this->createMock(UserInterface::class);
-        $user
-            ->expects(self::any())
-            ->method('getUsername')
-            ->willReturn('notUserName');
-
-        self::assertFalse(
-            $this->buildObject()->isEqualTo($user)
-        );
-    }
-
-    public function testIsEqualToSameUserName()
-    {
-        if (!\method_exists(UserInterface::class, 'getUsername')) {
-            self::markTestSkipped('Method removed in Interface');
-        }
-        
-        $this->getUser()
-            ->expects(self::once())
-            ->method('getUserIdentifier')
-            ->willReturn('myUserName');
-
-        $user = $this->createMock(PasswordAuthenticatedUser::class);
-        $user
-            ->expects(self::any())
-            ->method('getUsername')
-            ->willReturn('myUserName');
-
-        self::assertTrue(
-            $this->buildObject()->isEqualTo($user)
         );
     }
 }
