@@ -39,7 +39,7 @@
     "require": {
         "php": "~8.0",
         "ext-json": "*",
-        "php-di/php-di": "~6.3",
+        "php-di/php-di": "^6.3.4",
         "teknoo/immutable": "^2.0.9",
         "teknoo/states": "^5.0.6",
         "teknoo/recipe": "^3.2.1",
@@ -71,9 +71,10 @@
         "symfony/templating": "^5.3.4",
         "symfony/translation": "^5.3.4",
         "symfony/yaml": "^5.3.6",
-        "twig/twig": "~3.2",
+        "twig/twig": "~3.3",
         "laminas/laminas-diactoros": "~2.6",
         "doctrine/common": "^3.1.2",
+        "doctrine/persistence": "^2.2.2",
         "doctrine/mongodb-odm": "^2.2.2",
         "doctrine/mongodb-odm-bundle": "^4.3.0"
     },
