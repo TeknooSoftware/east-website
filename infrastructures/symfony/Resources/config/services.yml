@@ -2,9 +2,6 @@ parameters:
     #Admin form types
     teknoo.east.website.form_type.doctrine.class: 'Doctrine\Bundle\MongoDBBundle\Form\Type\DocumentType'
 
-    #Provider
-    teknoo.east.website.bundle.user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\UserProvider'
-
     #Command
     teknoo.east.website.bundle.command.create_user.class: 'Teknoo\East\WebsiteBundle\Command\CreateUserCommand'
 
@@ -90,8 +87,8 @@ services:
         public: true
 
     #Provider
-    teknoo.east.website.bundle.user_provider:
-        alias: 'Teknoo\East\WebsiteBundle\Provider\UserProvider'
+    teknoo.east.website.bundle.password_authenticated_user_provider:
+        alias: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
 
     #Command
     teknoo.east.website.bundle.command.create_user:

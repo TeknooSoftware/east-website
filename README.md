@@ -69,7 +69,7 @@ Example with Symfony
         //..
         providers:
             main:
-                id: 'teknoo.east.website.bundle.user_provider'
+                id: 'teknoo.east.website.bundle.password_authenticated_user_provider'
 
     //In routes/website.yml
     admin_website:
