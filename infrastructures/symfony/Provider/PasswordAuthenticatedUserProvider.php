@@ -107,6 +107,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface
     public function supportsClass($class): bool
     {
         $reflection = new ReflectionClass($class);
-        return $class === PasswordAuthenticatedUser::class || $reflection->isSubclassOf(PasswordAuthenticatedUser::class);
+        return $class === PasswordAuthenticatedUser::class
+            || $reflection->isSubclassOf(PasswordAuthenticatedUser::class);
     }
 }

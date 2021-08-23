@@ -32,6 +32,7 @@ use Doctrine\Persistence\Mapping\Driver\FileDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\ObjectManager;
+use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
 use Teknoo\East\Website\Doctrine\Exception\InvalidMappingException;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
 
@@ -50,7 +51,7 @@ use function is_callable;
 class ExtensionMetadataFactory
 {
     /**
-     * @param AbstractClassMetadataFactory<mixed> $classMetadataFactory
+     * @param AbstractClassMetadataFactory<ClassMetadataODM> $classMetadataFactory
      */
     public function __construct(
         private ObjectManager $objectManager,
@@ -86,6 +87,9 @@ class ExtensionMetadataFactory
         return $className . '\\$_TRANSLATE_METADATA';
     }
 
+    /**
+     * @param ClassMetadata<ClassMetadataODM> $metaData
+     */
     public function loadExtensionMetadata(
         ClassMetadata $metaData,
         TranslatableListener $listener

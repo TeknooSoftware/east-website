@@ -102,7 +102,7 @@ class ODM implements AdapterInterface
     }
 
     /**
-     * @param BaseClassMetadata<mixed> $metadata
+     * @param BaseClassMetadata<ClassMetadata> $metadata
      */
     public function recomputeSingleObjectChangeSet(
         BaseClassMetadata $metadata,

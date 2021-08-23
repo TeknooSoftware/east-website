@@ -33,7 +33,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 
-
 /**
  * Symfony user class, implementing Symfony interface and wrapping East Website User.
  * To use with Symfony 5.2

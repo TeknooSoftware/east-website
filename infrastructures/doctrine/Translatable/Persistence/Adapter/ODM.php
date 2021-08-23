@@ -135,7 +135,7 @@ class ODM implements AdapterInterface
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     private function generateInsertionArray(
         OdmClassMetadata $metadata,
@@ -190,6 +190,9 @@ class ODM implements AdapterInterface
         return Type::getType($type);
     }
 
+    /**
+     * @param ClassMetadata<OdmClassMetadata> $metadata
+     */
     public function updateTranslationRecord(
         WrapperInterface $wrapped,
         ClassMetadata $metadata,
@@ -209,6 +212,9 @@ class ODM implements AdapterInterface
         return $this;
     }
 
+    /**
+     * @param ClassMetadata<OdmClassMetadata> $metadata
+     */
     public function setTranslatedValue(
         WrapperInterface $wrapped,
         ClassMetadata $metadata,

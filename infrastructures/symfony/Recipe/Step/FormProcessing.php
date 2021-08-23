@@ -39,9 +39,6 @@ use Teknoo\East\Website\Contracts\Recipe\Step\FormProcessingInterface;
  */
 class FormProcessing implements FormProcessingInterface
 {
-    /**
-     * @param FormInterface $form
-     */
     public function __invoke(
         mixed $form,
         ManagerInterface $manager,

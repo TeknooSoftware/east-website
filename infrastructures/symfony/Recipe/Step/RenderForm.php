@@ -28,7 +28,6 @@ namespace Teknoo\East\WebsiteBundle\Recipe\Step;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Symfony\Component\Form\FormInterface;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
@@ -61,13 +60,12 @@ class RenderForm implements RenderFormInterface
     }
 
     /**
-     * @param FormInterface $form
      * @param array<string, mixed> $viewParameters
      */
     public function __invoke(
         ServerRequestInterface $request,
         ClientInterface $client,
-        $form,
+        mixed $form,
         string $template,
         ObjectInterface $object,
         bool $isTranslatable = false,

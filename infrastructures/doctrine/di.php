@@ -243,8 +243,7 @@ return [
             $callback = [$listener, 'setLocale'];
         } else {
             //do nothing
-            $callback = static function () {
-            };
+            $callback = null;
         }
 
         return new LocaleMiddleware($callback);
