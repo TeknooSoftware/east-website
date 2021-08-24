@@ -66,6 +66,24 @@ class StoredPasswordTest extends TestCase
             'fooBar',
             $object->getPassword()
         );
+
+        self::assertTrue($object->mustHashPassword());
+    }
+
+    public function testSetHashedPassword()
+    {
+        $object = $this->buildObject();
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->setHashedPassword('fooBar')
+        );
+
+        self::assertEquals(
+            'fooBar',
+            $object->getPassword()
+        );
+
+        self::assertFalse($object->mustHashPassword());
     }
 
     public function testEraseCredentials()
@@ -151,6 +169,7 @@ class StoredPasswordTest extends TestCase
         );
 
         self::assertFalse($object->hasUpdatedPassword());
+        self::assertTrue($object->mustHashPassword());
 
         self::assertInstanceOf(
             \get_class($object),
@@ -158,13 +177,14 @@ class StoredPasswordTest extends TestCase
         );
 
         self::assertTrue($object->hasUpdatedPassword());
+        self::assertTrue($object->mustHashPassword());
 
         self::assertInstanceOf(
             \get_class($object),
             $object->setPassword('fooBar3')
         );
-
         self::assertTrue($object->hasUpdatedPassword());
+        self::assertTrue($object->mustHashPassword());
     }
 
     public function testSetPasswordExceptionOnBadArgument()

@@ -29,6 +29,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
@@ -315,6 +316,36 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     {
         self::assertNull(
             $this->buildProvider()->refreshUser($this->createMock(UserInterface::class))
+        );
+    }
+
+    public function testUpgradePasswordNotSupported()
+    {
+        $this->getWriter()->expects(self::never())->method('save');
+
+        $this->buildProvider()->upgradePassword(
+            $this->createMock(UserInterface::class),
+            'foo'
+        );
+    }
+
+    public function testUpgradePassword()
+    {
+        $user = $this->createMock(User::class);
+        $storedPassword = $this->createMock(StoredPassword::class);
+
+        $legacyUser = $this->createMock(LegacyUser::class);
+        $legacyUser->expects(self::any())->method('getWrappedUser')->willReturn($user);
+        $legacyUser->expects(self::any())->method('getWrappedStoredPassword')->willReturn($storedPassword);
+
+        $storedPassword->expects(self::once())->method('setSalt')->with('');
+        $storedPassword->expects(self::once())->method('setHashedPassword')->with('foo');
+
+        $this->getWriter()->expects(self::once())->method('save');
+
+        $this->buildProvider()->upgradePassword(
+            $legacyUser,
+            'foo'
         );
     }
 
