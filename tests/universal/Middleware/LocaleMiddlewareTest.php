@@ -134,11 +134,6 @@ class LocaleMiddlewareTest extends TestCase
             ->method('getAttribute')
             ->willReturn([]);
 
-        $serverRequestFinal->expects(self::any())
-            ->method('withAttribute')
-            ->with(ViewParameterInterface::REQUEST_PARAMETER_KEY, ['locale' => 'en'])
-            ->willReturnSelf();
-
         self::assertInstanceOf(
             LocaleMiddleware::class,
             $this->buildMiddleware('en')->execute($serverRequest, $manager, $bag)
@@ -181,11 +176,6 @@ class LocaleMiddlewareTest extends TestCase
         $serverRequestFinal->expects(self::any())
             ->method('getAttribute')
             ->willReturn(['foo' => 'bar']);
-
-        $serverRequestFinal->expects(self::any())
-            ->method('withAttribute')
-            ->with(ViewParameterInterface::REQUEST_PARAMETER_KEY, ['foo'=>'bar', 'locale' => 'fr'])
-            ->willReturnSelf();
 
         self::assertInstanceOf(
             LocaleMiddleware::class,
@@ -234,11 +224,6 @@ class LocaleMiddlewareTest extends TestCase
         $serverRequestFinal->expects(self::any())
             ->method('getAttribute')
             ->willReturn([]);
-
-        $serverRequestFinal->expects(self::any())
-            ->method('withAttribute')
-            ->with(ViewParameterInterface::REQUEST_PARAMETER_KEY, ['locale' => 'es'])
-            ->willReturnSelf();
 
         self::assertInstanceOf(
             LocaleMiddleware::class,

@@ -31,7 +31,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
-use Teknoo\East\Website\Middleware\ViewParameterInterface;
 use Teknoo\East\Website\Contracts\ObjectInterface;
 use Teknoo\East\Website\Recipe\Step\Traits\TemplateTrait;
 use Teknoo\East\Website\View\ParametersBag;
@@ -71,8 +70,6 @@ class RenderForm implements RenderFormInterface
         bool $isTranslatable = false,
         #[Transform(ParametersBag::class)] array $viewParameters = [],
     ): RenderFormInterface {
-        $viewParameters += $request->getAttribute(ViewParameterInterface::REQUEST_PARAMETER_KEY, []);
-
         $this->render(
             $client,
             $template,

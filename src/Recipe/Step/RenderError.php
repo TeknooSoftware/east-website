@@ -74,10 +74,6 @@ class RenderError
         #[Transform(ParametersBag::class)] array $viewParameters = [],
     ): self {
         $manager->stopErrorReporting();
-
-        if ($message instanceof ServerRequestInterface) {
-            $viewParameters += $message->getAttribute(ViewParameterInterface::REQUEST_PARAMETER_KEY, []);
-        }
         $viewParameters = ['error' => $error] + $viewParameters;
 
         $errorCode = $error->getCode();

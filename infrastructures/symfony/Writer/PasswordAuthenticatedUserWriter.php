@@ -53,6 +53,8 @@ class PasswordAuthenticatedUserWriter implements WriterInterface
     private function hashPassword(BaseUser $user, StoredPassword $password): void
     {
         if ($password->hasUpdatedPassword()) {
+            $password->setSalt('');
+
             $password->setPassword(
                 $this->passwordHasher->hashPassword(
                     new PasswordAuthenticatedUser($user, $password),

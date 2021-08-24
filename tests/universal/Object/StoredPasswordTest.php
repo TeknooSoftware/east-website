@@ -46,12 +46,6 @@ class StoredPasswordTest extends TestCase
         return new StoredPassword();
     }
 
-    public function testSetUserExceptionOnBadArgument()
-    {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setUser(new \stdClass());
-    }
-
     public function testGetPassword()
     {
         self::assertEquals(

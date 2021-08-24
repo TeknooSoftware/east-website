@@ -25,12 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
-use RuntimeException;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
-use Teknoo\East\Website\Contracts\User\AuthenticatorInterface;
-use Teknoo\East\Website\Contracts\User\UserInterface;
-
-use function is_a;
 
 /**
  * Class to defined persisted user's password to authenticate it on a website

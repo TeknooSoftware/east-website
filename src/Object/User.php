@@ -59,7 +59,7 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
 
     public function getFirstName(): string
     {
-        return (string) $this->firstName;
+        return $this->firstName;
     }
 
     public function setFirstName(string $firstName): User
@@ -71,7 +71,7 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
 
     public function getLastName(): string
     {
-        return (string) $this->lastName;
+        return $this->lastName;
     }
 
     public function setLastName(string $lastName): User
@@ -106,7 +106,7 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
 
     public function getEmail(): string
     {
-        return (string) $this->email;
+        return $this->email;
     }
 
     public function getUserIdentifier(): string

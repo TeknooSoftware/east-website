@@ -169,6 +169,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
         $promise = $this->createMock(PromiseInterface::class);
         $user = $this->createMock(BaseUser::class);
         $storedPassword = $this->createMock(StoredPassword::class);
+
         $user->expects(self::any())
             ->method('getAuthData')
             ->willReturn([$storedPassword]);
@@ -183,6 +184,11 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
         $storedPassword->expects(self::once())
             ->method('setPassword')
             ->with('fooBar')
+            ->willReturnSelf();
+
+        $storedPassword->expects(self::once())
+            ->method('setSalt')
+            ->with('')
             ->willReturnSelf();
 
         $this->getUniversalWriter()

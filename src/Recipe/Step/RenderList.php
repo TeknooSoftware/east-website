@@ -31,7 +31,6 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Website\Contracts\ObjectInterface;
-use Teknoo\East\Website\Middleware\ViewParameterInterface;
 use Teknoo\East\Website\Recipe\Step\Traits\TemplateTrait;
 use Teknoo\East\Website\View\ParametersBag;
 use Teknoo\Recipe\Ingredient\Attributes\Transform;
@@ -74,8 +73,6 @@ class RenderList
         mixed $searchForm = null,
         #[Transform(ParametersBag::class)] array $viewParameters = [],
     ): self {
-        $viewParameters += $request->getAttribute(ViewParameterInterface::REQUEST_PARAMETER_KEY, []);
-
         $this->render(
             $client,
             $template,
