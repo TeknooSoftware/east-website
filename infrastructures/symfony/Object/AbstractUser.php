@@ -65,7 +65,7 @@ abstract class AbstractUser implements
 
     public function getSalt()
     {
-        throw new BadMethodCallException("UserInterface::getSalt is deprecated");
+        return null;
     }
 
     /**

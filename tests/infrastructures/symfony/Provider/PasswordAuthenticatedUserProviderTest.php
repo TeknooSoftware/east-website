@@ -80,7 +80,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
 
     public function buildProvider(): PasswordAuthenticatedUserProvider
     {
-        return new PasswordAuthenticatedUserProvider($this->getLoader(), $this->getWriter(), 'sodium');
+        return new PasswordAuthenticatedUserProvider($this->getLoader(), $this->getWriter());
     }
 
     public function testLoadUserByUsernameNotFound()

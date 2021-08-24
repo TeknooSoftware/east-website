@@ -54,7 +54,6 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
     public function __construct(
         private UserLoader $loader,
         private PasswordAuthenticatedUserWriter $userWriter,
-        private string $algo,
     ) {
     }
 
@@ -116,7 +115,8 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
 
         $storedPassword = $user->getWrappedStoredPassword();
         $storedPassword->setSalt('');
-        $storedPassword->setPassword($newHashedPassword);
+        $storedPassword->setHashedPassword($newHashedPassword);
+        $storedPassword->setAlgo(PasswordAuthenticatedUser::class);
 
         $this->userWriter->save($user->getWrappedUser());
     }
