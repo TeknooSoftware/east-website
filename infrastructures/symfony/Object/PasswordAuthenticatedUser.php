@@ -28,8 +28,7 @@ namespace Teknoo\East\WebsiteBundle\Object;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherAwareInterface;
 
 /**
- * Symfony user class, implementing Symfony interface and wrapping East Website User.
- * To use with Symfony 5.2
+ * Symfony user class, implementing new Symfony user interface and wrapping East Website User.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

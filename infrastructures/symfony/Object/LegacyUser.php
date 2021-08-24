@@ -28,10 +28,7 @@ namespace Teknoo\East\WebsiteBundle\Object;
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 
 /**
- * Symfony user class, implementing Symfony interface and wrapping East Website User.
- * To use with Symfony 5.3
- *
- * Class implementing user for Symfony 5.3+ with new interface.
+ * Legacy user class, implementing legacy Symfony interface with a salt and wrapping East Website User.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

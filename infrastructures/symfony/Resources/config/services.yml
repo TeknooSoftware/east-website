@@ -5,6 +5,9 @@ parameters:
     #Command
     teknoo.east.website.bundle.command.create_user.class: 'Teknoo\East\WebsiteBundle\Command\CreateUserCommand'
 
+    #Provider
+    teknoo.east.website.bundle.password_authenticated_user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
+
     #Writer
     teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
 
@@ -87,13 +90,13 @@ services:
         public: true
 
     #Provider
-    teknoo.east.website.bundle.password_authenticated_user_provider:
-        alias: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
+    Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider:
+        class: '%teknoo.east.website.bundle.password_authenticated_user_provider.class%'
+        arguments:
+            - '@Teknoo\East\Website\Loader\UserLoader'
+            - '@Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
 
     #Command
-    teknoo.east.website.bundle.command.create_user:
-        alias: 'Teknoo\East\WebsiteBundle\Command\CreateUserCommand'
-
     Teknoo\East\WebsiteBundle\Command\CreateUserCommand:
         class: '%teknoo.east.website.bundle.command.create_user.class%'
         arguments:
@@ -104,9 +107,6 @@ services:
         public: false
 
     #Writer
-    teknoo.east.website.bundle.writer.user:
-        alias: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
-
     Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter:
         class: '%teknoo.east.website.bundle.writer.user.class%'
         arguments:

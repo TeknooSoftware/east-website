@@ -109,38 +109,6 @@ class ContainerTest extends TestCase
         );
     }
 
-    public function testUserProvider()
-    {
-        $container = $this->buildContainer();
-
-        $container->set(UserLoader::class, $loader = $this->createMock(UserLoader::class));
-
-        self::assertInstanceOf(
-            PasswordAuthenticatedUserProvider::class,
-            $provider = $container->get(PasswordAuthenticatedUserProvider::class)
-        );
-
-        $user = new BaseUser();
-        $user->setEmail('foo@bar');
-        $user->setAuthData([new StoredPassword()]);
-
-        $loader->expects(self::once())
-            ->method('query')
-            ->willReturnCallback(function ($name, PromiseInterface $promise) use ($user, $loader) {
-                self::assertEquals(new UserByEmailQuery('foo@bar'), $name);
-                $promise->success($user);
-
-                return $loader;
-            });
-
-        $loadedUser = new PasswordAuthenticatedUser($user, new StoredPassword());
-
-        self::assertEquals(
-            $loadedUser,
-            $provider->loadUserByUsername('foo@bar')
-        );
-    }
-
     public function testFormProcessing()
     {
         $container = $this->buildContainer();

@@ -33,6 +33,7 @@ use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
+use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\User as BaseUser;
 
@@ -49,6 +50,11 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     private $loader;
 
     /**
+     * @var PasswordAuthenticatedUserWriter
+     */
+    private $writer;
+
+    /**
      * @return UserLoader|\PHPUnit\Framework\MockObject\MockObject
      */
     public function getLoader(): UserLoader
@@ -60,9 +66,21 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         return $this->loader;
     }
 
+    /**
+     * @return PasswordAuthenticatedUserWriter|\PHPUnit\Framework\MockObject\MockObject
+     */
+    public function getWriter(): PasswordAuthenticatedUserWriter
+    {
+        if (!$this->writer instanceof PasswordAuthenticatedUserWriter) {
+            $this->writer = $this->createMock(PasswordAuthenticatedUserWriter::class);
+        }
+
+        return $this->writer;
+    }
+
     public function buildProvider(): PasswordAuthenticatedUserProvider
     {
-        return new PasswordAuthenticatedUserProvider($this->getLoader());
+        return new PasswordAuthenticatedUserProvider($this->getLoader(), $this->getWriter());
     }
 
     public function testLoadUserByUsernameNotFound()

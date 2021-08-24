@@ -36,8 +36,6 @@ use Teknoo\East\Website\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\SearchFormLoaderInterface;
 use Teknoo\East\WebsiteBundle\Middleware\LocaleMiddleware;
-use Teknoo\East\Website\Loader\UserLoader;
-use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormHandling;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormProcessing;
 use Teknoo\East\WebsiteBundle\Recipe\Step\RedirectClient;
@@ -66,9 +64,6 @@ return [
 
         return $previous;
     }),
-
-    PasswordAuthenticatedUserProvider::class => create()
-        ->constructor(get(UserLoader::class)),
 
     SearchFormLoaderInterface::class => get(SearchFormLoader::class),
 

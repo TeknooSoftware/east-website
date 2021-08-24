@@ -28,11 +28,14 @@ namespace Teknoo\East\WebsiteBundle\Provider;
 use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User;
 use Teknoo\East\WebsiteBundle\Object\AbstractUser;
+use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
@@ -46,10 +49,11 @@ use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class PasswordAuthenticatedUserProvider implements UserProviderInterface
+class PasswordAuthenticatedUserProvider implements UserProviderInterface, PasswordUpgraderInterface
 {
     public function __construct(
-        private UserLoader $loader
+        private UserLoader $loader,
+        private PasswordAuthenticatedUserWriter $userWriter,
     ) {
     }
 
@@ -99,6 +103,12 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface
         }
 
         return null;
+    }
+
+    public function upgradePassword(
+        PasswordAuthenticatedUserInterface|UserInterface $user,
+        string $newHashedPassword
+    ): void {
     }
 
     /**

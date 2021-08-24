@@ -33,8 +33,7 @@ use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
- * Symfony user class, implementing Symfony interface and wrapping East Website User.
- * To use with Symfony 5.2
+ * Base user class wrapping a East User Class in a Symfony context
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
