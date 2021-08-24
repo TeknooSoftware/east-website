@@ -110,8 +110,7 @@ abstract class AbstractUserTest extends TestCase
 
     public function testGetSalt()
     {
-        $this->expectException(\BadMethodCallException::class);
-        $this->buildObject()->getSalt();
+        self::assertEmpty($this->buildObject()->getSalt());
     }
 
     public function testGetUsername()
