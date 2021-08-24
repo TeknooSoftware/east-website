@@ -37,6 +37,8 @@ class StoredPassword implements AuthDataInterface
 {
     private ?string $algo = '';
 
+    private bool $clearPassword = true;
+
     private ?string $password = null;
 
     private ?string $originalPassword = null;
@@ -81,9 +83,23 @@ class StoredPassword implements AuthDataInterface
             $this->originalPassword = $this->password;
         }
 
+        $this->clearPassword = true;
         $this->password = $password;
 
         return $this;
+    }
+
+    public function setHashedPassword(string $hashedPassword): self
+    {
+        $this->clearPassword = false;
+        $this->password = $hashedPassword;
+
+        return $this;
+    }
+
+    public function mustHashPassword(): bool
+    {
+        return $this->clearPassword;
     }
 
     public function getSalt(): string

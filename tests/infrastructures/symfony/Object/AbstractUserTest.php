@@ -27,6 +27,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\User;
 use Teknoo\East\WebsiteBundle\Object\AbstractUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\Website\Object\User as BaseUser;
@@ -199,6 +200,22 @@ abstract class AbstractUserTest extends TestCase
 
         self::assertTrue(
             $this->buildObject()->isEqualTo($user)
+        );
+    }
+
+    public function testGetWrappedUser()
+    {
+        self::assertInstanceOf(
+            User::class,
+            $this->buildObject()->getWrappedUser()
+        );
+    }
+
+    public function testGetWrappedStoredPassword()
+    {
+        self::assertInstanceOf(
+            StoredPassword::class,
+            $this->buildObject()->getWrappedStoredPassword()
         );
     }
 }

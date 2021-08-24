@@ -82,7 +82,9 @@ class PasswordAuthenticatedUserWriter implements WriterInterface
                 continue;
             }
 
-            $this->hashPassword($object, $authData);
+            if ($authData->mustHashPassword()) {
+                $this->hashPassword($object, $authData);
+            }
         }
 
         $this->universalWriter->save($object, $promise);

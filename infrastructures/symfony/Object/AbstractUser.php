@@ -30,6 +30,7 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
@@ -78,6 +79,16 @@ abstract class AbstractUser implements
     public function getUserIdentifier(): string
     {
         return $this->user->getUserIdentifier();
+    }
+
+    public function getWrappedUser(): User
+    {
+        return $this->user;
+    }
+
+    public function getWrappedStoredPassword(): StoredPassword
+    {
+        return $this->password;
     }
 
     public function eraseCredentials(): self

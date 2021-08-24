@@ -147,6 +147,10 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturn(false);
 
         $storedPassword->expects(self::once())
+            ->method('mustHashPassword')
+            ->willReturn(true);
+
+        $storedPassword->expects(self::once())
             ->method('eraseCredentials');
 
         $storedPassword->expects(self::never())
@@ -178,6 +182,10 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->method('hasUpdatedPassword')
             ->willReturn(true);
 
+        $storedPassword->expects(self::once())
+            ->method('mustHashPassword')
+            ->willReturn(true);
+
         $storedPassword->expects(self::never())
             ->method('eraseCredentials');
 
@@ -187,6 +195,49 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturnSelf();
 
         $storedPassword->expects(self::once())
+            ->method('setSalt')
+            ->with('')
+            ->willReturnSelf();
+
+        $this->getUniversalWriter()
+            ->expects(self::once())
+            ->method('save')
+            ->with($user, $promise)
+            ->willReturnSelf();
+
+        self::assertInstanceOf(
+            PasswordAuthenticatedUserWriter::class,
+            $this->buildWriter()->save($user, $promise)
+        );
+    }
+
+    public function testSaveWithUserWithUpdatedHashedPassword()
+    {
+        $promise = $this->createMock(PromiseInterface::class);
+        $user = $this->createMock(BaseUser::class);
+        $storedPassword = $this->createMock(StoredPassword::class);
+
+        $user->expects(self::any())
+            ->method('getAuthData')
+            ->willReturn([$storedPassword]);
+
+        $storedPassword->expects(self::any())
+            ->method('hasUpdatedPassword')
+            ->willReturn(true);
+
+        $storedPassword->expects(self::once())
+            ->method('mustHashPassword')
+            ->willReturn(false);
+
+        $storedPassword->expects(self::never())
+            ->method('eraseCredentials');
+
+        $storedPassword->expects(self::never())
+            ->method('setPassword')
+            ->with('fooBar')
+            ->willReturnSelf();
+
+        $storedPassword->expects(self::never())
             ->method('setSalt')
             ->with('')
             ->willReturnSelf();

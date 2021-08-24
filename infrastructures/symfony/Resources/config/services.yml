@@ -7,6 +7,7 @@ parameters:
 
     #Provider
     teknoo.east.website.bundle.password_authenticated_user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
+    teknoo.east.website.bundle.password_authenticated_user_provider.default_algo: 'sodium'
 
     #Writer
     teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
@@ -95,6 +96,7 @@ services:
         arguments:
             - '@Teknoo\East\Website\Loader\UserLoader'
             - '@Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
+            - '%teknoo.east.website.bundle.password_authenticated_user_provider.default_algo%'
 
     #Command
     Teknoo\East\WebsiteBundle\Command\CreateUserCommand:
