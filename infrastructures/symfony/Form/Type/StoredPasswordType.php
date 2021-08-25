@@ -32,6 +32,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
@@ -59,6 +61,17 @@ class StoredPasswordType extends AbstractType
                 'required' => false
             ]
         );
+
+        return $this;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): self
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults(array(
+            'data_class' => StoredPassword::class,
+        ));
 
         return $this;
     }
