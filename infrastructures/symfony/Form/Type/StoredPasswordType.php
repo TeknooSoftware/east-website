@@ -32,10 +32,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
-use Teknoo\East\Website\Object\StoredPassword;
-use Teknoo\East\Website\Object\User;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
@@ -44,7 +40,7 @@ use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class UserType extends AbstractType
+class StoredPasswordType extends AbstractType
 {
     /**
      * @param FormBuilderInterface<PasswordAuthenticatedUser> $builder
@@ -52,47 +48,16 @@ class UserType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options): self
     {
-        $builder->add('firstName', TextType::class, ['required' => true]);
-        $builder->add('lastName', TextType::class, ['required' => true]);
         $builder->add(
-            'roles',
-            ChoiceType::class,
+            'password',
+            RepeatedType::class,
             [
-                'required' => true,
-                'multiple' => true,
-                'choices' => [
-                    'user' => 'ROLE_USER',
-                    'admin' => 'ROLE_ADMIN'
-                ]
+                'type' => PasswordType::class,
+                'first_options' => ['label' => 'Password'],
+                'second_options' => ['label' => 'Confirm it'],
+                'invalid_message' => 'The password fields must match.',
+                'required' => false
             ]
-        );
-
-        $builder->add('email', EmailType::class, ['required' => true]);
-
-        $builder->add('storedPassword', StoredPassword::class, ['mapped' => false]);
-
-        $builder->addEventListener(
-            FormEvents::POST_SET_DATA,
-            static function (FormEvent $event) {
-                /**
-                 * @var User $user
-                 */
-                $user = $event->getData();
-                $spForm = $event->getForm()->get('storedPassword');
-
-                foreach ($user->getAuthData() as $authData) {
-                    if (!$authData instanceof StoredPassword) {
-                        continue;
-                    }
-
-                    $spForm->setData($authData);
-                    return;
-                }
-
-                $authData = new StoredPassword();
-                $spForm->setData($authData);
-                $user->setAuthData([$authData]);
-            }
         );
 
         return $this;

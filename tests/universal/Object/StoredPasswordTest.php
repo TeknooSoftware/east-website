@@ -52,6 +52,14 @@ class StoredPasswordTest extends TestCase
         );
     }
 
+    public function testGetPassword()
+    {
+        self::assertEquals(
+            'fooBar',
+            $this->generateObjectPopulated(['hash' => 'fooBar'])->getPassword()
+        );
+    }
+
     public function testSetPassword()
     {
         $object = $this->buildObject();

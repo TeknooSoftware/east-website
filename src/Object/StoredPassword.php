@@ -60,6 +60,11 @@ class StoredPassword implements AuthDataInterface
         return (string) $this->hash;
     }
 
+    public function getPassword(): string
+    {
+        return $this->getHash();
+    }
+
     public function setPassword(?string $hash): self
     {
         $this->unhashedPassword = true;
