@@ -69,7 +69,7 @@ class UserType extends AbstractType
 
         $builder->add('email', EmailType::class, ['required' => true]);
 
-        $builder->add('storedPassword', StoredPassword::class, ['mapped' => false]);
+        $builder->add('storedPassword', StoredPasswordType::class, ['mapped' => false]);
 
         $builder->addEventListener(
             FormEvents::POST_SET_DATA,
