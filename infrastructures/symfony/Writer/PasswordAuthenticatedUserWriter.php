@@ -52,18 +52,14 @@ class PasswordAuthenticatedUserWriter implements WriterInterface
 
     private function hashPassword(BaseUser $user, StoredPassword $password): void
     {
-        if ($password->hasUpdatedPassword()) {
-            $password->setSalt('');
+        $password->setSalt('');
 
-            $password->setPassword(
-                $this->passwordHasher->hashPassword(
-                    new PasswordAuthenticatedUser($user, $password),
-                    $password->getPassword()
-                )
-            );
-        } else {
-            $password->eraseCredentials();
-        }
+        $password->setPassword(
+            $this->passwordHasher->hashPassword(
+                new PasswordAuthenticatedUser($user, $password),
+                $password->getHash()
+            )
+        );
     }
 
     public function save(ObjectInterface $object, PromiseInterface $promise = null): WriterInterface

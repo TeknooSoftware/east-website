@@ -24,8 +24,6 @@
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Contracts\User\AuthenticatorInterface;
-use Teknoo\East\Website\Contracts\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 
@@ -46,11 +44,11 @@ class StoredPasswordTest extends TestCase
         return new StoredPassword();
     }
 
-    public function testGetPassword()
+    public function testGetHash()
     {
         self::assertEquals(
             'fooBar',
-            $this->generateObjectPopulated(['password' => 'fooBar'])->getPassword()
+            $this->generateObjectPopulated(['hash' => 'fooBar'])->getHash()
         );
     }
 
@@ -64,7 +62,7 @@ class StoredPasswordTest extends TestCase
 
         self::assertEquals(
             'fooBar',
-            $object->getPassword()
+            $object->getHash()
         );
 
         self::assertTrue($object->mustHashPassword());
@@ -80,7 +78,7 @@ class StoredPasswordTest extends TestCase
 
         self::assertEquals(
             'fooBar',
-            $object->getPassword()
+            $object->getHash()
         );
 
         self::assertFalse($object->mustHashPassword());
@@ -96,12 +94,7 @@ class StoredPasswordTest extends TestCase
 
         self::assertEquals(
             'fooBar',
-            $object->getPassword()
-        );
-
-        self::assertEquals(
-            'fooBar',
-            $object->getOriginalPassword()
+            $object->getHash()
         );
 
         self::assertInstanceOf(
@@ -111,12 +104,7 @@ class StoredPasswordTest extends TestCase
 
         self::assertEquals(
             'fooBar2',
-            $object->getPassword()
-        );
-
-        self::assertEquals(
-            'fooBar',
-            $object->getOriginalPassword()
+            $object->getHash()
         );
 
         self::assertInstanceOf(
@@ -124,67 +112,7 @@ class StoredPasswordTest extends TestCase
             $object->eraseCredentials()
         );
 
-        self::assertEmpty($object->getPassword());
-        self::assertEmpty($object->getOriginalPassword());
-    }
-
-    public function testHasUpdatedPassword()
-    {
-        $object = $this->buildObject();
-        self::assertFalse($object->hasUpdatedPassword());
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword('fooBar')
-        );
-
-        self::assertTrue($object->hasUpdatedPassword());
-
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword('fooBar2')
-        );
-
-        self::assertTrue($object->hasUpdatedPassword());
-
-        $object = $this->buildObject(['password' => 'fooBar']);
-        self::assertFalse($object->hasUpdatedPassword());
-
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword(null)
-        );
-
-        self::assertFalse($object->hasUpdatedPassword());
-
-        $object = $this->buildObject();
-        $refProperty = new \ReflectionProperty($object, 'password');
-        $refProperty->setAccessible(true);
-        $refProperty->setValue($object, 'fooBar');
-
-        self::assertTrue($object->hasUpdatedPassword());
-
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword('fooBar')
-        );
-
-        self::assertFalse($object->hasUpdatedPassword());
-        self::assertTrue($object->mustHashPassword());
-
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword('fooBar2')
-        );
-
-        self::assertTrue($object->hasUpdatedPassword());
-        self::assertTrue($object->mustHashPassword());
-
-        self::assertInstanceOf(
-            \get_class($object),
-            $object->setPassword('fooBar3')
-        );
-        self::assertTrue($object->hasUpdatedPassword());
-        self::assertTrue($object->mustHashPassword());
+        self::assertEmpty($object->getHash());
     }
 
     public function testSetPasswordExceptionOnBadArgument()

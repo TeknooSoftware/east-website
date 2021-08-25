@@ -99,7 +99,7 @@ abstract class AbstractUserTest extends TestCase
     {
         $this->getStoredPassword()
             ->expects(self::once())
-            ->method('getPassword')
+            ->method('getHash')
             ->willReturn('foo');
 
         self::assertEquals(

@@ -60,7 +60,7 @@ abstract class AbstractUser implements
 
     public function getPassword(): string
     {
-        return $this->password->getPassword();
+        return $this->password->getHash();
     }
 
     public function getSalt()

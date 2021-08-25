@@ -133,41 +133,6 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
         );
     }
 
-    public function testSaveWithUserWithNoUpdatedPassword()
-    {
-        $promise = $this->createMock(PromiseInterface::class);
-        $user = $this->createMock(BaseUser::class);
-        $storedPassword = $this->createMock(StoredPassword::class);
-        $user->expects(self::any())
-            ->method('getAuthData')
-            ->willReturn([$storedPassword]);
-
-        $storedPassword->expects(self::once())
-            ->method('hasUpdatedPassword')
-            ->willReturn(false);
-
-        $storedPassword->expects(self::once())
-            ->method('mustHashPassword')
-            ->willReturn(true);
-
-        $storedPassword->expects(self::once())
-            ->method('eraseCredentials');
-
-        $storedPassword->expects(self::never())
-            ->method('setPassword');
-
-        $this->getUniversalWriter()
-            ->expects(self::once())
-            ->method('save')
-            ->with($user, $promise)
-            ->willReturnSelf();
-
-        self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
-            $this->buildWriter()->save($user, $promise)
-        );
-    }
-
     public function testSaveWithUserWithUpdatedPassword()
     {
         $promise = $this->createMock(PromiseInterface::class);
@@ -179,15 +144,8 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturn([$storedPassword]);
 
         $storedPassword->expects(self::once())
-            ->method('hasUpdatedPassword')
-            ->willReturn(true);
-
-        $storedPassword->expects(self::once())
             ->method('mustHashPassword')
             ->willReturn(true);
-
-        $storedPassword->expects(self::never())
-            ->method('eraseCredentials');
 
         $storedPassword->expects(self::once())
             ->method('setPassword')
@@ -220,10 +178,6 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
         $user->expects(self::any())
             ->method('getAuthData')
             ->willReturn([$storedPassword]);
-
-        $storedPassword->expects(self::any())
-            ->method('hasUpdatedPassword')
-            ->willReturn(true);
 
         $storedPassword->expects(self::once())
             ->method('mustHashPassword')

@@ -37,11 +37,9 @@ class StoredPassword implements AuthDataInterface
 {
     private ?string $algo = '';
 
-    private bool $clearPassword = true;
+    private bool $unhashedPassword = false;
 
-    private ?string $password = null;
-
-    private ?string $originalPassword = null;
+    private ?string $hash = null;
 
     private string $salt = '';
 
@@ -57,49 +55,30 @@ class StoredPassword implements AuthDataInterface
         return $this;
     }
 
-    public function getPassword(): string
+    public function getHash(): string
     {
-        if (empty($this->originalPassword)) {
-            $this->originalPassword = $this->password;
-        }
-
-        return (string) $this->password;
+        return (string) $this->hash;
     }
 
-    public function getOriginalPassword(): string
+    public function setPassword(?string $hash): self
     {
-        return (string) $this->originalPassword;
-    }
-
-    public function hasUpdatedPassword(): bool
-    {
-        return (empty($this->originalPassword) && !empty($this->password))
-            || ($this->originalPassword !== $this->password);
-    }
-
-    public function setPassword(?string $password): self
-    {
-        if (empty($this->originalPassword)) {
-            $this->originalPassword = $this->password;
-        }
-
-        $this->clearPassword = true;
-        $this->password = $password;
+        $this->unhashedPassword = true;
+        $this->hash = $hash;
 
         return $this;
     }
 
     public function setHashedPassword(string $hashedPassword): self
     {
-        $this->clearPassword = false;
-        $this->password = $hashedPassword;
+        $this->unhashedPassword = false;
+        $this->hash = $hashedPassword;
 
         return $this;
     }
 
     public function mustHashPassword(): bool
     {
-        return $this->clearPassword;
+        return $this->unhashedPassword;
     }
 
     public function getSalt(): string
@@ -116,8 +95,7 @@ class StoredPassword implements AuthDataInterface
 
     public function eraseCredentials(): self
     {
-        $this->password = '';
-        $this->originalPassword = '';
+        $this->hash = '';
 
         return $this;
     }

@@ -1,5 +1,25 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta1] - 2021-08-12
+### Stable Release
+- Add `UserInterface` to represent and User in a Eastt Website / WebApp.
+- Add `AuthDataInterface` to represent any data/credentials, able to authenticate an user
+- Update `User` class to following the previeous interface
+- Split authentications data from `User` class to a dedicated class `StoredPassword`
+- Support password already hashed into `StoredPassword`
+- Update Doctrine ODM mappingg about `User` ans add `StoredPassword`
+- Create `AbstractUser` to wrap East Webiste `User` with a `StoredPassword` in Symfony
+- Create `PasswordAuthenticatedUser` to implements new Symfony's interface `PasswordAuthenticatedUserInterface`
+- Update `LegacyUser` to use `AbstractUser`
+- Update `UserWriter` implementation in Symfony to hash password only when its needed.
+- Rework `UserProvider` to `PasswordAuthenticatedUserProvider` to return a `LegacyUser` if the user use the legacy Symfony behavior with a slug
+  or a `PasswordAuthenticatedUser`. It is able to migrate logged user to the new behavior, update the hashed ppassword passed by Symfony and 
+  remove salt.
+- Prepare third-party authentication.
+- Some QA fixes on PHPDoc
+- Remove deprecated `ViewParameterInterface`
+- Remove deprecated Symfony `User` class
+
 ## [5.1.5] - 2021-08-12
 ### Stable Release
 - Switch to `Recipe Promise`
