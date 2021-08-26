@@ -74,6 +74,26 @@ class StoredPasswordTest extends TestCase
         );
 
         self::assertTrue($object->mustHashPassword());
+
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->setPassword(null)
+        );
+
+        self::assertEquals(
+            'fooBar',
+            $object->getHash()
+        );
+
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->setPassword('')
+        );
+
+        self::assertEquals(
+            'fooBar',
+            $object->getHash()
+        );
     }
 
     public function testSetHashedPassword()
@@ -90,6 +110,15 @@ class StoredPasswordTest extends TestCase
         );
 
         self::assertFalse($object->mustHashPassword());
+
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->setHashedPassword(null)
+        );
+
+        self::assertEmpty(
+            $object->getHash()
+        );
     }
 
     public function testEraseCredentials()
