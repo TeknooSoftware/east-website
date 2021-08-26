@@ -91,7 +91,7 @@ class UserType extends AbstractType
 
                 $authData = new StoredPassword();
                 $spForm->setData($authData);
-                $user->setAuthData([$authData]);
+                $user->addAuthData($authData);
             }
         );
 

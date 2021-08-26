@@ -28,6 +28,8 @@ namespace Teknoo\East\Website\Object;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Contracts\User\UserInterface;
 
+use function is_array;
+use function iterator_to_array;
 use function trim;
 
 /**
@@ -127,6 +129,17 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
     public function setAuthData(iterable $authData): User
     {
         $this->authData = $authData;
+
+        return $this;
+    }
+
+    public function addAuthData(AuthDataInterface $authData): User
+    {
+        if (!is_array($this->authData)) {
+            $this->authData = iterator_to_array($this->authData);
+        }
+
+        $this->authData[] = $authData;
 
         return $this;
     }

@@ -65,6 +65,11 @@ class StoredPassword implements AuthDataInterface
         return $this->getHash();
     }
 
+    /*
+     * Empty password are not allowed and ignored.
+     * To clear a password, you must pass an empty hash to setHashedPassword
+     * A hash must not be rehashed, be a password must always be hashed before persisted
+     */
     public function setPassword(?string $password): self
     {
         if (empty($password)) {

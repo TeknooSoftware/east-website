@@ -71,7 +71,7 @@ class CreateUserCommand extends Command
         $user->setRoles(['ROLE_USER', 'ROLE_ADMIN']);
 
         $storedPassword = new StoredPassword();
-        $storedPassword->setPassword(
+        $storedPassword->setHashedPassword(
             $this->passwordHasher->hashPassword(
                 new PasswordAuthenticatedUser(
                     $user,
@@ -81,7 +81,7 @@ class CreateUserCommand extends Command
             )
         );
 
-        $user->setAuthData([$storedPassword]);
+        $user->addAuthData($storedPassword);
 
         $this->writer->save($user);
 

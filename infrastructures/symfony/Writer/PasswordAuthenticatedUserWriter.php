@@ -54,7 +54,7 @@ class PasswordAuthenticatedUserWriter implements WriterInterface
     {
         $password->setSalt('');
 
-        $password->setPassword(
+        $password->setHashedPassword(
             $this->passwordHasher->hashPassword(
                 new PasswordAuthenticatedUser($user, $password),
                 $password->getHash()

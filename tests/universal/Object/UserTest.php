@@ -196,6 +196,57 @@ class UserTest extends TestCase
         );
     }
 
+    public function testAddAuthData()
+    {
+        $object = $this->buildObject();
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->addAuthData(
+                $ad1 = $this->createMock(AuthDataInterface::class)
+            )
+        );
+
+        self::assertEquals(
+            [$ad1],
+            $object->getAuthData()
+        );
+
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->addAuthData(
+                $ad2 = $this->createMock(AuthDataInterface::class)
+            )
+        );
+
+        self::assertEquals(
+            [$ad1, $ad2],
+            $object->getAuthData()
+        );
+    }
+
+    public function testAddAuthDataWithIterator()
+    {
+        $object = $this->generateObjectPopulated(
+            [
+                'authData' => new \ArrayIterator([
+                    $ad1 = $this->createMock(AuthDataInterface::class)
+                ])
+            ]
+        );
+
+        self::assertInstanceOf(
+            \get_class($object),
+            $object->addAuthData(
+                $ad2 = $this->createMock(AuthDataInterface::class)
+            )
+        );
+
+        self::assertEquals(
+            [$ad1, $ad2],
+            $object->getAuthData()
+        );
+    }
+
     public function testSetAuthDataExceptionOnBadArgument()
     {
         $this->expectException(\Throwable::class);

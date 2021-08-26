@@ -148,7 +148,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturn(true);
 
         $storedPassword->expects(self::once())
-            ->method('setPassword')
+            ->method('setHashedPassword')
             ->with('fooBar')
             ->willReturnSelf();
 

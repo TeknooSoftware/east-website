@@ -24,6 +24,7 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Form\Type;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\WebsiteBundle\Form\Type\StoredPasswordType;
 
 /**
@@ -38,5 +39,15 @@ class StoredPasswordTypeTest extends TestCase
     public function buildForm(): StoredPasswordType
     {
         return new StoredPasswordType();
+    }
+
+    public function testConfigureOptions()
+    {
+        self::assertInstanceOf(
+            StoredPasswordType::class,
+            $this->buildForm()->configureOptions(
+                $this->createMock(OptionsResolver::class)
+            )
+        );
     }
 }
