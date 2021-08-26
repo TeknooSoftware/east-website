@@ -1,7 +1,7 @@
 # Teknoo Software - Website - Change Log
 
-## [6.0.0-beta1] - 2021-08-12
-### Stable Release
+## [6.0.0-beta1] - 2021-08-26
+### Beta Release
 - Add `UserInterface` to represent and User in a Eastt Website / WebApp.
 - Add `AuthDataInterface` to represent any data/credentials, able to authenticate an user
 - Update `User` class to following the previeous interface
@@ -19,6 +19,8 @@
 - Some QA fixes on PHPDoc
 - Remove deprecated `ViewParameterInterface`
 - Remove deprecated Symfony `User` class
+- Create `StoredPasswordType` to manage new user in a Symfony Form.
+- Fix some bug in admin routes.
 
 ## [5.1.5] - 2021-08-12
 ### Stable Release
