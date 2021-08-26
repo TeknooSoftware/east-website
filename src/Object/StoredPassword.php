@@ -35,6 +35,8 @@ use Teknoo\East\Website\Contracts\User\AuthDataInterface;
  */
 class StoredPassword implements AuthDataInterface
 {
+    private string $type = self::class;
+
     private ?string $algo = '';
 
     private bool $unhashedPassword = false;
