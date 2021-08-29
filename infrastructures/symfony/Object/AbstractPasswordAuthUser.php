@@ -25,18 +25,39 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherAwareInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
- * Symfony user class, implementing new Symfony user interface and wrapping East Website User.
+ * Base user class wrapping a East User Class in a Symfony context
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class PasswordAuthenticatedUser extends AbstractPasswordAuthUser implements PasswordHasherAwareInterface
+abstract class AbstractPasswordAuthUser extends AbstractUser implements PasswordAuthenticatedUserInterface
 {
-    public function getPasswordHasherName(): ?string
+    public function __construct(
+        BaseUser $user,
+        protected StoredPassword $password,
+    ) {
+        parent::__construct($user);
+    }
+
+    public function getPassword(): string
     {
-        return $this->password->getAlgo();
+        return $this->password->getHash();
+    }
+
+    public function getWrappedStoredPassword(): StoredPassword
+    {
+        return $this->password;
+    }
+
+    public function eraseCredentials(): self
+    {
+        $this->password->eraseCredentials();
+
+        return $this;
     }
 }

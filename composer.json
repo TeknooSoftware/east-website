@@ -76,7 +76,9 @@
         "doctrine/common": "^3.1.2",
         "doctrine/persistence": "^2.2.2",
         "doctrine/mongodb-odm": "^2.2.2",
-        "doctrine/mongodb-odm-bundle": "^4.3.0"
+        "doctrine/mongodb-odm-bundle": "^4.3.0",
+        "league/oauth2-client": "~2.6",
+        "knpuniversity/oauth2-client-bundle": "~2.8"
     },
     "archive": {
         "exclude": ["features", "tests", "vendor", ".idea"]

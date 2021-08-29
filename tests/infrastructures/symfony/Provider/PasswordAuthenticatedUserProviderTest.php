@@ -34,7 +34,7 @@ use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
-use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
+use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\User as BaseUser;
 
@@ -51,7 +51,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     private $loader;
 
     /**
-     * @var PasswordAuthenticatedUserWriter
+     * @var SymfonyUserWriter
      */
     private $writer;
 
@@ -68,12 +68,12 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     }
 
     /**
-     * @return PasswordAuthenticatedUserWriter|\PHPUnit\Framework\MockObject\MockObject
+     * @return SymfonyUserWriter|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function getWriter(): PasswordAuthenticatedUserWriter
+    public function getWriter(): SymfonyUserWriter
     {
-        if (!$this->writer instanceof PasswordAuthenticatedUserWriter) {
-            $this->writer = $this->createMock(PasswordAuthenticatedUserWriter::class);
+        if (!$this->writer instanceof SymfonyUserWriter) {
+            $this->writer = $this->createMock(SymfonyUserWriter::class);
         }
 
         return $this->writer;

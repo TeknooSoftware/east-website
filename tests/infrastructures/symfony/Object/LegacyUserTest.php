@@ -25,6 +25,7 @@ namespace Teknoo\Tests\East\WebsiteBundle\Object;
 
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\WebsiteBundle\Object\AbstractPasswordAuthUser;
 use Teknoo\East\WebsiteBundle\Object\AbstractUser;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\Website\Object\User as BaseUser;
@@ -33,9 +34,10 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractUser
+ * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractPasswordAuthUser
  * @covers      \Teknoo\East\WebsiteBundle\Object\LegacyUser
  */
-class LegacyUserTest extends AbstractUserTest
+class LegacyUserTest extends AbstractPasswordAuthUserTest
 {
     private ?BaseUser $user = null;
 

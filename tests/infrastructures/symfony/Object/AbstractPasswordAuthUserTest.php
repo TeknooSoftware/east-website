@@ -23,40 +23,19 @@
 
 namespace Teknoo\Tests\East\WebsiteBundle\Object;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Object\StoredPassword;
-use Teknoo\East\WebsiteBundle\Object\AbstractUser;
+use Teknoo\East\Website\Object\User;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
-use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractUser
- * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractPasswordAuthUser
- * @covers      \Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser
  */
-class PasswordAuthenticatedUserTest extends AbstractPasswordAuthUserTest
+abstract class AbstractPasswordAuthUserTest extends AbstractUserTest
 {
-    private ?BaseUser $user = null;
-
     private ?StoredPassword $storedPassword = null;
-
-    /**
-     * @return BaseUser|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getUser(): BaseUser
-    {
-        if (!$this->user instanceof BaseUser) {
-            $this->user = $this->createMock(BaseUser::class);
-
-            $this->user->expects(self::any())->method('getAuthData')->willReturn([$this->getStoredPassword()]);
-        }
-
-        return $this->user;
-    }
 
     /**
      * @return StoredPassword|\PHPUnit\Framework\MockObject\MockObject
@@ -68,11 +47,6 @@ class PasswordAuthenticatedUserTest extends AbstractPasswordAuthUserTest
         }
 
         return $this->storedPassword;
-    }
-
-    public function buildObject(): AbstractUser
-    {
-        return new PasswordAuthenticatedUser($this->getUser(), $this->getStoredPassword());
     }
 
     public function testExceptionWithBadUser()
@@ -87,16 +61,37 @@ class PasswordAuthenticatedUserTest extends AbstractPasswordAuthUserTest
         new PasswordAuthenticatedUser($this->getUser(), new \stdClass());
     }
 
-    public function testGetPasswordHasherName()
+    public function testGetPassword()
     {
         $this->getStoredPassword()
             ->expects(self::once())
-            ->method('getAlgo')
+            ->method('getHash')
             ->willReturn('foo');
 
         self::assertEquals(
             'foo',
-            $this->buildObject()->getPasswordHasherName()
+            $this->buildObject()->getPassword()
+        );
+    }
+
+    public function testEraseCredentials()
+    {
+        $this->getStoredPassword()
+            ->expects(self::once())
+            ->method('eraseCredentials')
+            ->willReturnSelf();
+
+        self::assertInstanceOf(
+            PasswordAuthenticatedUserInterface::class,
+            $this->buildObject()->eraseCredentials()
+        );
+    }
+
+    public function testGetWrappedStoredPassword()
+    {
+        self::assertInstanceOf(
+            StoredPassword::class,
+            $this->buildObject()->getWrappedStoredPassword()
         );
     }
 }

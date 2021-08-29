@@ -33,7 +33,7 @@ use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterfac
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class LegacyUser extends AbstractUser implements LegacyPasswordAuthenticatedUserInterface
+class LegacyUser extends AbstractPasswordAuthUser implements LegacyPasswordAuthenticatedUserInterface
 {
     public function getSalt(): ?string
     {

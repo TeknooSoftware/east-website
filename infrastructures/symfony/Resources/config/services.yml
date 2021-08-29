@@ -10,7 +10,7 @@ parameters:
     teknoo.east.website.bundle.password_authenticated_user_provider.default_algo: 'sodium'
 
     #Writer
-    teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
+    teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter'
 
     #Steps
     teknoo.east.website.bundle.allowed_forms: []
@@ -95,7 +95,7 @@ services:
         class: '%teknoo.east.website.bundle.password_authenticated_user_provider.class%'
         arguments:
             - '@Teknoo\East\Website\Loader\UserLoader'
-            - '@Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter'
+            - '@Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter'
 
     #Command
     Teknoo\East\WebsiteBundle\Command\CreateUserCommand:
@@ -108,7 +108,7 @@ services:
         public: false
 
     #Writer
-    Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter:
+    Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter:
         class: '%teknoo.east.website.bundle.writer.user.class%'
         arguments:
             - '@Teknoo\East\Website\Writer\UserWriter'

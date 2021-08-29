@@ -30,16 +30,16 @@ use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
+use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\East\Website\Writer\UserWriter as UniversalWriter;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter
+ * @covers      \Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter
  */
-class PasswordAuthenticatedUserWriterTest extends TestCase
+class SymfonyUserWriterTest extends TestCase
 {
     /**
      * @var UniversalWriter
@@ -80,9 +80,9 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
         return $this->userPasswordHasher;
     }
 
-    public function buildWriter(): PasswordAuthenticatedUserWriter
+    public function buildWriter(): SymfonyUserWriter
     {
-        return new PasswordAuthenticatedUserWriter(
+        return new SymfonyUserWriter(
             $this->getUniversalWriter(),
             $this->getUserPasswordHasher()
         );
@@ -107,7 +107,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->method('fail');
 
         self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
+            SymfonyUserWriter::class,
             $this->buildWriter()->save($object, $promise)
         );
     }
@@ -128,7 +128,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
+            SymfonyUserWriter::class,
             $this->buildWriter()->save($user, $promise)
         );
     }
@@ -164,7 +164,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
+            SymfonyUserWriter::class,
             $this->buildWriter()->save($user, $promise)
         );
     }
@@ -203,7 +203,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
+            SymfonyUserWriter::class,
             $this->buildWriter()->save($user, $promise)
         );
     }
@@ -220,7 +220,7 @@ class PasswordAuthenticatedUserWriterTest extends TestCase
             ->willReturnSelf();
 
         self::assertInstanceOf(
-            PasswordAuthenticatedUserWriter::class,
+            SymfonyUserWriter::class,
             $this->buildWriter()->remove($object, $promise)
         );
     }

@@ -34,8 +34,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User;
-use Teknoo\East\WebsiteBundle\Object\AbstractUser;
-use Teknoo\East\WebsiteBundle\Writer\PasswordAuthenticatedUserWriter;
+use Teknoo\East\WebsiteBundle\Object\AbstractPasswordAuthUser;
+use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
@@ -53,7 +53,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
 {
     public function __construct(
         private UserLoader $loader,
-        private PasswordAuthenticatedUserWriter $userWriter,
+        private SymfonyUserWriter $userWriter,
     ) {
     }
 
@@ -98,7 +98,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
 
     public function refreshUser(UserInterface $user): ?UserInterface
     {
-        if ($user instanceof AbstractUser) {
+        if ($user instanceof AbstractPasswordAuthUser) {
             return $this->fetchUserByUsername($user->getUsername());
         }
 
@@ -109,7 +109,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
         PasswordAuthenticatedUserInterface|UserInterface $user,
         string $newHashedPassword
     ): void {
-        if (!$user instanceof AbstractUser) {
+        if (!$user instanceof AbstractPasswordAuthUser) {
             return;
         }
 
@@ -122,12 +122,12 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
     }
 
     /**
-     * @param class-string<AbstractUser> $class
+     * @param class-string<AbstractPasswordAuthUser> $class
      * @throws ReflectionException
      */
     public function supportsClass($class): bool
     {
         $reflection = new ReflectionClass($class);
-        return $reflection->isSubclassOf(AbstractUser::class);
+        return $reflection->isSubclassOf(AbstractPasswordAuthUser::class);
     }
 }

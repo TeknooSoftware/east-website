@@ -25,11 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use BadMethodCallException;
 use Symfony\Component\Security\Core\User\EquatableInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Object\User as BaseUser;
 
@@ -41,12 +38,10 @@ use Teknoo\East\Website\Object\User as BaseUser;
  */
 abstract class AbstractUser implements
     UserInterface,
-    PasswordAuthenticatedUserInterface,
     EquatableInterface
 {
     public function __construct(
         private BaseUser $user,
-        protected StoredPassword $password,
     ) {
     }
 
@@ -56,11 +51,6 @@ abstract class AbstractUser implements
     public function getRoles(): iterable
     {
         return $this->user->getRoles();
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password->getHash();
     }
 
     public function getSalt()
@@ -84,18 +74,6 @@ abstract class AbstractUser implements
     public function getWrappedUser(): User
     {
         return $this->user;
-    }
-
-    public function getWrappedStoredPassword(): StoredPassword
-    {
-        return $this->password;
-    }
-
-    public function eraseCredentials(): self
-    {
-        $this->password->eraseCredentials();
-
-        return $this;
     }
 
     public function isEqualTo(UserInterface $user): bool
