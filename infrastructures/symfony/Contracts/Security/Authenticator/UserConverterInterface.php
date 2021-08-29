@@ -23,40 +23,18 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\WebsiteBundle\Object;
+namespace Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator;
 
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Teknoo\East\Website\Object\StoredPassword;
-use Teknoo\East\Website\Object\User as BaseUser;
+use League\OAuth2\Client\Provider\ResourceOwnerInterface;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
- *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-abstract class AbstractPasswordAuthUser extends AbstractUser implements PasswordAuthenticatedUserInterface
+interface UserConverterInterface
 {
-    public function __construct(
-        BaseUser $user,
-        protected StoredPassword $password,
-    ) {
-        parent::__construct($user);
-    }
+    public function extractEmail(ResourceOwnerInterface $owner, PromiseInterface $promise): UserConverterInterface;
 
-    public function getPassword(): string
-    {
-        return $this->password->getHash();
-    }
-
-    public function getWrappedStoredPassword(): StoredPassword
-    {
-        return $this->password;
-    }
-
-    public function eraseCredentials(): self
-    {
-        $this->password->eraseCredentials();
-
-        return $this;
-    }
+    public function convertToUser(ResourceOwnerInterface $owner, PromiseInterface $promise): UserConverterInterface;
 }

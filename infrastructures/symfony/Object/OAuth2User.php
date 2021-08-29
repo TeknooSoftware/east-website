@@ -25,8 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Object;
 
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Website\Object\ThirdPartyAuth;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
@@ -34,29 +33,27 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-abstract class AbstractPasswordAuthUser extends AbstractUser implements PasswordAuthenticatedUserInterface
+class OAuth2User extends AbstractUser
 {
     public function __construct(
         BaseUser $user,
-        protected StoredPassword $password,
+        protected ThirdPartyAuth $auth,
     ) {
         parent::__construct($user);
     }
 
-    public function getPassword(): string
+    public function getWrappedThirdAuth(): ThirdPartyAuth
     {
-        return $this->password->getHash();
+        return $this->auth;
     }
 
-    public function getWrappedStoredPassword(): StoredPassword
+    public function getPassword()
     {
-        return $this->password;
+        return $this->auth->getToken();
     }
 
     public function eraseCredentials(): self
     {
-        $this->password->eraseCredentials();
-
         return $this;
     }
 }

@@ -42,7 +42,7 @@
         "php-di/php-di": "^6.3.4",
         "teknoo/immutable": "^2.0.9",
         "teknoo/states": "^5.0.6",
-        "teknoo/recipe": "^3.2.1",
+        "teknoo/recipe": "^3.3.0",
         "teknoo/east-foundation": "^5.3.4"
     },
     "require-dev": {
@@ -68,6 +68,7 @@
         "symfony/options-resolver": "^5.3.4",
         "symfony/psr-http-message-bridge": "~2.1",
         "symfony/security-core": "^5.3.6",
+        "symfony/security-http": "^5.3.6",
         "symfony/templating": "^5.3.4",
         "symfony/translation": "^5.3.4",
         "symfony/yaml": "^5.3.6",
