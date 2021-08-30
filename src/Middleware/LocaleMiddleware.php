@@ -84,6 +84,7 @@ class LocaleMiddleware
                             ($this->translatableSetter)($locale);
                         }
                         $request = $request->withAttribute('locale', $locale);
+                        #todo
                         $returnedLocale = $locale;
                     },
                     function () use (&$request) {

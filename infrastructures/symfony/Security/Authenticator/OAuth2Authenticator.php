@@ -105,13 +105,18 @@ class OAuth2Authenticator extends BaseAuthenticator
         return new SelfValidatingPassport(
             new UserBadge(
                 $accessToken->getToken(),
-                function() use ($accessToken, $provider, $client): UserInterface {
+                function () use ($accessToken, $provider, $client): UserInterface {
                     $oauthUser = $client->fetchUserFromToken($accessToken);
 
-                    $loadedUser = null;
+                    $returnPromise = new Promise(
+                        static function (OAuth2User $user): OAuth2User {
+                            return $user;
+                        }
+                    );
+
                     $registerTokenPromise = new Promise(
                         function (User $user, PromiseInterface $next) use ($accessToken, $provider) {
-                            $this->registerToken($user, $provider, $accessToken->getToken(), $next);
+                            return $this->registerToken($user, $provider, $accessToken->getToken(), $next);
                         },
                         null,
                         true
@@ -131,7 +136,7 @@ class OAuth2Authenticator extends BaseAuthenticator
                     );
 
                     $extractEmailPromise = new Promise(
-                        function (string $email, PromiseInterface $next) use ($accessToken) {
+                        function (string $email, PromiseInterface $next) {
                             $this->loader->query(
                                 new UserByEmailQuery($email),
                                 $next
@@ -145,14 +150,16 @@ class OAuth2Authenticator extends BaseAuthenticator
 
                     $this->userConverter->extractEmail(
                         $oauthUser,
-                        $extractEmailPromise->next(
+                        $promise = $extractEmailPromise->next(
                             $fetchingPromise->next(
-                                $registerTokenPromise
+                                $registerTokenPromise->next(
+                                    $returnPromise
+                                )
                             )
                         )
                     );
 
-                    return $loadedUser;
+                    return $promise->fetchResult();
                 }
             )
         );
