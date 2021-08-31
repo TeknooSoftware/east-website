@@ -58,8 +58,8 @@ class OAuth2Authenticator extends BaseAuthenticator
 
     public function __construct(
         private ClientRegistry $clientRegistry,
-            private UserLoader $loader,
-            private SymfonyUserWriter $userWriter,
+        private UserLoader $loader,
+        private SymfonyUserWriter $userWriter,
         private UserConverterInterface $userConverter,
     ) {
     }
