@@ -41,9 +41,12 @@ use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface;
 use Teknoo\East\WebsiteBundle\Object\OAuth2User;
+use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Throwable;
+
+use function strtr;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
@@ -55,7 +58,8 @@ class OAuth2Authenticator extends BaseAuthenticator
 
     public function __construct(
         private ClientRegistry $clientRegistry,
-        private UserLoader $loader,
+            private UserLoader $loader,
+            private SymfonyUserWriter $userWriter,
         private UserConverterInterface $userConverter,
     ) {
     }
@@ -91,6 +95,8 @@ class OAuth2Authenticator extends BaseAuthenticator
 
         $thirdPartyAuth->setToken($accessToken);
 
+        $this->userWriter->save($user);
+
         $promise->success(new OAuth2User($user, $thirdPartyAuth));
 
         return $this;
@@ -116,7 +122,7 @@ class OAuth2Authenticator extends BaseAuthenticator
 
                     $registerTokenPromise = new Promise(
                         function (User $user, PromiseInterface $next) use ($accessToken, $provider) {
-                            return $this->registerToken($user, $provider, $accessToken->getToken(), $next);
+                            $this->registerToken($user, $provider, $accessToken->getToken(), $next);
                         },
                         null,
                         true
@@ -172,7 +178,7 @@ class OAuth2Authenticator extends BaseAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $message = strtr($exception->getMessageKey(), $exception->getMessageData());
+        $message = strtr((string) $exception->getMessageKey(), (array) $exception->getMessageData());
 
         return new Response($message, Response::HTTP_FORBIDDEN);
     }
