@@ -9,6 +9,9 @@ parameters:
     teknoo.east.website.bundle.password_authenticated_user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
     teknoo.east.website.bundle.password_authenticated_user_provider.default_algo: 'sodium'
 
+    #Authenticator
+    teknoo.east.website.bundle.security.authenticator.oauth2.class: 'Teknoo\East\WebsiteBundle\Security\Authenticator\OAuth2Authenticator'
+
     #Writer
     teknoo.east.website.bundle.writer.user.class: 'Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter'
 
@@ -106,6 +109,19 @@ services:
         tags:
             - { name: console.command }
         public: false
+
+    #Authenticator
+    Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface:
+        public: true
+        synthetic: true
+
+    Teknoo\East\WebsiteBundle\Security\Authenticator\OAuth2Authenticator:
+        class: '%teknoo.east.website.bundle.security.authenticator.oauth2.class%'
+        arguments:
+            - '@KnpU\OAuth2ClientBundle\Client\ClientRegistry'
+            - '@Teknoo\East\Website\Loader\UserLoader'
+            - '@Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter'
+            - '@Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface'
 
     #Writer
     Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter:
