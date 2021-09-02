@@ -40,7 +40,7 @@ use Teknoo\East\Website\Object\ThirdPartyAuth;
 use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface;
-use Teknoo\East\WebsiteBundle\Object\OAuth2User;
+use Teknoo\East\WebsiteBundle\Object\ThirdPartyAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -97,7 +97,7 @@ class OAuth2Authenticator extends BaseAuthenticator
 
         $this->userWriter->save($user);
 
-        $promise->success(new OAuth2User($user, $thirdPartyAuth));
+        $promise->success(new ThirdPartyAuthenticatedUser($user, $thirdPartyAuth));
 
         return $this;
     }
@@ -115,7 +115,7 @@ class OAuth2Authenticator extends BaseAuthenticator
                     $oauthUser = $client->fetchUserFromToken($accessToken);
 
                     $returnPromise = new Promise(
-                        static function (OAuth2User $user): OAuth2User {
+                        static function (ThirdPartyAuthenticatedUser $user): ThirdPartyAuthenticatedUser {
                             return $user;
                         },
                         static function (Throwable $error) {

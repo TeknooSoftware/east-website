@@ -28,32 +28,24 @@ use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Loader\UserLoader;
-use Teknoo\East\Website\Object\StoredPassword;
-use Teknoo\East\Website\Object\User;
+use Teknoo\East\Website\Object\ThirdPartyAuth;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
-use Teknoo\East\WebsiteBundle\Object\LegacyUser;
-use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
-use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
-use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
+use Teknoo\East\WebsiteBundle\Object\ThirdPartyAuthenticatedUser;
+use Teknoo\East\WebsiteBundle\Provider\ThirdPartyAuthenticatedUserProvider;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedPasswordAuthenticatedUserProvider
+ * @covers      \Teknoo\East\WebsiteBundle\Provider\ThirdPartyAuthenticatedUserProvider
  */
-class PasswordAuthenticatedUserProviderTest extends TestCase
+class ThirdPartyAuthenticatedUserProviderTest extends TestCase
 {
     /**
      * @var UserLoader
      */
     private $loader;
-
-    /**
-     * @var SymfonyUserWriter
-     */
-    private $writer;
 
     /**
      * @return UserLoader|\PHPUnit\Framework\MockObject\MockObject
@@ -67,21 +59,9 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         return $this->loader;
     }
 
-    /**
-     * @return SymfonyUserWriter|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getWriter(): SymfonyUserWriter
+    public function buildProvider(): ThirdPartyAuthenticatedUserProvider
     {
-        if (!$this->writer instanceof SymfonyUserWriter) {
-            $this->writer = $this->createMock(SymfonyUserWriter::class);
-        }
-
-        return $this->writer;
-    }
-
-    public function buildProvider(): PasswordAuthenticatedUserProvider
-    {
-        return new PasswordAuthenticatedUserProvider($this->getLoader(), $this->getWriter());
+        return new ThirdPartyAuthenticatedUserProvider($this->getLoader());
     }
 
     public function testLoadUserByUsernameNotFound()
@@ -105,7 +85,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     {
         $user = new BaseUser();
         $user->setEmail('foo@bar');
-        $user->setAuthData([$storedPassword = new StoredPassword()]);
+        $user->setAuthData([$thirdPartyAuth = new ThirdPartyAuth()]);
 
         $this->getLoader()
             ->expects(self::once())
@@ -117,7 +97,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
                 return $this->getLoader();
             });
 
-        $loadedUser = new PasswordAuthenticatedUser($user, $storedPassword);
+        $loadedUser = new ThirdPartyAuthenticatedUser($user, $thirdPartyAuth);
 
         self::assertEquals(
             $loadedUser,
@@ -125,7 +105,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         );
     }
 
-    public function testLoadUserByUsernameFoundWithoutStoredPassword()
+    public function testLoadUserByUsernameFoundWithoutThirdPartyAuth()
     {
         $user = new BaseUser();
         $user->setEmail('foo@bar');
@@ -143,31 +123,6 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
 
         $this->expectException(UserNotFoundException::class);
         $this->buildProvider()->loadUserByUsername('foo@bar');
-    }
-
-    public function testLoadLegacyUserByUsernameFound()
-    {
-        $user = new BaseUser();
-        $user->setEmail('foo@bar');
-        $user->setAuthData([$storedPassword = new StoredPassword()]);
-        $storedPassword->setSalt('foo');
-
-        $this->getLoader()
-            ->expects(self::once())
-            ->method('query')
-            ->willReturnCallback(function ($name, PromiseInterface $promise) use ($user) {
-                self::assertEquals(new UserByEmailQuery('foo@bar'), $name);
-                $promise->success($user);
-
-                return $this->getLoader();
-            });
-
-        $loadedUser = new LegacyUser($user, $storedPassword);
-
-        self::assertEquals(
-            $loadedUser,
-            $this->buildProvider()->loadUserByUsername('foo@bar')
-        );
     }
 
     public function testLoadUserByIdentifierNotFound()
@@ -191,7 +146,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     {
         $user = new BaseUser();
         $user->setEmail('foo@bar');
-        $user->setAuthData([$storedPassword = new StoredPassword()]);
+        $user->setAuthData([$thirdPartyAuth = new ThirdPartyAuth()]);
 
         $this->getLoader()
             ->expects(self::once())
@@ -203,7 +158,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
                 return $this->getLoader();
             });
 
-        $loadedUser = new PasswordAuthenticatedUser($user, $storedPassword);
+        $loadedUser = new ThirdPartyAuthenticatedUser($user, $thirdPartyAuth);
 
         self::assertEquals(
             $loadedUser,
@@ -211,7 +166,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         );
     }
 
-    public function testLoadUserByIdentifierFoundWithoutStoredPassword()
+    public function testLoadUserByIdentifierFoundWithoutThirdPartyAuth()
     {
         $user = new BaseUser();
         $user->setEmail('foo@bar');
@@ -246,9 +201,9 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
             });
 
         $this->buildProvider()->refreshUser(
-            new PasswordAuthenticatedUser(
+            new ThirdPartyAuthenticatedUser(
                 (new BaseUser())->setEmail('foo@bar'),
-                new StoredPassword()
+                new ThirdPartyAuth()
             )
         );
     }
@@ -257,7 +212,7 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
     {
         $user = new BaseUser();
         $user->setEmail('foo@bar');
-        $user->setAuthData([$storedPassword = new StoredPassword()]);
+        $user->setAuthData([$thirdPartyAuth = new ThirdPartyAuth()]);
 
         $this->getLoader()
             ->expects(self::once())
@@ -269,44 +224,14 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
                 return $this->getLoader();
             });
 
-        $loadedUser = new PasswordAuthenticatedUser($user, $storedPassword);
+        $loadedUser = new ThirdPartyAuthenticatedUser($user, $thirdPartyAuth);
 
         self::assertEquals(
             $loadedUser,
             $this->buildProvider()->refreshUser(
-                new PasswordAuthenticatedUser(
+                new ThirdPartyAuthenticatedUser(
                     (new BaseUser())->setEmail('foo@bar'),
-                    $storedPassword
-                )
-            )
-        );
-    }
-
-    public function testRefreshLegacyUserFound()
-    {
-        $user = new BaseUser();
-        $user->setEmail('foo@bar');
-        $user->setAuthData([$storedPassword = new StoredPassword()]);
-        $storedPassword->setSalt('foo');
-
-        $this->getLoader()
-            ->expects(self::once())
-            ->method('query')
-            ->willReturnCallback(function ($name, PromiseInterface $promise) use ($user) {
-                self::assertEquals(new UserByEmailQuery('foo@bar'), $name);
-                $promise->success($user);
-
-                return $this->getLoader();
-            });
-
-        $loadedUser = new LegacyUser($user, $storedPassword);
-
-        self::assertEquals(
-            $loadedUser,
-            $this->buildProvider()->refreshUser(
-                new LegacyUser(
-                    (new BaseUser())->setEmail('foo@bar'),
-                    $storedPassword
+                    $thirdPartyAuth
                 )
             )
         );
@@ -319,39 +244,9 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         );
     }
 
-    public function testUpgradePasswordNotSupported()
-    {
-        $this->getWriter()->expects(self::never())->method('save');
-
-        $this->buildProvider()->upgradePassword(
-            $this->createMock(UserInterface::class),
-            'foo'
-        );
-    }
-
-    public function testUpgradePassword()
-    {
-        $user = $this->createMock(User::class);
-        $storedPassword = $this->createMock(StoredPassword::class);
-
-        $legacyUser = $this->createMock(LegacyUser::class);
-        $legacyUser->expects(self::any())->method('getWrappedUser')->willReturn($user);
-        $legacyUser->expects(self::any())->method('getWrappedStoredPassword')->willReturn($storedPassword);
-
-        $storedPassword->expects(self::once())->method('setSalt')->with('');
-        $storedPassword->expects(self::once())->method('setHashedPassword')->with('foo');
-
-        $this->getWriter()->expects(self::once())->method('save');
-
-        $this->buildProvider()->upgradePassword(
-            $legacyUser,
-            'foo'
-        );
-    }
-
     public function testSupportsClass()
     {
-        self::assertTrue($this->buildProvider()->supportsClass(PasswordAuthenticatedUser::class));
+        self::assertTrue($this->buildProvider()->supportsClass(ThirdPartyAuthenticatedUser::class));
         self::assertFalse($this->buildProvider()->supportsClass(BaseUser::class));
         self::assertFalse($this->buildProvider()->supportsClass(\DateTime::class));
     }

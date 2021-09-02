@@ -7,6 +7,7 @@ parameters:
 
     #Provider
     teknoo.east.website.bundle.password_authenticated_user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
+    teknoo.east.website.bundle.third_party_authenticated_user_provider.class: 'Teknoo\East\WebsiteBundle\Provider\ThirdPartyAuthenticatedUserProvider'
     teknoo.east.website.bundle.password_authenticated_user_provider.default_algo: 'sodium'
 
     #Authenticator
@@ -99,6 +100,11 @@ services:
         arguments:
             - '@Teknoo\East\Website\Loader\UserLoader'
             - '@Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter'
+
+    Teknoo\East\WebsiteBundle\Provider\ThirdPartyAuthenticatedUserProvider:
+        class: '%teknoo.east.website.bundle.third_party_authenticated_user_provider.class%'
+        arguments:
+            - '@Teknoo\East\Website\Loader\UserLoader'
 
     #Command
     Teknoo\East\WebsiteBundle\Command\CreateUserCommand:

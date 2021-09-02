@@ -38,7 +38,7 @@ use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Object\ThirdPartyAuth;
 use Teknoo\East\Website\Object\User;
 use Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface;
-use Teknoo\East\WebsiteBundle\Object\OAuth2User;
+use Teknoo\East\WebsiteBundle\Object\ThirdPartyAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Security\Authenticator\OAuth2Authenticator;
 use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -151,7 +151,7 @@ class OAuth2AuthenticatorTest extends TestCase
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::once())->method('success')
             ->with($this->callback(
-                fn ($x) => $x instanceof OAuth2User
+                fn ($x) => $x instanceof ThirdPartyAuthenticatedUser
             ))
         ->willReturnSelf();
 
@@ -184,7 +184,7 @@ class OAuth2AuthenticatorTest extends TestCase
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::once())->method('success')
             ->with($this->callback(
-                fn ($x) => $x instanceof OAuth2User
+                fn ($x) => $x instanceof ThirdPartyAuthenticatedUser
             ))
             ->willReturnSelf();
 
@@ -213,7 +213,7 @@ class OAuth2AuthenticatorTest extends TestCase
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::once())->method('success')
             ->with($this->callback(
-                fn ($x) => $x instanceof OAuth2User
+                fn ($x) => $x instanceof ThirdPartyAuthenticatedUser
             ))
             ->willReturnSelf();
 
@@ -274,7 +274,7 @@ class OAuth2AuthenticatorTest extends TestCase
 
         $user = $passport->getUser();
         self::assertInstanceOf(
-            OAuth2User::class,
+            ThirdPartyAuthenticatedUser::class,
             $user
         );
     }
@@ -336,7 +336,7 @@ class OAuth2AuthenticatorTest extends TestCase
 
         $user = $passport->getUser();
         self::assertInstanceOf(
-            OAuth2User::class,
+            ThirdPartyAuthenticatedUser::class,
             $user
         );
     }

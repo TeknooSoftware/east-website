@@ -33,7 +33,7 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class OAuth2User extends AbstractUser
+class ThirdPartyAuthenticatedUser extends AbstractUser
 {
     public function __construct(
         BaseUser $user,

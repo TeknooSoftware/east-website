@@ -24,7 +24,7 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Object;
 
 use Teknoo\East\Website\Object\ThirdPartyAuth;
-use Teknoo\East\WebsiteBundle\Object\OAuth2User;
+use Teknoo\East\WebsiteBundle\Object\ThirdPartyAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\Website\Object\User as BaseUser;
 
@@ -32,9 +32,9 @@ use Teknoo\East\Website\Object\User as BaseUser;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers      \Teknoo\East\WebsiteBundle\Object\AbstractUser
- * @covers      \Teknoo\East\WebsiteBundle\Object\OAuth2User
+ * @covers      \Teknoo\East\WebsiteBundle\Object\ThirdPartyAuthenticatedUser
  */
-class OAuth2UserTest extends AbstractUserTest
+class ThirdPartyAuthenticatedUserTest extends AbstractUserTest
 {
     private ?BaseUser $user = null;
 
@@ -66,9 +66,9 @@ class OAuth2UserTest extends AbstractUserTest
         return $this->thirdPartyAuth;
     }
 
-    public function buildObject(): OAuth2User
+    public function buildObject(): ThirdPartyAuthenticatedUser
     {
-        return new OAuth2User($this->getUser(), $this->getThirdPartyAuth());
+        return new ThirdPartyAuthenticatedUser($this->getUser(), $this->getThirdPartyAuth());
     }
 
     public function testExceptionWithBadUser()
@@ -107,7 +107,7 @@ class OAuth2UserTest extends AbstractUserTest
     public function testEraseCredentials()
     {
         self::assertInstanceOf(
-            OAuth2User::class,
+            ThirdPartyAuthenticatedUser::class,
             $this->buildObject()->eraseCredentials()
         );
     }

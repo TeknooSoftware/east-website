@@ -1,5 +1,11 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta3] - 2021-09-02
+### Beta Release
+- Fix `OAuth2Authenticator` with exception during user's fetching from storage.
+- Rename `ThirdPartyAuthenticatedUser` to `ThirdPartyAuthenticatedUser`.
+- Add `ThirdPartyAuthenticatedUserProvider` as provider for third part authenticated user.
+
 ## [6.0.0-beta2] - 2021-09-01
 ### Beta Release
 - Add `ThirdPartyAuth` to store ids data from thrid party needed to authenticate an user.
@@ -9,7 +15,7 @@
 - Add `AbstractPassordAuthUser` to implement password logic for `LegacyUser` and `PasswordAuthenticatedUser`.
 - `AbstractUser` can be also used for non password authenticated user.
 - Rename `PasswordAuthenticatedUser` to `SymfonyUserWriter`
-- Create OAuth2Authenticator, built on KNPU OAuth2 client bundle to authenticate user thanks to a OAuth2 provider. 
+- Create `OAuth2Authenticator`, built on KNPU OAuth2 client bundle to authenticate user thanks to a OAuth2 provider. 
 
 ## [6.0.0-beta1] - 2021-08-26
 ### Beta Release
