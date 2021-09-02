@@ -117,6 +117,9 @@ class OAuth2Authenticator extends BaseAuthenticator
                     $returnPromise = new Promise(
                         static function (OAuth2User $user): OAuth2User {
                             return $user;
+                        },
+                        static function (Throwable $error) {
+                            throw $error;
                         }
                     );
 
@@ -124,7 +127,7 @@ class OAuth2Authenticator extends BaseAuthenticator
                         function (User $user, PromiseInterface $next) use ($accessToken, $provider) {
                             $this->registerToken($user, $provider, $accessToken->getToken(), $next);
                         },
-                        null,
+                        fn (Throwable $error, PromiseInterface $next) => $next->fail($error),
                         true
                     );
 
@@ -133,6 +136,10 @@ class OAuth2Authenticator extends BaseAuthenticator
                             $next->success($user);
                         },
                         function (Throwable $error, PromiseInterface $next) use ($oauthUser) {
+                            if (!$error instanceof \DomainException) {
+                                $next->fail($error);
+                            }
+
                             $this->userConverter->convertToUser(
                                 $oauthUser,
                                 $next

@@ -33,7 +33,7 @@ use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
-use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
+use Teknoo\East\WebsiteBundle\Provider\UserProvider;
 use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\User as BaseUser;
@@ -41,7 +41,7 @@ use Teknoo\East\Website\Object\User as BaseUser;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider
+ * @covers      \Teknoo\East\WebsiteBundle\Provider\UserProvider
  */
 class PasswordAuthenticatedUserProviderTest extends TestCase
 {
@@ -79,9 +79,9 @@ class PasswordAuthenticatedUserProviderTest extends TestCase
         return $this->writer;
     }
 
-    public function buildProvider(): PasswordAuthenticatedUserProvider
+    public function buildProvider(): UserProvider
     {
-        return new PasswordAuthenticatedUserProvider($this->getLoader(), $this->getWriter());
+        return new UserProvider($this->getLoader(), $this->getWriter());
     }
 
     public function testLoadUserByUsernameNotFound()

@@ -46,7 +46,7 @@ use Teknoo\East\WebsiteBundle\Middleware\LocaleMiddleware;
 use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\Object\User;
-use Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider;
+use Teknoo\East\WebsiteBundle\Provider\UserProvider;
 use Teknoo\East\WebsiteBundle\Recipe\Step\FormProcessing;
 use Teknoo\East\WebsiteBundle\Recipe\Step\RenderForm;
 use Teknoo\Recipe\Promise\PromiseInterface;

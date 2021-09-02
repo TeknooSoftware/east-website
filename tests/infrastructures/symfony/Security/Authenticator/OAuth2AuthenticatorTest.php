@@ -341,6 +341,58 @@ class OAuth2AuthenticatorTest extends TestCase
         );
     }
 
+    public function testAuthenticateUserOtherError()
+    {
+        $request = new Request([], [], ['_oauth_client_key'=>'foo']);
+
+        $token = $this->createMock(AccessToken::class);
+        $token->expects(self::any())->method('getToken')->willReturn('foo');
+
+        $client = $this->createMock(OAuth2ClientInterface::class);
+        $client->expects(self::any())->method('getAccessToken')->willReturn($token);
+        $client->expects(self::any())->method('fetchUserFromToken')->willReturn(
+            $this->createMock(ResourceOwnerInterface::class)
+        );
+
+        $this->getClientRegistry()
+            ->expects(self::any())
+            ->method('getClient')
+            ->willReturn($client);
+
+        $this->getUserConverterInterface()
+            ->expects(self::any())
+            ->method('extractEmail')
+            ->willReturnCallback(
+                function (ResourceOwnerInterface $owner, PromiseInterface $promise) {
+                    $promise->success('foo@bar');
+
+                    return $this->getUserConverterInterface();
+                }
+            );
+
+        $this->getUserConverterInterface()
+            ->expects(self::never())
+            ->method('convertToUser');
+
+        $this->getLoader()
+            ->expects(self::any())
+            ->method('query')
+            ->willReturnCallback(
+                function ($query, PromiseInterface $promise) {
+                    $promise->fail(new \RuntimeException());
+
+                    return $this->getLoader();
+                }
+            );
+
+        $passport = $this->buildAuthenticator()->authenticate($request);
+
+        self::assertInstanceOf(SelfValidatingPassport::class, $passport);
+
+        $this->expectException(\RuntimeException::class);
+        $passport->getUser();
+    }
+
     public function testAuthenticateUserErrorInEmail()
     {
         $request = new Request([], [], ['_oauth_client_key'=>'foo']);
