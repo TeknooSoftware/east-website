@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta4] - 2021-09-03
+### Beta Release
+- Fix `SymfonyUserWriter` to set algo when password is hashed
+
 ## [6.0.0-beta3] - 2021-09-02
 ### Beta Release
 - Fix `OAuth2Authenticator` with exception during user's fetching from storage.

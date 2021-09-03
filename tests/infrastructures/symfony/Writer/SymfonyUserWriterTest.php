@@ -28,6 +28,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Teknoo\East\Website\Contracts\User\AuthDataInterface;
 use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Object\ObjectInterface;
 use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
@@ -155,6 +156,11 @@ class SymfonyUserWriterTest extends TestCase
         $storedPassword->expects(self::once())
             ->method('setSalt')
             ->with('')
+            ->willReturnSelf();
+
+        $storedPassword->expects(self::once())
+            ->method('setAlgo')
+            ->with(PasswordAuthenticatedUser::class)
             ->willReturnSelf();
 
         $this->getUniversalWriter()
