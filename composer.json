@@ -43,7 +43,7 @@
         "teknoo/immutable": "^2.0.9",
         "teknoo/states": "^5.0.6",
         "teknoo/recipe": "^3.3.0",
-        "teknoo/east-foundation": "^5.3.4"
+        "teknoo/east-foundation": "^5.3.5"
     },
     "require-dev": {
         "ext-simplexml" : "*",

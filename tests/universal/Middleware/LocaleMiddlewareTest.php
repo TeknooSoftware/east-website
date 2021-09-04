@@ -31,7 +31,6 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Foundation\Session\SessionInterface;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
-use Teknoo\East\Website\Middleware\ViewParameterInterface;
 use Teknoo\East\Website\View\ParametersBag;
 
 /**
@@ -185,8 +184,6 @@ class LocaleMiddlewareTest extends TestCase
 
     public function testExecuteInRequestInSession()
     {
-        $client = $this->createMock(ClientInterface::class);
-
         $serverRequest = $this->createMock(ServerRequestInterface::class);
         $serverRequestFinal = $this->createMock(ServerRequestInterface::class);
 
@@ -220,6 +217,29 @@ class LocaleMiddlewareTest extends TestCase
             ->method('getAttribute')
             ->with(SessionInterface::ATTRIBUTE_KEY)
             ->willReturn($sessionMiddleware);
+
+        $serverRequestFinal->expects(self::any())
+            ->method('getAttribute')
+            ->willReturn([]);
+
+        self::assertInstanceOf(
+            LocaleMiddleware::class,
+            $this->buildMiddleware('en')->execute($serverRequest, $manager, $bag)
+        );
+    }
+
+    public function testExecuteNoSession()
+    {
+        $serverRequest = $this->createMock(ServerRequestInterface::class);
+        $serverRequestFinal = $this->createMock(ServerRequestInterface::class);
+
+        $bag = $this->createMock(ParametersBag::class);
+
+        $manager = $this->createMock(ManagerInterface::class);
+
+        $serverRequest->expects(self::any())
+            ->method('getQueryParams')
+            ->willReturn([]);
 
         $serverRequestFinal->expects(self::any())
             ->method('getAttribute')
