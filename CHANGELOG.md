@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta6] - 2021-09-08
+### Beta Release
+- Complete phpdoc
+- Add ConnectEndPoint to redirect viisitor to an oauth2 provider thanks to KNPU OAuth2 Client Bundle
+
 ## [6.0.0-beta5] - 2021-09-08
 ### Beta Release
 - Complete integrations tests
