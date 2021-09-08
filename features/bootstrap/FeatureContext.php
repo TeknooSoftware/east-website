@@ -24,6 +24,7 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder;
 use Symfony\Component\HttpFoundation\Request as SfRequest;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\PasswordHasher\Hasher\SodiumPasswordHasher;
 use Symfony\Component\Security\Core\Encoder\Pbkdf2PasswordEncoder;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
@@ -212,10 +213,16 @@ class FeatureContext implements Context
             protected function configureRoutes($routes): void
             {
                 $rootDir = \dirname(__DIR__, 2);
-                $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yml', 'glob')
-                    ->prefix('/admin');
-                $routes->import($rootDir . '/features/bootstrap/config/routes/*.yaml', 'glob');
-                $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yml', 'glob');
+                if ($routes instanceof RoutingConfigurator) {
+                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yml', 'glob')
+                        ->prefix('/admin');
+                    $routes->import($rootDir . '/features/bootstrap/config/routes/*.yaml', 'glob');
+                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yml', 'glob');
+                } else {
+                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yml', '/admin', 'glob');
+                    $routes->import($rootDir . '/features/bootstrap/config/routes/*.yaml', '/', 'glob');
+                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yml', '/', 'glob');
+                }
             }
 
             protected function getContainerClass(): string
