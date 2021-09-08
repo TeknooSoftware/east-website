@@ -28,7 +28,8 @@ namespace Teknoo\East\WebsiteBundle\Object;
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 
 /**
- * Legacy user class, implementing legacy Symfony interface with a salt and wrapping East Website User.
+ * Symfony user implentation to wrap a East Website user instance authenticated via a password hashed by the legacy
+ * pbkdf2 algo, with a salt. Authenticating data are stored into a StoredPassword instance.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

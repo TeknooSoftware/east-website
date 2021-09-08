@@ -49,6 +49,11 @@ use Throwable;
 use function strtr;
 
 /**
+ * Symfony Authenticator build on KNPU OAuth2 client bundlle to create/update, thanks to a provided
+ * implementation of `UserConverterInterface`, a East Website User instance and complete User's AuthParts
+ * with a ThirdPartyAuth to store the access token.
+ * If the user is not already present in the database (fetch from its email), it will be imported.
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

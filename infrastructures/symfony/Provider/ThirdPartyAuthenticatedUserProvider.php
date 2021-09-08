@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Provider;
 
-use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -38,8 +37,8 @@ use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
 
 /**
- * Symfony user provider to load East Website's user from email.
- * Use the standard User Loader, and wrap user fetched into User or LegacyUser, available in this namespace.
+ * Symfony user provider to load East Website's user authenticated thanks to OAuth2Authenticator, or any third party
+ * authenticated. It can manage only ThirdPartyAuthenticatedUser.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

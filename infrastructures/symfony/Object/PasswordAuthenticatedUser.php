@@ -28,7 +28,8 @@ namespace Teknoo\East\WebsiteBundle\Object;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherAwareInterface;
 
 /**
- * Symfony user class, implementing new Symfony user interface and wrapping East Website User.
+ * Symfony user implentation to wrap a East Website user instance authenticated via a password hashed by a modern
+ * algo like sodium, without salt. Authenticating data are stored into a StoredPassword instance.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

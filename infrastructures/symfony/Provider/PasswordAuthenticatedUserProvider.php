@@ -44,7 +44,11 @@ use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
  * Symfony user provider to load East Website's user from email.
- * Use the standard User Loader, and wrap user fetched into User or LegacyUser, available in this namespace.
+ * Use the standard User Loader, and wrap user fetched into a PasswordAuthenticatedUser or a LegacyUser.
+ * A LegacyUser is returned when the user is authenticated with the legacy couple of salt+password hashed thanks to
+ * pbkdf2.
+ * A PasswordAuthenticatedUser is returned for all user authenticated thanks to a modern hash method like sodium.
+ * The salt must be empty and the used algo stored into the StoredPassword instance.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

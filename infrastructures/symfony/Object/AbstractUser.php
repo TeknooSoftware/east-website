@@ -31,7 +31,7 @@ use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
- * Base user class wrapping a East User Class in a Symfony context
+ * Abstract Symfony user implentation to wrap a East Website user instance
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

@@ -30,6 +30,8 @@ use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
+ * Abstract Symfony user implentation to wrap a East Website user instance authenticated via a password.
+ * Authenticating data are stored into a StoredPassword instance.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
