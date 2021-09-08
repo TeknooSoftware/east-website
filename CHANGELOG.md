@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta5] - 2021-09-08
+### Beta Release
+- Complete integrations tests
+- Fix Symfony config
+
 ## [6.0.0-beta4] - 2021-09-03
 ### Beta Release
 - Fix `SymfonyUserWriter` to set algo when password is hashed

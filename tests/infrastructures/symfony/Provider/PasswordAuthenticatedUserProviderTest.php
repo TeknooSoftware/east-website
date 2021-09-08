@@ -41,7 +41,7 @@ use Teknoo\East\Website\Object\User as BaseUser;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedPasswordAuthenticatedUserProvider
+ * @covers      \Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider
  */
 class PasswordAuthenticatedUserProviderTest extends TestCase
 {

@@ -111,7 +111,7 @@ services:
         class: '%teknoo.east.website.bundle.command.create_user.class%'
         arguments:
             - '@Teknoo\East\Website\Writer\UserWriter'
-            - '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'
+            - '@security.user_password_hasher'
         tags:
             - { name: console.command }
         public: false
@@ -134,5 +134,5 @@ services:
         class: '%teknoo.east.website.bundle.writer.user.class%'
         arguments:
             - '@Teknoo\East\Website\Writer\UserWriter'
-            - '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'
+            - '@security.user_password_hasher'
         public: true
