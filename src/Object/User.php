@@ -148,4 +148,60 @@ class User implements ObjectInterface, UserInterface, DeletableInterface, Timest
     {
         return $this->authData;
     }
+
+    private function getStoredPassword(): StoredPassword
+    {
+        $storedPassword = null;
+        foreach ($this->authData as $authData) {
+            if ($authData instanceof StoredPassword) {
+                $storedPassword = $authData;
+
+                break;
+            }
+        }
+
+        if (null === $storedPassword) {
+            $storedPassword = new StoredPassword();
+
+            $this->addAuthData($storedPassword);
+        }
+
+        return $storedPassword;
+    }
+
+    public function migrateSalt(string $salt): self
+    {
+        if (empty($salt)) {
+            return $this;
+        }
+
+        $storedPassword = $this->getStoredPassword();
+
+        if (
+            empty($storedPassword->getAlgo())
+            && empty($storedPassword->getSalt())
+        ) {
+            $storedPassword->setSalt($salt);
+        }
+
+        return $this;
+    }
+
+    public function migrateHash(string $hash): self
+    {
+        if (empty($hash)) {
+            return $this;
+        }
+
+        $storedPassword = $this->getStoredPassword();
+
+        if (
+            empty($storedPassword->getAlgo())
+            && empty($storedPassword->getHash())
+        ) {
+            $storedPassword->setHashedPassword($hash);
+        }
+
+        return $this;
+    }
 }

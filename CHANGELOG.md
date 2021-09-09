@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta7] - 2021-09-09
+### Beta Release
+- Migration of old document structure about user to new structure
+
 ## [6.0.0-beta6] - 2021-09-08
 ### Beta Release
 - Complete phpdoc

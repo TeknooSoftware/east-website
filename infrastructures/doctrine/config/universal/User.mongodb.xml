@@ -17,6 +17,10 @@
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date" />
         <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true" />
+        <also-load-methods>
+            <also-load-method method="migrateSalt" field="salt"/>
+            <also-load-method method="migrateHash" field="password"/>
+        </also-load-methods>
         <indexes>
             <index unique="true">
                 <key name="email" order="asc" />
