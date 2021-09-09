@@ -54,7 +54,7 @@ use Teknoo\East\Website\Object\Media as BaseMedia;
 use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Object\Block;
-use Teknoo\East\Website\Object\User;
+use Teknoo\East\Website\Doctrine\Object\User;
 use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Recipe\Cookbook\RenderStaticContentEndPoint;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;

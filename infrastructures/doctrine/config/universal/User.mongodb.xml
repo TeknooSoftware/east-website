@@ -5,7 +5,7 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <document name="Teknoo\East\Website\Object\User" collection="users">
+    <document name="Teknoo\East\Website\Object\User" collection="users" inheritance-type="COLLECTION_PER_CLASS">
         <id type="string" strategy="UUID"/>
         <field field-name="firstName" name="first_name" type="string" />
         <field field-name="lastName" name="last_name" type="string" />
@@ -17,10 +17,6 @@
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date" />
         <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true" />
-        <also-load-methods>
-            <also-load-method method="migrateSalt" field="salt"/>
-            <also-load-method method="migrateHash" field="password"/>
-        </also-load-methods>
         <indexes>
             <index unique="true">
                 <key name="email" order="asc" />

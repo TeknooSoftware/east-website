@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-beta8] - 2021-09-09
+### Beta Release
+- Fix migration of old document structure about user to new structure : *(Doctrine ODM override authData collection)*
+- Migration structure is now managed by a `User` child class in the `Doctrine` namespace.
+
 ## [6.0.0-beta7] - 2021-09-09
 ### Beta Release
 - Migration of old document structure about user to new structure
