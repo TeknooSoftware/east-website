@@ -6,10 +6,8 @@
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Teknoo\East\Website\Doctrine\Object\User" collection="users">
-        <also-load-methods>
-            <also-load-method method="migrateSalt" field="salt"/>
-            <also-load-method method="migrateHash" field="password"/>
-        </also-load-methods>
+        <field field-name="legacyHash" name="password" type="string" nullable="true"/>
+        <field field-name="legacySalt" name="salt" type="string" nullable="true"/>
         <lifecycle-callbacks>
             <lifecycle-callback type="postLoad" method="postLoad"/>
         </lifecycle-callbacks>

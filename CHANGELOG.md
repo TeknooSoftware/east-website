@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [6.0.0-rc1] - 2021-09-10
+### Beta Release
+- Clean legacies salt and hash after migration into User object.
+
 ## [6.0.0-beta8] - 2021-09-09
 ### Beta Release
 - Fix migration of old document structure about user to new structure : *(Doctrine ODM override authData collection)*

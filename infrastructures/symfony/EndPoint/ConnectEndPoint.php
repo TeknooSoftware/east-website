@@ -35,9 +35,8 @@ use Teknoo\East\FoundationBundle\EndPoint\RoutingTrait;
 
 /**
  * Default east endpoint implementation to redirect a visitor to an oauth2 provider
-
- * @copyright   Copyright (c) 2009-2021 EIRL Richard Déloge (richarddeloge@gmail.com)
- * @copyright   Copyright (c) 2020-2021 SASU Teknoo Software (https://teknoo.software)
+ *
+ * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
 class ConnectEndPoint implements RedirectingInterface

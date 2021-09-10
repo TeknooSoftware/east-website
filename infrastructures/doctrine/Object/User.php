@@ -29,8 +29,13 @@ use Teknoo\East\Website\Object\StoredPassword;
 use Teknoo\East\Website\Object\User as BaseUser;
 
 /**
+ * Internal child class of East Website User class to manage salt and hash migration into a embedded StoredPassword
+ * instance.
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
+ *
+* @internal
  */
 class User extends BaseUser
 {
@@ -83,6 +88,9 @@ class User extends BaseUser
         ) {
             $storedPassword->setHashedPassword($this->legacyHash);
         }
+
+        $this->legacyHash = null;
+        $this->legacySalt = null;
 
         return $this;
     }
