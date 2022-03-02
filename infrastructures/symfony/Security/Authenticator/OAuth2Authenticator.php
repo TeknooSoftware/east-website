@@ -59,7 +59,7 @@ use function strtr;
  */
 class OAuth2Authenticator extends BaseAuthenticator
 {
-    private const PROTOCOL = 'oauth2';
+    final private const PROTOCOL = 'oauth2';
 
     public function __construct(
         private ClientRegistry $clientRegistry,
