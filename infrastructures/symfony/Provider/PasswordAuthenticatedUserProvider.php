@@ -101,7 +101,7 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
     public function refreshUser(UserInterface $user): ?UserInterface
     {
         if ($user instanceof AbstractPasswordAuthUser) {
-            return $this->fetchUserByUsername($user->getUsername());
+            return $this->fetchUserByUsername($user->getUserIdentifier());
         }
 
         return null;
