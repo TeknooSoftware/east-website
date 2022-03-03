@@ -28,6 +28,8 @@ namespace Teknoo\East\Website\Recipe\Step;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Website\Query\Enum\Direction;
+use Teknoo\Recipe\Ingredient\Attributes\Transform;
 use Throwable;
 
 use function strtoupper;
@@ -49,7 +51,7 @@ class ExtractOrder
      */
     private function extractOrder(
         ServerRequestInterface $request,
-        string $defaultOrderDirection,
+        Direction $defaultOrderDirection,
         string $defaultOrderColumn
     ): array {
         $order = [];
@@ -59,7 +61,7 @@ class ExtractOrder
             switch ($value = strtoupper($queryParams['direction'])) {
                 case 'ASC':
                 case 'DESC':
-                    $direction = $value;
+                    $direction = Direction::from($value);
                     break;
                 default:
                     throw new InvalidArgumentException('Invalid direction value %value');
@@ -78,7 +80,7 @@ class ExtractOrder
     public function __invoke(
         ServerRequestInterface $request,
         ManagerInterface $manager,
-        string $defaultOrderDirection = 'DESC',
+        #[Transform(transformer: [Direction::class,'from'])] Direction $defaultOrderDirection = Direction::Desc,
         string $defaultOrderColumn = 'id'
     ): self {
 

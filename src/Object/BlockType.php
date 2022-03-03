@@ -25,49 +25,19 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
-use Teknoo\Tests\East\WebsiteBundle\Form\Type\BlockTypeTest;
-
 /**
- * Persisted object representing a dynamic bloc in a type of content page.
- * Used into Type class.
- *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class Block
+enum BlockType: string
 {
-    public function __construct(
-        private string $name = '',
-        private BlockType $type = BlockType::Text,
-    ) {
-    }
+    case Textarea = 'textarea';
 
-    public function getName(): string
-    {
-        return (string) $this->name;
-    }
+    case Raw = 'raw';
 
-    public function __toString(): string
-    {
-        return $this->getName();
-    }
+    case Numeric = 'numeric';
 
-    public function setName(string $name): Block
-    {
-        $this->name = $name;
+    case Text = 'text';
 
-        return $this;
-    }
-
-    public function getType(): BlockType
-    {
-        return $this->type;
-    }
-
-    public function setType(BlockType $type): Block
-    {
-        $this->type = $type;
-
-        return $this;
-    }
+    case Image = 'image';
 }
