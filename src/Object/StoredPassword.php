@@ -66,7 +66,7 @@ class StoredPassword implements AuthDataInterface
     }
 
     /*
-     * Empty password are not allowed and ignored.
+     * Empty passwords are not allowed and ignored.
      * To clear a password, you must pass an empty hash to setHashedPassword
      * A hash must not be rehashed, be a password must always be hashed before persisted
      */

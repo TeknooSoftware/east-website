@@ -44,7 +44,7 @@ class Block
 
     public function getName(): string
     {
-        return (string) $this->name;
+        return $this->name;
     }
 
     public function __toString(): string
