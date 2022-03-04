@@ -45,7 +45,7 @@ class Type implements ObjectInterface, DeletableInterface, TimestampableInterfac
     private string $template = '';
 
     /**
-     * @var array<string, string>
+     * @var array<string, BlockType>
      */
     private array $blocks = [];
 

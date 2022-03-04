@@ -47,7 +47,7 @@ use function strtoupper;
 class ExtractOrder
 {
     /**
-     * @return array<string, string>
+     * @return array<string, Direction>
      */
     private function extractOrder(
         ServerRequestInterface $request,
