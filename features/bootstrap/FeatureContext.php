@@ -52,6 +52,7 @@ use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Object\Block;
+use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\Media as BaseMedia;
 use Teknoo\East\Website\Object\StoredPassword;
@@ -735,7 +736,7 @@ class FeatureContext implements Context
         $this->type->setName($name);
         $blocksList = [];
         foreach (\explode(',', $blocks) as $blockName) {
-            $blocksList[] = new Block($blockName, 'text');
+            $blocksList[] = new Block($blockName, BlockType::Text);
         }
         $this->type->setBlocks($blocksList);
         $this->type->setTemplate($template);

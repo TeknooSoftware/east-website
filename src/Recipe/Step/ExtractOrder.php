@@ -51,7 +51,7 @@ class ExtractOrder
      */
     private function extractOrder(
         ServerRequestInterface $request,
-        Direction $defaultOrderDirection,
+        #[Transform(transformer: [Direction::class, 'from'])] Direction $defaultOrderDirection,
         string $defaultOrderColumn
     ): array {
         $order = [];
