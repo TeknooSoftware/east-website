@@ -61,11 +61,6 @@ abstract class AbstractUser implements
         return $roles;
     }
 
-    public function getSalt(): ?string
-    {
-        return null;
-    }
-
     public function getUserIdentifier(): string
     {
         return $this->user->getUserIdentifier();

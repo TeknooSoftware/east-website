@@ -80,11 +80,6 @@ abstract class AbstractUserTest extends TestCase
         );
     }
 
-    public function testGetSalt()
-    {
-        self::assertEmpty($this->buildObject()->getSalt());
-    }
-
     public function testGetUserIdentifier()
     {
         $this->getUser()

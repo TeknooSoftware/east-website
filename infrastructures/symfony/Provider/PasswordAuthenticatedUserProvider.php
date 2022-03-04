@@ -39,7 +39,6 @@ use Teknoo\East\WebsiteBundle\Writer\SymfonyUserWriter;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Query\User\UserByEmailQuery;
-use Teknoo\East\WebsiteBundle\Object\LegacyUser;
 use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
 
 /**
@@ -48,7 +47,6 @@ use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
  * A LegacyUser is returned when the user is authenticated with the legacy couple of salt+password hashed thanks to
  * pbkdf2.
  * A PasswordAuthenticatedUser is returned for all user authenticated thanks to a modern hash method like sodium.
- * The salt must be empty and the used algo stored into the StoredPassword instance.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
@@ -79,10 +77,6 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
                 foreach ($user->getAuthData() as $authData) {
                     if (!$authData instanceof StoredPassword) {
                         continue;
-                    }
-
-                    if (!empty($authData->getSalt())) {
-                        return new LegacyUser($user, $authData);
                     }
 
                     return new PasswordAuthenticatedUser($user, $authData);
@@ -116,7 +110,6 @@ class PasswordAuthenticatedUserProvider implements UserProviderInterface, Passwo
         }
 
         $storedPassword = $user->getWrappedStoredPassword();
-        $storedPassword->setSalt('');
         $storedPassword->setHashedPassword($newHashedPassword);
         $storedPassword->setAlgo(PasswordAuthenticatedUser::class);
 
