@@ -71,7 +71,7 @@ class ExtractOrder
         if (!empty($queryParams['order'])) {
             $order[(string) $queryParams['order']] = $direction;
         } elseif (!empty($defaultOrderColumn)) {
-            $order[(string) $defaultOrderColumn] = $direction;
+            $order[$defaultOrderColumn] = $direction;
         }
 
         return $order;

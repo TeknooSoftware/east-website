@@ -28,6 +28,7 @@ namespace Teknoo\East\Website\Query;
 use Countable;
 use IteratorAggregate;
 use Teknoo\East\Website\Contracts\ObjectInterface;
+use Teknoo\East\Website\Query\Enum\Direction;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\DBSource\RepositoryInterface;
@@ -50,7 +51,7 @@ class PaginationQuery implements QueryInterface, ImmutableInterface
 
     /**
      * @param array<string, mixed> $criteria
-     * @param array<string, string> $order
+     * @param array<string, Direction> $order
      */
     public function __construct(
         private readonly array $criteria,

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Query\Item;
 
+use Teknoo\East\Website\Query\Enum\Direction;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\DBSource\RepositoryInterface;
 use Teknoo\East\Website\Loader\LoaderInterface;
@@ -60,8 +61,8 @@ class TopItemByLocationQuery implements QueryInterface, ImmutableInterface
             ],
             $promise,
             [
-                'parent' => 'ASC',
-                'position' => 'ASC'
+                'parent' => Direction::Asc,
+                'position' => Direction::Asc,
             ]
         );
 
