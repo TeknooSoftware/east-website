@@ -240,7 +240,7 @@ return [
             && ($container->get(ObjectManager::class)) instanceof DocumentManager
         ) {
             $listener = $container->get(TranslatableListener::class);
-            $callback = [$listener, 'setLocale'];
+            $callback = $listener->setLocale(...);
         } else {
             //do nothing
             $callback = null;

@@ -129,7 +129,7 @@ class LoadListObjects
                         ]
                     );
                 },
-                [$manager, 'error']
+                $manager->error(...)
             )
         );
 
