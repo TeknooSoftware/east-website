@@ -49,31 +49,16 @@ class PaginationQuery implements QueryInterface, ImmutableInterface
     use ImmutableTrait;
 
     /**
-     * @var array<string, mixed>
-     */
-    private array $criteria;
-
-    /**
-     * @var array<string, string>
-     */
-    private array $order;
-
-    private int $limit;
-
-    private int $offset;
-
-    /**
      * @param array<string, mixed> $criteria
      * @param array<string, string> $order
      */
-    public function __construct(array $criteria, array $order, int $limit, int $offset)
-    {
+    public function __construct(
+        private readonly array $criteria,
+        private readonly array $order,
+        private readonly int $limit,
+        private readonly int $offset,
+    ) {
         $this->uniqueConstructorCheck();
-
-        $this->criteria = $criteria;
-        $this->order = $order;
-        $this->limit = $limit;
-        $this->offset = $offset;
     }
 
     public function execute(
@@ -101,8 +86,8 @@ class PaginationQuery implements QueryInterface, ImmutableInterface
                                      * @param Traversable<ObjectInterface> $iterator
                                      */
                                     public function __construct(
-                                        private int $count,
-                                        private Traversable $iterator,
+                                        private readonly int $count,
+                                        private readonly Traversable $iterator,
                                     ) {
                                     }
 

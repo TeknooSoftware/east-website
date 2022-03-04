@@ -42,13 +42,10 @@ class TopItemByLocationQuery implements QueryInterface, ImmutableInterface
 {
     use ImmutableTrait;
 
-    private string $location;
-
-    public function __construct(string $location)
-    {
+    public function __construct(
+        private readonly string $location,
+    ) {
         $this->uniqueConstructorCheck();
-
-        $this->location = $location;
     }
 
     public function execute(

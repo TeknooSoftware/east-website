@@ -39,13 +39,10 @@ class ObjectReference implements ExprInterface, ImmutableInterface
 {
     use ImmutableTrait;
 
-    private ObjectInterface $object;
-
-    public function __construct(ObjectInterface $object)
-    {
+    public function __construct(
+        private readonly ObjectInterface $object,
+    ) {
         $this->uniqueConstructorCheck();
-
-        $this->object = $object;
     }
 
     public function getObject(): ObjectInterface
