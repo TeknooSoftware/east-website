@@ -118,7 +118,7 @@ class TypeTest extends TestCase
     {
         self::assertEquals(
             [new Block('foo', BlockType::Raw)],
-            $this->generateObjectPopulated(['blocks' => ['foo'=>BlockType::Raw]])->getBlocks()
+            $this->generateObjectPopulated(['blocks' => ['foo'=>BlockType::Raw->value]])->getBlocks()
         );
     }
 
