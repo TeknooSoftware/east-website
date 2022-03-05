@@ -152,7 +152,7 @@ class ContentType extends AbstractType
                             'mapped' => false,
                             'data' => $value,
                             'required' => false,
-                            'attr' => ['data-type' => $block->getType()]
+                            'attr' => ['data-type' => $block->getType()->value]
                         ]
                     );
                 }
