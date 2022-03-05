@@ -85,6 +85,10 @@ class Type implements ObjectInterface, DeletableInterface, TimestampableInterfac
     {
         return array_map(
             static function ($key, $value) {
+                if (!$value instanceof BlockType) {
+                    $value = BlockType::from($value);
+                }
+
                 return new Block($key, $value);
             },
             array_keys($this->blocks),
