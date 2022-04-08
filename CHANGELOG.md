@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.0-beta1] - 2022-04-08
+### Stable Release
+- Implement Teknoo East Common and keep only CMS Features
+
 ## [7.0.3] - 2022-03-10
 ### Stable Release
 - Require Recipe 4.1.2+ or later
@@ -241,10 +245,10 @@ not supported, all users' passwords must be converted before switching to this v
 ### Stable Release
 - CreateObject step has a new parameter `$workPlanKey` to custom the key to use to store the
   new object in the workplan
-- CreateObject, DeleteObject, LoadObject, SaveObject and SlugPreparation use `Teknoo\East\Website\Contracts\ObjectInterface`
-  instead `Teknoo\East\Website\Object\ObjectInterface`. SaveObject pass the id only if the object implements
+- CreateObject, DeleteObject, LoadObject, SaveObject and SlugPreparation use `Teknoo\East\Common\Contracts\Object\ObjectInterface`
+  instead `Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface`. SaveObject pass the id only if the object implements
   this last object
-- Writers services, Deleting services, and interfaces use also `Teknoo\East\Website\Contracts\ObjectInterface`.
+- Writers services, Deleting services, and interfaces use also `Teknoo\East\Common\Contracts\Object\ObjectInterface`.
 
 ## [5.0.1] - 2021-03-24
 ### Stable Release
@@ -269,7 +273,7 @@ not supported, all users' passwords must be converted before switching to this v
 
 ## [4.3.2] - 2021-02-27
 ### Stable Release
-- Create `Teknoo\East\Website\Contracts\ObjectInterface`, `Teknoo\East\Website\Object\ObjectInterface` extends it
+- Create `Teknoo\East\Common\Contracts\Object\ObjectInterface`, `Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface` extends it
   dedicated to non persisted object, manipulable by other components
 - Update steps and forms interface to use this new interface
 

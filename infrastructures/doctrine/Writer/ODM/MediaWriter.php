@@ -31,8 +31,8 @@ use RuntimeException;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Object\MediaMetadata;
-use Teknoo\East\Website\Contracts\ObjectInterface;
-use Teknoo\East\Website\Writer\WriterInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
 
 /**

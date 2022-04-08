@@ -26,7 +26,7 @@ namespace Teknoo\Tests\East\Website\Writer;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Writer\TypeWriter;
-use Teknoo\East\Website\Writer\WriterInterface;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

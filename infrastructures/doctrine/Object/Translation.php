@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\Object;
 
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
 
 /**
@@ -38,7 +39,7 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class Translation implements TranslationInterface
+class Translation implements TranslationInterface, ObjectInterface
 {
     private string $id = '';
 

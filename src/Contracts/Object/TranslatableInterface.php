@@ -23,34 +23,20 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Object\Content;
+namespace Teknoo\East\Website\Contracts\Object;
 
-use DateTimeInterface;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\States\State\StateInterface;
-use Teknoo\States\State\StateTrait;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 /**
- * Content's state representing a content instance not published, aka a draft. The methode "setPublishedAt" is provided
- * only in this state. So, a published content can not be republished (but can be updated).
+ * This interface is not necessary but can be implemented for object which in some cases needs to be identified as
+ * TranslatableInterface
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- *
- * @mixin Content
  */
-class Draft implements StateInterface
+interface TranslatableInterface extends IdentifiedObjectInterface
 {
-    use StateTrait;
+    public function getLocaleField(): ?string;
 
-    public function publishingAt(): callable
-    {
-        return function (DateTimeInterface $dateTime): Content {
-            $this->publishedAt = $dateTime;
-
-            $this->updateStates();
-
-            return $this;
-        };
-    }
+    public function setLocaleField(?string $localeField): TranslatableInterface;
 }

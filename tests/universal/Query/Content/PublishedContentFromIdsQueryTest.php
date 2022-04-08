@@ -24,14 +24,13 @@
 namespace Teknoo\Tests\East\Website\Query\Content;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Loader\LoaderInterface;
-use Teknoo\East\Website\Query\Expr\In;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
-use Teknoo\East\Website\Query\QueryInterface;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
 
 /**

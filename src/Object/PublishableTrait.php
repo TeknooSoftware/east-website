@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Object;
 
 use DateTimeInterface;
+use Teknoo\East\Common\Object\ObjectTrait;
 
 /**
  * Trait to implement methods in PublishableInterface in object classes

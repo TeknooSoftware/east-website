@@ -28,7 +28,7 @@ namespace Teknoo\East\Website\Doctrine\Form\Type;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Website\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 /**
  * Form trait to support translatable fields for translatable object.
@@ -44,7 +44,7 @@ trait TranslatableTrait
     private string $locales;
 
     /**
-     * @param FormBuilderInterface<ObjectInterface> $builder
+     * @param FormBuilderInterface<IdentifiedObjectInterface> $builder
      */
     protected function addTranslatableLocaleFieldHidden(FormBuilderInterface $builder): self
     {

@@ -26,7 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Middleware;
 
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Website\View\ParametersBag;
+use Teknoo\East\Common\View\ParametersBag;
 
 /**
  * Middleware injected into the main East Foundation's recipe, as middleware, to inject into the view parameter bag

@@ -29,7 +29,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Recipe\Step\LoadMedia;
-use Teknoo\East\Website\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Recipe\Step\SendMedia;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Cookbook\BaseCookbookTrait;

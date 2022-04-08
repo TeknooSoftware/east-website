@@ -25,13 +25,14 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Loader;
 
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Object\Media;
-use Teknoo\East\Website\Query\QueryCollectionInterface;
-use Teknoo\East\Website\Query\QueryElementInterface;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Query\Expr\InclusiveOr;
 use Throwable;
 
 /**

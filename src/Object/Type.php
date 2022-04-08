@@ -25,6 +25,11 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use Teknoo\East\Common\Contracts\Object\DeletableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
+use Teknoo\East\Common\Object\ObjectTrait;
+
 use function array_keys;
 use function array_map;
 use function array_values;
@@ -36,7 +41,7 @@ use function array_values;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class Type implements ObjectInterface, DeletableInterface, TimestampableInterface
+class Type implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface
 {
     use ObjectTrait;
 

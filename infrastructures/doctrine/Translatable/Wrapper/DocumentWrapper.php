@@ -28,11 +28,11 @@ namespace Teknoo\East\Website\Doctrine\Translatable\Wrapper;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Types\Type;
 use ProxyManager\Proxy\GhostObjectInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\AdapterInterface as ManagerAdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 use function spl_object_hash;
 
@@ -49,7 +49,7 @@ use function spl_object_hash;
 class DocumentWrapper implements WrapperInterface
 {
     /**
-     * @param ClassMetadata<ObjectInterface> $meta
+     * @param ClassMetadata<IdentifiedObjectInterface> $meta
      */
     public function __construct(
         private TranslatableInterface $object,

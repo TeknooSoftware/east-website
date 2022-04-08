@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\Common;
 
+use Teknoo\East\Common\Doctrine\DBSource\Common\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Object\Item;
-use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
 
 /**
  * Default implementation of `ItemRepositoryInterface` for Doctrine's repositories,

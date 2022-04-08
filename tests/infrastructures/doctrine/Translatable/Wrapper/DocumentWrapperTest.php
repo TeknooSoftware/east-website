@@ -27,12 +27,12 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Types\Type;
 use PHPUnit\Framework\TestCase;
 use ProxyManager\Proxy\GhostObjectInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\AdapterInterface as ManagerAdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
@@ -52,7 +52,7 @@ class DocumentWrapperTest extends TestCase
     private ?ClassMetadata $meta = null;
 
     /**
-     * @return TranslatableInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @return \Teknoo\East\Website\Contracts\Object\TranslatableInterface|\PHPUnit\Framework\MockObject\MockObject
      */
     public function getObject(): TranslatableInterface
     {

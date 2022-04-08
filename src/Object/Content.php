@@ -27,10 +27,17 @@ namespace Teknoo\East\Website\Object;
 
 use DateTimeInterface;
 use Exception;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\Object\DeletableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Object\PublishableInterface;
+use Teknoo\East\Common\Contracts\Object\SluggableInterface;
+use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
+use Teknoo\East\Common\Object\User;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
-use Teknoo\East\Website\Service\FindSlugService;
+use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\States\Automated\Assertion\AssertionInterface;
 use Teknoo\States\Automated\Assertion\Property;
 use Teknoo\States\Automated\Assertion\Property\IsInstanceOf;
@@ -50,10 +57,10 @@ use function json_encode;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *
- * @implements SluggableInterface<ObjectInterface>
+ * @implements SluggableInterface<IdentifiedObjectInterface>
  */
 class Content implements
-    ObjectInterface,
+    IdentifiedObjectInterface,
     TranslatableInterface,
     AutomatedInterface,
     DeletableInterface,
@@ -262,5 +269,10 @@ class Content implements
         $this->localeField = $localeField;
 
         return $this;
+    }
+
+    public function setPublishedAt(DateTimeInterface $dateTime): PublishableInterface
+    {
+        return $this->publishingAt($dateTime);
     }
 }
