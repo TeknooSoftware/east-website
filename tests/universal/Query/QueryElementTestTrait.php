@@ -23,10 +23,10 @@
 
 namespace Teknoo\Tests\East\Website\Query;
 
-use Teknoo\East\Website\Query\QueryElementInterface;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Loader\LoaderInterface;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

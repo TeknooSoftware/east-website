@@ -25,7 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Loader;
 
-use Teknoo\East\Website\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Common\Loader\LoaderTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Object\Type;
 
 /**

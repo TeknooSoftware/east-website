@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\ODM;
 
+use Teknoo\East\Common\Doctrine\DBSource\ODM\RepositoryTrait;
 use Teknoo\East\Website\Doctrine\Object\Translation;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 
 /**
  * ODM optimised implementation of repository to manage translation in this library for Doctrine's ODM repositories.

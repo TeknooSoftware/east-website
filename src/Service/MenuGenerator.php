@@ -25,7 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Service;
 
-use Teknoo\East\Website\Contracts\ObjectInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;

@@ -30,19 +30,33 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as OdmClassMetadata;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Doctrine\ODM\MongoDB\Repository\GridFSRepository;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
-use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Exception;
-use Psr\Container\ContainerInterface;
 use ProxyManager\Proxy\GhostObjectInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use RuntimeException;
 use SimpleXMLElement;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Object\User;
-use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\ContentRepository as OdmContentRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\MediaRepository as OdmMediaRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
+use Teknoo\East\Website\Doctrine\Object\Content;
+use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Doctrine\Recipe\Step\ODM\GetStreamFromMedia;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\SimpleXmlFactoryInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Xml;
@@ -51,36 +65,17 @@ use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\ExtensionMetadataFactory;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\Adapter\ODM as ODMAdapter;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\Adapter\ODM as ODMPersistence;
-use Teknoo\East\Website\Object\TranslatableInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Website\DBSource\ManagerInterface;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\TypeRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\UserRepositoryInterface;
-use Teknoo\East\Website\Doctrine\DBSource\Common\Manager;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\ContentRepository as OdmContentRepository;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\MediaRepository as OdmMediaRepository;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\UserRepository as OdmUserRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\UserRepository;
-use Teknoo\East\Website\Doctrine\Object\Content;
-use Teknoo\East\Website\Doctrine\Object\Item;
-use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface as WrapperFactory;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Middleware\LocaleMiddleware;
-use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
-use Teknoo\East\Website\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Doctrine\Writer\ODM\MediaWriter;
+use Teknoo\East\Website\Middleware\LocaleMiddleware;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Website\Object\Type;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
+use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 use function DI\get;
 
@@ -133,7 +128,7 @@ return [
             $persistence,
             new class implements WrapperFactory {
                 /**
-                 * @param ClassMetadata<ObjectInterface> $metadata
+                 * @param ClassMetadata<IdentifiedObjectInterface> $metadata
                  */
                 public function __invoke(TranslatableInterface $object, ClassMetadata $metadata): WrapperInterface
                 {
@@ -149,12 +144,6 @@ return [
         $eventManager->addEventSubscriber($translatableListener);
 
         return $translatableListener;
-    },
-
-    ManagerInterface::class => get(Manager::class),
-    Manager::class => static function (ContainerInterface $container): Manager {
-        $objectManager = $container->get(ObjectManager::class);
-        return new Manager($objectManager);
     },
 
     ContentRepositoryInterface::class => static function (ContainerInterface $container): ContentRepositoryInterface {
@@ -214,22 +203,6 @@ return [
 
         if ($repository instanceof ObjectRepository) {
             return new TypeRepository($repository);
-        }
-
-        throw new RuntimeException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
-    },
-
-    UserRepositoryInterface::class => static function (ContainerInterface $container): UserRepositoryInterface {
-        $repository = $container->get(ObjectManager::class)->getRepository(User::class);
-        if ($repository instanceof DocumentRepository) {
-            return new OdmUserRepository($repository);
-        }
-
-        if ($repository instanceof ObjectRepository) {
-            return new UserRepository($repository);
         }
 
         throw new RuntimeException(sprintf(

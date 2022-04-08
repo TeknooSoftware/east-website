@@ -26,9 +26,8 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Doctrine\Translatable\Wrapper;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 /**
  * Implementation to define factory able to create the good wrapper instance to wrap the Translatable object passed in
@@ -40,7 +39,7 @@ use Teknoo\East\Website\Object\TranslatableInterface;
 interface FactoryInterface
 {
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      */
     public function __invoke(TranslatableInterface $object, ClassMetadata $metadata): WrapperInterface;
 }

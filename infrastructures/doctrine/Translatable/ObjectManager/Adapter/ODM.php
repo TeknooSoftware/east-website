@@ -30,11 +30,12 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\UnitOfWork;
 use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
 use RuntimeException;
-use Teknoo\East\Website\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 use function spl_object_hash;
 
@@ -55,14 +56,14 @@ class ODM implements AdapterInterface
     ) {
     }
 
-    public function persist(object $object): ManagerInterface
+    public function persist(ObjectInterface $object): ManagerInterface
     {
         $this->eastManager->persist($object);
 
         return $this;
     }
 
-    public function remove(object $object): ManagerInterface
+    public function remove(ObjectInterface $object): ManagerInterface
     {
         $this->eastManager->remove($object);
 
@@ -106,7 +107,7 @@ class ODM implements AdapterInterface
     }
 
     /**
-     * @param BaseClassMetadata<ObjectInterface> $metadata
+     * @param BaseClassMetadata<IdentifiedObjectInterface> $metadata
      */
     public function recomputeSingleObjectChangeSet(
         BaseClassMetadata $metadata,

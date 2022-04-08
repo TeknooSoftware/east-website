@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\Common;
 
-use Teknoo\East\Website\Doctrine\Object\Media;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Common\Doctrine\DBSource\Common\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Website\Object\Media;
 
 /**
  * Default implementation of `MediaRepositoryInterface` for Doctrine's repositories,

@@ -25,7 +25,7 @@ namespace Teknoo\Tests\East\Website\Doctrine\DBSource\Common;
 
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
 
 /**

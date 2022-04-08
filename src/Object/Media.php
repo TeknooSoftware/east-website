@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+
 /**
  * Abstract class to persist media in the database (image, pdf, or any binary stuff). Metadata of this media are
  * stored into an embedded MediaMetadata instance (content type, filename, alternative name).
@@ -35,7 +37,7 @@ namespace Teknoo\East\Website\Object;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-abstract class Media implements ObjectInterface
+abstract class Media implements IdentifiedObjectInterface
 {
     protected ?string $id = null;
 

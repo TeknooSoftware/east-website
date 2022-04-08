@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\ODM;
 
+use Teknoo\East\Common\Doctrine\DBSource\ODM\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Object\Item;
-use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
 
 /**
  * ODM optimised implementation of `ItemRepositoryInterface` for Doctrine's ODM repositories

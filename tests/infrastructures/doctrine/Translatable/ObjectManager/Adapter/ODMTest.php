@@ -28,10 +28,11 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\UnitOfWork;
 use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\Adapter\ODM;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Website\Object\TranslatableInterface;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
@@ -81,7 +82,7 @@ class ODMTest extends TestCase
 
     public function testPersist()
     {
-        $object = new \stdClass();
+        $object = $this->createMock(ObjectInterface::class);
         $this->getEastManager()->expects(self::once())->method('persist')->with($object);
 
         self::assertInstanceOf(
@@ -92,7 +93,7 @@ class ODMTest extends TestCase
 
     public function testRemove()
     {
-        $object = new \stdClass();
+        $object = $this->createMock(ObjectInterface::class);
         $this->getEastManager()->expects(self::once())->method('remove')->with($object);
 
         self::assertInstanceOf(

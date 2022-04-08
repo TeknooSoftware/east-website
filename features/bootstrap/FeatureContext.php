@@ -27,10 +27,10 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder;
 use Symfony\Component\HttpFoundation\Request as SfRequest;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\PasswordHasher\Hasher\Pbkdf2PasswordHasher;
 use Symfony\Component\PasswordHasher\Hasher\SodiumPasswordHasher;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Teknoo\DI\SymfonyBridge\DIBridgeBundle;
+use Teknoo\East\CommonBundle\TeknooEastCommonBundle;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Client\ResponseInterface as EastResponse;
 use Teknoo\East\Foundation\EndPoint\RecipeEndPoint;
@@ -43,10 +43,9 @@ use Teknoo\East\Foundation\Router\RouterInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Foundation\Template\ResultInterface;
 use Teknoo\East\FoundationBundle\EastFoundationBundle;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
-use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
@@ -55,15 +54,16 @@ use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\Media as BaseMedia;
-use Teknoo\East\Website\Object\StoredPassword;
+use Teknoo\East\Common\Object\StoredPassword;
 use Teknoo\East\Website\Object\Type;
+use Teknoo\East\Common\Object\User;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderStaticContentEndPoint;
-use Teknoo\Tests\East\Website\Behat\GetTokenStorageService;
-use Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser;
+use Teknoo\East\Common\Recipe\Cookbook\RenderStaticContentEndPoint;
+use Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle;
 use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\Tests\East\Website\Behat\GetTokenStorageService;
 use Twig\Environment;
 
 /**
@@ -135,13 +135,19 @@ class FeatureContext implements Context
             include $rootDir.'/vendor/teknoo/east-foundation/src/di.php'
         );
         $containerDefinition->addDefinitions(
+            include $rootDir.'/vendor/teknoo/east-common/src/di.php'
+        );
+        $containerDefinition->addDefinitions(
+            include $rootDir.'/vendor/teknoo/east-common/infrastructures/doctrine/di.php'
+        );
+        $containerDefinition->addDefinitions(
+            include $rootDir.'/vendor/teknoo/east-common/infrastructures/di.php'
+        );
+        $containerDefinition->addDefinitions(
             include $rootDir . '/src/di.php'
         );
         $containerDefinition->addDefinitions(
             include $rootDir.'/infrastructures/doctrine/di.php'
-        );
-        $containerDefinition->addDefinitions(
-            include $rootDir.'/infrastructures/di.php'
         );
 
         $this->container = $containerDefinition->build();
@@ -187,6 +193,7 @@ class FeatureContext implements Context
             {
                 yield new FrameworkBundle();
                 yield new EastFoundationBundle();
+                yield new TeknooEastCommonBundle();
                 yield new TeknooEastWebsiteBundle();
                 yield new DIBridgeBundle();
                 yield new SecurityBundle();
@@ -248,7 +255,7 @@ class FeatureContext implements Context
             }
 
             /**
-             * @param \Teknoo\East\Website\Object\ObjectInterface $object
+             * @param \Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface $object
              */
             public function persist($object)
             {

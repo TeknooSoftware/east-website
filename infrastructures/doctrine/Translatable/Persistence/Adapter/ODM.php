@@ -34,7 +34,7 @@ use RuntimeException;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 use function strlen;
 
@@ -196,7 +196,7 @@ class ODM implements AdapterInterface
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      */
     public function updateTranslationRecord(
         WrapperInterface $wrapped,
@@ -218,7 +218,7 @@ class ODM implements AdapterInterface
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      */
     public function setTranslatedValue(
         WrapperInterface $wrapped,

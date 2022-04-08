@@ -27,10 +27,10 @@ namespace Teknoo\East\Website\Recipe\Cookbook;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
-use Teknoo\East\Website\Recipe\Step\ExtractSlug;
+use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
-use Teknoo\East\Website\Recipe\Step\Render;
-use Teknoo\East\Website\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\Render;
+use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Cookbook\BaseCookbookTrait;
 use Teknoo\Recipe\Ingredient\Ingredient;

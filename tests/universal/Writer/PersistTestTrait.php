@@ -24,10 +24,10 @@
 namespace Teknoo\Tests\East\Website\Writer;
 
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\ManagerInterface;
-use Teknoo\East\Website\Object\TimestampableInterface;
-use Teknoo\East\Website\Service\DatesService;
-use Teknoo\East\Website\Writer\WriterInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
+use Teknoo\East\Common\Service\DatesService;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

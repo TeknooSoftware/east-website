@@ -24,13 +24,13 @@
 namespace Teknoo\Tests\East\Website\Loader;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\Recipe\Promise\Promise;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Object\Media;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Loader\MediaLoader;
-use Teknoo\East\Website\Query\Expr\InclusiveOr;
+use Teknoo\East\Website\Object\Media;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
+use Teknoo\Recipe\Promise\Promise;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\ODM;
 
-use Teknoo\East\Website\Doctrine\Object\Media;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Common\Doctrine\DBSource\ODM\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Website\Object\Media;
 
 /**
  * ODM optimised implementation of `MediaRepositoryInterface` for Doctrine's ODM repositories

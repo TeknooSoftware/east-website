@@ -23,34 +23,19 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Object\Content;
+namespace Teknoo\East\Website\Contracts\DBSource\Repository;
 
-use DateTimeInterface;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\States\State\StateInterface;
-use Teknoo\States\State\StateTrait;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Website\Object\Media;
 
 /**
- * Content's state representing a content instance not published, aka a draft. The methode "setPublishedAt" is provided
- * only in this state. So, a published content can not be republished (but can be updated).
+ * Interface to define repository in charge of object `Teknoo\East\Website\Object\Media`.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *
- * @mixin Content
+ * @extends RepositoryInterface<Media>
  */
-class Draft implements StateInterface
+interface MediaRepositoryInterface extends RepositoryInterface
 {
-    use StateTrait;
-
-    public function publishingAt(): callable
-    {
-        return function (DateTimeInterface $dateTime): Content {
-            $this->publishedAt = $dateTime;
-
-            $this->updateStates();
-
-            return $this;
-        };
-    }
 }

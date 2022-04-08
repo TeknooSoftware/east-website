@@ -30,7 +30,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Foundation\Session\SessionInterface;
-use Teknoo\East\Website\View\ParametersBag;
+use Teknoo\East\Common\View\ParametersBag;
 
 use function is_callable;
 

@@ -24,11 +24,11 @@
 namespace Teknoo\Tests\East\Website\Loader;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Object\Content;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Website\Object\Content;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

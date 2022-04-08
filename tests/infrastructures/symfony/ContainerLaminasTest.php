@@ -53,16 +53,6 @@ class ContainerLaminasTest extends TestCase
         return $containerDefinition->build();
     }
 
-    public function testStreamFactory()
-    {
-        $container = $this->buildContainer();
-
-        self::assertInstanceOf(
-            StreamFactory::class,
-            $container->get(StreamFactory::class)
-        );
-    }
-
     public function testMediaEndPointStreamFactory()
     {
         $container = $this->buildContainer();
