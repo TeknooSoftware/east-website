@@ -27,76 +27,44 @@ namespace Teknoo\East\Website;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\CreateContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\DeleteContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\EditContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\ListContentEndPointInterface;
+use Teknoo\East\Common\Recipe\Step\ExtractSlug;
+use Teknoo\East\Common\Recipe\Step\InitParametersBag;
+use Teknoo\East\Common\Recipe\Step\Render;
+use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Common\Service\DatesService;
+use Teknoo\East\Common\Service\DeletingService;
+use Teknoo\East\Foundation\Recipe\RecipeInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderStaticContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\FormHandlingInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\FormProcessingInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\ListObjectsAccessControlInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\ObjectAccessControlInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\RedirectClientInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\RenderFormInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\SearchFormLoaderInterface;
-use Teknoo\East\Website\Recipe\Cookbook\DeleteContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\EditContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\ListContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderStaticContentEndPoint;
-use Teknoo\East\Website\Recipe\Step\CreateObject;
-use Teknoo\East\Website\Recipe\Step\InitParametersBag;
-use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
-use Teknoo\East\Foundation\Recipe\RecipeInterface;
-use Teknoo\East\Foundation\Template\EngineInterface;
-use Teknoo\East\Website\DBSource\ManagerInterface;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\TypeRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\UserRepositoryInterface;
-use Teknoo\East\Website\Loader\ItemLoader;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
+use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
-use Teknoo\East\Website\Loader\UserLoader;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
-use Teknoo\East\Website\Recipe\Cookbook\CreateContentEndPoint;
-use Teknoo\East\Website\Recipe\Step\DeleteObject;
-use Teknoo\East\Website\Recipe\Step\ExtractOrder;
-use Teknoo\East\Website\Recipe\Step\ExtractPage;
-use Teknoo\East\Website\Recipe\Step\ExtractSlug;
+use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
-use Teknoo\East\Website\Recipe\Step\LoadListObjects;
 use Teknoo\East\Website\Recipe\Step\LoadMedia;
-use Teknoo\East\Website\Recipe\Step\LoadObject;
-use Teknoo\East\Website\Recipe\Step\Render;
-use Teknoo\East\Website\Recipe\Step\RenderError;
-use Teknoo\East\Website\Recipe\Step\RenderList;
-use Teknoo\East\Website\Recipe\Step\SaveObject;
 use Teknoo\East\Website\Recipe\Step\SendMedia;
-use Teknoo\East\Website\Recipe\Step\SlugPreparation;
-use Teknoo\East\Website\Service\DatesService;
-use Teknoo\East\Website\Service\DeletingService;
-use Teknoo\East\Website\Service\FindSlugService;
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Website\Service\ProxyDetectorInterface;
-use Teknoo\East\Website\Writer\ItemWriter;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Writer\ContentWriter;
+use Teknoo\East\Website\Writer\ItemWriter;
 use Teknoo\East\Website\Writer\MediaWriter;
 use Teknoo\East\Website\Writer\TypeWriter;
-use Teknoo\East\Website\Writer\UserWriter;
 use Teknoo\Recipe\Recipe;
+use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
-use function DI\get;
-use function DI\decorate;
 use function DI\create;
+use function DI\decorate;
+use function DI\get;
 
 return [
     //Loaders
@@ -108,8 +76,6 @@ return [
         ->constructor(get(MediaRepositoryInterface::class)),
     TypeLoader::class => create(TypeLoader::class)
         ->constructor(get(TypeRepositoryInterface::class)),
-    UserLoader::class => create(UserLoader::class)
-        ->constructor(get(UserRepositoryInterface::class)),
 
     //Writer
     ItemWriter::class => create(ItemWriter::class)
@@ -119,8 +85,6 @@ return [
     MediaWriter::class => create(MediaWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     TypeWriter::class => create(TypeWriter::class)
-        ->constructor(get(ManagerInterface::class), get(DatesService::class)),
-    UserWriter::class => create(UserWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
 
     //Deleting
@@ -132,8 +96,6 @@ return [
         ->constructor(get(MediaWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.type' => create(DeletingService::class)
         ->constructor(get(TypeWriter::class), get(DatesService::class)),
-    'teknoo.east.website.deleting.user' => create(DeletingService::class)
-        ->constructor(get(UserWriter::class), get(DatesService::class)),
 
     //Menu
     MenuGenerator::class => static function (ContainerInterface $container): MenuGenerator {
@@ -146,10 +108,6 @@ return [
 
     MenuMiddleware::class => create(MenuMiddleware::class)
         ->constructor(get(MenuGenerator::class)),
-
-    //Service
-    FindSlugService::class => create(FindSlugService::class),
-    DatesService::class => create(DatesService::class),
 
     //Middleware
     RecipeInterface::class => decorate(static function ($previous, ContainerInterface $container) {
@@ -182,51 +140,17 @@ return [
     }),
 
     //Steps
-    CreateObject::class => create(),
-    DeleteObject::class => create()
-        ->constructor(
-            get(DeletingService::class)
-        ),
-    ExtractOrder::class => create(),
-    ExtractPage::class => create(),
-    ExtractSlug::class => create(),
-    InitParametersBag::class => create(),
     LoadContent::class => create()
         ->constructor(
             get(ContentLoader::class)
         ),
-    LoadListObjects::class => create(),
     LoadMedia::class => create()
         ->constructor(
             get(MediaLoader::class)
         ),
-    LoadObject::class => create(),
-    Render::class => create()
-        ->constructor(
-            get(EngineInterface::class),
-            get(StreamFactoryInterface::class),
-            get(ResponseFactoryInterface::class)
-        ),
-    RenderError::class => create()
-        ->constructor(
-            get(EngineInterface::class),
-            get(StreamFactoryInterface::class),
-            get(ResponseFactoryInterface::class)
-        ),
-    RenderList::class => create()
-        ->constructor(
-            get(EngineInterface::class),
-            get(StreamFactoryInterface::class),
-            get(ResponseFactoryInterface::class)
-        ),
-    SaveObject::class => create(),
     SendMedia::class => create()
         ->constructor(
             get(ResponseFactoryInterface::class)
-        ),
-    SlugPreparation::class => create()
-        ->constructor(
-            get(FindSlugService::class)
         ),
 
     //Base recipe
@@ -234,84 +158,6 @@ return [
     Recipe::class => create(),
 
     //Cookbook
-    CreateContentEndPointInterface::class => get(CreateContentEndPoint::class),
-    CreateContentEndPoint::class => static function (ContainerInterface $container): CreateContentEndPoint {
-        $accessControl = null;
-        if ($container->has(ObjectAccessControlInterface::class)) {
-            $accessControl = $container->get(ObjectAccessControlInterface::class);
-        }
-
-        return new CreateContentEndPoint(
-            $container->get(OriginalRecipeInterface::class),
-            $container->get(CreateObject::class),
-            $container->get(FormHandlingInterface::class),
-            $container->get(FormProcessingInterface::class),
-            $container->get(SlugPreparation::class),
-            $container->get(SaveObject::class),
-            $container->get(RedirectClientInterface::class),
-            $container->get(RenderFormInterface::class),
-            $container->get(RenderError::class),
-            $accessControl
-        );
-    },
-    DeleteContentEndPointInterface::class => get(DeleteContentEndPoint::class),
-    DeleteContentEndPoint::class => static function (ContainerInterface $container): DeleteContentEndPoint {
-        $accessControl = null;
-        if ($container->has(ObjectAccessControlInterface::class)) {
-            $accessControl = $container->get(ObjectAccessControlInterface::class);
-        }
-
-        return new DeleteContentEndPoint(
-            $container->get(OriginalRecipeInterface::class),
-            $container->get(LoadObject::class),
-            $container->get(DeleteObject::class),
-            $container->get(RedirectClientInterface::class),
-            $container->get(RenderError::class),
-            $accessControl
-        );
-    },
-    EditContentEndPointInterface::class => get(EditContentEndPoint::class),
-    EditContentEndPoint::class => static function (ContainerInterface $container): EditContentEndPoint {
-        $accessControl = null;
-        if ($container->has(ObjectAccessControlInterface::class)) {
-            $accessControl = $container->get(ObjectAccessControlInterface::class);
-        }
-
-        return new EditContentEndPoint(
-            $container->get(OriginalRecipeInterface::class),
-            $container->get(LoadObject::class),
-            $container->get(FormHandlingInterface::class),
-            $container->get(FormProcessingInterface::class),
-            $container->get(SlugPreparation::class),
-            $container->get(SaveObject::class),
-            $container->get(RenderFormInterface::class),
-            $container->get(RenderError::class),
-            $accessControl
-        );
-    },
-    ListContentEndPointInterface::class => get(ListContentEndPoint::class),
-    ListContentEndPoint::class => static function (ContainerInterface $container): ListContentEndPoint {
-        $formLoader = null;
-        if ($container->has(SearchFormLoaderInterface::class)) {
-            $formLoader = $container->get(SearchFormLoaderInterface::class);
-        }
-
-        $accessControl = null;
-        if ($container->has(ListObjectsAccessControlInterface::class)) {
-            $accessControl = $container->get(ListObjectsAccessControlInterface::class);
-        }
-
-        return new ListContentEndPoint(
-            $container->get(OriginalRecipeInterface::class),
-            $container->get(ExtractPage::class),
-            $container->get(ExtractOrder::class),
-            $container->get(LoadListObjects::class),
-            $container->get(RenderList::class),
-            $container->get(RenderError::class),
-            $formLoader,
-            $accessControl
-        );
-    },
     RenderDynamicContentEndPointInterface::class => get(RenderDynamicContentEndPoint::class),
     RenderDynamicContentEndPoint::class => create()
         ->constructor(
@@ -328,13 +174,6 @@ return [
             get(LoadMedia::class),
             get(GetStreamFromMediaInterface::class),
             get(SendMedia::class),
-            get(RenderError::class)
-        ),
-    RenderStaticContentEndPointInterface::class => get(RenderStaticContentEndPoint::class),
-    RenderStaticContentEndPoint::class => create()
-        ->constructor(
-            get(OriginalRecipeInterface::class),
-            get(Render::class),
             get(RenderError::class)
         ),
 ];

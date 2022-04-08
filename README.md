@@ -30,6 +30,17 @@ Example with Symfony
         import:
             Psr\Log\LoggerInterface: 'logger'
 
+    //config/packages/east_common_di.yaml:
+    di_bridge:
+        definitions:
+            - '%kernel.project_dir%/vendor/teknoo/east-common/src/di.php'
+            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/doctrine/di.php'
+            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/symfony/Resources/config/di.php'
+            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/symfony/Resources/config/laminas_di.php'
+            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/di.php'
+        import:
+            Doctrine\Persistence\ObjectManager: 'doctrine_mongodb.odm.default_document_manager'
+
     //config/packages/east_website_di.yaml:
     di_bridge:
         definitions:
@@ -37,7 +48,6 @@ Example with Symfony
             - '%kernel.project_dir%/vendor/teknoo/east-website/infrastructures/doctrine/di.php'
             - '%kernel.project_dir%/vendor/teknoo/east-website/infrastructures/symfony/Resources/config/di.php'
             - '%kernel.project_dir%/vendor/teknoo/east-website/infrastructures/symfony/Resources/config/laminas_di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-website/infrastructures/di.php'
         import:
             Doctrine\Persistence\ObjectManager: 'doctrine_mongodb.odm.default_document_manager'
     
@@ -45,6 +55,7 @@ Example with Symfony
     ...
     Teknoo\DI\SymfonyBridge\DIBridgeBundle::class => ['all' => true],
     Teknoo\East\FoundationBundle\EastFoundationBundle::class => ['all' => true],
+    Teknoo\East\CommonBundle\TeknooEastCommonBundle::class => ['all' => true],
     Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle::class => ['all' => true],
 
     //In doctrine config (east_website_doctrine_mongodb.yaml)
@@ -53,6 +64,11 @@ Example with Symfony
             default:
                 auto_mapping: true
                 mappings:
+                    TeknooEastCommon:
+                        type: 'xml'
+                        dir: '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/doctrine/config/universal'
+                        is_bundle: false
+                        prefix: 'Teknoo\East\Common\Object'
                     TeknooEastWebsite:
                         type: 'xml'
                         dir: '%kernel.project_dir%/vendor/teknoo/east-website/infrastructures/doctrine/config/universal'
@@ -71,16 +87,20 @@ Example with Symfony
 
         providers:
             with_password:
-                id: 'Teknoo\East\WebsiteBundle\Provider\PasswordAuthenticatedUserProvider'
+                id: 'Teknoo\East\CommonBundle\Provider\PasswordAuthenticatedUserProvider'
     
         password_hashers:
-            Teknoo\East\WebsiteBundle\Object\PasswordAuthenticatedUser:
-                algorithm: '%teknoo.east.website.bundle.password_authenticated_user_provider.default_algo%'
+            Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser:
+                algorithm: '%teknoo.east.common.bundle.password_authenticated_user_provider.default_algo%'
 
 
     //In routes/website.yml
     admin_website:
         resource: '@TeknooEastWebsiteBundle/Resources/config/admin_routing.yml'
+        prefix: '/admin'
+
+    admin_common:
+        resource: '@TeknooEastCommonBundle/Resources/config/admin_routing.yml'
         prefix: '/admin'
     
     website:
@@ -154,7 +174,7 @@ Enable third party authentication with an OAuth2 Provider (example with Gitlab)
     use DomainException;
     use League\OAuth2\Client\Provider\ResourceOwnerInterface;
     use Omines\OAuth2\Client\Provider\GitlabResourceOwner;
-    use Teknoo\East\Website\Object\User;
+    use Teknoo\East\Common\Object\User;
     use Teknoo\East\WebsiteBundle\Contracts\Security\Authenticator\UserConverterInterface;
     use Teknoo\Recipe\Promise\PromiseInterface;
     
@@ -291,8 +311,8 @@ News from Teknoo Website 5.0
 
 This library requires PHP 8.0 or newer and it's only compatible with Symfony 5.2 or newer
 - Migrate to PHP 8.0
-- Writers services, Deleting services, and interfaces use also `Teknoo\East\Website\Contracts\ObjectInterface`.
-- Create `Teknoo\East\Website\Contracts\ObjectInterface`, `Teknoo\East\Website\Object\ObjectInterface` extends it
+- Writers services, Deleting services, and interfaces use also `Teknoo\East\Common\Contracts\Object\ObjectInterface`.
+- Create `Teknoo\East\Common\Contracts\Object\ObjectInterface`, `Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface` extends it
   dedicated to non persisted object, manipulable by other components
 - Update steps and forms interface to use this new interface
 - Replace ServerRequestInterface to MessageInterface for ListObjectAccessControlInterface and ObjectAccessControlInterface
@@ -301,8 +321,8 @@ This library requires PHP 8.0 or newer and it's only compatible with Symfony 5.2
 - Add `ObjectReference` expression to filter on reference
 - CreateObject step has a new parameter `$workPlanKey` to custom the key to use to store the
   new object in the workplan
-- CreateObject, DeleteObject, LoadObject, SaveObject and SlugPreparation use `Teknoo\East\Website\Contracts\ObjectInterface`
-  instead `Teknoo\East\Website\Object\ObjectInterface`. SaveObject pass the id only if the object implements
+- CreateObject, DeleteObject, LoadObject, SaveObject and SlugPreparation use `Teknoo\East\Common\Contracts\Object\ObjectInterface`
+  instead `Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface`. SaveObject pass the id only if the object implements
   this last object
   
 News from Teknoo Website 4.0

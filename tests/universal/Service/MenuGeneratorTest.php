@@ -32,7 +32,7 @@ use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Website\Service\ProxyDetectorInterface;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

@@ -26,10 +26,10 @@ namespace Teknoo\Tests\East\Website\Recipe\Cookbook;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
-use Teknoo\East\Website\Recipe\Step\ExtractSlug;
+use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
-use Teknoo\East\Website\Recipe\Step\Render;
-use Teknoo\East\Website\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\Render;
+use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\RecipeInterface;
 use Teknoo\Tests\Recipe\Cookbook\BaseCookbookTestTrait;
 

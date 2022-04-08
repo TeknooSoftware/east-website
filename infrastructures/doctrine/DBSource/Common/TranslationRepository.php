@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\Common;
 
+use Teknoo\East\Common\Doctrine\DBSource\Common\RepositoryTrait;
 use Teknoo\East\Website\Doctrine\Object\Translation;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 
 /**
  * Default implementation of repository to manage translation in this library for Doctrine's repositories,

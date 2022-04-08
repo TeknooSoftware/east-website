@@ -25,10 +25,16 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
-use Teknoo\East\Website\Loader\LoaderInterface;
-use Teknoo\East\Website\Object\Item\Hidden;
+use Teknoo\East\Common\Contracts\Object\DeletableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Object\SluggableInterface;
+use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
+use Teknoo\East\Common\Object\ObjectTrait;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Item\Available;
-use Teknoo\East\Website\Service\FindSlugService;
+use Teknoo\East\Website\Object\Item\Hidden;
+use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\States\Automated\Assertion\AssertionInterface;
 use Teknoo\States\Automated\Assertion\Property;
 use Teknoo\States\Automated\Assertion\Property\IsEqual;
@@ -44,10 +50,10 @@ use Teknoo\States\Proxy\ProxyTrait;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *
- * @implements SluggableInterface<ObjectInterface>
+ * @implements SluggableInterface<IdentifiedObjectInterface>
  */
 class Item implements
-    ObjectInterface,
+    IdentifiedObjectInterface,
     TranslatableInterface,
     AutomatedInterface,
     DeletableInterface,

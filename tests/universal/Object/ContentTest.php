@@ -24,12 +24,12 @@
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Loader\LoaderInterface;
-use Teknoo\East\Website\Service\FindSlugService;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\Tests\East\Website\Object\Traits\PublishableTestTrait;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Object\User;
+use Teknoo\East\Common\Object\User;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

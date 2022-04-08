@@ -26,16 +26,15 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Doctrine\Translatable\ObjectManager;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
-use Teknoo\East\Website\DBSource\ManagerInterface;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 /**
  * Interface to help this extension to work evenly with Doctrine Document Manager or Doctrine Entity Manager.
- * This manager extends `Teknoo\East\Website\DBSource\ManagerInterface` because this parent interface define wrapper
- * for Persistence Manager to use in East Website.
+ * This manager extends `Teknoo\East\Common\Contracts\DBSource\ManagerInterface` because this parent interface define
+ * wrapper for Persistence Manager to use in East Website.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
@@ -53,7 +52,7 @@ interface AdapterInterface extends ManagerInterface
     public function foreachScheduledObjectDeletions(callable $callback): AdapterInterface;
 
     /**
-     * @param ClassMetadata<ObjectInterface> $meta
+     * @param ClassMetadata<IdentifiedObjectInterface> $meta
      */
     public function recomputeSingleObjectChangeSet(
         ClassMetadata $meta,

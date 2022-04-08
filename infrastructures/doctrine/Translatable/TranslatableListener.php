@@ -30,18 +30,17 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\LoadClassMetadataEventArgs;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
 use DomainException;
 use ProxyManager\Proxy\GhostObjectInterface;
 use ReflectionException;
 use RuntimeException;
+use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
+use Teknoo\East\Website\Doctrine\Translatable\Mapping\ExtensionMetadataFactory;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\AdapterInterface as ManagerAdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface as PersistenceAdapterInterface;
-use Teknoo\East\Website\Doctrine\Translatable\Mapping\ExtensionMetadataFactory;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Object\TranslatableInterface;
-use Teknoo\East\Website\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
 use function array_flip;
 use function get_parent_class;
@@ -121,7 +120,7 @@ class TranslatableListener implements EventSubscriber
      *          fields: array<int, string>,
      *          fallback: array<string, string>
      *      },
-     *      3:\Doctrine\Persistence\Mapping\ClassMetadata<ObjectInterface>
+     *      3:\Doctrine\Persistence\Mapping\ClassMetadata<IdentifiedObjectInterface>
      *     }>
      * >
      */
@@ -144,7 +143,7 @@ class TranslatableListener implements EventSubscriber
 
     /**
      * List of cached class metadata from doctrine manager
-     * @var array<string, ClassMetadata<ObjectInterface>>
+     * @var array<string, ClassMetadata<IdentifiedObjectInterface>>
      */
     private array $classMetadata = [];
 
@@ -178,7 +177,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @return ClassMetadata<ObjectInterface>
+     * @return ClassMetadata<IdentifiedObjectInterface>
      */
     private function getClassMetadata(string $className): ClassMetadata
     {
@@ -196,7 +195,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $classMetadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $classMetadata
      */
     public function registerClassMetadata(string $className, ClassMetadata $classMetadata): self
     {
@@ -226,7 +225,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      */
     private function wrap(TranslatableInterface $translatable, ClassMetadata $metadata): WrapperInterface
     {
@@ -234,7 +233,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      */
     private function loadMetadataForObjectClass(ClassMetadata $metadata): void
     {
@@ -242,7 +241,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      * @param array{
      *        useObjectClass: string,
      *        translationClass: string,
@@ -260,7 +259,7 @@ class TranslatableListener implements EventSubscriber
     }
 
     /**
-     * @param ClassMetadata<ObjectInterface> $metadata
+     * @param ClassMetadata<IdentifiedObjectInterface> $metadata
      * @return array{
      *        useObjectClass: string,
      *        translationClass: string,
@@ -314,7 +313,7 @@ class TranslatableListener implements EventSubscriber
      *     fields: array<int, string>|null,
      *     fallback: array<string, string>
      * } $config
-     * @param ClassMetadata<ObjectInterface> $metaData
+     * @param ClassMetadata<IdentifiedObjectInterface> $metaData
      */
     private function loadAllTranslations(
         WrapperInterface $wrapper,

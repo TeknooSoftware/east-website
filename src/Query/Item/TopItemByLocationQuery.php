@@ -25,12 +25,12 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Query\Item;
 
-use Teknoo\East\Website\Query\Enum\Direction;
+use Teknoo\East\Common\Query\Enum\Direction;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Item;
-use Teknoo\East\Website\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 

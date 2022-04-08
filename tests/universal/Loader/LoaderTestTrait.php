@@ -23,11 +23,11 @@
 
 namespace Teknoo\Tests\East\Website\Loader;
 
-use Teknoo\East\Website\Query\QueryCollectionInterface;
-use Teknoo\East\Website\Query\QueryElementInterface;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Recipe\Promise\Promise;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Query\QueryInterface;
 
 /**

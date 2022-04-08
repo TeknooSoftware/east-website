@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\Common;
 
+use Teknoo\East\Common\Doctrine\DBSource\Common\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\DBSource\Repository\TypeRepositoryInterface;
 
 /**
  * Default implementation of `TypeRepositoryInterface` for Doctrine's repositories,

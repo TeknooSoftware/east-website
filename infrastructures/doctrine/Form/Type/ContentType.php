@@ -35,11 +35,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Common\Object\User;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Object\User;
 
 /**
  * Symfony Form dedicated to manage translatable Content Object in a Symfony Website.

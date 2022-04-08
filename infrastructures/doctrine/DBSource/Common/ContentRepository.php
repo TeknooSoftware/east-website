@@ -25,8 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\DBSource\Common;
 
+use Teknoo\East\Common\Doctrine\DBSource\Common\RepositoryTrait;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Object\Content;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
 
 /**
  * Default implementation of `ContentRepositoryInterface` for Doctrine's repositories,

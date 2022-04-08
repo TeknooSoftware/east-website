@@ -26,14 +26,14 @@ namespace Teknoo\Tests\East\Website\Doctrine\DBSource\ODM;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\ODM\MongoDB\Query\Query;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
-use Teknoo\East\Website\Query\Enum\Direction;
-use Teknoo\East\Website\Query\Expr\NotEqual;
+use Teknoo\East\Common\Query\Enum\Direction;
+use Teknoo\East\Common\Query\Expr\NotEqual;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Object\ObjectInterface;
-use Teknoo\East\Website\Query\Expr\In;
-use Teknoo\East\Website\Query\Expr\InclusiveOr;
-use Teknoo\East\Website\Query\Expr\ObjectReference;
+use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
+use Teknoo\East\Common\Query\Expr\ObjectReference;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
@@ -309,7 +309,7 @@ trait RepositoryTestTrait
                         ['foo' => 'bar'],
                         ['bar' => 'foo']
                     ),
-                    'hello' => new ObjectReference($this->createMock(ObjectInterface::class))
+                    'hello' => new ObjectReference($this->createMock(IdentifiedObjectInterface::class))
                 ],
                 $promise
             )

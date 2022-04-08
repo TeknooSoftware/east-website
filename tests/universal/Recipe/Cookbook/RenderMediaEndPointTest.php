@@ -28,7 +28,7 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadMedia;
-use Teknoo\East\Website\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Recipe\Step\SendMedia;
 use Teknoo\Recipe\RecipeInterface;
 use Teknoo\Tests\Recipe\Cookbook\BaseCookbookTestTrait;

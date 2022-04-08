@@ -44,7 +44,7 @@ class Published implements StateInterface
 {
     use StateTrait;
 
-    public function setPublishedAt(): callable
+    public function publishingAt(): callable
     {
         return function (DateTimeInterface $dateTime): Content {
             return $this;

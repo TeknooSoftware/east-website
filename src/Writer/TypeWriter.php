@@ -25,16 +25,18 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Writer;
 
-use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Website\Contracts\ObjectInterface;
+use Teknoo\East\Common\Writer\PersistTrait;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Website\Object\Type;
+use Teknoo\Recipe\Promise\PromiseInterface;
 use Throwable;
 
 /**
  * Object writer in charge of object `Teknoo\East\Website\Object\Type`.
  * The writer will update object's timestamp before update. The object persisted will be passed, with its new id for
  * new persisted object, to the promise, else the error is also passed to the promise.
- * Must provide an implementation of `Teknoo\East\Website\DBSource\ManagerInterface` to be able work.
+ * Must provide an implementation of `Teknoo\East\Common\Contracts\DBSource\ManagerInterface` to be able work.
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>

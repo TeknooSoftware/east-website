@@ -31,7 +31,7 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Foundation\Session\SessionInterface;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
-use Teknoo\East\Website\View\ParametersBag;
+use Teknoo\East\Common\View\ParametersBag;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License

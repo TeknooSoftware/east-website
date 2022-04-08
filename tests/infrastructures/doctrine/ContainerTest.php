@@ -30,8 +30,8 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Doctrine\ODM\MongoDB\Repository\GridFSRepository;
-use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
+use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\ObjectManager;
@@ -39,27 +39,26 @@ use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
 use ProxyManager\Proxy\GhostObjectInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
-use Teknoo\East\Website\DBSource\ManagerInterface;
-use Teknoo\East\Website\DBSource\Repository\ContentRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\MediaRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\TypeRepositoryInterface;
-use Teknoo\East\Website\DBSource\Repository\UserRepositoryInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Website\Doctrine\Object\Content;
+use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Doctrine\Recipe\Step\ODM\GetStreamFromMedia;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Website\Doctrine\Writer\ODM\MediaWriter;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
-use Teknoo\East\Website\Doctrine\Object\Content;
-use Teknoo\East\Website\Doctrine\Object\Item;
-use Teknoo\East\Website\Doctrine\Object\Media;
-use Teknoo\East\Website\Object\User;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Service\ProxyDetectorInterface;
+use Teknoo\East\Common\Object\User;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
  * Class DefinitionProviderTest.
@@ -81,6 +80,9 @@ class ContainerTest extends TestCase
     protected function buildContainer() : Container
     {
         $containerDefinition = new ContainerBuilder();
+        $containerDefinition->addDefinitions(
+            __DIR__.'/../../../vendor/teknoo/east-common/infrastructures/doctrine/di.php'
+        );
         $containerDefinition->addDefinitions(__DIR__.'/../../../infrastructures/doctrine/di.php');
 
         return $containerDefinition->build();
@@ -144,11 +146,6 @@ class ContainerTest extends TestCase
         $this->generateTestForRepository(Type::class, TypeRepositoryInterface::class, ObjectRepository::class);
     }
 
-    public function testUserRepositoryWithObjectRepository()
-    {
-        $this->generateTestForRepository(User::class, UserRepositoryInterface::class, ObjectRepository::class);
-    }
-
     public function testItemRepositoryWithDocumentRepository()
     {
         $this->generateTestForRepository(Item::class, ItemRepositoryInterface::class, DocumentRepository::class);
@@ -167,11 +164,6 @@ class ContainerTest extends TestCase
     public function testTypeRepositoryWithDocumentRepository()
     {
         $this->generateTestForRepository(Type::class, TypeRepositoryInterface::class, DocumentRepository::class);
-    }
-
-    public function testUserRepositoryWithDocumentRepository()
-    {
-        $this->generateTestForRepository(User::class, UserRepositoryInterface::class, DocumentRepository::class);
     }
 
     public function testItemRepositoryWithUnsupportedRepository()
@@ -196,12 +188,6 @@ class ContainerTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
         $this->generateTestForRepositoryWithUnsupportedRepository(Type::class, TypeRepositoryInterface::class);
-    }
-
-    public function testUserRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(User::class, UserRepositoryInterface::class);
     }
 
     public function testLocaleMiddlewareWithDocumentManager()

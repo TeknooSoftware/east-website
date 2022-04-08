@@ -24,10 +24,10 @@
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Loader\LoaderInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Item;
-use Teknoo\East\Website\Service\FindSlugService;
+use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 
 /**

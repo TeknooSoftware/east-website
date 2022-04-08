@@ -22,7 +22,7 @@
                 <all/>
             </cascade>
         </reference-one>
-        <reference-one field="author" target-document="Teknoo\East\Website\Object\User" store-as="dbRefWithDb">
+        <reference-one field="author" target-document="Teknoo\East\Common\Object\User" store-as="dbRefWithDb">
             <cascade>
                 <all/>
             </cascade>

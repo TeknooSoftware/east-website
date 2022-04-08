@@ -26,7 +26,7 @@ namespace Teknoo\Tests\East\Website\Middleware;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Website\View\ParametersBag;
+use Teknoo\East\Common\View\ParametersBag;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
