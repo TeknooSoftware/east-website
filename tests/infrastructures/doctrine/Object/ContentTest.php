@@ -37,7 +37,6 @@ use Teknoo\Tests\East\Website\Object\ContentTest as OriginalTest;
  *
  * @covers \Teknoo\East\Website\Doctrine\Object\Content
  * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\ObjectTrait
  * @covers \Teknoo\East\Website\Object\Content
  * @covers \Teknoo\East\Website\Object\Content\Draft
  * @covers \Teknoo\East\Website\Object\Content\Published

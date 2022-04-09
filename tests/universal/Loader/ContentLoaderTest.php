@@ -34,7 +34,6 @@ use Teknoo\East\Website\Object\Content;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers      \Teknoo\East\Website\Loader\ContentLoader
- * @covers      \Teknoo\East\Website\Loader\LoaderTrait
  */
 class ContentLoaderTest extends TestCase
 {

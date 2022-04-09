@@ -34,7 +34,6 @@ use Teknoo\East\Website\Object\Type;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers      \Teknoo\East\Website\Loader\TypeLoader
- * @covers      \Teknoo\East\Website\Loader\LoaderTrait
  */
 class TypeLoaderTest extends TestCase
 {

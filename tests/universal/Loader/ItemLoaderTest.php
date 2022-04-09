@@ -34,7 +34,6 @@ use Teknoo\East\Website\Object\Item;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers      \Teknoo\East\Website\Loader\ItemLoader
- * @covers      \Teknoo\East\Website\Loader\LoaderTrait
  */
 class ItemLoaderTest extends TestCase
 {

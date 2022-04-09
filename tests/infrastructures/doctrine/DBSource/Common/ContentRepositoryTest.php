@@ -32,8 +32,6 @@ use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository
- * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\RepositoryTrait
- * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\ExprConversionTrait
  */
 class ContentRepositoryTest extends TestCase
 {

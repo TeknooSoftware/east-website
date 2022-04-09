@@ -37,7 +37,6 @@ use Teknoo\Tests\East\Website\Object\MediaTest as OriginalTest;
  *
  * @covers \Teknoo\East\Website\Doctrine\Object\Media
  * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\ObjectTrait
  * @covers \Teknoo\East\Website\Object\Media
  */
 class MediaTest extends OriginalTest

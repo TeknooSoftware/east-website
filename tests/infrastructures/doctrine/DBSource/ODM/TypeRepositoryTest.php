@@ -32,8 +32,6 @@ use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers \Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository
- * @covers \Teknoo\East\Website\Doctrine\DBSource\ODM\RepositoryTrait
- * @covers \Teknoo\East\Website\Doctrine\DBSource\ODM\ExprConversionTrait
  */
 class TypeRepositoryTest extends TestCase
 {

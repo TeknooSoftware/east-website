@@ -32,8 +32,6 @@ use Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository
- * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\RepositoryTrait
- * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\ExprConversionTrait
  */
 class MediaRepositoryTest extends TestCase
 {

@@ -37,7 +37,6 @@ use Teknoo\Tests\East\Website\Object\ItemTest as OriginalTest;
  *
  * @covers \Teknoo\East\Website\Doctrine\Object\Item
  * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\ObjectTrait
  * @covers \Teknoo\East\Website\Object\Item
  */
 class ItemTest extends OriginalTest
