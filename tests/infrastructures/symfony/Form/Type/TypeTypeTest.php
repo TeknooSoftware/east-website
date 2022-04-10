@@ -24,6 +24,7 @@
 namespace Teknoo\Tests\East\WebsiteBundle\Form\Type;
 
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\WebsiteBundle\Form\Type\TypeType;
 
 /**
@@ -38,5 +39,15 @@ class TypeTypeTest extends TestCase
     public function buildForm()
     {
         return new TypeType();
+    }
+
+    public function testConfigureOptions()
+    {
+        self::assertInstanceOf(
+            TypeType::class,
+            $this->buildForm()->configureOptions(
+                $this->createMock(OptionsResolver::class)
+            )
+        );
     }
 }

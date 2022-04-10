@@ -98,6 +98,7 @@ class ItemType extends AbstractType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults(array(
+            'data_class' => Item::class,
             'doctrine_type' => '',
         ));
 

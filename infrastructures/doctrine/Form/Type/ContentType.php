@@ -193,6 +193,7 @@ class ContentType extends AbstractType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults(array(
+            'data_class' => Content::class,
             'doctrine_type' => '',
         ));
 

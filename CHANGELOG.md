@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.1] - 2022-04-10
+### Stable Release
+- Fix `MediaType`, `TypeType`, `ContentType` and `ItemType` form to be use as subforms
+  *(missed `data_class`) options.
+
 ## [8.0.0] - 2022-04-08
 ### Stable Release
 - Implement Teknoo East Common and keep only CMS Features

@@ -29,6 +29,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Object\Type;
 
 /**
@@ -54,6 +55,17 @@ class TypeType extends AbstractType
             'allow_delete' => true,
             'delete_empty' => true,
         ));
+
+        return $this;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): self
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'data_class' => Type::class,
+        ]);
 
         return $this;
     }

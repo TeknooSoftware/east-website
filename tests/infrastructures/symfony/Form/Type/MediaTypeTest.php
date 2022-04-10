@@ -30,6 +30,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Object\Media;
 use Teknoo\East\WebsiteBundle\Form\Type\MediaType;
 
@@ -118,6 +119,16 @@ class MediaTypeTest extends TestCase
         self::assertInstanceOf(
             AbstractType::class,
             $this->buildForm()->buildForm($builder, [])
+        );
+    }
+
+    public function testConfigureOptions()
+    {
+        self::assertInstanceOf(
+            MediaType::class,
+            $this->buildForm()->configureOptions(
+                $this->createMock(OptionsResolver::class)
+            )
         );
     }
 }

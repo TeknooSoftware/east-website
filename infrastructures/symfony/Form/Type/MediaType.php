@@ -33,6 +33,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\MediaMetadata;
 
@@ -90,6 +91,17 @@ class MediaType extends AbstractType
                 $mediaObject->setMetadata($meta);
             }
         );
+
+        return $this;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): self
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'data_class' => Media::class,
+        ]);
 
         return $this;
     }
