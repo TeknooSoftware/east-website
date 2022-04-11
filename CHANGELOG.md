@@ -1,5 +1,11 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.2] - 2022-04-11
+### Stable Release
+- Fix `Common\RepositoryTrait::$repository` definition
+- Fix generic definition in `TranslatableListener`
+- Upgrade dev libs requirements
+
 ## [8.0.1] - 2022-04-10
 ### Stable Release
 - Fix `MediaType`, `TypeType`, `ContentType` and `ItemType` form to be use as subforms

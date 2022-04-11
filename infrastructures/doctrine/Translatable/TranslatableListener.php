@@ -30,6 +30,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\LoadClassMetadataEventArgs;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use DomainException;
 use ProxyManager\Proxy\GhostObjectInterface;
 use ReflectionException;
@@ -285,6 +286,9 @@ class TranslatableListener implements EventSubscriber
         return $this->configurations[$className];
     }
 
+    /**
+     * @param LoadClassMetadataEventArgs<ClassMetadata<IdentifiedObjectInterface>, ObjectManager> $event
+     */
     public function loadClassMetadata(LoadClassMetadataEventArgs $event): self
     {
         $metadata = $event->getClassMetadata();
@@ -357,8 +361,9 @@ class TranslatableListener implements EventSubscriber
         );
     }
 
-    /*
+    /**
      * After object is loaded, listener updates the translations by currently used locale
+     * @param LifecycleEventArgs<ObjectManager> $event
      */
     public function postLoad(LifecycleEventArgs $event): self
     {
@@ -567,8 +572,9 @@ class TranslatableListener implements EventSubscriber
         return $this;
     }
 
-    /*
+    /**
      * Checks for inserted object to update their translation foreign keys
+     * @param LifecycleEventArgs<ObjectManager> $event
      */
     public function postPersist(LifecycleEventArgs $event): self
     {
