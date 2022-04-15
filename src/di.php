@@ -27,8 +27,9 @@ namespace Teknoo\East\Website;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
-use Teknoo\East\Common\Recipe\Step\InitParametersBag;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Common\Service\DatesService;
@@ -41,7 +42,6 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
-use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
@@ -54,7 +54,6 @@ use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadMedia;
 use Teknoo\East\Website\Recipe\Step\SendMedia;
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Writer\ContentWriter;
 use Teknoo\East\Website\Writer\ItemWriter;
 use Teknoo\East\Website\Writer\MediaWriter;
@@ -112,13 +111,6 @@ return [
     //Middleware
     RecipeInterface::class => decorate(static function ($previous, ContainerInterface $container) {
         if ($previous instanceof RecipeInterface) {
-            $previous = $previous->cook(
-                $container->get(InitParametersBag::class),
-                InitParametersBag::class,
-                [],
-                4
-            );
-
             if ($container->has(LocaleMiddleware::class)) {
                 $previous = $previous->cook(
                     [$container->get(LocaleMiddleware::class), 'execute'],
