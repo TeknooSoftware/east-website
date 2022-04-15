@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.3] - 2022-04-15
+### Stable Release
+- Fix Recipe decoration in `src/di.php`
+ 
 ## [8.0.2] - 2022-04-11
 ### Stable Release
 - Fix `Common\RepositoryTrait::$repository` definition
