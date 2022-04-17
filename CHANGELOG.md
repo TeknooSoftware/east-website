@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.4] - 2022-04-17
+### Stable Release
+- Rename `.yml` files to `.yaml`
+- 
 ## [8.0.3] - 2022-04-15
 ### Stable Release
 - Fix Recipe decoration in `src/di.php`

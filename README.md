@@ -80,7 +80,7 @@ Example with Symfony
                         is_bundle: false
                         prefix: 'Teknoo\East\Website\Doctrine\Object'
 
-    //In security.yml
+    //In security.yaml
     security:
         //...
         enable_authenticator_manager: true
@@ -94,22 +94,22 @@ Example with Symfony
                 algorithm: '%teknoo.east.common.bundle.password_authenticated_user_provider.default_algo%'
 
 
-    //In routes/website.yml
+    //In routes/website.yaml
     admin_website:
-        resource: '@TeknooEastWebsiteBundle/Resources/config/admin_routing.yml'
+        resource: '@TeknooEastWebsiteBundle/Resources/config/admin_routing.yaml'
         prefix: '/admin'
 
     admin_common:
-        resource: '@TeknooEastCommonBundle/Resources/config/admin_routing.yml'
+        resource: '@TeknooEastCommonBundle/Resources/config/admin_routing.yaml'
         prefix: '/admin'
     
     website:
-        resource: '@TeknooEastWebsiteBundle/Resources/config/routing.yml'
+        resource: '@TeknooEastWebsiteBundle/Resources/config/routing.yaml'
 
 Enable third party authentication with an OAuth2 Provider (example with Gitlab)
 -------------------------------------------------------------------------------
 
-    //In security.yml
+    //In security.yaml
     security:
         providers:
             //...
