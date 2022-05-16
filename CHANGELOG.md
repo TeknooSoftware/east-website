@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.5] - 2022-05-16
+### Stable Release
+- Fix admin lists routes
+- Update teknoo libs requirements
+
 ## [8.0.4] - 2022-04-17
 ### Stable Release
 - Rename `.yml` files to `.yaml`
