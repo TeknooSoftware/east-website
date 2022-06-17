@@ -61,9 +61,7 @@ class PublishedContentFromIdsQueryTest extends TestCase
 
         $repository->expects(self::once())
             ->method('findBy')
-            ->with(['id' => new In(['fooBar']), 'deletedAt' => null,], $this->callback(function ($pr) {
-                return $pr instanceof PromiseInterface;
-            }));
+            ->with(['id' => new In(['fooBar']), 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
         self::assertInstanceOf(
             PublishedContentFromIdsQuery::class,

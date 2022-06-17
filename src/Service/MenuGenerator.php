@@ -55,9 +55,9 @@ use function array_keys;
 class MenuGenerator
 {
     public function __construct(
-        private ItemLoader $itemLoader,
-        private ContentLoader $contentLoader,
-        private ?ProxyDetectorInterface $proxyDetector = null,
+        private readonly ItemLoader $itemLoader,
+        private readonly ContentLoader $contentLoader,
+        private readonly ?ProxyDetectorInterface $proxyDetector = null,
     ) {
     }
 

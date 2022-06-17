@@ -52,8 +52,8 @@ class Xml implements DriverInterface
     private const DOCTRINE_NAMESPACE_URI = 'http://xml.teknoo.it/schemas/doctrine/east-website-translation';
 
     public function __construct(
-        private FileLocator $locator,
-        private SimpleXmlFactoryInterface $simpleXmlFactory,
+        private readonly FileLocator $locator,
+        private readonly SimpleXmlFactoryInterface $simpleXmlFactory,
     ) {
     }
 

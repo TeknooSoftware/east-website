@@ -78,9 +78,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \DomainException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \DomainException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())
@@ -210,9 +208,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \DomainException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \DomainException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())
@@ -230,9 +226,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \RuntimeException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \RuntimeException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())
@@ -315,9 +309,9 @@ trait RepositoryTestTrait
     {
         $expr = $this->createMock(ExprInterface::class);
 
-        $class = \get_class($this->buildRepository());
+        $class = $this->buildRepository()::class;
         $class::addExprMappingConversion(
-            \get_class($expr),
+            $expr::class,
             static function (array &$final, string $key, ExprInterface $expr) {
                 $final['foo'] = 'bar';
             }

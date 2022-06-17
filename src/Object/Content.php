@@ -27,6 +27,7 @@ namespace Teknoo\East\Website\Object;
 
 use DateTimeInterface;
 use Exception;
+use Stringable;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\PublishableInterface;
@@ -66,7 +67,8 @@ class Content implements
     DeletableInterface,
     PublishableInterface,
     TimestampableInterface,
-    SluggableInterface
+    SluggableInterface,
+    Stringable
 {
     use PublishableTrait;
     use AutomatedTrait;
@@ -148,7 +150,7 @@ class Content implements
         return $this;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getTitle();
     }
@@ -216,7 +218,7 @@ class Content implements
      */
     public function getParts(): array
     {
-        return (array) json_decode((string) $this->parts, true);
+        return (array) json_decode((string) $this->parts, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -224,7 +226,7 @@ class Content implements
      */
     public function setParts(?array $parts): Content
     {
-        $this->parts = (string) json_encode((array) $parts);
+        $this->parts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
 
         return $this;
     }

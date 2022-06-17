@@ -67,7 +67,7 @@ class TypeTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setName('fooBar')
         );
 
@@ -96,7 +96,7 @@ class TypeTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setTemplate('fooBar')
         );
 
@@ -125,7 +125,7 @@ class TypeTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setBlocks([new Block('foo', BlockType::Textarea)])
         );
 

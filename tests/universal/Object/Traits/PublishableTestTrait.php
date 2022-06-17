@@ -47,12 +47,12 @@ trait PublishableTestTrait
 
         $object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($object),
+            $object::class,
             $object->setPublishedAt($date)
         );
 
         self::assertInstanceOf(
-            \get_class($object),
+            $object::class,
             $object->setPublishedAt($date2)
         );
 

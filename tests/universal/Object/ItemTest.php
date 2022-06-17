@@ -67,7 +67,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setName('fooBar')
         );
 
@@ -131,7 +131,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setSlug('fooBar')
         );
 
@@ -197,7 +197,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocation('fooBar')
         );
 
@@ -224,7 +224,7 @@ class ItemTest extends TestCase
         $Object = $this->buildObject();
         self::assertFalse($Object->isHidden());
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setHidden(true)
         );
 
@@ -243,7 +243,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocaleField('fooBar')
         );
 
@@ -257,7 +257,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocaleField(null)
         );
 
@@ -284,7 +284,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setPosition(123)
         );
 
@@ -350,7 +350,7 @@ class ItemTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setChildren(['foo'=>'bar'])
         );
 

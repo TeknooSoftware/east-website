@@ -79,9 +79,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \DomainException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \DomainException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())
@@ -240,9 +238,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \DomainException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \DomainException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())
@@ -260,9 +256,7 @@ trait RepositoryTestTrait
     {
         $promise = $this->createMock(PromiseInterface::class);
         $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail')->with($this->callback(function ($value) {
-            return $value instanceof \RuntimeException;
-        }));
+        $promise->expects(self::once())->method('fail')->with($this->callback(fn($value) => $value instanceof \RuntimeException));
 
         $this->getDoctrineObjectRepositoryMock()
             ->expects(self::once())

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use Stringable;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\SluggableInterface;
@@ -58,7 +59,8 @@ class Item implements
     AutomatedInterface,
     DeletableInterface,
     TimestampableInterface,
-    SluggableInterface
+    SluggableInterface,
+    Stringable
 {
     use AutomatedTrait;
     use ObjectTrait;
@@ -118,7 +120,7 @@ class Item implements
         return $this->name;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getName();
     }

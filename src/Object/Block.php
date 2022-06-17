@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
-use Teknoo\Tests\East\WebsiteBundle\Form\Type\BlockTypeTest;
+use Stringable;
 
 /**
  * Persisted object representing a dynamic bloc in a type of content page.
@@ -34,7 +34,7 @@ use Teknoo\Tests\East\WebsiteBundle\Form\Type\BlockTypeTest;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class Block
+class Block implements Stringable
 {
     public function __construct(
         private string $name = '',

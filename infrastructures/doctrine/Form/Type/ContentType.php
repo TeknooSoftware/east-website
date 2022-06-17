@@ -68,10 +68,8 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'userIdentifier',
-                'query_builder' => static function (ObjectRepository $repository) {
-                    return $repository->createQueryBuilder()
-                        ->field('deletedAt')->equals(null);
-                }
+                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
+                    ->field('deletedAt')->equals(null)
             ]
         );
 
@@ -83,10 +81,8 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'name',
-                'query_builder' => static function (ObjectRepository $repository) {
-                    return $repository->createQueryBuilder()
-                        ->field('deletedAt')->equals(null);
-                }
+                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
+                    ->field('deletedAt')->equals(null)
             ]
         );
         $builder->add('title', TextType::class, ['required' => true]);

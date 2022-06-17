@@ -284,10 +284,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('findClassMetadata')
             ->willReturnCallback(
-                function (string $class, TranslatableListener $listener) {
-
-                    return $this->getManager();
-                }
+                fn(string $class, TranslatableListener $listener) => $this->getManager()
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
@@ -418,9 +415,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         self::assertInstanceOf(
@@ -492,9 +487,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         self::assertInstanceOf(
@@ -582,9 +575,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         self::assertInstanceOf(
@@ -638,9 +629,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
@@ -740,9 +729,7 @@ class TranslatableListenerTest extends TestCase
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
@@ -857,25 +844,14 @@ class TranslatableListenerTest extends TestCase
         $wrapper->expects(self::any())
             ->method('findTranslation')
             ->willReturnCallback(
-                function (
-                    AdapterInterface $adapter,
-                    string $locale,
-                    string $field,
-                    string $translationClass,
-                    string $objectClass,
-                    callable $callback
-                ) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(AdapterInterface $adapter, string $locale, string $field, string $translationClass, string $objectClass, callable $callback) => $wrapper
             );
 
         $this->getWrapperFactory()
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
@@ -960,25 +936,14 @@ class TranslatableListenerTest extends TestCase
         $wrapper->expects(self::any())
             ->method('findTranslation')
             ->willReturnCallback(
-                function (
-                    AdapterInterface $adapter,
-                    string $locale,
-                    string $field,
-                    string $translationClass,
-                    string $objectClass,
-                    callable $callback
-                ) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(AdapterInterface $adapter, string $locale, string $field, string $translationClass, string $objectClass, callable $callback) => $wrapper
             );
 
         $this->getWrapperFactory()
             ->expects(self::any())
             ->method('__invoke')
             ->willReturnCallback(
-                function (TranslatableInterface $object, ClassMetadata $metadata) use ($wrapper) {
-                    return $wrapper;
-                }
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()

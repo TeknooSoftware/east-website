@@ -61,9 +61,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects(self::once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'deletedAt' => null,], $this->callback(function ($pr) {
-                return $pr instanceof PromiseInterface;
-            }));
+            ->with(['slug' => 'fooBar', 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
         self::assertInstanceOf(
             PublishedContentFromSlugQuery::class,
@@ -152,9 +150,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $promise->expects(self::once())
             ->method('success')
-            ->with($this->callback(function ($value) {
-                return $value instanceof Content;
-            }));
+            ->with($this->callback(fn($value) => $value instanceof Content));
         $promise->expects(self::never())->method('fail');
 
         $repository->expects(self::once())

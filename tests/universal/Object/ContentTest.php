@@ -63,7 +63,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setParts(['fooBar'])
         );
 
@@ -72,7 +72,7 @@ class ContentTest extends TestCase
             $Object->getParts()
         );
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setParts(null)
         );
 
@@ -99,7 +99,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setDescription('fooBar')
         );
 
@@ -109,7 +109,7 @@ class ContentTest extends TestCase
         );
 
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setDescription(null)
         );
 
@@ -172,7 +172,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setSlug('fooBar')
         );
 
@@ -200,7 +200,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setSubtitle('fooBar')
         );
 
@@ -236,7 +236,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setTitle('fooBar')
         );
 
@@ -326,7 +326,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setTags(['foo'=>'bar'])
         );
 
@@ -359,7 +359,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocaleField('fooBar')
         );
 
@@ -373,7 +373,7 @@ class ContentTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocaleField(null)
         );
 

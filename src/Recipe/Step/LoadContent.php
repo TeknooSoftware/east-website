@@ -45,7 +45,7 @@ use Throwable;
 class LoadContent
 {
     public function __construct(
-        private ContentLoader $contentLoader,
+        private readonly ContentLoader $contentLoader,
     ) {
     }
 

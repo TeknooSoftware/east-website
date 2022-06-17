@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.6] - 2022-06-17
+### Stable Release
+- Clean code and test thanks to Rector
+- Update libs requirements
+
 ## [8.0.5] - 2022-05-16
 ### Stable Release
 - Fix admin lists routes

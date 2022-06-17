@@ -39,10 +39,7 @@ class TeknooEastWebsiteExtensionTest extends TestCase
      */
     private $container;
 
-    /**
-     * @return ContainerBuilder|\PHPUnit\Framework\MockObject\MockObject
-     */
-    private function getContainerBuilderMock()
+    private function getContainerBuilderMock(): \ContainerBuilder|\PHPUnit\Framework\MockObject\MockObject
     {
         if (!$this->container instanceof ContainerBuilder) {
             $this->container = $this->createMock(ContainerBuilder::class);
@@ -59,9 +56,6 @@ class TeknooEastWebsiteExtensionTest extends TestCase
         return new TeknooEastWebsiteExtension();
     }
 
-    /**
-     * @return string
-     */
     private function getExtensionClass(): string
     {
         return TeknooEastWebsiteExtension::class;

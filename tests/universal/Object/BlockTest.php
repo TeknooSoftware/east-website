@@ -65,7 +65,7 @@ class BlockTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setName('fooBar')
         );
 
@@ -93,7 +93,7 @@ class BlockTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setType(BlockType::Raw)
         );
 

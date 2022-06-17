@@ -40,7 +40,7 @@ class MenuMiddleware
     final public const MIDDLEWARE_PRIORITY = 7;
 
     public function __construct(
-        private MenuGenerator $menuGenerator,
+        private readonly MenuGenerator $menuGenerator,
     ) {
     }
 

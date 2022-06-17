@@ -49,10 +49,10 @@ class RenderMediaEndPoint implements RenderMediaEndPointInterface
 
     public function __construct(
         RecipeInterface $recipe,
-        private LoadMedia $loadMedia,
-        private GetStreamFromMediaInterface $getStreamFromMedia,
-        private SendMedia $sendMedia,
-        private RenderError $renderError
+        private readonly LoadMedia $loadMedia,
+        private readonly GetStreamFromMediaInterface $getStreamFromMedia,
+        private readonly SendMedia $sendMedia,
+        private readonly RenderError $renderError
     ) {
         $this->fill($recipe);
     }
@@ -68,8 +68,6 @@ class RenderMediaEndPoint implements RenderMediaEndPointInterface
 
         $recipe = $recipe->cook($this->sendMedia, SendMedia::class, [], 30);
 
-        $recipe = $recipe->onError(new Bowl($this->renderError, []));
-
-        return $recipe;
+        return $recipe->onError(new Bowl($this->renderError, []));
     }
 }

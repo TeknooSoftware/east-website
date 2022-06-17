@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use Stringable;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
@@ -41,7 +42,7 @@ use function array_values;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
-class Type implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface
+class Type implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
 {
     use ObjectTrait;
 
@@ -66,7 +67,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
         return $this;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getName();
     }
@@ -89,9 +90,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
     public function getBlocks(): array
     {
         return array_map(
-            static function ($key, $value) {
-                return new Block($key, BlockType::from($value));
-            },
+            static fn($key, $value) => new Block($key, BlockType::from($value)),
             array_keys($this->blocks),
             array_values($this->blocks)
         );

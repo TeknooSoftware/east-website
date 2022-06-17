@@ -63,10 +63,8 @@ class ItemType extends AbstractType
                 'required' => false,
                 'multiple' => false,
                 'choice_label' => 'name',
-                'query_builder' => static function (ObjectRepository $repository) {
-                    return $repository->createQueryBuilder()
-                        ->field('deletedAt')->equals(null);
-                }
+                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
+                    ->field('deletedAt')->equals(null)
             ]
         );
         $builder->add(
@@ -77,10 +75,8 @@ class ItemType extends AbstractType
                 'required' => false,
                 'multiple' => false,
                 'choice_label' => 'title',
-                'query_builder' => static function (ObjectRepository $repository) {
-                    return $repository->createQueryBuilder()
-                        ->field('deletedAt')->equals(null);
-                }
+                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
+                    ->field('deletedAt')->equals(null)
             ]
         );
         $builder->add('slug', TextType::class, ['required' => false]);

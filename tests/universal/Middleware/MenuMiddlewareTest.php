@@ -40,10 +40,7 @@ class MenuMiddlewareTest extends TestCase
      */
     private $menuGenerator;
 
-    /**
-     * @return MenuGenerator|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getMenuGenerator()
+    public function getMenuGenerator(): \MenuGenerator|\PHPUnit\Framework\MockObject\MockObject
     {
         if (!$this->menuGenerator instanceof MenuGenerator) {
             $this->menuGenerator = $this->createMock(MenuGenerator::class);

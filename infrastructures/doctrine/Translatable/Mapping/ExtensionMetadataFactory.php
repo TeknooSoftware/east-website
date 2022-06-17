@@ -55,10 +55,10 @@ class ExtensionMetadataFactory
      * @param AbstractClassMetadataFactory<ClassMetadataODM<IdentifiedObjectInterface>> $classMetadataFactory
      */
     public function __construct(
-        private ObjectManager $objectManager,
-        private AbstractClassMetadataFactory $classMetadataFactory,
-        private MappingDriver $mappingDriver,
-        private DriverFactoryInterface $driverFactory,
+        private readonly ObjectManager $objectManager,
+        private readonly AbstractClassMetadataFactory $classMetadataFactory,
+        private readonly MappingDriver $mappingDriver,
+        private readonly DriverFactoryInterface $driverFactory,
     ) {
     }
 

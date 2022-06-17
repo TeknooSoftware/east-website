@@ -49,10 +49,10 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
 
     public function __construct(
         RecipeInterface $recipe,
-        private ExtractSlug $extractSlug,
-        private LoadContent $loadContent,
-        private Render $render,
-        private RenderError $renderError
+        private readonly ExtractSlug $extractSlug,
+        private readonly LoadContent $loadContent,
+        private readonly Render $render,
+        private readonly RenderError $renderError
     ) {
         $this->fill($recipe);
     }
@@ -67,8 +67,6 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
 
         $recipe = $recipe->cook($this->render, Render::class, [], 30);
 
-        $recipe = $recipe->onError(new Bowl($this->renderError, []));
-
-        return $recipe;
+        return $recipe->onError(new Bowl($this->renderError, []));
     }
 }

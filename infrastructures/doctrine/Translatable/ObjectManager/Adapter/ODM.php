@@ -51,8 +51,8 @@ class ODM implements AdapterInterface
     private ?UnitOfWork $unitOfWork = null;
 
     public function __construct(
-        private ManagerInterface $eastManager,
-        private DocumentManager $doctrineManager,
+        private readonly ManagerInterface $eastManager,
+        private readonly DocumentManager $doctrineManager,
     ) {
     }
 

@@ -41,7 +41,7 @@ use Throwable;
 class LoadMedia
 {
     public function __construct(
-        private MediaLoader $mediaLoader,
+        private readonly MediaLoader $mediaLoader,
     ) {
     }
 

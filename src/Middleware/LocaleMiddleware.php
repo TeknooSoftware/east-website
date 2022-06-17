@@ -56,7 +56,7 @@ class LocaleMiddleware
 
     public function __construct(
         ?callable $translatableSetter = null,
-        private string $defaultLocale = 'en',
+        private readonly string $defaultLocale = 'en',
     ) {
         $this->translatableSetter = $translatableSetter;
     }

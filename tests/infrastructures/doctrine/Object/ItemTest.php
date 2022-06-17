@@ -58,7 +58,7 @@ class ItemTest extends OriginalTest
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setLocaleField('fooBar')
         );
 

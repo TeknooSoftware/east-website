@@ -48,8 +48,8 @@ class GetStreamFromMedia implements GetStreamFromMediaInterface
      * @param GridFSRepository<Media> $repository
      */
     public function __construct(
-        private GridFSRepository $repository,
-        private StreamFactoryInterface $streamFactory,
+        private readonly GridFSRepository $repository,
+        private readonly StreamFactoryInterface $streamFactory,
     ) {
     }
 

@@ -52,8 +52,8 @@ class DocumentWrapper implements WrapperInterface
      * @param ClassMetadata<IdentifiedObjectInterface> $meta
      */
     public function __construct(
-        private TranslatableInterface $object,
-        private ClassMetadata $meta,
+        private readonly TranslatableInterface $object,
+        private readonly ClassMetadata $meta,
     ) {
     }
 

@@ -48,7 +48,7 @@ use function strlen;
 class ODM implements AdapterInterface
 {
     public function __construct(
-        private DocumentManager $manager,
+        private readonly DocumentManager $manager,
     ) {
     }
 

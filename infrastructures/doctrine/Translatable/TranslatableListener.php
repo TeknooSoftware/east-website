@@ -65,41 +65,6 @@ use function spl_object_hash;
  */
 class TranslatableListener implements EventSubscriber
 {
-    /*
-     * ExtensionMetadataFactory used to read the extension
-     * metadata through the extension drivers
-     */
-    private ExtensionMetadataFactory $extensionMetadataFactory;
-
-    private ManagerAdapterInterface $manager;
-
-    private PersistenceAdapterInterface $persistence;
-
-    private FactoryInterface $wrapperFactory;
-
-    /*
-     * Locale which is set on this listener.
-     * If pbject being translated has locale defined it
-     * will override this one
-     */
-    private string $locale;
-
-    /*
-     * Default locale, this changes behavior
-     * to not update the original record field if locale
-     * which is used for updating is not default. This
-     * will load the default translation in other locales
-     * if record is not translated yet
-     */
-    private string $defaultLocale;
-
-    /*
-     * If this is set to false, when if object does
-     * not have a translation for requested locale
-     * it will show a blank value
-     */
-    private bool $translationFallback;
-
     /**
      * List of translations which do not have the foreign
      * key generated yet - MySQL case. These translations
@@ -149,21 +114,14 @@ class TranslatableListener implements EventSubscriber
     private array $classMetadata = [];
 
     public function __construct(
-        ExtensionMetadataFactory $extensionMetadataFactory,
-        ManagerAdapterInterface $manager,
-        PersistenceAdapterInterface $persistence,
-        FactoryInterface $wrapperFactory,
-        string $locale = 'en',
-        string $defaultLocale = 'en',
-        bool $translationFallback = true
+        private readonly ExtensionMetadataFactory $extensionMetadataFactory,
+        private readonly ManagerAdapterInterface $manager,
+        private readonly PersistenceAdapterInterface $persistence,
+        private readonly FactoryInterface $wrapperFactory,
+        private string $locale = 'en',
+        private readonly string $defaultLocale = 'en',
+        private readonly bool $translationFallback = true
     ) {
-        $this->extensionMetadataFactory = $extensionMetadataFactory;
-        $this->manager = $manager;
-        $this->persistence = $persistence;
-        $this->wrapperFactory = $wrapperFactory;
-        $this->locale = $locale;
-        $this->defaultLocale = $defaultLocale;
-        $this->translationFallback = $translationFallback;
     }
 
     public function getSubscribedEvents(): array

@@ -63,7 +63,7 @@ class MediaTest extends TestCase
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($Object),
+            $Object::class,
             $Object->setId('fooBar')
         );
 
@@ -91,7 +91,7 @@ class MediaTest extends TestCase
     {
         $object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($object),
+            $object::class,
             $object->setName('fooBar')
         );
 
@@ -119,7 +119,7 @@ class MediaTest extends TestCase
     {
         $object = $this->buildObject();
         self::assertInstanceOf(
-            \get_class($object),
+            $object::class,
             $object->setLength(123)
         );
 

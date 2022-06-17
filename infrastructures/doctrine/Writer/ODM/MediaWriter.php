@@ -50,15 +50,15 @@ class MediaWriter implements WriterInterface
      * @param GridFSRepository<Media> $repository
      */
     public function __construct(
-        private GridFSRepository $repository,
-        private OriginalWriter $writer,
+        private readonly GridFSRepository $repository,
+        private readonly OriginalWriter $writer,
     ) {
     }
 
     public function save(ObjectInterface $object, PromiseInterface $promise = null): WriterInterface
     {
         if (!$object instanceof Media || !$object->getMetadata() instanceof MediaMetadata) {
-            if ($promise) {
+            if (null !== $promise) {
                 $promise->fail(new RuntimeException('This type of media is not managed by this writer'));
             }
 
@@ -76,7 +76,7 @@ class MediaWriter implements WriterInterface
             $options
         );
 
-        if ($promise) {
+        if (null !== $promise) {
             $promise->success($media);
         }
 
