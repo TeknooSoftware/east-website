@@ -71,7 +71,7 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
                 ) {
                     $next->success($object);
                 } else {
-                    $next->fail(new DomainException('Object not found'));
+                    $next->fail(new DomainException('Content not found'));
                 }
             },
             static function (Throwable $e, PromiseInterface $next) {

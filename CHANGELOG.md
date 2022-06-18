@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.0.7] - 2022-06-18
+### Stable Release
+- Improve exception message in `PublishedContentFromSlugQuery`
+
 ## [8.0.6] - 2022-06-17
 ### Stable Release
 - Clean code and test thanks to Rector
