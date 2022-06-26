@@ -39,6 +39,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use RuntimeException;
 use SimpleXMLElement;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
@@ -119,7 +120,8 @@ return [
                         }
                     );
                 }
-            }
+            },
+            $container->get(ArrayAdapter::class),
         );
 
         $translatableListener = new TranslatableListener(

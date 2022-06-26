@@ -33,6 +33,7 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
+use Psr\Cache\CacheItemPoolInterface;
 use Teknoo\East\Website\Doctrine\Exception\InvalidMappingException;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
@@ -59,7 +60,15 @@ class ExtensionMetadataFactory
         private readonly AbstractClassMetadataFactory $classMetadataFactory,
         private readonly MappingDriver $mappingDriver,
         private readonly DriverFactoryInterface $driverFactory,
+        private ?CacheItemPoolInterface $cache = null,
     ) {
+    }
+
+    public function setCache(CacheItemPoolInterface $cache): self
+    {
+        $this->cache = $cache;
+
+        return $this;
     }
 
     private function getDriver(): DriverInterface
@@ -99,20 +108,11 @@ class ExtensionMetadataFactory
             return $this;
         }
 
-        $config = [];
-
         $cacheId = self::getCacheId($metaData->getName());
-        $cacheDriver = $this->classMetadataFactory->getCacheDriver();
-
-        if (null !== $cacheDriver && $cacheDriver->contains($cacheId)) {
-            /** @var array{
-             *        useObjectClass: string,
-             *        translationClass: string,
-             *        fields: array<int, string>|null,
-             *        fallback: array<string, string>
-             *      } $config */
-            $config = $cacheDriver->fetch($cacheId);
-            $listener->injectConfiguration($metaData, $config);
+        if (null !== $this->cache && $this->cache->hasItem($cacheId)) {
+            /** @var Configuration $config */
+            $config = $this->cache->getItem($cacheId);
+            $listener->injectConfiguration($metaData, $config->get());
 
             return $this;
         }
@@ -121,6 +121,7 @@ class ExtensionMetadataFactory
         $useObjectName = $metaData->getName();
 
         // collect metadata from inherited classes
+        $config = [];
         foreach (array_reverse((array) class_parents($useObjectName)) as $parentClass) {
             // read only inherited mapped classes
             /** @var class-string $parentClass */
@@ -147,8 +148,14 @@ class ExtensionMetadataFactory
             $config['useObjectClass'] = $useObjectName;
         }
 
-        if (null !== $cacheDriver) {
-            $cacheDriver->save($cacheId, $config);
+        if (null !== $this->cache) {
+            $this->cache->save(
+                new Configuration(
+                    cacheId: $cacheId,
+                    configurations: $config,
+                    isHit: false,
+                )
+            );
         }
 
         $listener->injectConfiguration($metaData, $config);
