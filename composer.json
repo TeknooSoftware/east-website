@@ -94,6 +94,9 @@
         "league/oauth2-client": "^2.6.1",
         "knpuniversity/oauth2-client-bundle": "^2.10"
     },
+    "conflict": {
+        "doctrine/persistence": "<3.0"
+    },
     "archive": {
         "exclude": ["features", "tests", "vendor", ".idea"]
     },

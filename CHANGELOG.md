@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.1.0] - 2022-06-27
+### Stable Release
+- Fix Support last version of Doctrine persistence
+- Old version are set as conflict
+
 ## [8.0.7] - 2022-06-18
 ### Stable Release
 - Improve exception message in `PublishedContentFromSlugQuery`
