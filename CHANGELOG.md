@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.1.1] - 2022-08-06
+### Stable Release
+- Fix composer.json
+
 ## [8.1.0] - 2022-06-27
 ### Stable Release
 - Fix Support last version of Doctrine persistence

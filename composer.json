@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Universal package, following the #East programming philosophy, build on Teknoo/East-Foundation (and Teknoo/Recipe), and implementing a basic CMS to display dynamics pages with different types and templates.",
     "keywords": ["east","website","cms"],
-    "homepage": "http://teknoo.software/website",
+    "homepage": "http://teknoo.software/east/website",
     "license": "MIT",
     "authors": [
         {
