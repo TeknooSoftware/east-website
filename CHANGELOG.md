@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.2.0] - 2022-08-14
+### Stable Release
+- Support last version of `Teknoo East Common`
+- Update writers to support `prefereRealDateOnUpdate` behavior
+
 ## [8.1.1] - 2022-08-06
 ### Stable Release
 - Fix composer.json

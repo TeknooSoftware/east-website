@@ -37,9 +37,9 @@ class ItemWriterTest extends TestCase
 {
     use PersistTestTrait;
 
-    public function buildWriter(): WriterInterface
+    public function buildWriter(bool $prefereRealDateOnUpdate = false,): WriterInterface
     {
-        return new ItemWriter($this->getObjectManager(), $this->getDatesServiceMock());
+        return new ItemWriter($this->getObjectManager(), $this->getDatesServiceMock(), $prefereRealDateOnUpdate);
     }
 
     public function getObject()

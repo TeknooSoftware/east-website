@@ -53,9 +53,12 @@ class ContentWriter implements WriterInterface
     /**
      * @throws Throwable
      */
-    public function save(ObjectInterface $object, PromiseInterface $promise = null): WriterInterface
-    {
-        $this->persist($object, $promise);
+    public function save(
+        ObjectInterface $object,
+        PromiseInterface $promise = null,
+        ?bool $prefereRealDateOnUpdate = null,
+    ): WriterInterface {
+        $this->persist($object, $promise, $prefereRealDateOnUpdate);
 
         return $this;
     }

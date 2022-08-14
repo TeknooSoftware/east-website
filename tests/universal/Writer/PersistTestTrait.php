@@ -72,7 +72,7 @@ trait PersistTestTrait
     /**
      * @return WriterInterface
      */
-    abstract public function buildWriter(): WriterInterface;
+    abstract public function buildWriter(bool $prefereRealDateOnUpdate = false,): WriterInterface;
 
     /**
      * @return object
@@ -137,6 +137,195 @@ trait PersistTestTrait
         }
 
         self::assertInstanceOf(WriterInterface::class, $this->buildWriter()->save($object, $promise));
+    }
+
+    public function testSaveWithPromiseSuccessWithNotPreferedRealDateSetInWriterPropertyButOverloadedInCall()
+    {
+        $object = $this->getObject();
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('persist')
+            ->with($object);
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('flush');
+
+        $promise = $this->createMock(PromiseInterface::class);
+        $promise->expects(self::once())
+            ->method('success')
+            ->with($object)
+            ->willReturnSelf();
+
+        $promise->expects(self::never())
+            ->method('fail');
+
+        $date = new \DateTime('2017-01-01');
+
+        if ($object instanceof TimestampableInterface) {
+            $this->getDatesServiceMock()
+                ->expects(self::any())
+                ->method('passMeTheDate')
+                ->willReturnCallback(
+                    function ($setter, $preferRealDate) use ($date) {
+                        $setter($date);
+                        self::assertTrue($preferRealDate);
+
+                        return $this->getDatesServiceMock();
+                    }
+                );
+        } else {
+            $this->getDatesServiceMock()
+                ->expects(self::never())
+                ->method('passMeTheDate');
+        }
+
+        self::assertInstanceOf(
+            WriterInterface::class,
+            $this->buildWriter(false)->save($object, $promise, true)
+        );
+    }
+
+    public function testSaveWithPromiseSuccessWithPreferedRealDateSetInWriterProperty()
+    {
+        $object = $this->getObject();
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('persist')
+            ->with($object);
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('flush');
+
+        $promise = $this->createMock(PromiseInterface::class);
+        $promise->expects(self::once())
+            ->method('success')
+            ->with($object)
+            ->willReturnSelf();
+
+        $promise->expects(self::never())
+            ->method('fail');
+
+        $date = new \DateTime('2017-01-01');
+
+        if ($object instanceof TimestampableInterface) {
+            $this->getDatesServiceMock()
+                ->expects(self::any())
+                ->method('passMeTheDate')
+                ->willReturnCallback(
+                    function ($setter, $preferRealDate) use ($date) {
+                        $setter($date);
+                        self::assertTrue($preferRealDate);
+
+                        return $this->getDatesServiceMock();
+                    }
+                );
+        } else {
+            $this->getDatesServiceMock()
+                ->expects(self::never())
+                ->method('passMeTheDate');
+        }
+
+        self::assertInstanceOf(WriterInterface::class, $this->buildWriter(true)->save($object, $promise));
+    }
+
+    public function testSaveWithPromiseSuccessWithPreferedRealDateSetInWriterPropertyOverloadedToFalseInCall()
+    {
+        $object = $this->getObject();
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('persist')
+            ->with($object);
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('flush');
+
+        $promise = $this->createMock(PromiseInterface::class);
+        $promise->expects(self::once())
+            ->method('success')
+            ->with($object)
+            ->willReturnSelf();
+
+        $promise->expects(self::never())
+            ->method('fail');
+
+        $date = new \DateTime('2017-01-01');
+
+        if ($object instanceof TimestampableInterface) {
+            $this->getDatesServiceMock()
+                ->expects(self::any())
+                ->method('passMeTheDate')
+                ->willReturnCallback(
+                    function ($setter, $preferRealDate) use ($date) {
+                        $setter($date);
+                        self::assertFalse($preferRealDate);
+
+                        return $this->getDatesServiceMock();
+                    }
+                );
+        } else {
+            $this->getDatesServiceMock()
+                ->expects(self::never())
+                ->method('passMeTheDate');
+        }
+
+        self::assertInstanceOf(
+            WriterInterface::class,
+            $this->buildWriter(true)->save($object, $promise, false)
+        );
+    }
+
+    public function testSaveWithPromiseSuccessWithPreferedRealDateSetInWriterPropertyOverloadedToTrueInCall()
+    {
+        $object = $this->getObject();
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('persist')
+            ->with($object);
+
+        $this->getObjectManager()
+            ->expects(self::once())
+            ->method('flush');
+
+        $promise = $this->createMock(PromiseInterface::class);
+        $promise->expects(self::once())
+            ->method('success')
+            ->with($object)
+            ->willReturnSelf();
+
+        $promise->expects(self::never())
+            ->method('fail');
+
+        $date = new \DateTime('2017-01-01');
+
+        if ($object instanceof TimestampableInterface) {
+            $this->getDatesServiceMock()
+                ->expects(self::any())
+                ->method('passMeTheDate')
+                ->willReturnCallback(
+                    function ($setter, $preferRealDate) use ($date) {
+                        $setter($date);
+                        self::assertTrue($preferRealDate);
+
+                        return $this->getDatesServiceMock();
+                    }
+                );
+        } else {
+            $this->getDatesServiceMock()
+                ->expects(self::never())
+                ->method('passMeTheDate');
+        }
+
+        self::assertInstanceOf(
+            WriterInterface::class,
+            $this->buildWriter(true)->save($object, $promise, true)
+        );
     }
 
     public function testSaveWithPromiseFailure()

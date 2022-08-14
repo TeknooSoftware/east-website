@@ -55,8 +55,11 @@ class MediaWriter implements WriterInterface
     ) {
     }
 
-    public function save(ObjectInterface $object, PromiseInterface $promise = null): WriterInterface
-    {
+    public function save(
+        ObjectInterface $object,
+        PromiseInterface $promise = null,
+        ?bool $prefereRealDateOnUpdate = null,
+    ): WriterInterface {
         if (!$object instanceof Media || !$object->getMetadata() instanceof MediaMetadata) {
             if (null !== $promise) {
                 $promise->fail(new RuntimeException('This type of media is not managed by this writer'));
