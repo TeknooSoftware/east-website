@@ -2,6 +2,9 @@ parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.sanitize.default_context: ~
+    teknoo.east.website.sanitize.salt: '%env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT)%'
+    env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT): youmustchangeit
 
 services:
     #Generic endpoints
@@ -30,3 +33,18 @@ services:
         arguments:
             - '@teknoo.east.website.endpoint.media.bowl'
             - '@service_container'
+
+    Teknoo\East\Website\Twig\Extension\SanitizedContent:
+        arguments:
+            - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
+        tags:
+            - { name: "twig.extension" }
+
+    Teknoo\East\Website\Doctrine\Form\Type\ContentType:
+        class: 'Teknoo\East\Website\Doctrine\Form\Type\ContentType'
+        arguments:
+            - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
+            - '%teknoo.east.website.sanitize.default_context%'
+            - '%teknoo.east.website.sanitize.salt%'
+        tags:
+            - {name: form.type}

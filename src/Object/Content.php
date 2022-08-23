@@ -39,6 +39,7 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\East\Common\Service\FindSlugService;
+use Teknoo\East\Website\Object\DTO\ReadOnlyArray;
 use Teknoo\States\Automated\Assertion\AssertionInterface;
 use Teknoo\States\Automated\Assertion\Property;
 use Teknoo\States\Automated\Assertion\Property\IsInstanceOf;
@@ -47,8 +48,11 @@ use Teknoo\States\Automated\AutomatedInterface;
 use Teknoo\States\Automated\AutomatedTrait;
 use Teknoo\States\Proxy\ProxyTrait;
 
+use function hash;
 use function json_decode;
 use function json_encode;
+
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Stated class representing a dynamic content in the website. The content has a `Type` with several blocks.
@@ -74,6 +78,8 @@ class Content implements
     use AutomatedTrait;
     use ProxyTrait;
 
+    protected const HASH_ALGO_FOR_SANITIZED = 'sha256';
+
     protected ?User $author = null;
 
     protected string $title = '';
@@ -85,6 +91,14 @@ class Content implements
     protected ?Type $type = null;
 
     protected string $parts = '{}';
+
+    protected ?ReadOnlyArray $decodedParts = null;
+
+    protected string $sanitizedParts = '{}';
+
+    protected ?ReadOnlyArray $decodedSanitizedParts = null;
+
+    protected string $sanitizedHash = '';
 
     /**
      * @var array<string>
@@ -214,11 +228,45 @@ class Content implements
     }
 
     /**
-     * @return array<mixed>
+     * @return ReadOnlyArray
      */
-    public function getParts(): array
+    public function getParts(): ReadOnlyArray
     {
-        return (array) json_decode((string) $this->parts, true, 512, JSON_THROW_ON_ERROR);
+        if (null !== $this->decodedParts) {
+            return $this->decodedParts;
+        }
+
+        return $this->decodedParts = new ReadOnlyArray(
+            (array) json_decode(
+                json: (string) $this->parts,
+                associative: true,
+                depth: 512,
+                flags: JSON_THROW_ON_ERROR,
+            )
+        );
+    }
+
+    /**
+     * @return ReadOnlyArray|null
+     */
+    public function getSanitizedParts(string $salt): ?ReadOnlyArray
+    {
+        if (null !== $this->decodedSanitizedParts) {
+            return $this->decodedSanitizedParts;
+        }
+
+        if ($this->computeSanitizedHash($this->sanitizedParts, $salt) !== $this->sanitizedHash) {
+            return null;
+        }
+
+        return $this->decodedSanitizedParts = new ReadOnlyArray(
+            (array) json_decode(
+                json: (string) $this->sanitizedParts,
+                associative: true,
+                depth: 512,
+                flags: JSON_THROW_ON_ERROR,
+            )
+        );
     }
 
     /**
@@ -226,7 +274,28 @@ class Content implements
      */
     public function setParts(?array $parts): Content
     {
+        $this->decodedParts = null;
         $this->parts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
+
+        return $this;
+    }
+
+    private function computeSanitizedHash(string &$value, string &$salt): string
+    {
+        return hash(
+            algo: self::HASH_ALGO_FOR_SANITIZED,
+            data: $salt . $value,
+        );
+    }
+
+    /**
+     * @param array<mixed>|null $parts
+     */
+    public function setSanitizedParts(?array $parts, string $salt): Content
+    {
+        $this->decodedSanitizedParts = null;
+        $this->sanitizedParts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
+        $this->sanitizedHash = $this->computeSanitizedHash($this->sanitizedParts, $salt);
 
         return $this;
     }

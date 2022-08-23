@@ -12,6 +12,8 @@
         <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>
         <field field-name="description" type="string" />
         <field field-name="parts" type="string" />
+        <field field-name="sanitizedParts" name="sanitized_parts" type="string" />
+        <field field-name="sanitizedHash" name="sanitized_hash" type="string" />
         <field field-name="tags" type="collection" index="true"/>
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date" />

@@ -10,5 +10,6 @@
         <field field-name="subtitle"/>
         <field field-name="description" />
         <field field-name="parts" />
+        <field field-name="sanitizedParts" />
     </object>
 </east-website-translation>

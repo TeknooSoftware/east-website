@@ -744,6 +744,7 @@ class FeatureContext implements Context
             (new Content())->setSlug($type)
                 ->setType($this->type)
                 ->setParts(['block1' => 'hello', 'block2' => 'world'])
+                ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
                 ->setPublishedAt(new \DateTime('2017-11-25'))
         );
     }
@@ -807,6 +808,10 @@ class FeatureContext implements Context
                         'localeField',
                         'publishedAt',
                         'defaultCallerStatedClassName',
+                        'decodedParts',
+                        'sanitizedParts',
+                        'decodedSanitizedParts',
+                        'sanitizedHash',
                     ])) {
                         continue;
                     }
@@ -849,7 +854,60 @@ class FeatureContext implements Context
                 $keys = [];
                 $values = [];
                 if (isset($parameters['content']) && $parameters['content'] instanceof Content) {
-                    foreach ($parameters['content']->getParts() as $key=>$value) {
+                    foreach ($parameters['content']->getParts()->toArray() as $key=>$value) {
+                        $keys[] = '{'.$key.'}';
+                        $values[] = $value;
+                    }
+                }
+
+                $result = $this->context->buildResultObject(\str_replace($keys, $values, $this->context->templateContent));
+                $promise->success($result);
+
+                return $this;
+            }
+
+            public function exists($name)
+            {
+            }
+
+            public function supports($name)
+            {
+            }
+        };
+
+        $this->container->set(EngineInterface::class, $this->templating);
+    }
+
+    /**
+     * @Given a templating engine for sanitized content
+     */
+    public function aTemplatingEngineForSanitizedContent(): void
+    {
+        $this->templating = new class($this) implements EngineInterface {
+            private $context;
+
+            /**
+             * @param FeatureContext $context
+             */
+            public function __construct(FeatureContext $context)
+            {
+                $this->context = $context;
+            }
+
+            public function render(PromiseInterface $promise, $name, array $parameters = array()): EngineInterface
+            {
+                if ('404-error' === $name) {
+                    $promise->fail(new \Exception('Error 404'));
+
+                    return $this;
+                }
+
+                Assert::assertEquals($this->context->templateToCall, $name);
+
+                $keys = [];
+                $values = [];
+                if (isset($parameters['content']) && $parameters['content'] instanceof Content) {
+                    foreach ($parameters['content']->getSanitizedParts('fooBar')->toArray() as $key=>$value) {
                         $keys[] = '{'.$key.'}';
                         $values[] = $value;
                     }

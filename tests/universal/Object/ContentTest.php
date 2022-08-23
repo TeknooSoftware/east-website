@@ -53,35 +53,159 @@ class ContentTest extends TestCase
 
     public function testGetParts()
     {
+        $object = $this->generateObjectPopulated(['parts' => \json_encode(['fooBar'])]);
+
         self::assertEquals(
             ['fooBar'],
-            $this->generateObjectPopulated(['parts' => \json_encode(['fooBar'])])->getParts()
+            $object->getParts()->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getParts()->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getParts()->toArray(),
         );
     }
 
     public function testSetParts()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setParts(['fooBar'])
+            $object::class,
+            $object->setParts(['fooBar'])
         );
 
         self::assertEquals(
             ['fooBar'],
-            $Object->getParts()
+            $object->getParts()->toArray(),
         );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getParts()->toArray(),
+        );
+
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setParts(null)
+            $object::class,
+            $object->setParts(['fooBar2'])
+        );
+
+        self::assertEquals(
+            ['fooBar2'],
+            $object->getParts()->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar2'],
+            $object->getParts()->toArray(),
+        );
+
+        self::assertInstanceOf(
+            $object::class,
+            $object->setParts(null)
         );
 
         self::assertEmpty(
-            $Object->getParts()
+            $object->getParts()->toArray(),
         );
     }
 
     public function testSetPartsExceptionOnBadArgument()
+    {
+        $this->expectException(\Throwable::class);
+        $this->buildObject()->setContent(new \stdClass());
+    }
+
+    public function testGetSanitizedParts()
+    {
+        $object = $this->generateObjectPopulated(
+            [
+                'sanitizedParts' => $value = \json_encode(['fooBar']),
+                'sanitizedHash' => \hash(
+                    algo: 'sha256',
+                    data: 'barFoo' . $value,
+                )
+            ]
+        );
+
+        self::assertNull(
+            $object->getSanitizedParts('barFoo2')
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getSanitizedParts('barFoo')->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getSanitizedParts('barFoo')->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getSanitizedParts('barFoo')->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            $object->getSanitizedParts('barFoo2')->toArray(),
+        );
+    }
+
+    public function testSetSanitizedParts()
+    {
+        $object = $this->buildObject();
+        self::assertInstanceOf(
+            $object::class,
+            $object->setSanitizedParts(['fooBar'], 'barFoo')
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            ($a1 = $object->getSanitizedParts('barFoo'))->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar'],
+            ($a2 = $object->getSanitizedParts('barFoo'))->toArray(),
+        );
+
+        self::assertSame($a1, $a2);
+
+        self::assertInstanceOf(
+            $object::class,
+            $object->setSanitizedParts(['fooBar2'], 'barFoo')
+        );
+
+        self::assertEquals(
+            ['fooBar2'],
+            ($a3 = $object->getSanitizedParts('barFoo'))->toArray(),
+        );
+
+        self::assertEquals(
+            ['fooBar2'],
+            ($a4 = $object->getSanitizedParts('barFoo'))->toArray(),
+        );
+
+        self::assertSame($a3, $a4);
+        self::assertNotSame($a1, $a3);
+
+        self::assertInstanceOf(
+            $object::class,
+            $object->setSanitizedParts(null, 'barFoo')
+        );
+
+        self::assertEmpty(
+            $object->getSanitizedParts('barFoo')->toArray(),
+        );
+    }
+
+    public function testSetSanitizedPartsExceptionOnBadArgument()
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setContent(new \stdClass());
@@ -97,24 +221,24 @@ class ContentTest extends TestCase
 
     public function testSetDescription()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setDescription('fooBar')
+            $object::class,
+            $object->setDescription('fooBar')
         );
 
         self::assertEquals(
             'fooBar',
-            $Object->getDescription()
+            $object->getDescription()
         );
 
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setDescription(null)
+            $object::class,
+            $object->setDescription(null)
         );
 
         self::assertEmpty(
-            $Object->getDescription()
+            $object->getDescription()
         );
     }
 
@@ -170,15 +294,15 @@ class ContentTest extends TestCase
 
     public function testSetSlug()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setSlug('fooBar')
+            $object::class,
+            $object->setSlug('fooBar')
         );
 
         self::assertEquals(
             'fooBar',
-            $Object->getSlug()
+            $object->getSlug()
         );
     }
 
@@ -198,15 +322,15 @@ class ContentTest extends TestCase
 
     public function testSetSubtitle()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setSubtitle('fooBar')
+            $object::class,
+            $object->setSubtitle('fooBar')
         );
 
         self::assertEquals(
             'fooBar',
-            $Object->getSubtitle()
+            $object->getSubtitle()
         );
     }
 
@@ -234,15 +358,15 @@ class ContentTest extends TestCase
 
     public function testSetTitle()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setTitle('fooBar')
+            $object::class,
+            $object->setTitle('fooBar')
         );
 
         self::assertEquals(
             'fooBar',
-            $Object->getTitle()
+            $object->getTitle()
         );
     }
 
@@ -263,17 +387,17 @@ class ContentTest extends TestCase
 
     public function testSetAuthor()
     {
-        $object = new User();
+        $user = new User();
 
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
             Content::class,
-            $Object->setAuthor($object)
+            $object->setAuthor($user)
         );
 
         self::assertEquals(
-            $object,
-            $Object->getAuthor()
+            $user,
+            $object->getAuthor()
         );
     }
 
@@ -294,17 +418,17 @@ class ContentTest extends TestCase
 
     public function testSetType()
     {
-        $object = new Type();
+        $type = new Type();
 
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
             Content::class,
-            $Object->setType($object)
+            $object->setType($type)
         );
 
         self::assertEquals(
-            $object,
-            $Object->getType()
+            $type,
+            $object->getType()
         );
     }
 
@@ -324,15 +448,15 @@ class ContentTest extends TestCase
 
     public function testSetTags()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setTags(['foo'=>'bar'])
+            $object::class,
+            $object->setTags(['foo'=>'bar'])
         );
 
         self::assertEquals(
             ['foo'=>'bar'],
-            $Object->getTags()
+            $object->getTags()
         );
     }
 
@@ -357,28 +481,28 @@ class ContentTest extends TestCase
 
     public function testSetLocaleField()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setLocaleField('fooBar')
+            $object::class,
+            $object->setLocaleField('fooBar')
         );
 
         self::assertEquals(
             'fooBar',
-            $Object->getLocaleField()
+            $object->getLocaleField()
         );
     }
 
     public function testSetLocaleFieldToNull()
     {
-        $Object = $this->buildObject();
+        $object = $this->buildObject();
         self::assertInstanceOf(
-            $Object::class,
-            $Object->setLocaleField(null)
+            $object::class,
+            $object->setLocaleField(null)
         );
 
         self::assertNull(
-            $Object->getLocaleField()
+            $object->getLocaleField()
         );
     }
 

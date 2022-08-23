@@ -1,5 +1,17 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.0] - 2022-08-23
+### Stable Release
+- Add `ReadOnlyArray` to simulate a read only array, to improve memory access (object are passed by reference in PHP)
+ instead of array
+- `Content::getParts()` return now an instance of `ReadOnlyArray` and this instance is cached until parts properties is
+ not updated
+- Add `sanitizedParts` to store parts value sanitized during Content's edition. Authenticity of sanitized values
+  (they are not be updated directly into the data store) is granted by a hash, computed with `sha256` and a salt to
+ pass at each call, If the hash is invalid, null answer is returned by the `Content` instance. 
+- Add `SanitizedContent` twig filter to return automatically the sanitized part's element if it is available, else
+ sanitize if from parts's elements and return it.
+
 ## [8.2.0] - 2022-08-14
 ### Stable Release
 - Support last version of `Teknoo East Common`

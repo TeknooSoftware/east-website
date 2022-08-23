@@ -34,6 +34,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Common\Object\User;
 use Teknoo\East\Website\Doctrine\Object\Content;
@@ -53,6 +54,13 @@ use Teknoo\East\Website\Object\Type;
 class ContentType extends AbstractType
 {
     use TranslatableTrait;
+
+    public function __construct(
+        private ?HtmlSanitizerInterface $sanitizer = null,
+        private ?string $sanitizeContext = null,
+        private ?string $contentSanitzedSalt = null,
+    ) {
+    }
 
     /**
      * @param FormBuilderInterface<Content> $builder
@@ -157,7 +165,7 @@ class ContentType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SUBMIT,
-            static function (FormEvent $event) {
+            function (FormEvent $event) {
                 $form = $event->getForm();
                 /** @var array<string, string> $data */
                 $data = $event->getData();
@@ -168,14 +176,35 @@ class ContentType extends AbstractType
                 }
 
                 $type = $contentObject->getType();
-                $contentValue = [];
+                $contentValues = [];
+                $sanitzedContentValues = [];
                 foreach ($type->getBlocks() as $block) {
-                    if (isset($data[$block->getName()])) {
-                        $contentValue[$block->getName()] = $data[$block->getName()];
+                    if (!isset($data[$block->getName()])) {
+                        continue;
+                    }
+
+                    $value = $data[$block->getName()];
+                    $contentValues[$block->getName()] = $value;
+
+                    if (null === $this->sanitizer) {
+                        continue;
+                    }
+
+                    if (null !== $this->contentSanitzedSalt && null === $this->sanitizeContext) {
+                        $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitize($value);
+                    } elseif (null !== $this->contentSanitzedSalt && null !== $this->sanitizeContext) {
+                        $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitizeFor(
+                            $this->sanitizeContext,
+                            $value,
+                        );
                     }
                 }
 
-                $contentObject->setParts($contentValue);
+                $contentObject->setParts($contentValues);
+
+                if (null !== $this->contentSanitzedSalt && null !== $this->sanitizer) {
+                    $contentObject->setSanitizedParts($sanitzedContentValues, $this->contentSanitzedSalt);
+                }
             }
         );
 
