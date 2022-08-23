@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.1] - 2022-08-23
+### Stable Release
+- Fix issue in Translation when an use want update a translated object with new properties
+  without already set in the original language.
+
 ## [8.3.0] - 2022-08-23
 ### Stable Release
 - Add `ReadOnlyArray` to simulate a read only array, to improve memory access (object are passed by reference in PHP)

@@ -90,7 +90,9 @@ class DocumentWrapper implements WrapperInterface
 
         $propertyReflection = $this->meta->getReflectionProperty($name);
         $propertyReflection->setAccessible(true);
-        $propertyReflection->setValue($this->object, $value);
+        if (null !== $value || $propertyReflection->getType()?->allowsNull()) {
+            $propertyReflection->setValue($this->object, $value);
+        }
 
         return $this;
     }
