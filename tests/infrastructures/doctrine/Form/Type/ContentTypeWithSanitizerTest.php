@@ -32,6 +32,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Doctrine\Object\Content;
@@ -45,11 +46,15 @@ use Teknoo\East\Website\Doctrine\Form\Type\ContentType;
  * @covers      \Teknoo\East\Website\Doctrine\Form\Type\ContentType
  * @covers      \Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait
  */
-class ContentTypeTest extends TestCase
+class ContentTypeWithSanitizerTest extends TestCase
 {
     public function buildForm()
     {
-        return new ContentType();
+        return new ContentType(
+            $this->createMock(HtmlSanitizerInterface::class),
+            'body',
+            'foo',
+        );
     }
 
     public function testBuildForm()
@@ -182,7 +187,7 @@ class ContentTypeTest extends TestCase
                 $content->setType($type);
                 $form->expects(self::any())->method('getNormData')->willReturn($content);
 
-                $event = new FormEvent($form, ['foo'=>'bar', 'bar'=>'foo', 'foo2'=>'bar']);
+                $event = new FormEvent($form, ['foo'=>'bar', 'foo2'=>'bar']);
                 $callable($event);
 
                 return $builder;
