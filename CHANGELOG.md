@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.2] - 2022-08-27
+### Stable Release
+- Support East Common 1.4+
+
 ## [8.3.1] - 2022-08-23
 ### Stable Release
 - Fix issue in Translation when an use want update a translated object with new properties

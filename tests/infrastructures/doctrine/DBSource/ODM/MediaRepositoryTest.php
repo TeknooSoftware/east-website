@@ -27,6 +27,7 @@ use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\MediaRepository;
+use Teknoo\Tests\East\Common\Doctrine\DBSource\ODM\RepositoryTestTrait;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
