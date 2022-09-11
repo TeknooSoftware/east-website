@@ -42,7 +42,7 @@ use Teknoo\East\Website\Twig\Extension\SanitizedContent;
  *
  * @covers      \Teknoo\East\Website\Twig\Extension\SanitizedContent
  */
-class SanitizedContentTest extends TestCase
+class ExtendedSanitizedContentTest extends TestCase
 {
     public function testGetFilters()
     {
@@ -62,7 +62,13 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects(self::never())->method('sanitize');
         $sanitizer->expects(self::never())->method('sanitizeFor');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'bar',
             $filter->getPart(
@@ -86,7 +92,13 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects(self::never())->method('sanitize');
         $sanitizer->expects(self::never())->method('sanitizeFor');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'hello',
             $filter->getPart(
@@ -112,9 +124,15 @@ class SanitizedContentTest extends TestCase
 
         $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
         $sanitizer->expects(self::never())->method('sanitize')->with('bar')->willReturn('bar1');
-        $sanitizer->expects(self::once())->method('sanitizeFor')->with('default', 'bar')->willReturn('bar2');
+        $sanitizer->expects(self::once())->method('sanitizeFor')->with('default', '123bar')->willReturn('bar2');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'bar2',
             $filter->getPart(
@@ -138,9 +156,15 @@ class SanitizedContentTest extends TestCase
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
-        $filter = new SanitizedContent(null);
+        $filter = new class(null) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
-            'bar',
+            '123bar',
             $filter->getPart(
                 $content,
                 'foo',
@@ -163,10 +187,16 @@ class SanitizedContentTest extends TestCase
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
         $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
-        $sanitizer->expects(self::once())->method('sanitize')->with('bar')->willReturn('bar1');
+        $sanitizer->expects(self::once())->method('sanitize')->with('123bar')->willReturn('bar1');
         $sanitizer->expects(self::never())->method('sanitizeFor')->with('default', 'bar')->willReturn('bar2');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'bar1',
             $filter->getPart(
@@ -191,9 +221,15 @@ class SanitizedContentTest extends TestCase
 
         $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
         $sanitizer->expects(self::never())->method('sanitize')->with('hello')->willReturn('bar1');
-        $sanitizer->expects(self::once())->method('sanitizeFor')->with('default', 'hello')->willReturn('bar2');
+        $sanitizer->expects(self::once())->method('sanitizeFor')->with('default', '123hello')->willReturn('bar2');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'bar2',
             $filter->getPart(
@@ -218,10 +254,16 @@ class SanitizedContentTest extends TestCase
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
         $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
-        $sanitizer->expects(self::once())->method('sanitize')->with('hello')->willReturn('bar1');
+        $sanitizer->expects(self::once())->method('sanitize')->with('123hello')->willReturn('bar1');
         $sanitizer->expects(self::never())->method('sanitizeFor')->with('default', 'hello')->willReturn('bar2');
 
-        $filter = new SanitizedContent($sanitizer);
+        $filter = new class($sanitizer) extends SanitizedContent {
+            protected function hook(string $data): string
+            {
+                return '123' . $data;
+            }
+        };
+
         self::assertEquals(
             'bar1',
             $filter->getPart(

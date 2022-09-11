@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.3] - 2022-09-11
+### Stable Release
+- Twig filter `SanitizedContent` can be inherited and content can be altered by overwritting the proteted method `hook`.
+
 ## [8.3.2] - 2022-08-27
 ### Stable Release
 - Support East Common 1.4+

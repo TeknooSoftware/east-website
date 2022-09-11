@@ -54,6 +54,11 @@ class SanitizedContent extends AbstractExtension
         );
     }
 
+    protected function hook(string $data): string
+    {
+        return $data;
+    }
+
     public function getPart(
         Content $content,
         string $partName,
@@ -67,7 +72,7 @@ class SanitizedContent extends AbstractExtension
             return $sanitizedPart[$partName] ?? $default;
         }
 
-        $value = $content->getParts()[$partName] ?? $default;
+        $value = $this->hook($content->getParts()[$partName] ?? $default);
         if (null === $this->sanitizer) {
             return $value;
         }
