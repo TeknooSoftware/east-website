@@ -64,7 +64,7 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
     ): QueryElementInterface {
         /** @var Promise<Content, mixed, Content> $fetchingPromise */
         $fetchingPromise = new Promise(
-            static function ($object, PromiseInterface $next) {
+            onSuccess: static function ($object, PromiseInterface $next) {
                 if (
                     $object instanceof PublishableInterface
                     && $object->getPublishedAt() instanceof DateTimeInterface
@@ -74,10 +74,7 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
                     $next->fail(new DomainException('Content not found', 404));
                 }
             },
-            static function (Throwable $e, PromiseInterface $next) {
-                $next->fail($e);
-            },
-            true
+            allowNext: true
         );
 
         $repository->findOneBy(
@@ -85,7 +82,10 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
                 'slug' => $this->slug,
                 'deletedAt' => null,
             ],
-            $fetchingPromise->next($promise)
+            $fetchingPromise->next(
+                promise: $promise,
+                autoCall: true,
+            ),
         );
 
         return $this;
