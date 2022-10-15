@@ -90,10 +90,10 @@
         "symfony/var-dumper": "^6.0",
         "twig/twig": "^3.3",
         "laminas/laminas-diactoros": "^2.11",
-        "doctrine/common": "^3.3",
-        "doctrine/persistence": "^3.0",
+        "doctrine/common": "^3.4.3",
+        "doctrine/persistence": "^3.0.4",
         "doctrine/mongodb-odm": "^2.4.2",
-        "doctrine/mongodb-odm-bundle": "^4.5",
+        "doctrine/mongodb-odm-bundle": "^4.5.1",
         "league/oauth2-client": "^2.6.1",
         "knpuniversity/oauth2-client-bundle": "^2.10"
     },
