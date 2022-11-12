@@ -1,12 +1,36 @@
 <?php
 
+/*
+ * East Website.
+ *
+ * LICENSE
+ *
+ * This source file is subject to the MIT license
+ * license that are bundled with this package in the folder licences
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to richarddeloge@gmail.com so we can send you a copy immediately.
+ *
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/east/website Project website
+ *
+ * @license     http://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richarddeloge@gmail.com>
+ */
+
 declare(strict_types=1);
+
+namespace Teknoo\Tests\East\Website\Behat;
 
 use Behat\Behat\Context\Context;
 use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use Exception;
 use Laminas\Diactoros\ResponseFactory;
 use Laminas\Diactoros\ServerRequest;
 use Laminas\Diactoros\ServerRequestFactory;
@@ -19,6 +43,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
+use ReflectionObject;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -30,7 +55,13 @@ use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\PasswordHasher\Hasher\SodiumPasswordHasher;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Teknoo\DI\SymfonyBridge\DIBridgeBundle;
+use Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\CommonBundle\TeknooEastCommonBundle;
+use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Object\StoredPassword;
+use Teknoo\East\Common\Object\User;
+use Teknoo\East\Common\Recipe\Cookbook\RenderStaticContentEndPoint;
+use Teknoo\East\FoundationBundle\EastFoundationBundle;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Client\ResponseInterface as EastResponse;
 use Teknoo\East\Foundation\EndPoint\RecipeEndPoint;
@@ -39,10 +70,12 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Middleware\MiddlewareInterface;
 use Teknoo\East\Foundation\Recipe\CookbookInterface;
 use Teknoo\East\Foundation\Router\Result;
+use Teknoo\East\Foundation\Router\ResultInterface as RouterResultInterface;
 use Teknoo\East\Foundation\Router\RouterInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Foundation\Template\ResultInterface;
-use Teknoo\East\FoundationBundle\EastFoundationBundle;
+use Teknoo\East\Twig\Template\Engine;
+use Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
@@ -52,19 +85,29 @@ use Teknoo\East\Website\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
-use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\Media as BaseMedia;
-use Teknoo\East\Common\Object\StoredPassword;
+use Teknoo\East\Website\Object\Media;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Common\Object\User;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
-use Teknoo\East\Common\Recipe\Cookbook\RenderStaticContentEndPoint;
-use Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser;
-use Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\Tests\East\Website\Behat\GetTokenStorageService;
+use Throwable;
 use Twig\Environment;
+
+use function array_pop;
+use function current;
+use function dirname;
+use function explode;
+use function get_class;
+use function in_array;
+use function json_decode;
+use function json_encode;
+use function parse_str;
+use function preg_match;
+use function random_int;
+use function str_replace;
+use function strlen;
+use function uniqid;
 
 /**
  * Defines application features from the specific context.
@@ -118,7 +161,7 @@ class FeatureContext implements Context
 
     public ?ResponseInterface $response = null;
 
-    public ?\Throwable $error = null;
+    public ?Throwable $error = null;
 
     public $createdObjects = [];
 
@@ -130,7 +173,7 @@ class FeatureContext implements Context
     public function iHaveDiInitialized(): void
     {
         $containerDefinition = new ContainerBuilder();
-        $rootDir = \dirname(__DIR__, 2);
+        $rootDir = dirname(__DIR__, 2);
         $containerDefinition->addDefinitions(
             include $rootDir.'/vendor/teknoo/east-foundation/src/di.php'
         );
@@ -176,17 +219,17 @@ class FeatureContext implements Context
 
             public function getProjectDir(): string
             {
-                return \dirname(__DIR__, 2);
+                return dirname(__DIR__, 2);
             }
 
             public function getCacheDir(): string
             {
-                return \dirname(__DIR__, 2).'/tests/var/cache';
+                return dirname(__DIR__).'/var/cache';
             }
 
             public function getLogDir(): string
             {
-                return \dirname(__DIR__, 2).'/tests/var/logs';
+                return dirname(__DIR__).'/var/logs';
             }
 
             public function registerBundles(): iterable
@@ -210,15 +253,16 @@ class FeatureContext implements Context
 
             protected function configureRoutes($routes): void
             {
-                $rootDir = \dirname(__DIR__, 2);
+                $thisDir = __DIR__;
+                $rootDir = dirname(__DIR__, 2);
                 if ($routes instanceof RoutingConfigurator) {
                     $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yaml', 'glob')
                         ->prefix('/admin');
-                    $routes->import($rootDir . '/features/bootstrap/config/routes/*.yaml', 'glob');
+                    $routes->import($thisDir . '/config/routes/*.yaml', 'glob');
                     $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yaml', 'glob');
                 } else {
                     $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yaml', '/admin', 'glob');
-                    $routes->import($rootDir . '/features/bootstrap/config/routes/*.yaml', '/', 'glob');
+                    $routes->import($thisDir . '/config/routes/*.yaml', '/', 'glob');
                     $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yaml', '/', 'glob');
                 }
             }
@@ -228,7 +272,7 @@ class FeatureContext implements Context
                 $characters = 'abcdefghijklmnopqrstuvwxyz';
                 $str = '';
                 for ($i = 0; $i < 10; $i++) {
-                    $str .= $characters[\rand(0, \strlen($characters) - 1)];
+                    $str .= $characters[random_int(0, strlen($characters) - 1)];
                 }
 
                 return $str;
@@ -255,18 +299,18 @@ class FeatureContext implements Context
             }
 
             /**
-             * @param \Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface $object
+             * @param IdentifiedObjectInterface $object
              */
             public function persist($object)
             {
                 if ($id = $object->getId()) {
                     $this->featureContext->updatedObjects[$id] = $object;
                 } else {
-                    $object->setId(\uniqid());
-                    $class = \explode('\\', \get_class($object));
-                    $this->featureContext->createdObjects[\array_pop($class)][] = $object;
+                    $object->setId(uniqid());
+                    $class = explode('\\', get_class($object));
+                    $this->featureContext->createdObjects[array_pop($class)][] = $object;
 
-                    $this->featureContext->getObjectRepository(\get_class($object))->setObject(['id' => $object->getId()], $object);
+                    $this->featureContext->getObjectRepository(get_class($object))->setObject(['id' => $object->getId()], $object);
                 }
             }
 
@@ -371,7 +415,7 @@ class FeatureContext implements Context
                 }
                 
                 if (isset($criteria['slug']) && 'page-with-error' === $criteria['slug']) {
-                    throw new \Exception('Error', 404);
+                    throw new Exception('Error', 404);
                 }
 
                 if ($this->criteria == $criteria) {
@@ -431,7 +475,7 @@ class FeatureContext implements Context
             }
         };
 
-        \current($this->objectRepository)->setObject(
+        current($this->objectRepository)->setObject(
             [
                 'or' => [
                     ['id' => $name],
@@ -516,7 +560,7 @@ class FeatureContext implements Context
 
                 foreach ($this->routes as $route => $endpoint) {
                     $values = [];
-                    if (\preg_match($route, $path, $values)) {
+                    if (preg_match($route, $path, $values)) {
                         $result = new Result($endpoint);
                         $request = $request->withAttribute(RouterInterface::ROUTER_RESULT_KEY, $result);
 
@@ -530,7 +574,7 @@ class FeatureContext implements Context
                             $request = $request->withAttribute($key, $value);
                         }
 
-                        $manager->updateWorkPlan([\Teknoo\East\Foundation\Router\ResultInterface::class => $result]);
+                        $manager->updateWorkPlan([RouterResultInterface::class => $result]);
 
                         $manager->continueExecution($client, $request);
 
@@ -622,7 +666,7 @@ class FeatureContext implements Context
             /**
              * @inheritDoc
              */
-            public function errorInRequest(\Throwable $throwable, bool $silently = false): ClientInterface
+            public function errorInRequest(Throwable $throwable, bool $silently = false): ClientInterface
             {
                 $this->context->error = $throwable;
 
@@ -670,7 +714,7 @@ class FeatureContext implements Context
         $request = $request->withMethod('GET');
         $request = $request->withUri(new Uri($url));
         $query = [];
-        \parse_str($request->getUri()->getQuery(), $query);
+        parse_str($request->getUri()->getQuery(), $query);
         $request = $request->withQueryParams($query);
 
         $this->buildManager($request);
@@ -699,7 +743,7 @@ class FeatureContext implements Context
     public function theClientMustAcceptAnError(): void
     {
         Assert::assertNull($this->response);
-        Assert::assertInstanceOf(\Throwable::class, $this->error);
+        Assert::assertInstanceOf(Throwable::class, $this->error);
     }
 
     /**
@@ -725,7 +769,7 @@ class FeatureContext implements Context
         $this->type = new Type();
         $this->type->setName($name);
         $blocksList = [];
-        foreach (\explode(',', $blocks) as $blockName) {
+        foreach (explode(',', $blocks) as $blockName) {
             $blocksList[] = new Block($blockName, BlockType::Text);
         }
         $this->type->setBlocks($blocksList);
@@ -793,9 +837,9 @@ class FeatureContext implements Context
 
                 //To avoid to manage templating view for crud
                 $final = [];
-                $ro = new \ReflectionObject($object = $parameters['objectInstance']);
+                $ro = new ReflectionObject($object = $parameters['objectInstance']);
                 foreach ($ro->getProperties() as $rp) {
-                    if (\in_array($rp->getName(), [
+                    if (in_array($rp->getName(), [
                         'id',
                         'createdAt',
                         'updatedAt',
@@ -820,7 +864,7 @@ class FeatureContext implements Context
                     $final[$rp->getName()] = $rp->getValue($object);
                 }
 
-                return \json_encode($final);
+                return json_encode($final);
             }
         };
     }
@@ -844,7 +888,7 @@ class FeatureContext implements Context
             public function render(PromiseInterface $promise, $name, array $parameters = array()): EngineInterface
             {
                 if ('404-error' === $name) {
-                    $promise->fail(new \Exception('Error 404'));
+                    $promise->fail(new Exception('Error 404'));
 
                     return $this;
                 }
@@ -860,7 +904,7 @@ class FeatureContext implements Context
                     }
                 }
 
-                $result = $this->context->buildResultObject(\str_replace($keys, $values, $this->context->templateContent));
+                $result = $this->context->buildResultObject(str_replace($keys, $values, $this->context->templateContent));
                 $promise->success($result);
 
                 return $this;
@@ -897,7 +941,7 @@ class FeatureContext implements Context
             public function render(PromiseInterface $promise, $name, array $parameters = array()): EngineInterface
             {
                 if ('404-error' === $name) {
-                    $promise->fail(new \Exception('Error 404'));
+                    $promise->fail(new Exception('Error 404'));
 
                     return $this;
                 }
@@ -913,7 +957,7 @@ class FeatureContext implements Context
                     }
                 }
 
-                $result = $this->context->buildResultObject(\str_replace($keys, $values, $this->context->templateContent));
+                $result = $this->context->buildResultObject(str_replace($keys, $values, $this->context->templateContent));
                 $promise->success($result);
 
                 return $this;
@@ -970,7 +1014,7 @@ class FeatureContext implements Context
 
         $container->set(
             EngineInterface::class,
-            new \Teknoo\East\Twig\Template\Engine($this->twig)
+            new Engine($this->twig)
         );
 
         $response = $this->symfonyKernel->handle($serverRequest);
@@ -992,7 +1036,7 @@ class FeatureContext implements Context
      */
     public function theClientfollowsTheRedirection()
     {
-        $url = \current($this->response->getHeader('location'));
+        $url = current($this->response->getHeader('location'));
         $serverRequest = SfRequest::create($url, 'GET');
 
         $this->runSymfony($serverRequest);
@@ -1003,7 +1047,7 @@ class FeatureContext implements Context
      */
     public function theLastObjectUpdatedMustBeDeleted()
     {
-        Assert::assertNotEmpty(\current($this->updatedObjects)->getDeletedAt());
+        Assert::assertNotEmpty(current($this->updatedObjects)->getDeletedAt());
     }
 
     /**
@@ -1021,9 +1065,9 @@ class FeatureContext implements Context
     {
         Assert::assertInstanceOf(ResponseInterface::class, $this->response);
         Assert::assertEquals(302, $this->response->getStatusCode());
-        $location = \current($this->response->getHeader('location'));
+        $location = current($this->response->getHeader('location'));
 
-        Assert::assertGreaterThan(0, \preg_match("#$url#i", $location));
+        Assert::assertGreaterThan(0, preg_match("#$url#i", $location));
     }
 
     /**
@@ -1031,9 +1075,9 @@ class FeatureContext implements Context
      */
     public function iShouldGetInTheForm(string $body): void
     {
-        $expectedBody = \json_decode($body, true);
+        $expectedBody = json_decode($body, true);
 
-        $actualBody = \json_decode((string) $this->response->getBody(), true);
+        $actualBody = json_decode((string) $this->response->getBody(), true);
 
         Assert::assertEquals($expectedBody, $actualBody);
     }
@@ -1044,7 +1088,7 @@ class FeatureContext implements Context
     public function symfonyWillReceiveThePostRequestWith($url, $body)
     {
         $expectedBody = [];
-        \parse_str($body, $expectedBody);
+        parse_str($body, $expectedBody);
         $serverRequest = SfRequest::create($url, 'POST', $expectedBody);
 
         $this->runSymfony($serverRequest);
@@ -1079,8 +1123,8 @@ class FeatureContext implements Context
         $object = new $class;
         $object->setId($id);
 
-        $ro = new \ReflectionObject($object);
-        foreach (\json_decode($properties, true) as $name=>$value) {
+        $ro = new ReflectionObject($object);
+        foreach (json_decode($properties, true) as $name=> $value) {
             if (!$ro->hasProperty($name)) {
                 continue;
             }

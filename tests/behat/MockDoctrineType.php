@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * East Website.
  *
  * LICENSE
@@ -23,34 +23,22 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\Tests\East\WebsiteBundle\Form\Type;
+namespace Teknoo\Tests\East\Website\Behat;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Teknoo\East\WebsiteBundle\Form\Type\BlockType;
 
-/**
- * @license     http://teknoo.software/license/mit         MIT License
- * @author      Richard Déloge <richarddeloge@gmail.com>
- * @covers      \Teknoo\East\WebsiteBundle\Form\Type\BlockType
- */
-class BlockTypeTest extends TestCase
+class MockDoctrineType extends ChoiceType
 {
-    use FormTestTrait;
-
-    public function buildForm()
+    public function configureOptions(OptionsResolver $resolver): self
     {
-        return new BlockType();
-    }
+        parent::configureOptions($resolver);
 
-    public function testConfigureOptions()
-    {
-        self::assertInstanceOf(
-            AbstractType::class,
-            $this->buildForm()->configureOptions(
-                $this->createMock(OptionsResolver::class)
-            )
-        );
+        $resolver->setDefaults(array(
+            'class' => '',
+            'query_builder' => '',
+        ));
+
+        return $this;
     }
 }

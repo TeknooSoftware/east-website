@@ -41,6 +41,7 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use function array_reverse;
 use function class_parents;
 use function is_callable;
+use function str_replace;
 
 /**
  * The extension metadata factory is responsible for extension driver
@@ -94,7 +95,11 @@ class ExtensionMetadataFactory
 
     private static function getCacheId(string $className): string
     {
-        return $className . '\\$_TRANSLATE_METADATA';
+        return str_replace(
+            search: '\\',
+            replace: '-',
+            subject: $className . '\\$_TRANSLATE_METADATA'
+        );
     }
 
     /**

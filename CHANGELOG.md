@@ -1,5 +1,11 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.5] - 2022-11-12
+### Stable Release
+- Migrate behat boostrap into tests directory
+- Add strict_types=1 to all tests
+- Fix error in ExtensionMetadataFactory::getCacheId to not use reserved char `\`
+
 ## [8.3.4] - 2022-10-14
 ### Stable Release
 - Support Recipe 4.2+
