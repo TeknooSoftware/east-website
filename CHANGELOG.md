@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.3.6] - 2022-11-25
+### Stable Release
+- Update symfony configuration for behat
+
 ## [8.3.5] - 2022-11-12
 ### Stable Release
 - Migrate behat boostrap into tests directory
