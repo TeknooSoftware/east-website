@@ -104,7 +104,7 @@ class ExtensionMetadataFactory
     }
 
     /**
-     * @param ClassMetadata<IdentifiedObjectInterface> $metaData
+     * @param ClassMetadata<IdentifiedObjectInterface>|ClassMetadataODM<IdentifiedObjectInterface> $metaData
      */
     public function loadExtensionMetadata(
         ClassMetadata $metaData,
