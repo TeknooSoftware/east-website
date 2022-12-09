@@ -41,6 +41,7 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use function array_reverse;
 use function class_parents;
 use function is_callable;
+use function property_exists;
 use function str_replace;
 
 /**
@@ -109,7 +110,7 @@ class ExtensionMetadataFactory
         ClassMetadata $metaData,
         TranslatableListener $listener
     ): self {
-        if (!empty($metaData->isMappedSuperclass)) {
+        if (property_exists($metaData, 'isMappedSuperclass') && !empty($metaData->isMappedSuperclass)) {
             return $this;
         }
 
