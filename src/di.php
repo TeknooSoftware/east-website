@@ -98,10 +98,16 @@ return [
 
     //Menu
     MenuGenerator::class => static function (ContainerInterface $container): MenuGenerator {
+        $defaultMenuLocations = [];
+        if ($container->has('teknoo.east.website.menu_generator.default_locations')) {
+            $defaultMenuLocations = $container->get('teknoo.east.website.menu_generator.default_locations');
+        }
+
         return new MenuGenerator(
             $container->get(ItemLoader::class),
             $container->get(ContentLoader::class),
-            $container->has(ProxyDetectorInterface::class) ? $container->get(ProxyDetectorInterface::class) : null
+            $container->has(ProxyDetectorInterface::class) ? $container->get(ProxyDetectorInterface::class) : null,
+            $defaultMenuLocations
         );
     },
 

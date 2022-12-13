@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Query\Item;
 
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -38,7 +39,7 @@ use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @covers \Teknoo\East\Website\Query\Item\TopItemByLocationQuery
  */
-class TopItemByLocationQueryTest extends TestCase
+class TopItemByLocationQueryWithArrayTest extends TestCase
 {
     use QueryCollectionTestTrait;
 
@@ -47,7 +48,7 @@ class TopItemByLocationQueryTest extends TestCase
      */
     public function buildQuery(): QueryCollectionInterface
     {
-        return new TopItemByLocationQuery('fooBar');
+        return new TopItemByLocationQuery(['fooBar']);
     }
 
     public function testExecute()
@@ -61,7 +62,7 @@ class TopItemByLocationQueryTest extends TestCase
 
         $repository->expects(self::once())
             ->method('findBy')
-            ->with(['location' => 'fooBar', 'deletedAt' => null,], $promise);
+            ->with(['location' => new In(['fooBar']), 'deletedAt' => null,], $promise);
 
         self::assertInstanceOf(
             TopItemByLocationQuery::class,

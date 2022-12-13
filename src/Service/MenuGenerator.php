@@ -35,7 +35,9 @@ use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 
+use function array_diff;
 use function array_keys;
+use function array_unique;
 
 /**
  * Service to generate a menu from persisted item and loader. It will use the query TopItemByLocationQuery to extract
@@ -54,17 +56,23 @@ use function array_keys;
  */
 class MenuGenerator
 {
+    /**
+     * @var array<string, array<array{0:string, 1:Item}>>
+     */
+    private array $cache = [];
+
+    /**
+     * @param array<string> $preloadItemsLocations
+     */
     public function __construct(
         private readonly ItemLoader $itemLoader,
         private readonly ContentLoader $contentLoader,
         private readonly ?ProxyDetectorInterface $proxyDetector = null,
+        private readonly array $preloadItemsLocations = [],
     ) {
     }
 
-    /**
-     * @return iterable<Item>
-     */
-    public function extract(string $location): iterable
+    private function fetch(string $location): void
     {
         $itemsStacks = [];
         $contentsStacks = [];
@@ -118,23 +126,51 @@ class MenuGenerator
         /** @var Promise<iterable<Item>, mixed, mixed> $promise */
         $promise = new Promise($itemsSorting);
 
-        $this->itemLoader->query(new TopItemByLocationQuery($location), $promise);
+        $locations = $this->preloadItemsLocations;
+        $locations[] = $location;
+
+        $locations = array_diff(array_unique($locations), array_keys($this->cache));
+        $this->itemLoader->query(new TopItemByLocationQuery($locations), $promise);
 
         if (empty($itemsStacks['top'])) {
-            return $this;
+            return;
         }
 
-        foreach ($itemsStacks['top'] as $element) {
-            $haveChildren = !empty($itemsStacks[$id = $element->getId()]);
+        $generator = static function () use ($itemsStacks): iterable {
+            foreach ($itemsStacks['top'] as $element) {
+                $haveChildren = !empty($itemsStacks[$id = $element->getId()]);
 
-            if ($haveChildren) {
-                yield 'parent' => $element;
-                foreach ($itemsStacks[$id] as $child) {
-                    yield $id => $child;
+                if ($haveChildren) {
+                    yield 'parent' => $element;
+                    foreach ($itemsStacks[$id] as $child) {
+                        yield $id => $child;
+                    }
+                } else {
+                    yield 'top' => $element;
                 }
-            } else {
-                yield 'top' => $element;
             }
+        };
+
+        /**
+         * @var string $key
+         * @var Item $item
+         */
+        foreach ($generator() as $key => $item) {
+            $this->cache[$item->getLocation()][] = [$key, $item];
+        }
+    }
+
+    /**
+     * @return iterable<Item>
+     */
+    public function extract(string $location): iterable
+    {
+        if (!isset($this->cache[$location])) {
+            $this->fetch($location);
+        }
+
+        foreach ($this->cache[$location] ?? [] as $item) {
+            yield $item[0] => $item[1];
         }
 
         return $this;

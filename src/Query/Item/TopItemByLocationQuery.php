@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Query\Item;
 
 use Teknoo\East\Common\Query\Enum\Direction;
+use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -33,6 +34,8 @@ use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
+
+use function is_array;
 
 /**
  * Class implementing query to load first level items about a menu, ordered by their position (ascendant order)
@@ -46,8 +49,11 @@ class TopItemByLocationQuery implements QueryCollectionInterface, ImmutableInter
 {
     use ImmutableTrait;
 
+    /**
+     * @param string|array<string> $location
+     */
     public function __construct(
-        private readonly string $location,
+        private readonly string|array $location,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -57,9 +63,14 @@ class TopItemByLocationQuery implements QueryCollectionInterface, ImmutableInter
         RepositoryInterface $repository,
         PromiseInterface $promise
     ): QueryCollectionInterface {
+        $locations = $this->location;
+        if (is_array($locations)) {
+            $locations = new In($locations);
+        }
+
         $repository->findBy(
             criteria: [
-                'location' => $this->location,
+                'location' => $locations,
                 'deletedAt' => null,
             ],
             promise: $promise,

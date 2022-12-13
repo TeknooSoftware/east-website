@@ -198,6 +198,7 @@ class ContainerTest extends TestCase
         $container = $this->buildContainer();
         $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
         $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
+        $container->set('teknoo.east.website.menu_generator.default_locations', ['foo']);
         $loader = $container->get(MenuGenerator::class);
 
         self::assertInstanceOf(

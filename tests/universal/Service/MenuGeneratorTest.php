@@ -98,14 +98,15 @@ class MenuGeneratorTest extends TestCase
 
                     return $this;
                 }
-            }
+            },
+            ['foo']
         );
     }
 
     public function testExtract()
     {
-        $item1 = (new Item())->setId('i1');
-        $item2 = (new Item())->setId('i2')->setContent(
+        $item1 = (new Item())->setId('i1')->setLocation('location1');
+        $item2 = (new Item())->setId('i2')->setLocation('location1')->setContent(
             new class extends Content {
                 public function getId(): string
                 {
@@ -113,7 +114,7 @@ class MenuGeneratorTest extends TestCase
                 }
             }
         );
-        $item3 = (new Item())->setId('i3')->setParent($item1)->setContent(
+        $item3 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1)->setContent(
             new class extends Content {
                 public function getId(): string
                 {
@@ -121,7 +122,7 @@ class MenuGeneratorTest extends TestCase
                 }
             }
         );;
-        $item4 = (new Item())->setId('i3')->setParent($item1);
+        $item4 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1);
 
         $content1 = (new Content())->setId('c1');
         $content2 = (new Content())->setId('c2');
@@ -130,9 +131,9 @@ class MenuGeneratorTest extends TestCase
         $item4->setContent($content4);
 
         $this->getItemLoader()
-            ->expects(self::any())
+            ->expects(self::once())
             ->method('query')
-            ->with(new TopItemByLocationQuery('location1'))
+            ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4) {
                 $promise->success([$item1, $item2, $item3, $item4]);
 
@@ -150,7 +151,15 @@ class MenuGeneratorTest extends TestCase
             });
 
         $stack = [];
-        foreach ($this->buildService()->extract('location1') as $key=>$element) {
+        $service = $this->buildService();
+        foreach ($service->extract('location1') as $key=>$element) {
+            $stack[$key][] = $element;
+        }
+
+        self::assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3, $item4]], $stack);
+
+        $stack = [];
+        foreach ($service->extract('location1') as $key=>$element) {
             $stack[$key][] = $element;
         }
 
@@ -162,7 +171,7 @@ class MenuGeneratorTest extends TestCase
         $this->getItemLoader()
             ->expects(self::any())
             ->method('query')
-            ->with(new TopItemByLocationQuery('location1'))
+            ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) {
                 $promise->success([]);
 
@@ -189,14 +198,14 @@ class MenuGeneratorTest extends TestCase
 
     public function testExtractWithoutContent()
     {
-        $item1 = (new Item())->setId('i1');
-        $item2 = (new Item())->setId('i2');
-        $item3 = (new Item())->setId('i3')->setParent($item1);
+        $item1 = (new Item())->setId('i1')->setLocation('location1');
+        $item2 = (new Item())->setId('i2')->setLocation('location1');
+        $item3 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1);
 
         $this->getItemLoader()
-            ->expects(self::any())
+            ->expects(self::once())
             ->method('query')
-            ->with(new TopItemByLocationQuery('location1'))
+            ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3) {
                 $promise->success([$item1, $item2, $item3]);
 
