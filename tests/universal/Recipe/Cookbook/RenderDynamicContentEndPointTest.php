@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Cookbook;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
@@ -120,6 +121,7 @@ class RenderDynamicContentEndPointTest extends TestCase
             $this->getRecipe(),
             $this->getExtractSlug(),
             $this->getLoadContent(),
+            $this->createMock(LoadTranslationsInterface::class),
             $this->getRender(),
             $this->getRenderError()
         );

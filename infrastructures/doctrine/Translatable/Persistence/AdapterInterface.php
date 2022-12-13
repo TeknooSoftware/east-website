@@ -40,6 +40,8 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
  */
 interface AdapterInterface
 {
+    public function executeAllDeferredLoadings(): AdapterInterface;
+
     public function loadAllTranslations(
         string $locale,
         string $identifier,

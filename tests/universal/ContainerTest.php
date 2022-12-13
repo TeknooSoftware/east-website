@@ -31,6 +31,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
+use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -44,10 +45,12 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
@@ -198,6 +201,8 @@ class ContainerTest extends TestCase
         $container = $this->buildContainer();
         $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
         $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
+        $container->set(TranslationManagerInterface::class, $this->createMock(TranslationManagerInterface::class));
+        $container->set(ProxyDetectorInterface::class, $this->createMock(ProxyDetectorInterface::class));
         $container->set('teknoo.east.website.menu_generator.default_locations', ['foo']);
         $loader = $container->get(MenuGenerator::class);
 
@@ -290,6 +295,7 @@ class ContainerTest extends TestCase
         $container->set(LoadContent::class, $this->createMock(LoadContent::class));
         $container->set(Render::class, $this->createMock(Render::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
 
         self::assertInstanceOf(
             RenderDynamicContentEndPoint::class,

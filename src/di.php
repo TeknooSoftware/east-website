@@ -39,9 +39,11 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\MediaLoader;
@@ -103,11 +105,22 @@ return [
             $defaultMenuLocations = $container->get('teknoo.east.website.menu_generator.default_locations');
         }
 
+        $translationManager = null;
+        if ($container->has(TranslationManagerInterface::class)) {
+            $translationManager = $container->get(TranslationManagerInterface::class);
+        }
+
+        $proxyDetector = null;
+        if ($container->has(ProxyDetectorInterface::class)) {
+            $proxyDetector = $container->get(ProxyDetectorInterface::class);
+        }
+
         return new MenuGenerator(
-            $container->get(ItemLoader::class),
-            $container->get(ContentLoader::class),
-            $container->has(ProxyDetectorInterface::class) ? $container->get(ProxyDetectorInterface::class) : null,
-            $defaultMenuLocations
+            itemLoader: $container->get(ItemLoader::class),
+            contentLoader: $container->get(ContentLoader::class),
+            proxyDetector: $proxyDetector,
+            preloadItemsLocations: $defaultMenuLocations,
+            translationManager: $translationManager,
         );
     },
 
@@ -157,14 +170,24 @@ return [
 
     //Cookbook
     RenderDynamicContentEndPointInterface::class => get(RenderDynamicContentEndPoint::class),
-    RenderDynamicContentEndPoint::class => create()
-        ->constructor(
-            get(OriginalRecipeInterface::class),
-            get(ExtractSlug::class),
-            get(LoadContent::class),
-            get(Render::class),
-            get(RenderError::class)
-        ),
+    RenderDynamicContentEndPoint::class => static function (
+        ContainerInterface $container
+    ): RenderDynamicContentEndPoint {
+        $loadTranslations = null;
+        if ($container->has(LoadTranslationsInterface::class)) {
+            $loadTranslations = $container->get(LoadTranslationsInterface::class);
+        }
+
+        return new RenderDynamicContentEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class),
+            extractSlug: $container->get(ExtractSlug::class),
+            loadContent: $container->get(LoadContent::class),
+            loadTranslationsInterface: $loadTranslations,
+            render: $container->get(Render::class),
+            renderError: $container->get(RenderError::class)
+        );
+    },
+
     RenderMediaEndPointInterface::class => get(RenderMediaEndPoint::class),
     RenderMediaEndPoint::class => create()
         ->constructor(

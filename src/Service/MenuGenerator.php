@@ -27,6 +27,7 @@ namespace Teknoo\East\Website\Service;
 
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
+use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;
@@ -69,6 +70,7 @@ class MenuGenerator
         private readonly ContentLoader $contentLoader,
         private readonly ?ProxyDetectorInterface $proxyDetector = null,
         private readonly array $preloadItemsLocations = [],
+        private readonly ?TranslationManagerInterface $translationManager = null,
     ) {
     }
 
@@ -130,7 +132,10 @@ class MenuGenerator
         $locations[] = $location;
 
         $locations = array_diff(array_unique($locations), array_keys($this->cache));
+
+        $this->translationManager?->deferringTranslationsLoading();
         $this->itemLoader->query(new TopItemByLocationQuery($locations), $promise);
+        $this->translationManager?->stopDeferringTranslationsLoading();
 
         if (empty($itemsStacks['top'])) {
             return;

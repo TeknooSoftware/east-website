@@ -31,11 +31,13 @@ use Doctrine\ODM\MongoDB\Types\Type;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use MongoDB\BSON\ObjectId;
 use RuntimeException;
+use Teknoo\East\Website\Doctrine\Object\Translation;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
+use function array_keys;
 use function strlen;
 
 /**
@@ -47,18 +49,31 @@ use function strlen;
  */
 class ODM implements AdapterInterface
 {
+    /**
+     * @var array<string, array<string, array<string, array<string, callable>>>>
+     */
+    private array $translationsToLoad = [];
+
     public function __construct(
         private readonly DocumentManager $manager,
+        private bool $deferred = false,
     ) {
     }
 
-    public function loadAllTranslations(
+    public function setDeferred(bool $deferred): ODM
+    {
+        $this->deferred = $deferred;
+
+        return $this;
+    }
+
+    private function fetchAllTranslations(
         string $locale,
         string $identifier,
         string $translationClass,
         string $objectClass,
-        callable $callback
-    ): AdapterInterface {
+        callable $callback,
+    ): void {
         // load translated content for all translatable fields construct query
         $queryBuilder = $this->manager->createQueryBuilder($translationClass);
         $queryBuilder->field('foreignKey')->equals($identifier);
@@ -71,6 +86,69 @@ class ODM implements AdapterInterface
         $result = $query->execute();
 
         $callback($result);
+    }
+
+    public function executeAllDeferredLoadings(): AdapterInterface
+    {
+        foreach ($this->translationsToLoad as $translationClass => &$locales) {
+            foreach ($locales as $locale => &$classes) {
+                foreach ($classes as $objectClass => &$ids) {
+                    $queryBuilder = $this->manager->createQueryBuilder($translationClass);
+                    $queryBuilder->field('foreignKey')->in(array_keys($ids));
+                    $queryBuilder->field('locale')->equals($locale);
+                    $queryBuilder->field('objectClass')->equals($objectClass);
+                    $queryBuilder->sort('foreignKey');
+
+                    $query = $queryBuilder->getQuery();
+                    $query->setHydrate(false);
+
+                    /**
+                     * @var Translation $translation
+                     */
+                    $currentForeignKey = null;
+                    $subSets = [];
+                    foreach ($query->execute() as $translation) {
+                        if (null !== $currentForeignKey && $currentForeignKey !== $translation['foreign_key']) {
+                            ($ids[$currentForeignKey])($subSets);
+                            $subSets = [];
+                        }
+
+                        $currentForeignKey = $translation['foreign_key'];
+                        $subSets[] = $translation;
+                    }
+
+                    if (null !== $currentForeignKey) {
+                        ($ids[$currentForeignKey])($subSets);
+                    }
+                }
+            }
+        }
+
+        $this->translationsToLoad = [];
+
+        return $this;
+    }
+
+    public function loadAllTranslations(
+        string $locale,
+        string $identifier,
+        string $translationClass,
+        string $objectClass,
+        callable $callback,
+    ): AdapterInterface {
+        if (true === $this->deferred) {
+            $this->translationsToLoad[$translationClass][$locale][$objectClass][$identifier] = $callback;
+
+            return $this;
+        }
+
+        $this->fetchAllTranslations(
+            locale: $locale,
+            identifier: $identifier,
+            translationClass: $translationClass,
+            objectClass: $objectClass,
+            callback: $callback,
+        );
 
         return $this;
     }

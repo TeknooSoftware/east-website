@@ -47,8 +47,10 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository;
@@ -60,6 +62,7 @@ use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepositor
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Media;
+use Teknoo\East\Website\Doctrine\Recipe\Step\LoadTranslations;
 use Teknoo\East\Website\Doctrine\Recipe\Step\ODM\GetStreamFromMedia;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\SimpleXmlFactoryInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Xml;
@@ -69,6 +72,7 @@ use Teknoo\East\Website\Doctrine\Translatable\Mapping\ExtensionMetadataFactory;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\Adapter\ODM as ODMAdapter;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\Adapter\ODM as ODMPersistence;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
+use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface as WrapperFactory;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
@@ -77,17 +81,55 @@ use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
+use function DI\create;
+use function DI\decorate;
 use function DI\get;
 
 return [
-    TranslatableListener::class => static function (ContainerInterface $container): TranslatableListener {
+
+    ODMPersistence::class => static function (ContainerInterface $container): ODMPersistence {
         $objectManager = $container->get(ObjectManager::class);
-        $eastManager = $container->get(ManagerInterface::class);
 
         if (!$objectManager instanceof DocumentManager) {
             throw new RuntimeException('Sorry currently, this listener supports only ODM');
         }
+
+        $deferred = false;
+        if ($container->has('teknoo.east.website.translatable.deferred_loading')) {
+            $deferred = !empty($container->get('teknoo.east.website.translatable.deferred_loading'));
+        }
+
+        return new ODMPersistence(
+            manager: $objectManager,
+            deferred: $deferred,
+        );
+    },
+
+    TranslationManager::class => static function (ContainerInterface $container): ?TranslationManager {
+        $objectManager = $container->get(ObjectManager::class);
+
+        if (!$objectManager instanceof DocumentManager) {
+            return null;
+        }
+
+        return new TranslationManager(
+            $container->get(ODMPersistence::class),
+        );
+    },
+
+    TranslationManagerInterface::class => get(TranslationManager::class),
+
+    LoadTranslations::class => create()
+        ->constructor(get(TranslationManagerInterface::class)),
+
+    LoadTranslationsInterface::class => get(LoadTranslations::class),
+
+    TranslatableListener::class => static function (ContainerInterface $container): TranslatableListener {
+        $objectManager = $container->get(ObjectManager::class);
+        $eastManager = $container->get(ManagerInterface::class);
+        $persistence = $container->get(ODMPersistence::class);
 
         $eventManager = $objectManager->getEventManager();
 
@@ -95,8 +137,6 @@ return [
             $eastManager,
             $objectManager
         );
-
-        $persistence = new ODMPersistence($objectManager);
 
         $mappingDriver = $objectManager->getConfiguration()->getMetadataDriverImpl();
         if (null === $mappingDriver) {
@@ -278,4 +318,34 @@ return [
             $container->get(StreamFactoryInterface::class)
         );
     },
+
+    // @codeCoverageIgnoreStart
+    OriginalRecipeInterface::class . ':CRUD' => decorate(
+        static function ($previous, ContainerInterface $container): OriginalRecipeInterface {
+            if ($previous instanceof OriginalRecipeInterface) {
+                $previous = $previous->cook(
+                    action: $container->get(LoadTranslationsInterface::class),
+                    name: LoadTranslationsInterface::class,
+                    position: 0,
+                );
+            }
+
+            return $previous;
+        }
+    ),
+
+    OriginalRecipeInterface::class . ':Static' => decorate(
+        static function ($previous, ContainerInterface $container): OriginalRecipeInterface {
+            if ($previous instanceof OriginalRecipeInterface) {
+                $previous = $previous->cook(
+                    action: $container->get(LoadTranslationsInterface::class),
+                    name: LoadTranslationsInterface::class,
+                    position: 0,
+                );
+            }
+
+            return $previous;
+        }
+    ),
+    // @codeCoverageIgnoreEnd
 ];

@@ -45,22 +45,25 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Doctrine\Recipe\Step\ODM\GetStreamFromMedia;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
+use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Website\Doctrine\Writer\ODM\MediaWriter;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Common\Object\User;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
 /**
  * Class DefinitionProviderTest.
@@ -228,6 +231,7 @@ class ContainerTest extends TestCase
         $container = $this->buildContainer();
         $objectManager = $this->createMock(DocumentManager::class);
         $container->set(ObjectManager::class, $objectManager);
+        $container->set('teknoo.east.website.translatable.deferred_loading', true);
 
         $this->expectException(\RuntimeException::class);
         $listener = $container->get(TranslatableListener::class);
@@ -460,6 +464,80 @@ class ContainerTest extends TestCase
         self::assertInstanceOf(
             GetStreamFromMedia::class,
             $container->get(GetStreamFromMedia::class)
+        );
+    }
+
+    public function testTranslationManager()
+    {
+        $container = $this->buildContainer();
+
+        $objectManager = $this->createMock(DocumentManager::class);
+        $container->set(ObjectManager::class, $objectManager);
+
+        self::assertInstanceOf(
+            TranslationManager::class,
+            $container->get(TranslationManager::class)
+        );
+    }
+
+    public function testTranslationManagerInterface()
+    {
+        $container = $this->buildContainer();
+
+        $objectManager = $this->createMock(DocumentManager::class);
+        $container->set(ObjectManager::class, $objectManager);
+
+        self::assertInstanceOf(
+            TranslationManager::class,
+            $container->get(TranslationManagerInterface::class)
+        );
+    }
+
+    public function testTranslationManagerNonOdm()
+    {
+        $container = $this->buildContainer();
+
+        $objectManager = $this->createMock(ObjectManager::class);
+        $container->set(ObjectManager::class, $objectManager);
+
+        self::assertNull(
+            $container->get(TranslationManager::class)
+        );
+    }
+
+    public function testTranslationManagerInterfaceNonOdm()
+    {
+        $container = $this->buildContainer();
+
+        $objectManager = $this->createMock(ObjectManager::class);
+        $container->set(ObjectManager::class, $objectManager);
+
+        self::assertNull(
+            $container->get(TranslationManager::class)
+        );
+    }
+
+    public function testOriginalRecipeInterfaceCrud()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+
+        self::assertInstanceOf(
+            OriginalRecipeInterface::class,
+            $container->get(OriginalRecipeInterface::class . ':CRUD')
+        );
+    }
+
+    public function testOriginalRecipeInterfaceStatic()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':Static', $this->createMock(OriginalRecipeInterface::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+
+        self::assertInstanceOf(
+            OriginalRecipeInterface::class,
+            $container->get(OriginalRecipeInterface::class . ':Static')
         );
     }
 }

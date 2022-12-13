@@ -71,7 +71,7 @@ class ODMTest extends TestCase
         return new ODM($this->getManager());
     }
 
-    public function testloadAllTranslations()
+    public function testLoadAllTranslations()
     {
         $qBuilder = $this->createMock(Builder::class);
         $qBuilder->expects(self::any())
@@ -112,6 +112,117 @@ class ODMTest extends TestCase
         );
 
         self::assertTrue($called);
+    }
+
+    public function testLoadAllTranslationsOnDeferred()
+    {
+        $this->getManager()
+            ->expects(self::never())
+            ->method('createQueryBuilder');
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $this->build()->setDeferred(true)->loadAllTranslations(
+                'fr',
+                'fooId',
+                'fooClass',
+                'barClass',
+                function () use (&$called) {
+                    $called = true;
+                }
+            )
+        );
+    }
+
+    public function testSetDeferred()
+    {
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $this->build()->setDeferred(true)
+        );
+    }
+
+    public function testExecuteAllDeferredLoadingsOnNonDeferred()
+    {
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $this->build()->setDeferred(true)->executeAllDeferredLoadings()
+        );
+    }
+
+    public function testExecuteAllDeferredLoadingsOnDeferred()
+    {
+        $qBuilder = $this->createMock(Builder::class);
+        $qBuilder->expects(self::any())
+            ->method('field')
+            ->willReturnSelf();
+
+        $qBuilder->expects(self::any())
+            ->method('equals')
+            ->willReturnSelf();
+
+        $query = $this->createMock(Query::class);
+        $query->expects(self::once())->method('execute')->willReturn(
+            [
+                ['foreign_key' => 'fooId'],
+                ['foreign_key' => 'fooId'],
+                ['foreign_key' => 'fooId'],
+                ['foreign_key' => 'barId'],
+                ['foreign_key' => 'barId'],
+                ['foreign_key' => 'barId'],
+            ]
+        );
+
+        $qBuilder->expects(self::any())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $this->getManager()
+            ->expects(self::once())
+            ->method('createQueryBuilder')
+            ->willReturn($qBuilder);
+
+        $called = 0;
+
+        $odm = $this->build();
+
+        $odm->setDeferred(true);
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $odm->loadAllTranslations(
+                locale: 'fr',
+                identifier: 'fooId',
+                translationClass: 'fooClass',
+                objectClass: 'barClass',
+                callback: function () use (&$called) {
+                    $called++;
+                }
+            )
+        );
+
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $odm->loadAllTranslations(
+                locale: 'fr',
+                identifier: 'barId',
+                translationClass: 'fooClass',
+                objectClass: 'barClass',
+                callback: function () use (&$called) {
+                    $called++;
+                }
+            )
+        );
+
+        self::assertEquals(0, $called);
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $odm->executeAllDeferredLoadings(),
+        );
+
+        self::assertEquals(2, $called);
     }
 
     public function testFindTranslationNotFound()
@@ -386,7 +497,7 @@ class ODMTest extends TestCase
         );
     }
 
-    public function testsetTranslatedValueWithGenericClassMetaData()
+    public function testSetTranslatedValueWithGenericClassMetaData()
     {
         $this->expectException(\RuntimeException::class);
 
@@ -398,7 +509,7 @@ class ODMTest extends TestCase
         $this->build()->setTranslatedValue($wrapper, $meta, 'foo', 'bar');
     }
 
-    public function testsetTranslatedValue()
+    public function testSetTranslatedValue()
     {
         $wrapper = $this->createMock(WrapperInterface::class);
         $wrapper->expects(self::once())->method('setPropertyValue');

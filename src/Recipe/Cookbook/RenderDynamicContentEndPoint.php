@@ -26,11 +26,12 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Recipe\Cookbook;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
-use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Cookbook\BaseCookbookTrait;
 use Teknoo\Recipe\Ingredient\Ingredient;
@@ -51,6 +52,7 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
         RecipeInterface $recipe,
         private readonly ExtractSlug $extractSlug,
         private readonly LoadContent $loadContent,
+        private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
         private readonly Render $render,
         private readonly RenderError $renderError
     ) {
@@ -64,6 +66,10 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
         $recipe = $recipe->cook($this->extractSlug, ExtractSlug::class, [], 10);
 
         $recipe = $recipe->cook($this->loadContent, LoadContent::class, [], 20);
+
+        if (null !== $this->loadTranslationsInterface) {
+            $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
+        }
 
         $recipe = $recipe->cook($this->render, Render::class, [], 30);
 

@@ -1,5 +1,18 @@
 # Teknoo Software - Website - Change Log
 
+## [8.4.0] - 2022-12-13
+### Stable Release
+- Optimize MenuGenerator to fetch menu on a minimum of request
+- Add a DI key `teknoo.east.website.menu_generator.default_locations` to set an array of locations to fetch at
+  first `MenuGenerator.extract`
+- Add deferred translations loading to load all translations of all loaded translatable contents in a minimum requests
+- Add `TranslationManager` to enable or stop and fetch all translations
+- Add `LoadTranslationsInterface` and `LoadTranslations` step to automatically fetch translation before rendering
+  content in dynamic call
+- Extends `OriginalRecipeInterface::class . ':CRUD'` and OriginalRecipeInterface::class . ':Static' to disable this
+  behavior in admins parts.
+- Add `teknoo.east.website.translatable.deferred_loading` key in DI to enable by default this new behavior
+
 ## [8.3.6] - 2022-11-25
 ### Stable Release
 - Update symfony configuration for behat
