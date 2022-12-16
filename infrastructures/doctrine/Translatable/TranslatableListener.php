@@ -105,7 +105,7 @@ class TranslatableListener implements EventSubscriber
      *      }
      *  >
      */
-    private array $configurations = array();
+    private array $configurations = [];
 
     /**
      * List of cached class metadata from doctrine manager
@@ -289,7 +289,7 @@ class TranslatableListener implements EventSubscriber
             $locale,
             $translationClass,
             $config['useObjectClass'],
-            function (iterable $result) use ($wrapper, $config, $metaData) {
+            function (iterable $result) use ($wrapper, $config, $metaData): void {
                 if (empty($result)) {
                     return;
                 }
@@ -386,7 +386,7 @@ class TranslatableListener implements EventSubscriber
                 $wrapper,
                 &$translationClass,
                 $metaData
-            ) {
+            ): void {
                 // check for the availability of the primary key
                 $oid = spl_object_hash($object);
 
@@ -407,7 +407,7 @@ class TranslatableListener implements EventSubscriber
                             $field,
                             $translationClass,
                             $config['useObjectClass'],
-                            static function (TranslationInterface $result) use (&$translation) {
+                            static function (TranslationInterface $result) use (&$translation): void {
                                 $translation = $result;
                             }
                         );
@@ -471,7 +471,7 @@ class TranslatableListener implements EventSubscriber
     {
         $this->objectsToTranslate = [];
 
-        $handling = function ($object, $isInsert) {
+        $handling = function ($object, $isInsert): void {
             if (!$object instanceof TranslatableInterface) {
                 return;
             }
@@ -485,15 +485,15 @@ class TranslatableListener implements EventSubscriber
         };
 
         // check all scheduled inserts for TranslatableInterface objects
-        $this->manager->foreachScheduledObjectInsertions(static function ($object) use ($handling) {
+        $this->manager->foreachScheduledObjectInsertions(static function ($object) use ($handling): void {
             $handling($object, true);
         });
 
-        $this->manager->foreachScheduledObjectUpdates(static function ($object) use ($handling) {
+        $this->manager->foreachScheduledObjectUpdates(static function ($object) use ($handling): void {
             $handling($object, false);
         });
 
-        $this->manager->foreachScheduledObjectDeletions(function ($object) {
+        $this->manager->foreachScheduledObjectDeletions(function ($object): void {
             if (!$object instanceof TranslatableInterface) {
                 return;
             }
@@ -520,6 +520,7 @@ class TranslatableListener implements EventSubscriber
             foreach ($objects as &$object) {
                 $this->loadAllTranslations($object[0], $local, $object[1], $object[2], $object[3]);
             }
+
             unset($object);
         }
 

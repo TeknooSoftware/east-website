@@ -40,7 +40,7 @@ use Twig\TwigFilter;
 class SanitizedContent extends AbstractExtension
 {
     public function __construct(
-        private ?HtmlSanitizerInterface $sanitizer = null,
+        private readonly ?HtmlSanitizerInterface $sanitizer = null,
     ) {
     }
 
@@ -49,9 +49,15 @@ class SanitizedContent extends AbstractExtension
      */
     public function getFilters(): array
     {
-        return array(
-            new TwigFilter('sanitized_part', array($this, 'getPart'), ['is_safe' => ['html']]),
-        );
+        return [
+            new TwigFilter(
+                'sanitized_part',
+                $this->getPart(...),
+                [
+                    'is_safe' => ['html'],
+                ],
+            ),
+        ];
     }
 
     protected function hook(string $data): string

@@ -64,7 +64,7 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
     ): QueryElementInterface {
         /** @var Promise<Content, mixed, Content> $fetchingPromise */
         $fetchingPromise = new Promise(
-            onSuccess: static function ($object, PromiseInterface $next) {
+            onSuccess: static function ($object, PromiseInterface $next): void {
                 if (
                     $object instanceof PublishableInterface
                     && $object->getPublishedAt() instanceof DateTimeInterface

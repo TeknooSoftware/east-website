@@ -57,7 +57,7 @@ class MediaType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SUBMIT,
-            static function (FormEvent $event) {
+            static function (FormEvent $event): void {
                 $form = $event->getForm();
                 /** @var array<string, string|UploadedFile> $data */
                 $data = $event->getData();

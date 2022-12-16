@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.4.1] - 2022-12-16
+### Stable Release
+- Some QA fixes
+- Drop support of Symfony 6.0 and Doctrine 2.x, supports SF 6.1+ and Doctrine 3+
+
 ## [8.4.0] - 2022-12-13
 ### Stable Release
 - Optimize MenuGenerator to fetch menu on a minimum of request

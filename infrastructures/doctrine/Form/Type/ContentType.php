@@ -56,9 +56,9 @@ class ContentType extends AbstractType
     use TranslatableTrait;
 
     public function __construct(
-        private ?HtmlSanitizerInterface $sanitizer = null,
-        private ?string $sanitizeContext = null,
-        private ?string $contentSanitzedSalt = null,
+        private readonly ?HtmlSanitizerInterface $sanitizer = null,
+        private readonly ?string $sanitizeContext = null,
+        private readonly ?string $contentSanitzedSalt = null,
     ) {
     }
 
@@ -110,7 +110,7 @@ class ContentType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            static function (FormEvent $event) {
+            static function (FormEvent $event): void {
                 $data = $event->getData();
                 $form = $event->getForm();
 
@@ -118,7 +118,7 @@ class ContentType extends AbstractType
                     return;
                 }
 
-                $data->isInState([Published::class], static function () use ($data, $form) {
+                $data->isInState([Published::class], static function () use ($data, $form): void {
                     $form->add(
                         'publishedAt',
                         DateTimeType::class,
@@ -165,7 +165,7 @@ class ContentType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SUBMIT,
-            function (FormEvent $event) {
+            function (FormEvent $event): void {
                 $form = $event->getForm();
                 /** @var array<string, string> $data */
                 $data = $event->getData();

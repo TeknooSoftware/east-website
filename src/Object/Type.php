@@ -90,7 +90,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
     public function getBlocks(): array
     {
         return array_map(
-            static fn($key, $value) => new Block($key, BlockType::from($value)),
+            static fn($key, $value): Block => new Block($key, BlockType::from($value)),
             array_keys($this->blocks),
             array_values($this->blocks)
         );

@@ -213,6 +213,7 @@ class ODM implements AdapterInterface
 
         $idValue = $metadata->idGenerator->generate($this->manager, $translation);
         $idValue = $metadata->getPHPIdentifierValue($metadata->getDatabaseIdentifierValue($idValue));
+
         $metadata->setIdentifierValue($translation, $idValue);
     }
 

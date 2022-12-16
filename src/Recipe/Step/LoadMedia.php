@@ -49,10 +49,10 @@ class LoadMedia
     {
         /** @var Promise<Media, mixed, mixed> $fetchPromise */
         $fetchPromise = new Promise(
-            static function (Media $media) use ($manager) {
+            static function (Media $media) use ($manager): void {
                 $manager->updateWorkPlan([Media::class => $media]);
             },
-            static function (Throwable $error) use ($manager) {
+            static function (Throwable $error) use ($manager): void {
                 $error = new DomainException($error->getMessage(), 404, $error);
 
                 $manager->error($error);

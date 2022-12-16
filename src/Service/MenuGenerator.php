@@ -79,13 +79,15 @@ class MenuGenerator
         $itemsStacks = [];
         $contentsStacks = [];
 
-        $itemsSorting = function (iterable $items) use (&$itemsStacks, &$contentsStacks) {
+        $itemsSorting = function (iterable $items) use (&$itemsStacks, &$contentsStacks): void {
             foreach ($items as $item) {
                 if (null !== $this->proxyDetector && null !== ($content = $item->getContent())) {
                     /** @var Promise<ObjectInterface, mixed, mixed> $contentFetchedPromise */
-                    $contentFetchedPromise = new Promise(function ($content) use (&$contentsStacks, $item) {
-                        $contentsStacks[$content->getId()] = $item;
-                    });
+                    $contentFetchedPromise = new Promise(
+                        static function ($content) use (&$contentsStacks, $item): void {
+                            $contentsStacks[$content->getId()] = $item;
+                        }
+                    );
 
                     $this->proxyDetector->checkIfInstanceBehindProxy(
                         $content,
@@ -107,17 +109,19 @@ class MenuGenerator
             }
 
             /** @var Promise<iterable<Content>, mixed, mixed> $fetchedPromise */
-            $fetchedPromise = new Promise(function (iterable $contents) use (&$contentsStacks) {
-                foreach ($contents as $content) {
-                    $cId = $content->getId();
+            $fetchedPromise = new Promise(
+                static function (iterable $contents) use (&$contentsStacks): void {
+                    foreach ($contents as $content) {
+                        $cId = $content->getId();
 
-                    if (!isset($contentsStacks[$cId])) {
-                        continue;
+                        if (!isset($contentsStacks[$cId])) {
+                            continue;
+                        }
+
+                        $contentsStacks[$cId]->setContent($content);
                     }
-
-                    $contentsStacks[$cId]->setContent($content);
                 }
-            });
+            );
 
             $this->contentLoader->query(
                 new PublishedContentFromIdsQuery(array_keys($contentsStacks)),

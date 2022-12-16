@@ -51,7 +51,7 @@ class LoadContent
 
     public function __invoke(string $slug, ManagerInterface $manager): self
     {
-        $error = static function (Throwable $error) use ($manager) {
+        $error = static function (Throwable $error) use ($manager): void {
             if ($error instanceof DomainException) {
                 $error = new DomainException($error->getMessage(), 404, $error);
             }
@@ -61,7 +61,7 @@ class LoadContent
 
         /** @var Promise<Content, mixed, mixed> $fetchPromise */
         $fetchPromise = new Promise(
-            static function (Content $content) use ($manager, $error) {
+            static function (Content $content) use ($manager, $error): void {
                 $type = $content->getType();
                 if (null === $type) {
                     $error(new RuntimeException('Content type is not available'));

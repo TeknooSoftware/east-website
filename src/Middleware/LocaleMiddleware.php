@@ -79,18 +79,20 @@ class LocaleMiddleware
         }
 
         $promise = new Promise(
-            function (string $locale) use (&$request) {
+            function (string $locale) use (&$request): string {
                 if (is_callable($this->translatableSetter)) {
                     ($this->translatableSetter)($locale);
                 }
+
                 $request = $request->withAttribute('locale', $locale);
 
                 return $locale;
             },
-            function () use (&$request, $session) {
+            function () use (&$request, $session): void {
                 if (is_callable($this->translatableSetter)) {
                     ($this->translatableSetter)($this->defaultLocale);
                 }
+
                 $session->set(self::SESSION_KEY, $this->defaultLocale);
                 $request = $request->withAttribute('locale', $this->defaultLocale);
             }
@@ -126,6 +128,7 @@ class LocaleMiddleware
             if (is_callable($this->translatableSetter)) {
                 ($this->translatableSetter)($locale);
             }
+
             $this->registerLocaleInSession($message, $locale);
             $message = $message->withAttribute('locale', $locale);
 
