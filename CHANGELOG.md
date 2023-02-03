@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.4.2] - 2023-02-03
+### Stable Release
+- Update dev libs to support PHPUnit 10 and remove unused phploc
+
 ## [8.4.1] - 2022-12-16
 ### Stable Release
 - Some QA fixes
