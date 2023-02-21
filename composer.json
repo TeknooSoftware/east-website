@@ -48,7 +48,7 @@
         "ext-json": "*",
         "php-di/php-di": "^6.4",
         "teknoo/immutable": "^3.0.12",
-        "teknoo/states": "^6.0.12",
+        "teknoo/states": "^6.0.15",
         "teknoo/recipe": "^4.2.1",
         "teknoo/east-common": "^1.6.2",
         "teknoo/east-foundation": "^6.2.5"
@@ -59,7 +59,7 @@
         "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^9.6||^10",
         "squizlabs/php_codesniffer": "^3.7.1",
-        "phpstan/phpstan": "^1.9.14",
+        "phpstan/phpstan": "^1.10",
         "symfony/property-access": "^6.2.5",
         "icanhazstring/composer-unused": "^0.8.6",
         "nikic/php-parser": "^v4.15.2",
