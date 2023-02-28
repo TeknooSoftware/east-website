@@ -222,7 +222,7 @@ Enable third party authentication with an OAuth2 Provider (example with Gitlab)
         defaults:
             _controller: 'teknoo.east.website.endpoint.static'
             template: '@@TeknooEastWebsite/Admin/index.html.twig'
-            errorTemplate: '@@TeknooEastWebsite/Error/404.html.twig'
+            errorTemplate: '@@TeknooEastCommon/Error/404.html.twig'
             _oauth_client_key: gitlab
 
 

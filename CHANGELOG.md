@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.5.0] - 2023-02-28
+### Stable Release
+- East Common 1.7
+- Fix default value of `errorTemplate` to '@@TeknooEastCommon/Error/<error>.html.twig'
+
 ## [8.4.3] - 2023-02-11
 ### Stable Release
 - Remove phpcpd and upgrade phpunit.xml
