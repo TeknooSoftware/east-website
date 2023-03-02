@@ -98,7 +98,6 @@ use function array_pop;
 use function current;
 use function dirname;
 use function explode;
-use function get_class;
 use function in_array;
 use function json_decode;
 use function json_encode;
@@ -307,10 +306,10 @@ class FeatureContext implements Context
                     $this->featureContext->updatedObjects[$id] = $object;
                 } else {
                     $object->setId(uniqid());
-                    $class = explode('\\', get_class($object));
+                    $class = explode('\\', $object::class);
                     $this->featureContext->createdObjects[array_pop($class)][] = $object;
 
-                    $this->featureContext->getObjectRepository(get_class($object))->setObject(['id' => $object->getId()], $object);
+                    $this->featureContext->getObjectRepository($object::class)->setObject(['id' => $object->getId()], $object);
                 }
             }
 
