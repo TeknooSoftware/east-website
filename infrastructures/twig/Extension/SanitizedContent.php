@@ -34,6 +34,11 @@ use Twig\TwigFilter;
  * Twig filter to fetch an element in a content's part, prior into the sanitized content, else take it from not
  * sanitized content and sanitize it. If the element is not present, a default value can be defined
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

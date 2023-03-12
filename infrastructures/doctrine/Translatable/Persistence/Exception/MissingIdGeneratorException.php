@@ -23,14 +23,11 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Contracts\DBSource\Repository;
+namespace Teknoo\East\Website\Doctrine\Translatable\Persistence\Exception;
 
-use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
-use Teknoo\East\Website\Object\Media;
+use RuntimeException;
 
 /**
- * Interface to define repository in charge of object `Teknoo\East\Website\Object\Media`.
- *
  * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
  *
@@ -38,9 +35,7 @@ use Teknoo\East\Website\Object\Media;
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- *
- * @extends RepositoryInterface<Media>
  */
-interface MediaRepositoryInterface extends RepositoryInterface
+class MissingIdGeneratorException extends RuntimeException
 {
 }

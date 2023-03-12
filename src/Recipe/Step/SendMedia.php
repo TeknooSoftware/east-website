@@ -36,6 +36,11 @@ use Teknoo\East\Website\Object\Media;
  * This step will also update reponses's headers to add content type and filename if they are defined in the media.
  * The lenght of the stream will be also put into headers.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

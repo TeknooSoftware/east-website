@@ -40,6 +40,11 @@ use Teknoo\East\Website\Doctrine\Object\Item;
  * This form is placed in this namespace to use the good Symfony Form Doctrine Type to link an item to a parent and
  * to a content. Parents list and Contents list are populated from theirs respective repository.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

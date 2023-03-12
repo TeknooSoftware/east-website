@@ -48,6 +48,11 @@ use function str_replace;
  * The extension metadata factory is responsible for extension driver
  * initialization and fully reading the extension metadata
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @author      Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
@@ -78,7 +83,7 @@ class ExtensionMetadataFactory
         $omDriver = $this->mappingDriver;
         if ($omDriver instanceof MappingDriverChain) {
             $drivers = $omDriver->getDrivers();
-            foreach ($drivers as $namespace => $nestedOmDriver) {
+            foreach ($drivers as $nestedOmDriver) {
                 if ($nestedOmDriver instanceof FileDriver) {
                     $omDriver = $nestedOmDriver;
 

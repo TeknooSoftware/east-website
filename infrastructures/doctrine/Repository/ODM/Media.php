@@ -37,6 +37,11 @@ use function strlen;
  * Repository dedicated to Media implementation as GridFS Repository to store all media (image, pdf, or other stuff)
  * into a MongoDB's GridFS via Doctrine ODM.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *

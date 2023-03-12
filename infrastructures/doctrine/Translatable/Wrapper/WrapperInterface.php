@@ -36,6 +36,11 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
  * This interface defines method to update value in wrapped object, manipulate data in the object's manager (according
  * to its implementations/technology) or manage `TranslationInterface` instances linked to the wrapped object.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

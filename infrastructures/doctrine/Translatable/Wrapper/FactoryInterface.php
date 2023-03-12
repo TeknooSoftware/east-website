@@ -33,6 +33,11 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
  * Implementation to define factory able to create the good wrapper instance to wrap the Translatable object passed in
  * argument with its metadata.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

@@ -35,6 +35,11 @@ use Teknoo\States\State\StateTrait;
  * effect. So, a published content can not be republished (but can be updated).
  * The method setPublishedAt is only available in this state to avoid useless crash on a "Save & Publish" request.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *

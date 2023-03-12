@@ -33,6 +33,11 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as ClassMetadataODM;
  * Interface to define driver, able to read a configuration / metadata about class/object's translations and return it
  * to the ExtensionMetadataFactory to configure this Doctrine extension.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @author      Gediminas Morkevicius <gediminas.morkevicius@gmail.com>

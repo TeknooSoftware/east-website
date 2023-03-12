@@ -30,6 +30,11 @@ namespace Teknoo\East\Website\Doctrine\Exception;
  * Exception class used in Website Doctrine extension dedicated to translation.
  * Used when the translation xml mapping contain some errors.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @author      Gediminas Morkevicius <gediminas.morkevicius@gmail.com>

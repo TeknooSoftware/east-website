@@ -34,6 +34,11 @@ use Teknoo\States\State\StateTrait;
  * Content's state representing a content instance not published, aka a draft. The methode "setPublishedAt" is provided
  * only in this state. So, a published content can not be republished (but can be updated).
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *

@@ -32,6 +32,11 @@ use Teknoo\East\Common\View\ParametersBag;
  * Middleware injected into the main East Foundation's recipe, as middleware, to inject into the view parameter bag
  * the instance of the menu generator service, to be used into the template engine to show menus.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

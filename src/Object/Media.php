@@ -34,6 +34,11 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
  * This class is not directly instanciable and must be inherited according to data layer :
  *   (Doctrine ODM, Doctrine ORM, ... other)
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

@@ -29,11 +29,11 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\UnitOfWork;
 use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
-use RuntimeException;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\AdapterInterface;
+use Teknoo\East\Website\Doctrine\Translatable\ObjectManager\Exception\WrongClassMetadata;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 
@@ -42,6 +42,11 @@ use function spl_object_hash;
 /**
  * Implementation of adapter dedicated to Doctrine ODM Manager to use it into this library as Object Manager to update
  * objects's states.
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
@@ -114,7 +119,7 @@ class ODM implements AdapterInterface
         TranslatableInterface $object
     ): AdapterInterface {
         if (!$metadata instanceof ClassMetadata) {
-            throw new RuntimeException('Error this classMetada is not compatible with the document manager');
+            throw new WrongClassMetadata('Error this ClassMetadata is not compatible with the document manager');
         }
 
         $uow = $this->getUnitOfWork();

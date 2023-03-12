@@ -30,9 +30,10 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Types\Type;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use MongoDB\BSON\ObjectId;
-use RuntimeException;
 use Teknoo\East\Website\Doctrine\Object\Translation;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
+use Teknoo\East\Website\Doctrine\Translatable\Persistence\Exception\MissingIdGeneratorException;
+use Teknoo\East\Website\Doctrine\Translatable\Persistence\Exception\WrongClassMetadata;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
@@ -43,6 +44,11 @@ use function strlen;
 /**
  * Doctrine ODM adapter able to load and write translated value into a `TranslationInterface` document implementation
  * for each field of a translatable object, and load, in an optimized query, all translations for an object
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
@@ -208,7 +214,7 @@ class ODM implements AdapterInterface
         }
 
         if (null === $metadata->idGenerator) {
-            throw new RuntimeException('Missing Id Generator');
+            throw new MissingIdGeneratorException('Missing Id Generator');
         }
 
         $idValue = $metadata->idGenerator->generate($this->manager, $translation);
@@ -284,7 +290,7 @@ class ODM implements AdapterInterface
         TranslationInterface $translation
     ): AdapterInterface {
         if (!$metadata instanceof OdmClassMetadata) {
-            throw new RuntimeException('Error this classMetadata is not compatible with this adapter');
+            throw new WrongClassMetadata('Error this classMetadata is not compatible with this adapter');
         }
 
         $mapping = $metadata->getFieldMapping($field);
@@ -306,7 +312,7 @@ class ODM implements AdapterInterface
         mixed $value
     ): AdapterInterface {
         if (!$metadata instanceof OdmClassMetadata) {
-            throw new RuntimeException('Error this classMetadata is not compatible with this adapter');
+            throw new WrongClassMetadata('Error this classMetadata is not compatible with this adapter');
         }
 
         $mapping = $metadata->getFieldMapping($field);

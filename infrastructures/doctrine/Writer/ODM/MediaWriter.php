@@ -38,7 +38,12 @@ use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
 /**
  * East Website Writer implementation, dedicated to Media used a Doctrine ODM GridFS Repository.
  * Convert metadata from MediaMetadata to UploadOptions and upload to Mongodb the file downloaded from the client.
- *  *
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *

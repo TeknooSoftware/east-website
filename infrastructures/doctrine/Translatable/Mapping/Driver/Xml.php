@@ -29,9 +29,9 @@ namespace Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver;
 
 use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use RuntimeException;
 use SimpleXMLElement;
 use Teknoo\East\Website\Doctrine\Object\Translation;
+use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Exception\MalformedXmlException;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverInterface;
 use Teknoo\East\Website\Doctrine\Exception\InvalidMappingException;
 
@@ -41,6 +41,11 @@ use function str_replace;
 
 /**
  * Driver implementation to read Doctrine Translation configuration/metadata in XML files
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
  *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
@@ -75,7 +80,7 @@ class Xml implements DriverInterface
         $xmlElement = $xmlElement->children(self::DOCTRINE_NAMESPACE_URI);
 
         if (!isset($xmlElement->object)) {
-            throw new RuntimeException('error');
+            throw new MalformedXmlException('Malformed XML');
         }
 
         return $xmlElement->object;

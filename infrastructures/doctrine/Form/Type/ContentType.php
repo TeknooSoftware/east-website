@@ -47,9 +47,13 @@ use Teknoo\East\Website\Object\Type;
  * This form is placed in this namespace to use the good Symfony Form Doctrine Type to link a content to an author and
  * to a type. Author list and Type list are populated from theirs respective repository.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
- * @SuppressWarnings(PHPMD)
  */
 class ContentType extends AbstractType
 {
@@ -60,6 +64,102 @@ class ContentType extends AbstractType
         private readonly ?string $sanitizeContext = null,
         private readonly ?string $contentSanitzedSalt = null,
     ) {
+    }
+
+    private static function preSetDataallback(FormEvent $event): void
+    {
+        $data = $event->getData();
+        $form = $event->getForm();
+
+        if (!$data instanceof Content || !$data->getType() instanceof Type) {
+            return;
+        }
+
+        $data->isInState([Published::class], static function () use ($data, $form): void {
+            $form->add(
+                'publishedAt',
+                DateTimeType::class,
+                [
+                    'required' => false,
+                    'attr' => ['readonly' => true],
+                    'widget' => 'single_text',
+                    'mapped' => false,
+                    'data' => $data->getPublishedAt()
+                ]
+            );
+        });
+
+        $type = $data->getType();
+        $parts = $data->getParts();
+
+        foreach ($type->getBlocks() as $block) {
+            $formType = match ($block->getType()) {
+                BlockType::Textarea => TextareaType::class,
+                BlockType::Raw => TextareaType::class,
+                BlockType::Numeric => NumberType::class,
+                BlockType::Text => TextType::class,
+                BlockType::Image => TextType::class,
+            };
+
+            $value = '';
+            if (isset($parts[$block->getName()])) {
+                $value = $parts[$block->getName()];
+            }
+
+            $form->add(
+                $block->getName(),
+                $formType,
+                [
+                    'mapped' => false,
+                    'data' => $value,
+                    'required' => false,
+                    'attr' => ['data-type' => $block->getType()->value]
+                ]
+            );
+        }
+    }
+
+    private function preSubmitCallback(FormEvent $event): void
+    {
+        $form = $event->getForm();
+        /** @var array<string, string> $data */
+        $data = $event->getData();
+        $contentObject = $form->getNormData();
+
+        if (!$contentObject instanceof Content || !$contentObject->getType() instanceof Type) {
+            return;
+        }
+
+        $type = $contentObject->getType();
+        $contentValues = [];
+        $sanitzedContentValues = [];
+        foreach ($type->getBlocks() as $block) {
+            if (!isset($data[$block->getName()])) {
+                continue;
+            }
+
+            $value = $data[$block->getName()];
+            $contentValues[$block->getName()] = $value;
+
+            if (null === $this->sanitizer) {
+                continue;
+            }
+
+            if (null !== $this->contentSanitzedSalt && null === $this->sanitizeContext) {
+                $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitize($value);
+            } elseif (null !== $this->contentSanitzedSalt && null !== $this->sanitizeContext) {
+                $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitizeFor(
+                    $this->sanitizeContext,
+                    $value,
+                );
+            }
+        }
+
+        $contentObject->setParts($contentValues);
+
+        if (null !== $this->contentSanitzedSalt && null !== $this->sanitizer) {
+            $contentObject->setSanitizedParts($sanitzedContentValues, $this->contentSanitzedSalt);
+        }
     }
 
     /**
@@ -110,102 +210,12 @@ class ContentType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            static function (FormEvent $event): void {
-                $data = $event->getData();
-                $form = $event->getForm();
-
-                if (!$data instanceof Content || !$data->getType() instanceof Type) {
-                    return;
-                }
-
-                $data->isInState([Published::class], static function () use ($data, $form): void {
-                    $form->add(
-                        'publishedAt',
-                        DateTimeType::class,
-                        [
-                            'required' => false,
-                            'attr' => ['readonly' => true],
-                            'widget' => 'single_text',
-                            'mapped' => false,
-                            'data' => $data->getPublishedAt()
-                        ]
-                    );
-                });
-
-                $type = $data->getType();
-                $parts = $data->getParts();
-
-                foreach ($type->getBlocks() as $block) {
-                    $formType = match ($block->getType()) {
-                        BlockType::Textarea => TextareaType::class,
-                        BlockType::Raw => TextareaType::class,
-                        BlockType::Numeric => NumberType::class,
-                        BlockType::Text => TextType::class,
-                        BlockType::Image => TextType::class,
-                    };
-
-                    $value = '';
-                    if (isset($parts[$block->getName()])) {
-                        $value = $parts[$block->getName()];
-                    }
-
-                    $form->add(
-                        $block->getName(),
-                        $formType,
-                        [
-                            'mapped' => false,
-                            'data' => $value,
-                            'required' => false,
-                            'attr' => ['data-type' => $block->getType()->value]
-                        ]
-                    );
-                }
-            }
+            self::preSetDataallback(...),
         );
 
         $builder->addEventListener(
             FormEvents::PRE_SUBMIT,
-            function (FormEvent $event): void {
-                $form = $event->getForm();
-                /** @var array<string, string> $data */
-                $data = $event->getData();
-                $contentObject = $form->getNormData();
-
-                if (!$contentObject instanceof Content || !$contentObject->getType() instanceof Type) {
-                    return;
-                }
-
-                $type = $contentObject->getType();
-                $contentValues = [];
-                $sanitzedContentValues = [];
-                foreach ($type->getBlocks() as $block) {
-                    if (!isset($data[$block->getName()])) {
-                        continue;
-                    }
-
-                    $value = $data[$block->getName()];
-                    $contentValues[$block->getName()] = $value;
-
-                    if (null === $this->sanitizer) {
-                        continue;
-                    }
-
-                    if (null !== $this->contentSanitzedSalt && null === $this->sanitizeContext) {
-                        $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitize($value);
-                    } elseif (null !== $this->contentSanitzedSalt && null !== $this->sanitizeContext) {
-                        $sanitzedContentValues[$block->getName()] = $this->sanitizer->sanitizeFor(
-                            $this->sanitizeContext,
-                            $value,
-                        );
-                    }
-                }
-
-                $contentObject->setParts($contentValues);
-
-                if (null !== $this->contentSanitzedSalt && null !== $this->sanitizer) {
-                    $contentObject->setSanitizedParts($sanitzedContentValues, $this->contentSanitzedSalt);
-                }
-            }
+            $this->preSubmitCallback(...),
         );
 
         $this->addTranslatableLocaleFieldHidden($builder);

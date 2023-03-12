@@ -48,10 +48,10 @@
         "ext-json": "*",
         "php-di/php-di": "^6.4",
         "teknoo/immutable": "^3.0.14",
-        "teknoo/states": "^6.0.15",
-        "teknoo/recipe": "^4.2.3",
-        "teknoo/east-common": "^1.7.1",
-        "teknoo/east-foundation": "^6.2.6"
+        "teknoo/states": "^6.0.16",
+        "teknoo/recipe": "^4.2.5",
+        "teknoo/east-common": "^1.8.2",
+        "teknoo/east-foundation": "^6.2.7"
     },
     "require-dev": {
         "ext-simplexml" : "*",

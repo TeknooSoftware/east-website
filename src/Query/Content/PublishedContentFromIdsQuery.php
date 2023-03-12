@@ -38,6 +38,11 @@ use Teknoo\Immutable\ImmutableTrait;
  * Class implementing query to load some non soft-deleted Contents instances from theirs ids, and pass result to the
  * passed promise.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  *

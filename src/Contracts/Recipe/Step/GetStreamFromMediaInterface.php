@@ -32,6 +32,11 @@ use Teknoo\East\Website\Object\Media as BaseMedia;
  * Interface to define step to use into a HTTP EndPoint Recipe to fetch and put into Manager's workplan a PSR11
  * `StreamInterface` instance wrapping stream/bytes/resource handle of a persisted media
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

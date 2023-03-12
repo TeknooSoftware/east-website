@@ -32,6 +32,11 @@ use Teknoo\East\Website\Object\Media as OriginalMedia;
  * Media specialization in doctrine, present originally to support new GirdFS implementation in Doctrine ODM
  * Present to avoid bc break.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

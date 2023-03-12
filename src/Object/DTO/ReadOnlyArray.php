@@ -35,6 +35,11 @@ use function count;
  * Object to simulate a read only array, to improve memory access (object are passed by reference in PHP) instead of
  * array
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  * @implements ArrayAccess<string, string>

@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.5.1] - 2023-03-12
+### Stable Release
+- Q/A
+
 ## [8.5.0] - 2023-02-28
 ### Stable Release
 - East Common 1.7

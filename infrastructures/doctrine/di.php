@@ -37,7 +37,6 @@ use Exception;
 use ProxyManager\Proxy\GhostObjectInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use RuntimeException;
 use SimpleXMLElement;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
@@ -59,6 +58,7 @@ use Teknoo\East\Website\Doctrine\DBSource\ODM\ContentRepository as OdmContentRep
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\MediaRepository as OdmMediaRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
+use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Media;
@@ -93,7 +93,7 @@ return [
         $objectManager = $container->get(ObjectManager::class);
 
         if (!$objectManager instanceof DocumentManager) {
-            throw new RuntimeException('Sorry currently, this listener supports only ODM');
+            throw new NotSupportedException('Sorry currently, this listener supports only ODM');
         }
 
         $deferred = false;
@@ -140,7 +140,7 @@ return [
 
         $mappingDriver = $objectManager->getConfiguration()->getMetadataDriverImpl();
         if (null === $mappingDriver) {
-            throw new RuntimeException('The Mapping Driver is not available from the Doctrine manager');
+            throw new NotSupportedException('The Mapping Driver is not available from the Doctrine manager');
         }
 
         $extensionMetadataFactory = new ExtensionMetadataFactory(
@@ -175,7 +175,7 @@ return [
                 public function __invoke(TranslatableInterface $object, ClassMetadata $metadata): WrapperInterface
                 {
                     if (!$metadata instanceof OdmClassMetadata) {
-                        throw new RuntimeException('Error wrapper support only ' . OdmClassMetadata::class);
+                        throw new NotSupportedException('Error wrapper support only ' . OdmClassMetadata::class);
                     }
 
                     return new DocumentWrapper($object, $metadata);
@@ -199,7 +199,7 @@ return [
             return new ContentRepository($repository);
         }
 
-        throw new RuntimeException(sprintf(
+        throw new NotSupportedException(sprintf(
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
@@ -215,7 +215,7 @@ return [
             return new ItemRepository($repository);
         }
 
-        throw new RuntimeException(sprintf(
+        throw new NotSupportedException(sprintf(
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
@@ -231,7 +231,7 @@ return [
             return new MediaRepository($repository);
         }
 
-        throw new RuntimeException(sprintf(
+        throw new NotSupportedException(sprintf(
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
@@ -247,7 +247,7 @@ return [
             return new TypeRepository($repository);
         }
 
-        throw new RuntimeException(sprintf(
+        throw new NotSupportedException(sprintf(
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
@@ -274,7 +274,7 @@ return [
             return new MediaWriter($repository, $container->get(OriginalWriter::class));
         }
 
-        throw new RuntimeException(sprintf(
+        throw new NotSupportedException(sprintf(
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
@@ -310,7 +310,7 @@ return [
     GetStreamFromMedia::class => static function (ContainerInterface $container): GetStreamFromMedia {
         $repository = $container->get(ObjectManager::class)->getRepository(Media::class);
         if (!$repository instanceof GridFSRepository) {
-            throw new RuntimeException('Repository for Media class is not a GridFSRepository');
+            throw new NotSupportedException('Repository for Media class is not a GridFSRepository');
         }
 
         return new GetStreamFromMedia(

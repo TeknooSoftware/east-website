@@ -39,6 +39,11 @@ use Teknoo\East\Website\Object\Media as BaseMedia;
  * Open a resource via the GirdFS Repository, then create a new StreamInterface instance wrapping this resource and
  * put it into the workplan.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

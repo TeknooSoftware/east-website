@@ -31,6 +31,11 @@ namespace Teknoo\East\Website\Doctrine\Translatable;
  * Instances of this interface are not directly usable by developers, or reader or writer.
  * They are internals objecst used by this Doctrine extension to store translations.
  *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */

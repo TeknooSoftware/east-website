@@ -32,6 +32,12 @@ use Symfony\Contracts\Translation\LocaleAwareInterface;
 /**
  * Recipe step to use in main East Foundation recipe as middleware, to configure the Symfony's translator with the
  * selected locale
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (richarddeloge@gmail.com)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software)
+ *
+ * @link        http://teknoo.software/states Project website
+ *
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richarddeloge@gmail.com>
  */
