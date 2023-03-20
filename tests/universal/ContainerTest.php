@@ -29,42 +29,31 @@ use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
-use Teknoo\East\Common\Recipe\Step\RenderList;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Manager\Manager;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Router\RouterInterface;
-use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
-use Teknoo\East\Website\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
-use Teknoo\East\Website\Recipe\Step\LoadMedia;
-use Teknoo\East\Website\Recipe\Step\SendMedia;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\ContentWriter;
 use Teknoo\East\Website\Writer\ItemWriter;
-use Teknoo\East\Website\Writer\MediaWriter;
 use Teknoo\East\Website\Writer\TypeWriter;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
@@ -118,11 +107,6 @@ class ContainerTest extends TestCase
         $this->generateTestForLoader(ContentLoader::class, ContentRepositoryInterface::class);
     }
 
-    public function testMediaLoader()
-    {
-        $this->generateTestForLoader(MediaLoader::class, MediaRepositoryInterface::class);
-    }
-
     public function testTypeLoader()
     {
         $this->generateTestForLoader(TypeLoader::class, TypeRepositoryInterface::class);
@@ -152,11 +136,6 @@ class ContainerTest extends TestCase
         $this->generateTestForWriter(ContentWriter::class);
     }
 
-    public function testMediaWriter()
-    {
-        $this->generateTestForWriter(MediaWriter::class);
-    }
-
     public function testTypeWriter()
     {
         $this->generateTestForWriter(TypeWriter::class);
@@ -184,11 +163,6 @@ class ContainerTest extends TestCase
     public function testContentDelete()
     {
         $this->generateTestForDelete('teknoo.east.website.deleting.content');
-    }
-
-    public function testMediaDelete()
-    {
-        $this->generateTestForDelete('teknoo.east.website.deleting.media');
     }
 
     public function testTypeDelete()
@@ -265,28 +239,6 @@ class ContainerTest extends TestCase
         );
     }
 
-    public function testLoadMedia()
-    {
-        $container = $this->buildContainer();
-        $container->set(MediaRepositoryInterface::class, $this->createMock(MediaRepositoryInterface::class));
-
-        self::assertInstanceOf(
-            LoadMedia::class,
-            $container->get(LoadMedia::class)
-        );
-    }
-
-    public function testSendMedia()
-    {
-        $container = $this->buildContainer();
-        $container->set(ResponseFactoryInterface::class, $this->createMock(ResponseFactoryInterface::class));
-
-        self::assertInstanceOf(
-            SendMedia::class,
-            $container->get(SendMedia::class)
-        );
-    }
-
     public function testRenderDynamicContentEndPoint()
     {
         $container = $this->buildContainer();
@@ -307,25 +259,4 @@ class ContainerTest extends TestCase
             $container->get(RenderDynamicContentEndPointInterface::class)
         );
     }
-
-    public function testRenderMediaEndPoint()
-    {
-        $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadMedia::class, $this->createMock(LoadMedia::class));
-        $container->set(GetStreamFromMediaInterface::class, $this->createMock(GetStreamFromMediaInterface::class));
-        $container->set(SendMedia::class, $this->createMock(SendMedia::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-
-        self::assertInstanceOf(
-            RenderMediaEndPoint::class,
-            $container->get(RenderMediaEndPoint::class)
-        );
-
-        self::assertInstanceOf(
-            RenderMediaEndPointInterface::class,
-            $container->get(RenderMediaEndPointInterface::class)
-        );
-    }
-
 }

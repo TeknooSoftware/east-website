@@ -44,26 +44,20 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
-use Teknoo\East\Website\Doctrine\DBSource\Common\MediaRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ContentRepository as OdmContentRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
-use Teknoo\East\Website\Doctrine\DBSource\ODM\MediaRepository as OdmMediaRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
 use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
-use Teknoo\East\Website\Doctrine\Object\Media;
 use Teknoo\East\Website\Doctrine\Recipe\Step\LoadTranslations;
-use Teknoo\East\Website\Doctrine\Recipe\Step\ODM\GetStreamFromMedia;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\SimpleXmlFactoryInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Xml;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverFactoryInterface;
@@ -76,10 +70,8 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface as WrapperFactory;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Doctrine\Writer\ODM\MediaWriter;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Writer\MediaWriter as OriginalWriter;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
@@ -221,22 +213,6 @@ return [
         ));
     },
 
-    MediaRepositoryInterface::class => static function (ContainerInterface $container): MediaRepositoryInterface {
-        $repository = $container->get(ObjectManager::class)->getRepository(Media::class);
-        if ($repository instanceof DocumentRepository) {
-            return new OdmMediaRepository($repository);
-        }
-
-        if ($repository instanceof ObjectRepository) {
-            return new MediaRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
-    },
-
     TypeRepositoryInterface::class => static function (ContainerInterface $container): TypeRepositoryInterface {
         $repository = $container->get(ObjectManager::class)->getRepository(Type::class);
         if ($repository instanceof DocumentRepository) {
@@ -268,19 +244,6 @@ return [
         return new LocaleMiddleware($callback);
     },
 
-    MediaWriter::class => static function (ContainerInterface $container): MediaWriter {
-        $repository = $container->get(ObjectManager::class)->getRepository(Media::class);
-        if ($repository instanceof GridFSRepository) {
-            return new MediaWriter($repository, $container->get(OriginalWriter::class));
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
-    },
-    'teknoo.east.website.doctrine.writer.media.new' => get(MediaWriter::class),
-
     ProxyDetectorInterface::class => static function (): ProxyDetectorInterface {
         return new class implements ProxyDetectorInterface {
             public function checkIfInstanceBehindProxy(
@@ -304,19 +267,6 @@ return [
                 return $this;
             }
         };
-    },
-
-    GetStreamFromMediaInterface::class => get(GetStreamFromMedia::class),
-    GetStreamFromMedia::class => static function (ContainerInterface $container): GetStreamFromMedia {
-        $repository = $container->get(ObjectManager::class)->getRepository(Media::class);
-        if (!$repository instanceof GridFSRepository) {
-            throw new NotSupportedException('Repository for Media class is not a GridFSRepository');
-        }
-
-        return new GetStreamFromMedia(
-            $repository,
-            $container->get(StreamFactoryInterface::class)
-        );
     },
 
     // @codeCoverageIgnoreStart

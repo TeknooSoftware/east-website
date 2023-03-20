@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.6.0] - 2023-03-20
+### Stable Release
+- Migrate Media to Common
+
 ## [8.5.1] - 2023-03-12
 ### Stable Release
 - Q/A

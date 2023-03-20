@@ -24,7 +24,7 @@ services:
     teknoo.east.website.endpoint.media.bowl:
         class: '%teknoo.east.website.endpoint.media.bowl.class%'
         arguments:
-            - '@Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface'
+            - '@Teknoo\East\Common\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.media:
