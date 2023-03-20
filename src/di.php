@@ -37,28 +37,20 @@ use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Recipe\RecipeInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
-use Teknoo\East\Website\Contracts\DBSource\Repository\MediaRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
-use Teknoo\East\Website\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
-use Teknoo\East\Website\Recipe\Cookbook\RenderMediaEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
-use Teknoo\East\Website\Recipe\Step\LoadMedia;
-use Teknoo\East\Website\Recipe\Step\SendMedia;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\ContentWriter;
 use Teknoo\East\Website\Writer\ItemWriter;
-use Teknoo\East\Website\Writer\MediaWriter;
 use Teknoo\East\Website\Writer\TypeWriter;
 use Teknoo\Recipe\Recipe;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
@@ -73,8 +65,6 @@ return [
         ->constructor(get(ItemRepositoryInterface::class)),
     ContentLoader::class => create(ContentLoader::class)
         ->constructor(get(ContentRepositoryInterface::class)),
-    MediaLoader::class => create(MediaLoader::class)
-        ->constructor(get(MediaRepositoryInterface::class)),
     TypeLoader::class => create(TypeLoader::class)
         ->constructor(get(TypeRepositoryInterface::class)),
 
@@ -82,8 +72,6 @@ return [
     ItemWriter::class => create(ItemWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     ContentWriter::class => create(ContentWriter::class)
-        ->constructor(get(ManagerInterface::class), get(DatesService::class)),
-    MediaWriter::class => create(MediaWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     TypeWriter::class => create(TypeWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
@@ -93,8 +81,6 @@ return [
         ->constructor(get(ItemWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.content' => create(DeletingService::class)
         ->constructor(get(ContentWriter::class), get(DatesService::class)),
-    'teknoo.east.website.deleting.media' => create(DeletingService::class)
-        ->constructor(get(MediaWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.type' => create(DeletingService::class)
         ->constructor(get(TypeWriter::class), get(DatesService::class)),
 
@@ -155,14 +141,6 @@ return [
         ->constructor(
             get(ContentLoader::class)
         ),
-    LoadMedia::class => create()
-        ->constructor(
-            get(MediaLoader::class)
-        ),
-    SendMedia::class => create()
-        ->constructor(
-            get(ResponseFactoryInterface::class)
-        ),
 
     //Base recipe
     OriginalRecipeInterface::class => get(Recipe::class),
@@ -187,14 +165,4 @@ return [
             renderError: $container->get(RenderError::class)
         );
     },
-
-    RenderMediaEndPointInterface::class => get(RenderMediaEndPoint::class),
-    RenderMediaEndPoint::class => create()
-        ->constructor(
-            get(OriginalRecipeInterface::class),
-            get(LoadMedia::class),
-            get(GetStreamFromMediaInterface::class),
-            get(SendMedia::class),
-            get(RenderError::class)
-        ),
 ];
