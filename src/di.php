@@ -44,7 +44,6 @@ use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
-use Teknoo\East\Website\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
@@ -116,15 +115,6 @@ return [
     //Middleware
     RecipeInterface::class => decorate(static function ($previous, ContainerInterface $container) {
         if ($previous instanceof RecipeInterface) {
-            if ($container->has(LocaleMiddleware::class)) {
-                $previous = $previous->cook(
-                    [$container->get(LocaleMiddleware::class), 'execute'],
-                    LocaleMiddleware::class,
-                    [],
-                    LocaleMiddleware::MIDDLEWARE_PRIORITY
-                );
-            }
-
             $previous = $previous->cook(
                 [$container->get(MenuMiddleware::class), 'execute'],
                 MenuMiddleware::class,

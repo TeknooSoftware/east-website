@@ -51,7 +51,7 @@ use Teknoo\East\Website\Doctrine\Translatable\Mapping\DriverInterface;
 use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Middleware\LocaleMiddleware;
+use Teknoo\East\Common\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;

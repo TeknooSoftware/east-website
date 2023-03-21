@@ -70,7 +70,7 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface as WrapperFactory;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Website\Middleware\LocaleMiddleware;
+use Teknoo\East\Common\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;

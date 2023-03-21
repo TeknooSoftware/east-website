@@ -1,18 +1,11 @@
 parameters:
-    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         -
             message: '#Cannot cast mixed to string#'
             path: infrastructures
         -
-            message: '#ClassMetadataFactory#'
-            path: infrastructures/doctrine/di.php
-        -
             message: '#mixed#'
             path: infrastructures/doctrine/di.php
-        -
-            message: '#IdentifiedObjectInterface#'
-            path: infrastructures/doctrine/Translatable/Mapping/ExtensionMetadataFactory.php
         -
             message: '#supplied for foreach, only iterables are supported#'
             path: infrastructures/doctrine/Translatable/Persistence/Adapter/ODM.php
@@ -34,12 +27,6 @@ parameters:
         -
             message: '#ClassMetadata<object>#'
             path: infrastructures/doctrine/Translatable/
-        -
-            message: '#[a-zA-Z0-9\\_]+::cook\(\) expects \(callable\(\): mixed\)|[a-zA-Z0-9\\_]+#'
-            path: infrastructures/symfony/Resources/config/di.php
-        -
-            message: '#Cannot cast mixed to string#'
-            path: src
         -
             message: '#array#'
             path: src/Object/Content.php
