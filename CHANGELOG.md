@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [8.6.3] - 2023-05-15
+### Stable Release
+- Update dev lib requirements
+- Update copyrights
+
 ## [8.6.2] - 2023-04-16
 ### Stable Release
 - Update dev lib requirements
