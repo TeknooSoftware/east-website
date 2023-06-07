@@ -855,6 +855,7 @@ class FeatureContext implements Context
                         'sanitizedParts',
                         'decodedSanitizedParts',
                         'sanitizedHash',
+                        'loadedStatesCaches',
                     ])) {
                         continue;
                     }
