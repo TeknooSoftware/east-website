@@ -105,12 +105,10 @@ class ODM implements AdapterInterface
                     $query = $queryBuilder->getQuery();
                     $query->setHydrate(false);
 
-                    /**
-                     * @var Translation $translation
-                     */
                     $currentForeignKey = null;
                     $subSets = [];
                     foreach ($query->execute() as $translation) {
+                        /** @var array{foreign_key: string} $translation */
                         if (null !== $currentForeignKey && $currentForeignKey !== $translation['foreign_key']) {
                             ($ids[$currentForeignKey])($subSets);
                             $subSets = [];
