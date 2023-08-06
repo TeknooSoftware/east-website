@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [8.6.5] - 2023-08-06
+### Stable Release
+- Reorder options in Symfony Routes
+
 ## [8.6.4] - 2023-06-07
 ### Stable Release
 - Update Teknoo libs
