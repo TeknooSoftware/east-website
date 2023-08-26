@@ -41,8 +41,11 @@ use Twig\TwigFilter;
  */
 class SanitizedContent extends AbstractExtension
 {
+    /**
+     * @param object|HtmlSanitizerInterface|null $sanitizer
+     */
     public function __construct(
-        private readonly ?HtmlSanitizerInterface $sanitizer = null,
+        private readonly ?object $sanitizer = null,
     ) {
     }
 
@@ -81,7 +84,7 @@ class SanitizedContent extends AbstractExtension
         }
 
         $value = $this->hook($content->getParts()[$partName] ?? $default);
-        if (null === $this->sanitizer) {
+        if (!$this->sanitizer instanceof HtmlSanitizerInterface) {
             return $value;
         }
 

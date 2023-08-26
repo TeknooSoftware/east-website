@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [9.0.0] - 2023-08-26
+### Stable Release
+- Support PHP-DI 7.0+
+- Support Laminas Diactoros 3.0+
+
 ## [8.6.5] - 2023-08-06
 ### Stable Release
 - Reorder options in Symfony Routes
