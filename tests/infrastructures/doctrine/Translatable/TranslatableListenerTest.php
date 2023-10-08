@@ -500,6 +500,71 @@ class TranslatableListenerTest extends TestCase
         );
     }
 
+    public function testPostLoadWithTranslationFoundWithoutUseObjectClass()
+    {
+        $object = $this->createMock(Content::class);
+
+        $event = $this->createMock(LifecycleEventArgs::class);
+        $event->expects(self::any())->method('getObject')->willReturn($object);
+
+        $classMeta = $this->createMock(ClassMetadata::class);
+        $classMeta->expects(self::any())
+            ->method('getName')
+            ->willReturn(Content::class);
+
+        $this->getManager()
+            ->expects(self::any())
+            ->method('findClassMetadata')
+            ->willReturnCallback(
+                function (string $class, TranslatableListener $listener) use ($classMeta) {
+                    $listener->registerClassMetadata(
+                        $class,
+                        $classMeta
+                    );
+
+                    return $this->getManager();
+                }
+            );
+
+        $this->getExtensionMetadataFactory()
+            ->expects(self::any())
+            ->method('loadExtensionMetadata');
+
+        $wrapper = $this->createMock(WrapperInterface::class);
+        $wrapper->expects(self::any())
+            ->method('loadAllTranslations')
+            ->willReturnCallback(
+                function (
+                    AdapterInterface $adapter,
+                    string $locale,
+                    string $translationClass,
+                    string $objectClass,
+                    callable $callback
+                ) use ($wrapper) {
+                    $callback([
+                        ['field' => 'title', 'content' => 'foo'],
+                        ['field' => 'subtitle', 'content' => 'bar'],
+                    ]);
+
+                    return $wrapper;
+                }
+            );
+
+        $this->getWrapperFactory()
+            ->expects(self::any())
+            ->method('__invoke')
+            ->willReturnCallback(
+                fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
+            );
+
+        self::assertInstanceOf(
+            TranslatableListener::class,
+            $this->build()->setLocale('fr')->postLoad(
+                $event
+            )
+        );
+    }
+
     public function testPostLoadWithTranslationFoundForAProxy()
     {
         $object = new class extends Content implements GhostObjectInterface {

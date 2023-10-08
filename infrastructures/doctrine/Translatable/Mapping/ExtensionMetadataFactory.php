@@ -152,7 +152,7 @@ class ExtensionMetadataFactory
 
         $driver->readExtendedMetadata($metaData, $config);
 
-        if (!empty($config)) {
+        if (!empty($config) && empty($config['useObjectClass'])) {
             $config['useObjectClass'] = $useObjectName;
         }
 

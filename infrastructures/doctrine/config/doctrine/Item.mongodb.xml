@@ -5,7 +5,11 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <document name="Teknoo\East\Website\Doctrine\Object\Item" collection="items">
+    <document
+            name="Teknoo\East\Website\Doctrine\Object\Item"
+            collection="items"
+            inheritance-type="SINGLE_COLLECTION"
+    >
         <reference-one
                 field="parent"
                 store-as="dbRefWithDb"

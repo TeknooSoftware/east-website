@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.0.1] - 2023-10-08
+### Stable Release
+- Fix issues in translation with last doctrine locator
+
 ## [9.0.0] - 2023-08-26
 ### Stable Release
 - Support PHP-DI 7.0+

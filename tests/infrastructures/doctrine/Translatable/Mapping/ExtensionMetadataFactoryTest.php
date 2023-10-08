@@ -119,19 +119,23 @@ class ExtensionMetadataFactoryTest extends TestCase
     /**
      * @return DriverFactoryInterface|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function getDriverFactory(): DriverFactoryInterface
+    public function getDriverFactory(?string $useObjectClass = null): DriverFactoryInterface
     {
         if (!$this->driverFactory instanceof DriverFactoryInterface) {
             $this->driverFactory = $this->createMock(DriverFactoryInterface::class);
 
             $this->driverFactory->expects(self::any())
                 ->method('__invoke')
-                ->willReturnCallback(function () {
+                ->willReturnCallback(function () use ($useObjectClass) {
                     $driver = $this->createMock(DriverInterface::class);
                     $driver->expects(self::any())
                         ->method('readExtendedMetadata')
                         ->willReturnCallback(
-                            function (ClassMetadata $meta, array &$config) use ($driver) {
+                            function (ClassMetadata $meta, array &$config) use ($driver, $useObjectClass) {
+                                if (!empty($useObjectClass)) {
+                                    $config['useObjectClass'] = $useObjectClass;
+                                }
+
                                 $config['fields'] = ['foo', 'bar'];
                                 $config['fallbacks'] = ['foo', 'bar'];
 
@@ -146,13 +150,13 @@ class ExtensionMetadataFactoryTest extends TestCase
         return $this->driverFactory;
     }
 
-    public function build():ExtensionMetadataFactory
+    public function build(?string $useObjectClass = null):ExtensionMetadataFactory
     {
         return new ExtensionMetadataFactory(
             $this->getObjectManager(),
             $this->getClassMetadataFactory(),
             $this->getMappingDriver(),
-            $this->getDriverFactory(),
+            $this->getDriverFactory($useObjectClass),
             $this->getCacheMock(),
         );
     }
@@ -265,6 +269,57 @@ class ExtensionMetadataFactoryTest extends TestCase
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
             $this->build()->loadExtensionMetadata($meta, $listener)
+        );
+    }
+
+    public function testLoadExtensionMetadataWithFileDriverWithUseClassAlreadySet()
+    {
+
+        $meta = new class implements ClassMetadata
+        {
+            public $isMappedSuperclass = false;
+
+            public function getName() {
+                return Content::class;
+            }
+            public function getIdentifier() {}
+            public function getReflectionClass() {}
+            public function isIdentifier(string $fieldName) {}
+            public function hasField(string $fieldName) {}
+            public function hasAssociation(string $fieldName) {}
+            public function isSingleValuedAssociation(string $fieldName) {}
+            public function isCollectionValuedAssociation(string $fieldName) {}
+            public function getFieldNames() {}
+            public function getIdentifierFieldNames() {}
+            public function getAssociationNames() {}
+            public function getTypeOfField(string $fieldName) {}
+            public function getAssociationTargetClass(string $assocName) {}
+            public function isAssociationInverseSide(string $assocName) {}
+            public function getAssociationMappedByTargetField(string $assocName) {}
+            public function getIdentifierValues(object $object) {}
+        };
+
+        $this->mappingDriver = $this->createMock(FileDriver::class);
+
+        $locator = $this->createMock(FileLocator::class);
+        $this->mappingDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+
+        $listener = $this->createMock(TranslatableListener::class);
+        $listener->expects(self::once())
+            ->method('injectConfiguration')
+            ->willReturnCallback(
+                function ($metadata, $config) use ($listener) {
+                    self::assertEquals(
+                        'foo',
+                        $config['useObjectClass'],
+                    );
+                    return $listener;
+                }
+            );
+
+        self::assertInstanceOf(
+            ExtensionMetadataFactory::class,
+            $this->build('foo')->loadExtensionMetadata($meta, $listener)
         );
     }
 

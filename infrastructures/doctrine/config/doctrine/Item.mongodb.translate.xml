@@ -5,7 +5,9 @@
                           xsi:schemaLocation="http://xml.teknoo.it/schemas/doctrine/east-website-translation
                                               http://xml.teknoo.it/schemas/doctrine/east-website-translation.xsd">
 
-    <object name="Teknoo\East\Website\Object\Item">
+    <object name="Teknoo\East\Website\Doctrine\Object\Item"
+            object-class="Teknoo\East\Website\Object\Item"
+    >
         <field field-name="name" />
     </object>
 </east-website-translation>

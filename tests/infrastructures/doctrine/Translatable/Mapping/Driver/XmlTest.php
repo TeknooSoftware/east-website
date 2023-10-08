@@ -160,6 +160,29 @@ class XmlTest extends TestCase
         self::assertNotEmpty($result);
     }
 
+    public function testReadExtendedMetadataWithUseObjectClass()
+    {
+        $classMeta = $this->createMock(ClassMetadata::class);
+        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+
+        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+            __DIR__.'/support/valid-with-object-class.xml'
+        );
+
+        $result = [];
+
+        self::assertInstanceOf(
+            Xml::class,
+            $this->build()->readExtendedMetadata($classMeta, $result)
+        );
+
+        self::assertNotEmpty($result);
+        self::assertEquals(
+            'Teknoo\East\Website\Object\Content',
+            $result['useObjectClass'],
+        );
+    }
+
     public function testReadExtendedMetadataWithoutField()
     {
         $classMeta = $this->createMock(ClassMetadata::class);

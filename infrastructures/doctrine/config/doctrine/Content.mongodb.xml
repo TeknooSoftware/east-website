@@ -5,7 +5,10 @@
                         xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
-    <document name="Teknoo\East\Website\Doctrine\Object\Content" collection="contents">
+    <document name="Teknoo\East\Website\Doctrine\Object\Content"
+              collection="contents"
+              inheritance-type="SINGLE_COLLECTION"
+    >
         <lifecycle-callbacks>
             <lifecycle-callback type="postLoad" method="postLoadDoctrine"/>
         </lifecycle-callbacks>

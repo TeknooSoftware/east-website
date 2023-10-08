@@ -118,6 +118,7 @@ class Xml implements DriverInterface
         }
 
         $config['translationClass'] = (string) ($xml->attributes()['translation-class'] ?? Translation::class);
+        $config['useObjectClass'] = (string) ($xml->attributes()['object-class'] ?? $meta->getName());
 
         if (!class_exists($config['translationClass'])) {
             throw new InvalidMappingException(
