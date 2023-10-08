@@ -98,7 +98,7 @@
         "laminas/laminas-diactoros": "^3",
         "doctrine/common": "^3.4.3",
         "doctrine/mongodb-odm": "^2.5.2",
-        "doctrine/mongodb-odm-bundle": "^4.6",
+        "doctrine/mongodb-odm-bundle": "^4.6.1",
         "doctrine/persistence": "^3.2",
         "league/uri": "^7",
         "league/oauth2-client": "^2.7",
