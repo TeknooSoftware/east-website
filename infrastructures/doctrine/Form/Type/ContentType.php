@@ -42,6 +42,8 @@ use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\East\Website\Object\Type;
 
+use function str_replace;
+
 /**
  * Symfony Form dedicated to manage translatable Content Object in a Symfony Website.
  * This form is placed in this namespace to use the good Symfony Form Doctrine Type to link a content to an author and
@@ -56,6 +58,8 @@ class ContentType extends AbstractType
 {
     use TranslatableTrait;
 
+    public const BLOCK_PREFIX = 'block_';
+
     public function __construct(
         private readonly ?HtmlSanitizerInterface $sanitizer = null,
         private readonly ?string $sanitizeContext = null,
@@ -63,7 +67,7 @@ class ContentType extends AbstractType
     ) {
     }
 
-    private static function preSetDataallback(FormEvent $event): void
+    private static function preSetDataFallback(FormEvent $event): void
     {
         $data = $event->getData();
         $form = $event->getForm();
@@ -81,7 +85,7 @@ class ContentType extends AbstractType
                     'attr' => ['readonly' => true],
                     'widget' => 'single_text',
                     'mapped' => false,
-                    'data' => $data->getPublishedAt()
+                    'data' => $data->getPublishedAt(),
                 ]
             );
         });
@@ -104,14 +108,17 @@ class ContentType extends AbstractType
             }
 
             $form->add(
-                $block->getName(),
+                self::BLOCK_PREFIX . $block->getName(),
                 $formType,
                 [
                     'mapped' => false,
                     'data' => $value,
                     'required' => false,
-                    'attr' => ['data-type' => $block->getType()->value]
-                ]
+                    'attr' => [
+                        'data-type' => $block->getType()->value,
+                    ],
+                    'label' => str_replace('_', ' ', $block->getName()),
+                ],
             );
         }
     }
@@ -131,11 +138,11 @@ class ContentType extends AbstractType
         $contentValues = [];
         $sanitzedContentValues = [];
         foreach ($type->getBlocks() as $block) {
-            if (!isset($data[$block->getName()])) {
+            if (!isset($data[self::BLOCK_PREFIX . $block->getName()])) {
                 continue;
             }
 
-            $value = $data[$block->getName()];
+            $value = $data[self::BLOCK_PREFIX . $block->getName()];
             $contentValues[$block->getName()] = $value;
 
             if (null === $this->sanitizer) {
@@ -207,7 +214,7 @@ class ContentType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            self::preSetDataallback(...),
+            self::preSetDataFallback(...),
         );
 
         $builder->addEventListener(

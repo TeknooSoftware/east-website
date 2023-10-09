@@ -184,7 +184,14 @@ class ContentTypeTest extends TestCase
                 $content->setType($type);
                 $form->expects(self::any())->method('getNormData')->willReturn($content);
 
-                $event = new FormEvent($form, ['foo'=>'bar', 'bar'=>'foo', 'foo2'=>'bar']);
+                $event = new FormEvent(
+                    $form,
+                    [
+                        ContentType::BLOCK_PREFIX . 'foo' => 'bar',
+                        ContentType::BLOCK_PREFIX . 'bar' => 'foo',
+                        ContentType::BLOCK_PREFIX . 'foo2' => 'bar',
+                    ]
+                );
                 $callable($event);
 
                 return $builder;

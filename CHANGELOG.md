@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.0.2] - 2023-10-09
+### Stable Release
+- Fix issues in content form when a block has the same name of a content's owned field.
+
 ## [9.0.1] - 2023-10-08
 ### Stable Release
 - Fix issues in translation with last doctrine locator
