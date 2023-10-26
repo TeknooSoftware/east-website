@@ -66,6 +66,16 @@ interface AdapterInterface
         string $objectClass
     ): AdapterInterface;
 
+    /**
+     * @param string[] $updatedTranslations
+     */
+    public function removeOrphansTranslations(
+        string $identifier,
+        array $updatedTranslations,
+        string $translationClass,
+        string $objectClass
+    ): AdapterInterface;
+
     public function persistTranslationRecord(
         TranslationInterface $translation
     ): AdapterInterface;

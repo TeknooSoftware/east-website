@@ -197,6 +197,30 @@ class ODM implements AdapterInterface
     }
 
     /**
+     * @param string[] $updatedTranslations
+     */
+    public function removeOrphansTranslations(
+        string $identifier,
+        array $updatedTranslations,
+        string $translationClass,
+        string $objectClass
+    ): AdapterInterface {
+        $queryBuilder = $this->manager->createQueryBuilder($translationClass);
+        $queryBuilder->remove();
+        $queryBuilder->field('foreignKey')->equals($identifier);
+        $queryBuilder->field('objectClass')->equals($objectClass);
+
+        if (!empty($updatedTranslations)) {
+            $queryBuilder->field('id')->notIn($updatedTranslations);
+        }
+
+        $query = $queryBuilder->getQuery();
+        $query->execute();
+
+        return $this;
+    }
+
+    /**
      * @param OdmClassMetadata<TranslationInterface> $metadata
      */
     private function prepareId(OdmClassMetadata $metadata, TranslationInterface $translation): void

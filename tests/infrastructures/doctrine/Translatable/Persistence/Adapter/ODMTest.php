@@ -338,6 +338,82 @@ class ODMTest extends TestCase
         );
     }
 
+    public function testRemoveOrphansTranslations()
+    {
+        $qBuilder = $this->createMock(Builder::class);
+        $qBuilder->expects(self::any())
+            ->method('field')
+            ->willReturnSelf();
+
+        $qBuilder->expects(self::any())
+            ->method('equals')
+            ->willReturnSelf();
+
+        $qBuilder->expects(self::any())
+            ->method('notIn')
+            ->willReturnSelf();
+
+        $query = $this->createMock(Query::class);
+        $query->expects(self::once())->method('execute')->willReturn(true);
+
+        $qBuilder->expects(self::any())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $this->getManager()
+            ->expects(self::once())
+            ->method('createQueryBuilder')
+            ->willReturn($qBuilder);
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $this->build()->removeOrphansTranslations(
+                'fooId',
+                ['barId'],
+                'fooClass',
+                'barClass',
+            )
+        );
+    }
+
+    public function testRemoveOrphansTranslationsWithoutId()
+    {
+        $qBuilder = $this->createMock(Builder::class);
+        $qBuilder->expects(self::any())
+            ->method('field')
+            ->willReturnSelf();
+
+        $qBuilder->expects(self::any())
+            ->method('equals')
+            ->willReturnSelf();
+
+        $qBuilder->expects(self::never())
+            ->method('notIn')
+            ->willReturnSelf();
+
+        $query = $this->createMock(Query::class);
+        $query->expects(self::once())->method('execute')->willReturn(true);
+
+        $qBuilder->expects(self::any())
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $this->getManager()
+            ->expects(self::once())
+            ->method('createQueryBuilder')
+            ->willReturn($qBuilder);
+
+        self::assertInstanceOf(
+            AdapterInterface::class,
+            $this->build()->removeOrphansTranslations(
+                'fooId',
+                [],
+                'fooClass',
+                'barClass',
+            )
+        );
+    }
+
     public function testPersistTranslationRecordOnInsertNoneIdGeneration()
     {
         $translation = $this->createMock(TranslationInterface::class);

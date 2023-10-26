@@ -115,6 +115,11 @@ class TranslatableListener implements EventSubscriber
      */
     private array $classMetadata = [];
 
+    /**
+     * @var array<string, WrapperInterface>
+     */
+    private array $wrappers = [];
+
     public function __construct(
         private readonly ExtensionMetadataFactory $extensionMetadataFactory,
         private readonly ManagerAdapterInterface $manager,
@@ -190,7 +195,9 @@ class TranslatableListener implements EventSubscriber
      */
     private function wrap(TranslatableInterface $translatable, ClassMetadata $metadata): WrapperInterface
     {
-        return ($this->wrapperFactory)($translatable, $metadata);
+        $oid = spl_object_hash($translatable);
+
+        return $this->wrappers[$oid] ??= ($this->wrapperFactory)($translatable, $metadata);
     }
 
     /**
@@ -396,6 +403,7 @@ class TranslatableListener implements EventSubscriber
                 $translationReflection = $translationMetadata->getReflectionClass();
 
                 $translatableFields = array_flip($config['fields'] ?? []);
+                $updatedTranslations = [];
                 foreach ($translatableFields as $field => $notUsed) {
                     if (!isset($changeSet[$field])) {
                         continue; // locale is same and nothing changed
@@ -447,6 +455,7 @@ class TranslatableListener implements EventSubscriber
                             $this->pendingTranslationInserts[$oid][] = $translation;
                         } else {
                             $this->persistence->persistTranslationRecord($translation);
+                            $updatedTranslations[] = $translation->getIdentifier();
                         }
                     }
                 }
@@ -461,6 +470,13 @@ class TranslatableListener implements EventSubscriber
                     }
 
                     $this->manager->recomputeSingleObjectChangeset($metaData, $object);
+
+                    $this->persistence->removeOrphansTranslations(
+                        identifier: $object->getId(),
+                        updatedTranslations: $updatedTranslations,
+                        translationClass: $translationClass,
+                        objectClass: $config['useObjectClass'],
+                    );
                 }
             }
         );

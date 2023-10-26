@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.0.3] - 2023-10-26
+### Stable Release
+- Fix issues when a translated field has the same value of the original, the field was not persisted. 
+
 ## [9.0.2] - 2023-10-09
 ### Stable Release
 - Fix issues in content form when a block has the same name of a content's owned field.
