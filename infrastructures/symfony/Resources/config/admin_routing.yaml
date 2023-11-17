@@ -9,7 +9,7 @@ _teknoo_website_admin_item_list:
         itemsPerPage: 20
         loader: '@Teknoo\East\Website\Loader\ItemLoader'
         template: '@@TeknooEastWebsite/AdminItem/list.html.twig'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_item_edit:
     path: '/item/edit/{id}'
@@ -24,7 +24,7 @@ _teknoo_website_admin_item_edit:
         slugField: 'slug'
         template: '@@TeknooEastWebsite/AdminItem/edit.html.twig'
         writer: '@Teknoo\East\Website\Writer\ItemWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_item_new:
     path: '/item/new'
@@ -41,7 +41,7 @@ _teknoo_website_admin_item_new:
         slugField: 'slug'
         template: '@@TeknooEastWebsite/AdminItem/new.html.twig'
         writer: '@Teknoo\East\Website\Writer\ItemWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_item_delete:
     path: '/item/delete/{id}'
@@ -64,7 +64,7 @@ _teknoo_website_admin_content_list:
         itemsPerPage: 20
         loader: '@Teknoo\East\Website\Loader\ContentLoader'
         template: '@@TeknooEastWebsite/AdminContent/list.html.twig'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_content_edit:
     path: '/content/edit/{id}'
@@ -79,7 +79,7 @@ _teknoo_website_admin_content_edit:
         slugField: 'slug'
         template: '@@TeknooEastWebsite/AdminContent/edit.html.twig'
         writer: '@Teknoo\East\Website\Writer\ContentWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_content_new:
     path: '/content/new'
@@ -96,7 +96,7 @@ _teknoo_website_admin_content_new:
         slugField: 'slug'
         template: '@@TeknooEastWebsite/AdminContent/new.html.twig'
         writer: '@Teknoo\East\Website\Writer\ContentWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_content_delete:
     path: '/content/delete/{id}'
@@ -119,7 +119,7 @@ _teknoo_website_admin_media_list:
         itemsPerPage: 20
         loader: '@Teknoo\East\Common\Loader\MediaLoader'
         template: '@@TeknooEastCommon/AdminMedia/list.html.twig'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_media_new:
     path: '/media/new'
@@ -134,7 +134,7 @@ _teknoo_website_admin_media_new:
         route: '_teknoo_common_admin_media_list'
         template: '@@TeknooEastCommon/AdminMedia/new.html.twig'
         writer: '@Teknoo\East\Common\Doctrine\Writer\ODM\MediaWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_media_delete:
     path: '/media/delete/{id}'
@@ -157,7 +157,7 @@ _teknoo_website_admin_type_list:
         itemsPerPage: 20
         loader: '@Teknoo\East\Website\Loader\TypeLoader'
         template: '@@TeknooEastWebsite/AdminType/list.html.twig'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_type_edit:
     path: '/type/edit/{id}'
@@ -170,7 +170,7 @@ _teknoo_website_admin_type_edit:
         loader: '@Teknoo\East\Website\Loader\TypeLoader'
         template: '@@TeknooEastWebsite/AdminType/edit.html.twig'
         writer: '@Teknoo\East\Website\Writer\TypeWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_type_new:
     path: '/type/new'
@@ -185,7 +185,7 @@ _teknoo_website_admin_type_new:
         route: '_teknoo_website_admin_type_edit'
         template: '@@TeknooEastWebsite/AdminType/new.html.twig'
         writer: '@Teknoo\East\Website\Writer\TypeWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_type_delete:
     path: '/type/delete/{id}'
@@ -208,7 +208,7 @@ _teknoo_website_admin_user_list:
         itemsPerPage: 20
         loader: '@Teknoo\East\Common\Loader\UserLoader'
         template: '@@TeknooEastWebsite/AdminUser/list.html.twig'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_user_edit:
     path: '/user/edit/{id}'
@@ -221,7 +221,7 @@ _teknoo_website_admin_user_edit:
         loader: '@Teknoo\East\Common\Loader\UserLoader'
         template: '@@TeknooEastWebsite/AdminUser/edit.html.twig'
         writer: '@Teknoo\East\CommonBundle\Writer\SymfonyUserWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_user_new:
     path: '/user/new'
@@ -236,7 +236,7 @@ _teknoo_website_admin_user_new:
         route: '_teknoo_website_admin_user_edit'
         template: '@@TeknooEastWebsite/AdminUser/new.html.twig'
         writer: '@Teknoo\East\CommonBundle\Writer\SymfonyUserWriter'
-        cleanHtml: false
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_user_delete:
     path: '/user/delete/{id}'
