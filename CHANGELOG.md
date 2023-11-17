@@ -1,5 +1,11 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.0] - 2023-10-26
+### Stable Release
+- Update to East Common 2.5
+  - Add `teknoo.east.website.rendering.clean_html` and `teknoo.east.website.admin.rendering.clean_html`
+    to setup  auto cleanup of the html output.
+
 ## [9.0.3] - 2023-10-26
 ### Stable Release
 - Fix issues when a translated field has the same value of the original, the field was not persisted. 

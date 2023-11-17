@@ -11,6 +11,7 @@ _teknoo_website_content:
     defaults:
         _controller: 'teknoo.east.website.endpoint.content'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
     requirements:
         slug: ((?!_wdt|_profiler).).+
 
@@ -20,4 +21,5 @@ _teknoo_website_home:
     defaults:
         _controller: 'teknoo.east.website.endpoint.content'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
         slug: '/'

@@ -2,6 +2,10 @@ parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+
+    teknoo.east.website.admin.rendering.clean_html: true
+    teknoo.east.website.rendering.clean_html: false
+
     teknoo.east.website.sanitize.default_context: ~
     teknoo.east.website.sanitize.salt: '%env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT)%'
     env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT): youmustchangeit
