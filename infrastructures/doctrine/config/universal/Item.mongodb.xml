@@ -35,7 +35,8 @@
         </reference-one>
         <reference-many field="children"
                         target-document="Teknoo\East\Website\Object\Item"
-                        mapped-by="parent">
+                        mapped-by="parent"
+                        store-empty-array="true">
             <cascade>
                 <all/>
             </cascade>

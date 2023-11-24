@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.1] - 2023-11-24
+### Stable Release
+- Support of Doctrine ODM 2.6.1+
+
 ## [9.1.0] - 2023-10-26
 ### Stable Release
 - Update to East Common 2.5
