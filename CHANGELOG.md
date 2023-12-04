@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.4] - 2023-12-04
+### Stable Release
+- Support Symfony 7+
+
 ## [9.1.3] - 2023-12-01
 ### Stable Release
 - Update dev lib requirements
