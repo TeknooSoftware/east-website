@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.5] - 2023-12-08
+### Stable Release
+- Fix issue in ODM Translation persister to support `ObjectId` when orphans translations are deleted.
+
 ## [9.1.4] - 2023-12-04
 ### Stable Release
 - Support Symfony 7+

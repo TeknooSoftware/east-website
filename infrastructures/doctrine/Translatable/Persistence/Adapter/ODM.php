@@ -30,7 +30,6 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Types\Type;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use MongoDB\BSON\ObjectId;
-use Teknoo\East\Website\Doctrine\Object\Translation;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\Exception\MissingIdGeneratorException;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\Exception\WrongClassMetadata;
@@ -210,12 +209,20 @@ class ODM implements AdapterInterface
         $queryBuilder->field('foreignKey')->equals($identifier);
         $queryBuilder->field('objectClass')->equals($objectClass);
 
-        if (!empty($updatedTranslations)) {
-            $queryBuilder->field('id')->notIn($updatedTranslations);
+        $finalUpdatedTranslation = [];
+        foreach ($updatedTranslations as $id) {
+            if (24 === strlen($id)) {
+                $finalUpdatedTranslation[] = new ObjectId($id);
+            } else {
+                $finalUpdatedTranslation[] = $id;
+            }
         }
 
-        $query = $queryBuilder->getQuery();
-        $query->execute();
+        if (!empty($finalUpdatedTranslation)) {
+            $queryBuilder->field('id')->notIn($finalUpdatedTranslation);
+        }
+
+        $queryBuilder->getQuery()->execute();
 
         return $this;
     }

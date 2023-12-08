@@ -369,7 +369,10 @@ class ODMTest extends TestCase
             AdapterInterface::class,
             $this->build()->removeOrphansTranslations(
                 'fooId',
-                ['barId'],
+                [
+                    'barId',
+                    '5a4c12e03b8a7e000b55c7a2',
+                ],
                 'fooClass',
                 'barClass',
             )
