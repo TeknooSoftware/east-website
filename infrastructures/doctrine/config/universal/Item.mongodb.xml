@@ -21,10 +21,10 @@
                 field="parent"
                 target-document="Teknoo\East\Website\Object\Item"
                 store-as="dbRefWithDb"
-                inversed-by="children"
-                orphan-removal="true">
+                inversed-by="children">
             <cascade>
-                <all/>
+                <refresh/>
+                <persist/>
             </cascade>
         </reference-one>
         <reference-one
