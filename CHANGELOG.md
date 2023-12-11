@@ -1,8 +1,12 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.7] - 2023-12-11
+### Stable Release
+- Fix order in content and item symfony forms.
+
 ## [9.1.6] - 2023-12-08
 ### Stable Release
-- Fix issue in items with ODM when an item change of parent
+- Fix issue in items with ODM when an item change of parent.
 
 ## [9.1.5] - 2023-12-08
 ### Stable Release

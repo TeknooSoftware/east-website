@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\Form\Type;
 
+use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
@@ -180,8 +181,12 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'userIdentifier',
-                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
-                    ->field('deletedAt')->equals(null)
+                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
+                    ->createQueryBuilder()
+                        ->field('deletedAt')->equals(null)
+                        ->sort('firstName', 'asc')
+                        ->sort('lastName', 'asc')
+                        ->sort('email', 'asc')
             ]
         );
 
@@ -193,8 +198,10 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'name',
-                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
-                    ->field('deletedAt')->equals(null)
+                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
+                    ->createQueryBuilder()
+                        ->field('deletedAt')->equals(null)
+                        ->sort('name', 'asc')
             ]
         );
         $builder->add('title', TextType::class, ['required' => true]);

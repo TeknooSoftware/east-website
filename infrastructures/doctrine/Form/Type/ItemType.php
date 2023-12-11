@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Doctrine\Form\Type;
 
+use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -65,8 +66,10 @@ class ItemType extends AbstractType
                 'required' => false,
                 'multiple' => false,
                 'choice_label' => 'name',
-                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
-                    ->field('deletedAt')->equals(null)
+                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
+                    ->createQueryBuilder()
+                        ->field('deletedAt')->equals(null)
+                    ->sort('name', 'asc')
             ]
         );
         $builder->add(
@@ -77,8 +80,10 @@ class ItemType extends AbstractType
                 'required' => false,
                 'multiple' => false,
                 'choice_label' => 'title',
-                'query_builder' => static fn(ObjectRepository $repository) => $repository->createQueryBuilder()
-                    ->field('deletedAt')->equals(null)
+                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
+                    ->createQueryBuilder()
+                        ->field('deletedAt')->equals(null)
+                    ->sort('title', 'asc')
             ]
         );
         $builder->add('slug', TextType::class, ['required' => false]);
