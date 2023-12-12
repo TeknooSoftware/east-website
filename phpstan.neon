@@ -16,9 +16,6 @@ parameters:
             message: '#Teknoo\\East\\Website\\Doctrine\\Object\\Translation::\$[a-zA-Z0-9]+ is never read, only written#'
             path: infrastructures/doctrine/Object/Translation.php
         -
-            message: '#does not exist on SimpleXMLElement\|null#'
-            path: infrastructures/doctrine/Translatable/Mapping/Driver/Xml.php
-        -
             message: "#Offset 'name'#"
             path: infrastructures/doctrine/Translatable/Persistence/Adapter/ODM.php
         -
