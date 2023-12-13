@@ -142,7 +142,7 @@ This library requires :
     * Teknoo/States.
     * Teknoo/Recipe.
     * Teknoo/East-Foundation.
-    * Optional: Symfony 6.2+ (for administration)
+    * Optional: Symfony 6.3+ (for administration)
 
 News from Teknoo Website 9.x
 ----------------------------
