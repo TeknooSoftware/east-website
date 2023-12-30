@@ -59,19 +59,19 @@
         "teknoo/immutable": "^3.0.17",
         "teknoo/states": "^6.1.5",
         "teknoo/recipe": "^4.5.2",
-        "teknoo/east-common": "^2.6.3",
-        "teknoo/east-foundation": "^7.3.6"
+        "teknoo/east-common": "^2.6.4",
+        "teknoo/east-foundation": "^7.4"
     },
     "require-dev": {
         "ext-simplexml" : "*",
         "ext-mongodb" : "*",
         "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^10.4.2",
-        "squizlabs/php_codesniffer": "^3.7.2",
-        "phpstan/phpstan": "^1.10.49",
-        "symfony/property-access": "^6.3||^7",
-        "icanhazstring/composer-unused": "^0.8.10",
-        "nikic/php-parser": "^4.17.1",
+        "phpunit/phpunit": "^10.5.5",
+        "squizlabs/php_codesniffer": "^3.8",
+        "phpstan/phpstan": "^1.10.50",
+        "symfony/property-access": "^6.3||^7.0",
+        "icanhazstring/composer-unused": "^0.8.11",
+        "nikic/php-parser": "^4.18",
         "behat/behat": "^3.13",
         "teknoo/bridge-phpdi-symfony": "^6.0.4",
         "psr/cache": "^3.0",
@@ -98,12 +98,12 @@
         "twig/twig": "^3.8",
         "laminas/laminas-diactoros": "^3.3",
         "doctrine/common": "^3.4.3",
-        "doctrine/mongodb-odm": "^2.6.1",
-        "doctrine/mongodb-odm-bundle": "^4.6.2",
+        "doctrine/mongodb-odm": "^2.6.2",
+        "doctrine/mongodb-odm-bundle": "^4.7",
         "doctrine/persistence": "^3.2",
-        "league/uri": "^7.3",
+        "league/uri": "^7.4",
         "league/oauth2-client": "^2.7",
-        "knpuniversity/oauth2-client-bundle": "^2.17"
+        "knpuniversity/oauth2-client-bundle": "^2.18"
     },
     "conflict": {
         "doctrine/persistence": "<3.0"
