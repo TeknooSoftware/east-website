@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.8] - 2024-01-16
+### Stable Release
+- Support Doctrine Mongo ODM Bundle 5+
+
 ## [9.1.7] - 2023-12-11
 ### Stable Release
 - Fix order in content and item symfony forms.
