@@ -25,10 +25,10 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Writer;
 
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
-use Teknoo\East\Common\Service\DatesService;
 use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 
 /**
