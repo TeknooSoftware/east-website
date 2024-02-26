@@ -39,9 +39,9 @@ class ContentWriterTest extends TestCase
 {
     use PersistTestTrait;
 
-    public function buildWriter(bool $prefereRealDateOnUpdate = false,): WriterInterface
+    public function buildWriter(bool $preferRealDateOnUpdate = false,): WriterInterface
     {
-        return new ContentWriter($this->getObjectManager(), $this->getDatesServiceMock(), $prefereRealDateOnUpdate);
+        return new ContentWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
     }
 
     public function getObject()

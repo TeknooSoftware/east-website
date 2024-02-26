@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.10] - 2024-02-26
+### Stable Release
+- Fix typo `preferRealDate` instead of `prefereRealDate`
+
 ## [9.1.9] - 2024-01-31
 ### Stable Release
 - Require East Common 2.7
@@ -168,7 +172,7 @@
 ## [8.2.0] - 2022-08-14
 ### Stable Release
 - Support last version of `Teknoo East Common`
-- Update writers to support `prefereRealDateOnUpdate` behavior
+- Update writers to support `preferRealDateOnUpdate` behavior
 
 ## [8.1.1] - 2022-08-06
 ### Stable Release
