@@ -53,7 +53,7 @@
         }
     },
     "require": {
-        "php": "^8.2",
+        "php": "^8.1",
         "ext-json": "*",
         "php-di/php-di": "^7.0.6",
         "teknoo/immutable": "^3.0.17",
