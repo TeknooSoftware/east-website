@@ -42,6 +42,7 @@ use Teknoo\East\Website\Doctrine\Translatable\Persistence\AdapterInterface as Pe
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\FactoryInterface;
 use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\Recipe\Promise\Promise;
 
 use function array_flip;
 use function get_parent_class;
@@ -411,16 +412,19 @@ class TranslatableListener implements EventSubscriber
 
                     $translation = null;
                     if (!$isInsert) {
+                        $translationPromise = new Promise(
+                            static fn (TranslationInterface $result): TranslationInterface => $result,
+                        );
+
                         $wrapper->findTranslation(
                             $this->persistence,
                             $locale,
                             $field,
                             $translationClass,
                             $config['useObjectClass'],
-                            static function (TranslationInterface $result) use (&$translation): void {
-                                $translation = $result;
-                            }
+                            $translationPromise,
                         );
+                        $translation = $translationPromise->fetchResult();
                     }
 
                     // create new translation if translation not already created and locale is different from default
