@@ -3,7 +3,7 @@
 ## [9.1.11] - 2024-03-13
 ### Stable Release
 - Use Recipe 5+
-- Improve `RecoveringAccessUserProvider` to use new `Promise` feature
+- some `Promise` with new features
 
 ## [9.1.10] - 2024-02-26
 ### Stable Release
