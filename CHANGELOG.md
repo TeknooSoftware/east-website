@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [9.1.12] - 2024-03-22
+### Stable Release
+- Fix support of last PHPStan 1.10.64
+- Use State 6.2
+
 ## [9.1.11] - 2024-03-13
 ### Stable Release
 - Use Recipe 5+

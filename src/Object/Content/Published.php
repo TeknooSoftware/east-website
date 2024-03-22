@@ -48,6 +48,8 @@ class Published implements StateInterface
 
     public function publishingAt(): callable
     {
-        return fn(DateTimeInterface $dateTime): Content => $this;
+        return function (DateTimeInterface $dateTime): Content {
+            return $this;
+        };
     }
 }
