@@ -27,6 +27,7 @@ namespace Teknoo\East\Website\Recipe\Step;
 
 use DomainException;
 use RuntimeException;
+use SensitiveParameter;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;
@@ -53,7 +54,7 @@ class LoadContent
 
     public function __invoke(string $slug, ManagerInterface $manager): self
     {
-        $error = static function (Throwable $error) use ($manager): void {
+        $error = static function (#[SensitiveParameter] Throwable $error) use ($manager): void {
             if ($error instanceof DomainException) {
                 $error = new DomainException($error->getMessage(), 404, $error);
             }
