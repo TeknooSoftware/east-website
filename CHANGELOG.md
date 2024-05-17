@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.2.1] - 2024-05-17
+### Stable Release
+- Support East Common 2.12
+
 ## [9.2.0] - 2024-05-07
 ### Stable Release
 - Drop support of PHP 8.1

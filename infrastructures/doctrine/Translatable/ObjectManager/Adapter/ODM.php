@@ -58,6 +58,20 @@ class ODM implements AdapterInterface
     ) {
     }
 
+    public function openBatch(): ManagerInterface
+    {
+        $this->eastManager->openBatch();
+
+        return $this;
+    }
+
+    public function closeBatch(): ManagerInterface
+    {
+        $this->eastManager->closeBatch();
+
+        return $this;
+    }
+
     public function persist(ObjectInterface $object): ManagerInterface
     {
         $this->eastManager->persist($object);

@@ -82,6 +82,26 @@ class ODMTest extends TestCase
         return new ODM($this->getEastManager(), $this->getDoctrineManager());
     }
 
+    public function testOpenBatch()
+    {
+        $this->getEastManager()->expects(self::once())->method('openBatch');
+
+        self::assertInstanceOf(
+            ODM::class,
+            $this->build()->openBatch()
+        );
+    }
+
+    public function testCloseBatch()
+    {
+        $this->getEastManager()->expects(self::once())->method('closeBatch');
+
+        self::assertInstanceOf(
+            ODM::class,
+            $this->build()->closeBatch()
+        );
+    }
+
     public function testPersist()
     {
         $object = $this->createMock(ObjectInterface::class);
