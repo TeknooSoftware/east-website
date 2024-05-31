@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [9.2.2] - 2024-05-31
+### Stable Release
+- Fix deprecated : replace `Symfony\Component\HttpKernel\DependencyInjection\Extension`
+        by `Symfony\Component\DependencyInjection\Extension\Extension`
+
 ## [9.2.1] - 2024-05-17
 ### Stable Release
 - Support East Common 2.12
