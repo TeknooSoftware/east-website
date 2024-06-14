@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Recipe\Step;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
@@ -39,8 +40,8 @@ use Teknoo\East\Website\Doctrine\Recipe\Step\LoadTranslations;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Recipe\Step\LoadTranslations
  */
+#[CoversClass(LoadTranslations::class)]
 class LoadTranslationsTest extends TestCase
 {
     public function testInvoke()

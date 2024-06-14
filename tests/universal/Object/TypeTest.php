@@ -25,18 +25,21 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Object;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
+use Teknoo\East\Website\Object\PublishableTrait;
 use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 use Teknoo\East\Website\Object\Type;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\Type
  */
+#[CoversClass(Type::class)]
+#[CoversTrait(PublishableTrait::class)]
 class TypeTest extends TestCase
 {
     use ObjectTestTrait;

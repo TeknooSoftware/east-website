@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Translatable\Mapping;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Configuration;
 
@@ -37,8 +38,8 @@ use Teknoo\East\Website\Doctrine\Translatable\Mapping\Configuration;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\Mapping\Configuration
  */
+#[CoversClass(Configuration::class)]
 class ConfigurationTest extends TestCase
 {
     public function build(): Configuration

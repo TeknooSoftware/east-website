@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Writer;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Website\Writer\ItemWriter;
@@ -33,8 +34,8 @@ use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Writer\ItemWriter
  */
+#[CoversClass(ItemWriter::class)]
 class ItemWriterTest extends TestCase
 {
     use PersistTestTrait;

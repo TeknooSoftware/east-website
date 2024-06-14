@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Service;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
@@ -39,8 +40,8 @@ use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Service\MenuGenerator
  */
+#[CoversClass(MenuGenerator::class)]
 class MenuGeneratorTest extends TestCase
 {
     /**
@@ -131,7 +132,7 @@ class MenuGeneratorTest extends TestCase
         $item4->setContent($content4);
 
         $this->getItemLoader()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4) {
@@ -141,7 +142,7 @@ class MenuGeneratorTest extends TestCase
             });
 
         $this->getContentLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('query')
             ->with(new PublishedContentFromIdsQuery(['c1', 'c2']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($content1, $content2, $content3) {
@@ -169,7 +170,7 @@ class MenuGeneratorTest extends TestCase
     public function testExtractWithoutTop()
     {
         $this->getItemLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) {
@@ -179,7 +180,7 @@ class MenuGeneratorTest extends TestCase
             });
 
         $this->getContentLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('query')
             ->with(new PublishedContentFromIdsQuery([]))
             ->willReturnCallback(function ($value, PromiseInterface $promise)  {
@@ -203,7 +204,7 @@ class MenuGeneratorTest extends TestCase
         $item3 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1);
 
         $this->getItemLoader()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3) {

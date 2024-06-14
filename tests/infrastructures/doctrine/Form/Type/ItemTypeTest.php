@@ -25,18 +25,21 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Form\Type;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Doctrine\Form\Type\ItemType;
+use Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\Tests\East\WebsiteBundle\Form\Type\FormTestTrait;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\Website\Doctrine\Form\Type\ItemType
- * @covers      \Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait
  */
+#[CoversTrait(TranslatableTrait::class)]
+#[CoversClass(ItemType::class)]
 class ItemTypeTest extends TestCase
 {
     use FormTestTrait;

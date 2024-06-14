@@ -28,6 +28,7 @@ namespace Teknoo\Tests\East\Website\Doctrine\Translatable;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\LoadClassMetadataEventArgs;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ProxyManager\Proxy\GhostObjectInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
@@ -51,8 +52,8 @@ use Teknoo\East\Website\Object\Type;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\TranslatableListener
  */
+#[CoversClass(TranslatableListener::class)]
 class TranslatableListenerTest extends TestCase
 {
     private ?ExtensionMetadataFactory $extensionMetadataFactory = null;
@@ -176,13 +177,13 @@ class TranslatableListenerTest extends TestCase
     public function testLoadClassMetadata()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn(Content::class);
+        $classMeta->expects($this->any())->method('getName')->willReturn(Content::class);
 
         $event = $this->createMock(LoadClassMetadataEventArgs::class);
-        $event->expects(self::any())->method('getClassMetadata')->willReturn($classMeta);
+        $event->expects($this->any())->method('getClassMetadata')->willReturn($classMeta);
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -208,10 +209,10 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Type::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $this->getManager()
-            ->expects(self::never())
+            ->expects($this->never())
             ->method('findClassMetadata');
 
         self::assertInstanceOf(
@@ -227,12 +228,12 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -246,7 +247,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -260,11 +261,11 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::never())
+        $wrapper->expects($this->never())
             ->method('loadAllTranslations');
 
         $this->getWrapperFactory()
-            ->expects(self::never())
+            ->expects($this->never())
             ->method('__invoke');
 
         self::assertInstanceOf(
@@ -280,21 +281,21 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 fn(string $class, TranslatableListener $listener) => $this->getManager()
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::never())
+        $wrapper->expects($this->never())
             ->method('loadAllTranslations');
 
         $this->getWrapperFactory()
-            ->expects(self::never())
+            ->expects($this->never())
             ->method('__invoke');
 
         $this->expectException(\DomainException::class);
@@ -311,12 +312,12 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -330,7 +331,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -344,11 +345,11 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::never())
+        $wrapper->expects($this->never())
             ->method('loadAllTranslations');
 
         $this->getWrapperFactory()
-            ->expects(self::never())
+            ->expects($this->never())
             ->method('__invoke');
 
         self::assertInstanceOf(
@@ -364,12 +365,12 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -383,7 +384,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -397,7 +398,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('loadAllTranslations')
             ->willReturnCallback(
                 function (
@@ -414,7 +415,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
@@ -433,12 +434,12 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -452,7 +453,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -466,7 +467,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('loadAllTranslations')
             ->willReturnCallback(
                 function (
@@ -486,7 +487,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
@@ -505,15 +506,15 @@ class TranslatableListenerTest extends TestCase
         $object = $this->createMock(Content::class);
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())
+        $classMeta->expects($this->any())
             ->method('getName')
             ->willReturn(Content::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -527,11 +528,11 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata');
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('loadAllTranslations')
             ->willReturnCallback(
                 function (
@@ -551,7 +552,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
@@ -586,12 +587,12 @@ class TranslatableListenerTest extends TestCase
         };
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($object);
+        $event->expects($this->any())->method('getObject')->willReturn($object);
 
         $classMeta = $this->createMock(ClassMetadata::class);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -605,7 +606,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -619,7 +620,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('loadAllTranslations')
             ->willReturnCallback(
                 function (
@@ -639,7 +640,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
@@ -656,12 +657,12 @@ class TranslatableListenerTest extends TestCase
     public function testOnFlushOnDefaultLocale()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())
+        $classMeta->expects($this->any())
             ->method('getReflectionClass')
             ->willReturn(new \ReflectionClass(Translation::class));
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -675,7 +676,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -689,22 +690,22 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::never())
+        $wrapper->expects($this->never())
             ->method('findTranslation');
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
-            ->expects(self::never())
+            ->expects($this->never())
             ->method('ifObjectHasChangeSet');
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectInsertions')
             ->willReturnCallback(function (callable $callback) {
                 $callback(new Type());
@@ -714,7 +715,7 @@ class TranslatableListenerTest extends TestCase
             });
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectUpdates')
             ->willReturnCallback(function (callable $callback) {
                 $callback(new Type());
@@ -724,7 +725,7 @@ class TranslatableListenerTest extends TestCase
             });
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectDeletions')
             ->willReturnCallback(function (callable $callback) {
                 $callback(new Type());
@@ -742,12 +743,12 @@ class TranslatableListenerTest extends TestCase
     public function testOnFlushOnDifferentLocaleAndPostFlushAndPostPersist()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())
+        $classMeta->expects($this->any())
             ->method('getReflectionClass')
             ->willReturn(new \ReflectionClass(Translation::class));
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -761,7 +762,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -775,7 +776,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('findTranslation')
             ->willReturnCallback(
                 function (
@@ -793,14 +794,14 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('ifObjectHasChangeSet')
             ->willReturnCallback(
                 function ($object, callable $callback) {
@@ -812,7 +813,7 @@ class TranslatableListenerTest extends TestCase
 
         $content = new Content();
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectInsertions')
             ->willReturnCallback(function (callable $callback) use ($content) {
                 $callback(new Type());
@@ -822,7 +823,7 @@ class TranslatableListenerTest extends TestCase
             });
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectUpdates')
             ->willReturnCallback(function (callable $callback) {
                 $callback(new Type());
@@ -832,7 +833,7 @@ class TranslatableListenerTest extends TestCase
             });
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectDeletions')
             ->willReturnCallback(function (callable $callback) {
                 $callback(new Type());
@@ -848,7 +849,7 @@ class TranslatableListenerTest extends TestCase
         );
 
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn($content);
+        $event->expects($this->any())->method('getObject')->willReturn($content);
         self::assertInstanceOf(
             TranslatableListener::class,
             $listener->postPersist($event)
@@ -875,12 +876,12 @@ class TranslatableListenerTest extends TestCase
         };
 
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())
+        $classMeta->expects($this->any())
             ->method('getReflectionClass')
             ->willReturn($refClass);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -894,7 +895,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -908,21 +909,21 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('findTranslation')
             ->willReturnCallback(
                 fn(AdapterInterface $adapter, string $locale, string $field, string $translationClass, string $objectClass, callable $callback) => $wrapper
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('ifObjectHasChangeSet')
             ->willReturnCallback(
                 function ($object, callable $callback) {
@@ -934,7 +935,7 @@ class TranslatableListenerTest extends TestCase
 
         $content = new Content();
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectInsertions')
             ->willReturnCallback(function (callable $callback) use ($content) {
                 $callback(new Type());
@@ -967,12 +968,12 @@ class TranslatableListenerTest extends TestCase
         };
 
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())
+        $classMeta->expects($this->any())
             ->method('getReflectionClass')
             ->willReturn($refClass);
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('findClassMetadata')
             ->willReturnCallback(
                 function (string $class, TranslatableListener $listener) use ($classMeta) {
@@ -986,7 +987,7 @@ class TranslatableListenerTest extends TestCase
             );
 
         $this->getExtensionMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('loadExtensionMetadata')
             ->willReturnCallback(
                 function (ClassMetadata $metaData, TranslatableListener $listener) {
@@ -1000,21 +1001,21 @@ class TranslatableListenerTest extends TestCase
             );
 
         $wrapper = $this->createMock(WrapperInterface::class);
-        $wrapper->expects(self::any())
+        $wrapper->expects($this->any())
             ->method('findTranslation')
             ->willReturnCallback(
                 fn(AdapterInterface $adapter, string $locale, string $field, string $translationClass, string $objectClass, callable $callback) => $wrapper
             );
 
         $this->getWrapperFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('__invoke')
             ->willReturnCallback(
                 fn(TranslatableInterface $object, ClassMetadata $metadata) => $wrapper
             );
 
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('ifObjectHasChangeSet')
             ->willReturnCallback(
                 function ($object, callable $callback) {
@@ -1026,7 +1027,7 @@ class TranslatableListenerTest extends TestCase
 
         $content = new Content();
         $this->getManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('foreachScheduledObjectInsertions')
             ->willReturnCallback(function (callable $callback) use ($content) {
                 $callback(new Type());
@@ -1047,7 +1048,7 @@ class TranslatableListenerTest extends TestCase
     public function testPostPersistNonTranslatable()
     {
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn(new Type());
+        $event->expects($this->any())->method('getObject')->willReturn(new Type());
         self::assertInstanceOf(
             TranslatableListener::class,
             $this->build()->postPersist($event)
@@ -1057,7 +1058,7 @@ class TranslatableListenerTest extends TestCase
     public function testPostPersistNonInserted()
     {
         $event = $this->createMock(LifecycleEventArgs::class);
-        $event->expects(self::any())->method('getObject')->willReturn(new Content());
+        $event->expects($this->any())->method('getObject')->willReturn(new Content());
         self::assertInstanceOf(
             TranslatableListener::class,
             $this->build()->postPersist($event)

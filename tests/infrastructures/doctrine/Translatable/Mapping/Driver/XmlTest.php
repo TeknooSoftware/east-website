@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Doctrine\Translatable\Mapping\Driver;
 
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\FileLocator;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Doctrine\Exception\InvalidMappingException;
 use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\SimpleXmlFactoryInterface;
@@ -41,8 +42,8 @@ use Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Xml;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\Mapping\Driver\Xml
  */
+#[CoversClass(Xml::class)]
 class XmlTest extends TestCase
 {
     private ?FileLocator $locator = null;
@@ -69,7 +70,7 @@ class XmlTest extends TestCase
         if (!$this->simpleXmlFactory instanceof SimpleXmlFactoryInterface) {
             $this->simpleXmlFactory = $this->createMock(SimpleXmlFactoryInterface::class);
 
-            $this->simpleXmlFactory->expects(self::any())
+            $this->simpleXmlFactory->expects($this->any())
                 ->method('__invoke')
                 ->willReturnCallback(fn ($file) => new \SimpleXMLElement($file, 0, true));
         }
@@ -85,9 +86,9 @@ class XmlTest extends TestCase
     public function testReadExtendedMetadataFileNotExist()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn('');
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn('');
 
         $result = [];
 
@@ -104,9 +105,9 @@ class XmlTest extends TestCase
         $this->expectException(\RuntimeException::class);
 
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn(
             __DIR__.'/support/invalid.xml'
         );
 
@@ -125,9 +126,9 @@ class XmlTest extends TestCase
         $this->expectException(InvalidMappingException::class);
 
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn(
             __DIR__.'/support/wrong-translation.xml'
         );
 
@@ -144,9 +145,9 @@ class XmlTest extends TestCase
     public function testReadExtendedMetadata()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn(
             __DIR__.'/support/valid.xml'
         );
 
@@ -163,9 +164,9 @@ class XmlTest extends TestCase
     public function testReadExtendedMetadataWithUseObjectClass()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn(
             __DIR__.'/support/valid-with-object-class.xml'
         );
 
@@ -186,9 +187,9 @@ class XmlTest extends TestCase
     public function testReadExtendedMetadataWithoutField()
     {
         $classMeta = $this->createMock(ClassMetadata::class);
-        $classMeta->expects(self::any())->method('getName')->willReturn('Foo');
+        $classMeta->expects($this->any())->method('getName')->willReturn('Foo');
 
-        $this->getLocator()->expects(self::any())->method('findMappingFile')->willReturn(
+        $this->getLocator()->expects($this->any())->method('findMappingFile')->willReturn(
             __DIR__.'/support/valid-without-field.xml'
         );
 

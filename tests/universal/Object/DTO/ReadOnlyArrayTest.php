@@ -26,14 +26,15 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object\DTO;
 
 use BadMethodCallException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\DTO\ReadOnlyArray;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Object\DTO\ReadOnlyArray
  */
+#[CoversClass(ReadOnlyArray::class)]
 class ReadOnlyArrayTest extends TestCase
 {
     private function buildObject(): ReadOnlyArray

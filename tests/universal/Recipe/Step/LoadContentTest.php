@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Step;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
@@ -37,8 +38,8 @@ use Teknoo\East\Website\Recipe\Step\LoadContent;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Recipe\Step\LoadContent
  */
+#[CoversClass(LoadContent::class)]
 class LoadContentTest extends TestCase
 {
     private ?ContentLoader $contentLoader = null;
@@ -86,8 +87,8 @@ class LoadContentTest extends TestCase
         $content = (new Content())->setType($type);
 
         $manager = $this->createMock(ManagerInterface::class);
-        $manager->expects(self::never())->method('error');
-        $manager->expects(self::once())->method('updateWorkPlan')->with([
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan')->with([
             Content::class => $content,
             'objectInstance' => $content,
             'objectViewKey' => 'content',
@@ -95,7 +96,7 @@ class LoadContentTest extends TestCase
         ]);
 
         $this->getContentLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('fetch')
             ->willReturnCallback(
                 function ($query, PromiseInterface $promise) use ($content) {
@@ -119,13 +120,13 @@ class LoadContentTest extends TestCase
         $content = (new Content());
 
         $manager = $this->createMock(ManagerInterface::class);
-        $manager->expects(self::once())->method('error')->with(
+        $manager->expects($this->once())->method('error')->with(
             new \RuntimeException('Content type is not available')
         );
-        $manager->expects(self::never())->method('updateWorkPlan');
+        $manager->expects($this->never())->method('updateWorkPlan');
 
         $this->getContentLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('fetch')
             ->willReturnCallback(
                 function ($query, PromiseInterface $promise) use ($content) {
@@ -147,13 +148,13 @@ class LoadContentTest extends TestCase
     public function testInvokeNotFound()
     {
         $manager = $this->createMock(ManagerInterface::class);
-        $manager->expects(self::once())->method('error')->with(
+        $manager->expects($this->once())->method('error')->with(
             new \DomainException('foo', 404, new \DomainException('foo'))
         );
-        $manager->expects(self::never())->method('updateWorkPlan');
+        $manager->expects($this->never())->method('updateWorkPlan');
 
         $this->getContentLoader()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('fetch')
             ->willReturnCallback(
                 function ($query, PromiseInterface $promise) {

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\WebsiteBundle\Form\Type;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\WebsiteBundle\Form\Type\TypeType;
@@ -32,8 +33,8 @@ use Teknoo\East\WebsiteBundle\Form\Type\TypeType;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\WebsiteBundle\Form\Type\TypeType
  */
+#[CoversClass(TypeType::class)]
 class TypeTypeTest extends TestCase
 {
     use FormTestTrait;

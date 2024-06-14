@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Doctrine\Translatable\Wrapper;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Types\Type;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ProxyManager\Proxy\GhostObjectInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
@@ -45,8 +46,8 @@ use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\Wrapper\DocumentWrapper
  */
+#[CoversClass(DocumentWrapper::class)]
 class DocumentWrapperTest extends TestCase
 {
     private ?TranslatableInterface $object = null;
@@ -133,7 +134,7 @@ class DocumentWrapperTest extends TestCase
     public function testSetObjectPropertyInManagerWithProxy()
     {
         $manager = $this->createMock(ManagerAdapterInterface::class);
-        $manager->expects(self::once())->method('setObjectPropertyInManager');
+        $manager->expects($this->once())->method('setObjectPropertyInManager');
 
         $this->object = new class implements TranslatableInterface, GhostObjectInterface {
             public function setProxyInitializer(?\Closure $initializer = null)
@@ -176,7 +177,7 @@ class DocumentWrapperTest extends TestCase
     public function testSetObjectPropertyInManager()
     {
         $manager = $this->createMock(ManagerAdapterInterface::class);
-        $manager->expects(self::once())->method('setObjectPropertyInManager');
+        $manager->expects($this->once())->method('setObjectPropertyInManager');
 
         self::assertInstanceOf(
             WrapperInterface::class,
@@ -189,7 +190,7 @@ class DocumentWrapperTest extends TestCase
         $translation = $this->createMock(TranslationInterface::class);
         $type = $this->createMock(Type::class);
 
-        $translation->expects(self::once())->method('setContent');
+        $translation->expects($this->once())->method('setContent');
 
         self::assertInstanceOf(
             WrapperInterface::class,
@@ -201,7 +202,7 @@ class DocumentWrapperTest extends TestCase
     {
         $translation = $this->createMock(TranslationInterface::class);
 
-        $translation->expects(self::once())->method('setForeignKey');
+        $translation->expects($this->once())->method('setForeignKey');
 
         self::assertInstanceOf(
             WrapperInterface::class,
@@ -212,7 +213,7 @@ class DocumentWrapperTest extends TestCase
     public function testloadAllTranslations()
     {
         $adapter = $this->createMock(AdapterInterface::class);
-        $adapter->expects(self::once())->method('loadAllTranslations');
+        $adapter->expects($this->once())->method('loadAllTranslations');
 
         self::assertInstanceOf(
             WrapperInterface::class,
@@ -229,7 +230,7 @@ class DocumentWrapperTest extends TestCase
     public function testFindTranslation()
     {
         $adapter = $this->createMock(AdapterInterface::class);
-        $adapter->expects(self::once())->method('findTranslation');
+        $adapter->expects($this->once())->method('findTranslation');
 
         self::assertInstanceOf(
             WrapperInterface::class,
@@ -247,7 +248,7 @@ class DocumentWrapperTest extends TestCase
     public function testRemoveAssociatedTranslations()
     {
         $adapter = $this->createMock(AdapterInterface::class);
-        $adapter->expects(self::once())->method('removeAssociatedTranslations');
+        $adapter->expects($this->once())->method('removeAssociatedTranslations');
 
         self::assertInstanceOf(
             WrapperInterface::class,

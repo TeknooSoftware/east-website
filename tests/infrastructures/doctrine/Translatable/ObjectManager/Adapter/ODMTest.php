@@ -29,6 +29,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\UnitOfWork;
 use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Website\Contracts\Object\TranslatableInterface;
@@ -45,8 +46,8 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\ObjectManager\Adapter\ODM
  */
+#[CoversClass(ODM::class)]
 class ODMTest extends TestCase
 {
     private ?ManagerInterface $eastManager = null;
@@ -84,7 +85,7 @@ class ODMTest extends TestCase
 
     public function testOpenBatch()
     {
-        $this->getEastManager()->expects(self::once())->method('openBatch');
+        $this->getEastManager()->expects($this->once())->method('openBatch');
 
         self::assertInstanceOf(
             ODM::class,
@@ -94,7 +95,7 @@ class ODMTest extends TestCase
 
     public function testCloseBatch()
     {
-        $this->getEastManager()->expects(self::once())->method('closeBatch');
+        $this->getEastManager()->expects($this->once())->method('closeBatch');
 
         self::assertInstanceOf(
             ODM::class,
@@ -105,7 +106,7 @@ class ODMTest extends TestCase
     public function testPersist()
     {
         $object = $this->createMock(ObjectInterface::class);
-        $this->getEastManager()->expects(self::once())->method('persist')->with($object);
+        $this->getEastManager()->expects($this->once())->method('persist')->with($object);
 
         self::assertInstanceOf(
             ODM::class,
@@ -116,7 +117,7 @@ class ODMTest extends TestCase
     public function testRemove()
     {
         $object = $this->createMock(ObjectInterface::class);
-        $this->getEastManager()->expects(self::once())->method('remove')->with($object);
+        $this->getEastManager()->expects($this->once())->method('remove')->with($object);
 
         self::assertInstanceOf(
             ODM::class,
@@ -126,7 +127,7 @@ class ODMTest extends TestCase
 
     public function testFlush()
     {
-        $this->getEastManager()->expects(self::once())->method('flush')->with();
+        $this->getEastManager()->expects($this->once())->method('flush')->with();
 
         self::assertInstanceOf(
             ODM::class,
@@ -140,13 +141,13 @@ class ODMTest extends TestCase
         $meta = $this->createMock(ClassMetadata::class);
 
         $this->getDoctrineManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('getClassMetadata')
             ->with($class)
             ->willReturn($meta);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('registerClassMetadata')->with($class, $meta);
+        $listener->expects($this->once())->method('registerClassMetadata')->with($class, $meta);
 
         self::assertInstanceOf(
             ODM::class,
@@ -160,7 +161,7 @@ class ODMTest extends TestCase
 
         $uow = $this->createMock(UnitOfWork::class);
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
@@ -168,7 +169,7 @@ class ODMTest extends TestCase
             self::fail('must not be called');
         };
 
-        $uow->expects(self::any())->method('getDocumentChangeSet')->willReturn([]);
+        $uow->expects($this->any())->method('getDocumentChangeSet')->willReturn([]);
 
         self::assertInstanceOf(
             ODM::class,
@@ -184,11 +185,11 @@ class ODMTest extends TestCase
 
         $uow = $this->createMock(UnitOfWork::class);
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
-        $uow->expects(self::any())->method('getDocumentChangeSet')->willReturn($changset);
+        $uow->expects($this->any())->method('getDocumentChangeSet')->willReturn($changset);
 
         $called = false;
 
@@ -210,11 +211,11 @@ class ODMTest extends TestCase
         $object = $this->createMock(TranslatableInterface::class);
 
         $uow = $this->createMock(UnitOfWork::class);
-        $uow->expects(self::never())->method('clearDocumentChangeSet');
-        $uow->expects(self::never())->method('recomputeSingleDocumentChangeSet');
+        $uow->expects($this->never())->method('clearDocumentChangeSet');
+        $uow->expects($this->never())->method('recomputeSingleDocumentChangeSet');
 
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
@@ -227,11 +228,11 @@ class ODMTest extends TestCase
         $object = $this->createMock(TranslatableInterface::class);
 
         $uow = $this->createMock(UnitOfWork::class);
-        $uow->expects(self::once())->method('clearDocumentChangeSet');
-        $uow->expects(self::once())->method('recomputeSingleDocumentChangeSet');
+        $uow->expects($this->once())->method('clearDocumentChangeSet');
+        $uow->expects($this->once())->method('recomputeSingleDocumentChangeSet');
 
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
@@ -247,11 +248,11 @@ class ODMTest extends TestCase
 
         $uow = $this->createMock(UnitOfWork::class);
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
-        $uow->expects(self::any())->method('getScheduledDocumentInsertions')->willReturn($list);
+        $uow->expects($this->any())->method('getScheduledDocumentInsertions')->willReturn($list);
 
         $counter = 0;
 
@@ -271,11 +272,11 @@ class ODMTest extends TestCase
 
         $uow = $this->createMock(UnitOfWork::class);
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
-        $uow->expects(self::any())->method('getScheduledDocumentUpdates')->willReturn($list);
+        $uow->expects($this->any())->method('getScheduledDocumentUpdates')->willReturn($list);
 
         $counter = 0;
 
@@ -295,11 +296,11 @@ class ODMTest extends TestCase
 
         $uow = $this->createMock(UnitOfWork::class);
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 
-        $uow->expects(self::any())->method('getScheduledDocumentDeletions')->willReturn($list);
+        $uow->expects($this->any())->method('getScheduledDocumentDeletions')->willReturn($list);
 
         $counter = 0;
 
@@ -316,10 +317,10 @@ class ODMTest extends TestCase
     public function testSetObjectPropertyInManager()
     {
         $uow = $this->createMock(UnitOfWork::class);
-        $uow->expects(self::once())->method('setOriginalDocumentProperty');
+        $uow->expects($this->once())->method('setOriginalDocumentProperty');
 
         $this->getDoctrineManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getUnitOfWork')
             ->willReturn($uow);
 

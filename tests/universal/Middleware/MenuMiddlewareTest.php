@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Middleware;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -33,8 +34,8 @@ use Teknoo\East\Common\View\ParametersBag;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\Website\Middleware\MenuMiddleware
  */
+#[CoversClass(MenuMiddleware::class)]
 class MenuMiddlewareTest extends TestCase
 {
     /**
@@ -42,7 +43,7 @@ class MenuMiddlewareTest extends TestCase
      */
     private $menuGenerator;
 
-    public function getMenuGenerator(): \MenuGenerator|\PHPUnit\Framework\MockObject\MockObject
+    public function getMenuGenerator(): MenuGenerator|\PHPUnit\Framework\MockObject\MockObject
     {
         if (!$this->menuGenerator instanceof MenuGenerator) {
             $this->menuGenerator = $this->createMock(MenuGenerator::class);

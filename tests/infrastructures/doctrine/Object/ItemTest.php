@@ -25,7 +25,11 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Object;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Object\Item as ItemOriginal;
+use Teknoo\East\Website\Object\PublishableTrait;
 use Teknoo\Tests\East\Website\Object\ItemTest as OriginalTest;
 
 /**
@@ -37,10 +41,10 @@ use Teknoo\Tests\East\Website\Object\ItemTest as OriginalTest;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Object\Item
- * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\Item
  */
+#[CoversClass(ItemOriginal::class)]
+#[CoversTrait(PublishableTrait::class)]
+#[CoversClass(Item::class)]
 class ItemTest extends OriginalTest
 {
     public function buildObject(): Item

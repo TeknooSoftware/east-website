@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Translatable;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Doctrine\Translatable\Persistence\Adapter\ODM as ODMPersistence;
 use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
@@ -38,14 +39,14 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslationManager;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\TranslationManager
  */
+#[CoversClass(TranslationManager::class)]
 class TranslationManagerTest extends TestCase
 {
     public function testDeferringTranslationsLoading()
     {
         $mock = $this->createMock(ODMPersistence::class);
-        $mock->expects(self::once())->method('setDeferred')->with(true);
+        $mock->expects($this->once())->method('setDeferred')->with(true);
 
         self::assertInstanceOf(
             TranslationManager::class,
@@ -56,8 +57,8 @@ class TranslationManagerTest extends TestCase
     public function testStopDeferringTranslationsLoading()
     {
         $mock = $this->createMock(ODMPersistence::class);
-        $mock->expects(self::once())->method('executeAllDeferredLoadings');
-        $mock->expects(self::once())->method('setDeferred')->with(false);
+        $mock->expects($this->once())->method('executeAllDeferredLoadings');
+        $mock->expects($this->once())->method('setDeferred')->with(false);
 
         self::assertInstanceOf(
             TranslationManager::class,

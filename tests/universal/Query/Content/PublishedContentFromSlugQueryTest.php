@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Query\Content;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -32,14 +33,13 @@ use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
-use Teknoo\East\Website\Query\QueryInterface;
 use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery
  */
+#[CoversClass(PublishedContentFromSlugQuery::class)]
 class PublishedContentFromSlugQueryTest extends TestCase
 {
     use QueryElementTestTrait;
@@ -58,10 +58,10 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::never())->method('success');
-        $promise->expects(self::never())->method('fail');
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->never())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findOneBy')
             ->with(['slug' => 'fooBar', 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
@@ -77,10 +77,10 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail');
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->once())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
                 $promise->fail(new \RuntimeException());
@@ -100,10 +100,10 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail');
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->once())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
                 $promise->success(new \stdClass());
@@ -123,14 +123,14 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::never())->method('success');
-        $promise->expects(self::once())->method('fail');
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->once())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
                 $object = $this->createMock(Content::class);
-                $object->expects(self::any())->method('getPublishedAt')->willReturn(
+                $object->expects($this->any())->method('getPublishedAt')->willReturn(
                     null
                 );
                 $promise->success($object);
@@ -150,16 +150,16 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($this->callback(fn($value) => $value instanceof Content));
-        $promise->expects(self::never())->method('fail');
+        $promise->expects($this->never())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
                 $content = $this->createMock(Content::class);
-                $content->expects(self::any())->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
+                $content->expects($this->any())->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
                 $promise->success($content);
 
                 return $repository;

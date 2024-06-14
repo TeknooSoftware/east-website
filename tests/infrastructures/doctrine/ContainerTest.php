@@ -98,7 +98,7 @@ class ContainerTest extends TestCase
     {
         $container = $this->buildContainer();
         $objectManager = $this->createMock(ObjectManager::class);
-        $objectManager->expects(self::any())->method('getRepository')->with($objectClass)->willReturn(
+        $objectManager->expects($this->any())->method('getRepository')->with($objectClass)->willReturn(
             $this->createMock($repositoryType)
         );
 
@@ -115,7 +115,7 @@ class ContainerTest extends TestCase
     {
         $container = $this->buildContainer();
         $objectManager = $this->createMock(ObjectManager::class);
-        $objectManager->expects(self::any())->method('getRepository')->with($objectClass)->willReturn(
+        $objectManager->expects($this->any())->method('getRepository')->with($objectClass)->willReturn(
             $this->createMock(\DateTime::class)
         );
 
@@ -225,13 +225,13 @@ class ContainerTest extends TestCase
         $driver = $this->createMock(MappingDriver::class);
 
         $configuration = $this->createMock(Configuration::class);
-        $configuration->expects(self::any())->method('getMetadataDriverImpl')->willReturn($driver);
+        $configuration->expects($this->any())->method('getMetadataDriverImpl')->willReturn($driver);
 
         $mappingFactory = $this->createMock(AbstractClassMetadataFactory::class);
 
         $objectManager = $this->createMock(DocumentManager::class);
-        $objectManager->expects(self::any())->method('getConfiguration')->willReturn($configuration);
-        $objectManager->expects(self::any())->method('getMetadataFactory')->willReturn($mappingFactory);
+        $objectManager->expects($this->any())->method('getConfiguration')->willReturn($configuration);
+        $objectManager->expects($this->any())->method('getMetadataFactory')->willReturn($mappingFactory);
 
         $container->set(ObjectManager::class, $objectManager);
 
@@ -306,8 +306,8 @@ class ContainerTest extends TestCase
         $proxyDetector = $container->get(ProxyDetectorInterface::class);
 
         $p1 = $this->createMock(PromiseInterface::class);
-        $p1->expects(self::never())->method('success');
-        $p1->expects(self::once())->method('fail');
+        $p1->expects($this->never())->method('success');
+        $p1->expects($this->once())->method('fail');
 
         self::assertInstanceOf(
             ProxyDetectorInterface::class,
@@ -315,8 +315,8 @@ class ContainerTest extends TestCase
         );
 
         $p2 = $this->createMock(PromiseInterface::class);
-        $p2->expects(self::never())->method('success');
-        $p2->expects(self::once())->method('fail');
+        $p2->expects($this->never())->method('success');
+        $p2->expects($this->once())->method('fail');
 
         self::assertInstanceOf(
             ProxyDetectorInterface::class,
@@ -344,8 +344,8 @@ class ContainerTest extends TestCase
         );
 
         $p3 = $this->createMock(PromiseInterface::class);
-        $p3->expects(self::once())->method('success');
-        $p3->expects(self::never())->method('fail');
+        $p3->expects($this->once())->method('success');
+        $p3->expects($this->never())->method('fail');
 
         self::assertInstanceOf(
             ProxyDetectorInterface::class,

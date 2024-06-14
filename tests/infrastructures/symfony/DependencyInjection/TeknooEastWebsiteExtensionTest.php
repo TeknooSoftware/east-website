@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\WebsiteBundle\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension;
@@ -32,8 +33,8 @@ use Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension
  */
+#[CoversClass(TeknooEastWebsiteExtension::class)]
 class TeknooEastWebsiteExtensionTest extends TestCase
 {
     /**
@@ -41,7 +42,7 @@ class TeknooEastWebsiteExtensionTest extends TestCase
      */
     private $container;
 
-    private function getContainerBuilderMock(): \ContainerBuilder|\PHPUnit\Framework\MockObject\MockObject
+    private function getContainerBuilderMock(): ContainerBuilder|\PHPUnit\Framework\MockObject\MockObject
     {
         if (!$this->container instanceof ContainerBuilder) {
             $this->container = $this->createMock(ContainerBuilder::class);

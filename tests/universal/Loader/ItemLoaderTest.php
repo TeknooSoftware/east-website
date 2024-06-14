@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Loader;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -35,8 +36,8 @@ use Teknoo\East\Website\Object\Item;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\Website\Loader\ItemLoader
  */
+#[CoversClass(ItemLoader::class)]
 class ItemLoaderTest extends TestCase
 {
     use LoaderTestTrait;

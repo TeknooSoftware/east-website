@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Doctrine\Object;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Doctrine\Object\Translation;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
@@ -38,8 +39,8 @@ use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Object\Translation
  */
+#[CoversClass(Translation::class)]
 class TranslationTest extends TestCase
 {
     use PopulateObjectTrait;

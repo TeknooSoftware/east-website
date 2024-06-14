@@ -86,12 +86,12 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         self::assertInstanceOf(WriterInterface::class, $this->buildWriter()->save($object));
@@ -102,28 +102,28 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($object)
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
             $this->getDatesServiceMock()
-                ->expects(self::any())
+                ->expects($this->any())
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter) use ($date) {
@@ -134,7 +134,7 @@ trait PersistTestTrait
                 );
         } else {
             $this->getDatesServiceMock()
-                ->expects(self::never())
+                ->expects($this->never())
                 ->method('passMeTheDate');
         }
 
@@ -146,28 +146,28 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($object)
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
             $this->getDatesServiceMock()
-                ->expects(self::any())
+                ->expects($this->any())
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
@@ -179,7 +179,7 @@ trait PersistTestTrait
                 );
         } else {
             $this->getDatesServiceMock()
-                ->expects(self::never())
+                ->expects($this->never())
                 ->method('passMeTheDate');
         }
 
@@ -194,28 +194,28 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($object)
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
             $this->getDatesServiceMock()
-                ->expects(self::any())
+                ->expects($this->any())
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
@@ -227,7 +227,7 @@ trait PersistTestTrait
                 );
         } else {
             $this->getDatesServiceMock()
-                ->expects(self::never())
+                ->expects($this->never())
                 ->method('passMeTheDate');
         }
 
@@ -239,28 +239,28 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($object)
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
             $this->getDatesServiceMock()
-                ->expects(self::any())
+                ->expects($this->any())
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
@@ -272,7 +272,7 @@ trait PersistTestTrait
                 );
         } else {
             $this->getDatesServiceMock()
-                ->expects(self::never())
+                ->expects($this->never())
                 ->method('passMeTheDate');
         }
 
@@ -287,28 +287,28 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->with($object)
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
             $this->getDatesServiceMock()
-                ->expects(self::any())
+                ->expects($this->any())
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
@@ -320,7 +320,7 @@ trait PersistTestTrait
                 );
         } else {
             $this->getDatesServiceMock()
-                ->expects(self::never())
+                ->expects($this->never())
                 ->method('passMeTheDate');
         }
 
@@ -335,22 +335,22 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $error = new \Exception();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush')
             ->willThrowException($error);
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('success');
 
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('fail')
             ->with($error)
             ->willReturnSelf();
@@ -364,14 +364,14 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('persist')
             ->with($object);
 
         $error = new \Exception();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush')
             ->willThrowException($error);
 
@@ -383,12 +383,12 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('remove')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         self::assertInstanceOf(WriterInterface::class, $this->buildWriter()->remove($object));
@@ -399,20 +399,20 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('remove')
             ->with($object);
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush');
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('success')
             ->willReturnSelf();
 
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('fail');
 
         self::assertInstanceOf(WriterInterface::class, $this->buildWriter()->remove($object, $promise));
@@ -423,22 +423,22 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('remove')
             ->with($object);
 
         $error = new \Exception();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush')
             ->willThrowException($error);
 
         $promise = $this->createMock(PromiseInterface::class);
-        $promise->expects(self::never())
+        $promise->expects($this->never())
             ->method('success');
 
-        $promise->expects(self::once())
+        $promise->expects($this->once())
             ->method('fail')
             ->with($error)
             ->willReturnSelf();
@@ -452,14 +452,14 @@ trait PersistTestTrait
         $object = $this->getObject();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('remove')
             ->with($object);
 
         $error = new \Exception();
 
         $this->getObjectManager()
-            ->expects(self::once())
+            ->expects($this->once())
             ->method('flush')
             ->willThrowException($error);
 

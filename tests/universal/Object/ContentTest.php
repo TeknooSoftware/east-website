@@ -25,22 +25,32 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Object;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\Service\FindSlugService;
+use Teknoo\East\Website\Object\Content\Draft;
+use Teknoo\East\Website\Object\Content\Published;
+use Teknoo\East\Website\Object\PublishableTrait;
 use Teknoo\Tests\East\Website\Object\Traits\PublishableTestTrait;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Common\Object\User;
+use Throwable;
+
+use function hash;
+use function json_encode;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Object\PublishableTrait
- * @covers \Teknoo\East\Website\Object\Content
- * @covers \Teknoo\East\Website\Object\Content\Draft
- * @covers \Teknoo\East\Website\Object\Content\Published
  */
+#[CoversClass(Published::class)]
+#[CoversClass(Draft::class)]
+#[CoversClass(Content::class)]
+#[CoversTrait(PublishableTrait::class)]
 class ContentTest extends TestCase
 {
     use PublishableTestTrait;
@@ -55,7 +65,7 @@ class ContentTest extends TestCase
 
     public function testGetParts()
     {
-        $object = $this->generateObjectPopulated(['parts' => \json_encode(['fooBar'])]);
+        $object = $this->generateObjectPopulated(['parts' => json_encode(['fooBar'])]);
 
         self::assertEquals(
             ['fooBar'],
@@ -118,16 +128,16 @@ class ContentTest extends TestCase
 
     public function testSetPartsExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setContent(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setContent(new stdClass());
     }
 
     public function testGetSanitizedParts()
     {
         $object = $this->generateObjectPopulated(
             [
-                'sanitizedParts' => $value = \json_encode(['fooBar']),
-                'sanitizedHash' => \hash(
+                'sanitizedParts' => $value = json_encode(['fooBar']),
+                'sanitizedHash' => hash(
                     algo: 'sha256',
                     data: 'barFoo' . $value,
                 )
@@ -209,8 +219,8 @@ class ContentTest extends TestCase
 
     public function testSetSanitizedPartsExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setContent(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setContent(new stdClass());
     }
 
     public function testGetDescription()
@@ -246,8 +256,8 @@ class ContentTest extends TestCase
 
     public function testSetDescriptionExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setDescription(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setDescription(new stdClass());
     }
 
     public function testGetSlug()
@@ -263,7 +273,7 @@ class ContentTest extends TestCase
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
-        $findSlugService->expects(self::once())->method('process');
+        $findSlugService->expects($this->once())->method('process');
 
         self::assertInstanceOf(
             Content::class,
@@ -281,7 +291,7 @@ class ContentTest extends TestCase
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
-        $findSlugService->expects(self::once())->method('process');
+        $findSlugService->expects($this->once())->method('process');
 
         self::assertInstanceOf(
             Content::class,
@@ -310,8 +320,8 @@ class ContentTest extends TestCase
 
     public function testSetSlugExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setSlug(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setSlug(new stdClass());
     }
 
     public function testGetSubtitle()
@@ -338,8 +348,8 @@ class ContentTest extends TestCase
 
     public function testSetSubtitleExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setSubtitle(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setSubtitle(new stdClass());
     }
 
     public function testGetTitle()
@@ -374,8 +384,8 @@ class ContentTest extends TestCase
 
     public function testSetTitleExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setTitle(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setTitle(new stdClass());
     }
 
     public function testGetAuthor()
@@ -405,8 +415,8 @@ class ContentTest extends TestCase
 
     public function testSetAuthorExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setAuthor(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setAuthor(new stdClass());
     }
 
     public function testGetType()
@@ -436,8 +446,8 @@ class ContentTest extends TestCase
 
     public function testSetTypeExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setType(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setType(new stdClass());
     }
 
     public function testGetTags()
@@ -464,8 +474,8 @@ class ContentTest extends TestCase
 
     public function testSetTagsExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setTags(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setTags(new stdClass());
     }
 
     public function testStatesListDeclaration()
@@ -510,7 +520,7 @@ class ContentTest extends TestCase
 
     public function testSetLocaleFieldExceptionOnBadArgument()
     {
-        $this->expectException(\Throwable::class);
-        $this->buildObject()->setLocaleField(new \stdClass());
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setLocaleField(new stdClass());
     }
 }

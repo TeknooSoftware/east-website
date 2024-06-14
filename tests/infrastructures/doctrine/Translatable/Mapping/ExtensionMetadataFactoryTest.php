@@ -33,6 +33,7 @@ use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\ObjectManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
@@ -54,8 +55,8 @@ use Teknoo\East\Website\Doctrine\Translatable\TranslatableListener;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @covers \Teknoo\East\Website\Doctrine\Translatable\Mapping\ExtensionMetadataFactory
  */
+#[CoversClass(ExtensionMetadataFactory::class)]
 class ExtensionMetadataFactoryTest extends TestCase
 {
     private ?ObjectManager $objectManager = null;
@@ -124,11 +125,11 @@ class ExtensionMetadataFactoryTest extends TestCase
         if (!$this->driverFactory instanceof DriverFactoryInterface) {
             $this->driverFactory = $this->createMock(DriverFactoryInterface::class);
 
-            $this->driverFactory->expects(self::any())
+            $this->driverFactory->expects($this->any())
                 ->method('__invoke')
                 ->willReturnCallback(function () use ($useObjectClass) {
                     $driver = $this->createMock(DriverInterface::class);
-                    $driver->expects(self::any())
+                    $driver->expects($this->any())
                         ->method('readExtendedMetadata')
                         ->willReturnCallback(
                             function (ClassMetadata $meta, array &$config) use ($driver, $useObjectClass) {
@@ -186,7 +187,7 @@ class ExtensionMetadataFactoryTest extends TestCase
         };
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::never())->method('injectConfiguration');
+        $listener->expects($this->never())->method('injectConfiguration');
 
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
@@ -223,7 +224,7 @@ class ExtensionMetadataFactoryTest extends TestCase
         };
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::never())->method('injectConfiguration');
+        $listener->expects($this->never())->method('injectConfiguration');
 
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
@@ -261,10 +262,10 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(FileDriver::class);
 
         $locator = $this->createMock(FileLocator::class);
-        $this->mappingDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+        $this->mappingDriver->expects($this->any())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('injectConfiguration');
+        $listener->expects($this->once())->method('injectConfiguration');
 
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
@@ -302,10 +303,10 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(FileDriver::class);
 
         $locator = $this->createMock(FileLocator::class);
-        $this->mappingDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+        $this->mappingDriver->expects($this->any())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())
+        $listener->expects($this->once())
             ->method('injectConfiguration')
             ->willReturnCallback(
                 function ($metadata, $config) use ($listener) {
@@ -353,17 +354,17 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(MappingDriverChain::class);
         $fileDriver = $this->createMock(FileDriver::class);
 
-        $this->mappingDriver->expects(self::any())->method('getDrivers')->willReturn([
+        $this->mappingDriver->expects($this->any())->method('getDrivers')->willReturn([
             $this->createMock(MappingDriver::class),
             $this->createMock(MappingDriver::class),
             $fileDriver
         ]);
 
         $locator = $this->createMock(FileLocator::class);
-        $fileDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+        $fileDriver->expects($this->any())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('injectConfiguration');
+        $listener->expects($this->once())->method('injectConfiguration');
 
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
@@ -400,18 +401,18 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(FileDriver::class);
 
         $locator = $this->createMock(FileLocator::class);
-        $this->mappingDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+        $this->mappingDriver->expects($this->any())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('injectConfiguration');
+        $listener->expects($this->once())->method('injectConfiguration');
 
         $this->getClassMetadataFactory()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('hasMetadataFor')
             ->willReturn(true);
 
         $this->getObjectManager()
-            ->expects(self::any())
+            ->expects($this->any())
             ->method('getClassMetadata')
             ->willReturn($this->createMock(ClassMetadata::class));
 
@@ -450,12 +451,12 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(FileDriver::class);
 
         $locator = $this->createMock(FileLocator::class);
-        $this->mappingDriver->expects(self::any())->method('getLocator')->willReturn($locator);
+        $this->mappingDriver->expects($this->any())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('injectConfiguration');
+        $listener->expects($this->once())->method('injectConfiguration');
 
-        $this->getCacheMock()->expects(self::any())->method('hasItem')->willReturn(false);
+        $this->getCacheMock()->expects($this->any())->method('hasItem')->willReturn(false);
 
         self::assertInstanceOf(
             ExtensionMetadataFactory::class,
@@ -492,13 +493,13 @@ class ExtensionMetadataFactoryTest extends TestCase
         $this->mappingDriver = $this->createMock(FileDriver::class);
 
         $locator = $this->createMock(FileLocator::class);
-        $this->mappingDriver->expects(self::never())->method('getLocator')->willReturn($locator);
+        $this->mappingDriver->expects($this->never())->method('getLocator')->willReturn($locator);
 
         $listener = $this->createMock(TranslatableListener::class);
-        $listener->expects(self::once())->method('injectConfiguration');
+        $listener->expects($this->once())->method('injectConfiguration');
 
-        $this->getCacheMock()->expects(self::any())->method('hasItem')->willReturn(true);
-        $this->getCacheMock()->expects(self::any())->method('getItem')->willReturn(
+        $this->getCacheMock()->expects($this->any())->method('hasItem')->willReturn(true);
+        $this->getCacheMock()->expects($this->any())->method('getItem')->willReturn(
             new Configuration('foo', [])
         );
 

@@ -28,6 +28,8 @@ namespace Teknoo\Tests\East\Website\Doctrine\Form\Type;
 use Doctrine\Bundle\MongoDBBundle\Form\Type\DocumentType;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -36,6 +38,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\BlockType;
@@ -45,9 +48,9 @@ use Teknoo\East\Website\Doctrine\Form\Type\ContentType;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers      \Teknoo\East\Website\Doctrine\Form\Type\ContentType
- * @covers      \Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait
  */
+#[CoversTrait(TranslatableTrait::class)]
+#[CoversClass(ContentType::class)]
 class ContentTypeWithSanitizerTest extends TestCase
 {
     public function buildForm()
@@ -62,7 +65,7 @@ class ContentTypeWithSanitizerTest extends TestCase
     public function testBuildForm()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('addEventListener')
             ->willReturnCallback(function ($name, $callable) use ($builder) {
                 $form = $this->createMock(FormInterface::class);
@@ -84,24 +87,24 @@ class ContentTypeWithSanitizerTest extends TestCase
                 return $builder;
             });
 
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('add')
             ->willReturnCallback(
                 function ($child, $type, array $options = array()) use ($builder) {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('field')
                             ->with('deletedAt')
                             ->willReturnSelf();
 
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('equals')
                             ->with(null)
                             ->willReturnSelf();
 
                         $repository = $this->createMock(DocumentRepository::class);
-                        $repository->expects(self::once())
+                        $repository->expects($this->once())
                             ->method('createQueryBuilder')
                             ->willReturn($qBuilder);
 
@@ -121,7 +124,7 @@ class ContentTypeWithSanitizerTest extends TestCase
     public function testBuildFormWithPublishedContent()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('addEventListener')
             ->willReturnCallback(function ($name, $callable) use ($builder) {
                 $form = $this->createMock(FormInterface::class);
@@ -142,24 +145,24 @@ class ContentTypeWithSanitizerTest extends TestCase
                 return $builder;
             });
 
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('add')
             ->willReturnCallback(
                 function ($child, $type, array $options = array()) use ($builder) {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('field')
                             ->with('deletedAt')
                             ->willReturnSelf();
 
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('equals')
                             ->with(null)
                             ->willReturnSelf();
 
                         $repository = $this->createMock(DocumentRepository::class);
-                        $repository->expects(self::once())
+                        $repository->expects($this->once())
                             ->method('createQueryBuilder')
                             ->willReturn($qBuilder);
 
@@ -179,7 +182,7 @@ class ContentTypeWithSanitizerTest extends TestCase
     public function testBuildFormSubmittedData()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('addEventListener')
             ->willReturnCallback(function ($name, $callable) use ($builder) {
                 $form = $this->createMock(FormInterface::class);
@@ -187,7 +190,7 @@ class ContentTypeWithSanitizerTest extends TestCase
                 $type = new Type();
                 $type->setBlocks([new Block('foo', BlockType::Text), new Block('foo2', BlockType::Text)]);
                 $content->setType($type);
-                $form->expects(self::any())->method('getNormData')->willReturn($content);
+                $form->expects($this->any())->method('getNormData')->willReturn($content);
 
                 $event = new FormEvent(
                     $form,
@@ -201,24 +204,24 @@ class ContentTypeWithSanitizerTest extends TestCase
                 return $builder;
             });
 
-        $builder->expects(self::any())
+        $builder->expects($this->any())
             ->method('add')
             ->willReturnCallback(
                 function ($child, $type, array $options = array()) use ($builder) {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('field')
                             ->with('deletedAt')
                             ->willReturnSelf();
 
-                        $qBuilder->expects(self::once())
+                        $qBuilder->expects($this->once())
                             ->method('equals')
                             ->with(null)
                             ->willReturnSelf();
 
                         $repository = $this->createMock(DocumentRepository::class);
-                        $repository->expects(self::once())
+                        $repository->expects($this->once())
                             ->method('createQueryBuilder')
                             ->willReturn($qBuilder);
 

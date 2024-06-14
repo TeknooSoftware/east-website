@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Query\Item;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -36,8 +37,8 @@ use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Query\Item\TopItemByLocationQuery
  */
+#[CoversClass(TopItemByLocationQuery::class)]
 class TopItemByLocationQueryTest extends TestCase
 {
     use QueryCollectionTestTrait;
@@ -56,10 +57,10 @@ class TopItemByLocationQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects(self::never())->method('success');
-        $promise->expects(self::never())->method('fail');
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->never())->method('fail');
 
-        $repository->expects(self::once())
+        $repository->expects($this->once())
             ->method('findBy')
             ->with(['location' => 'fooBar', 'deletedAt' => null,], $promise);
 

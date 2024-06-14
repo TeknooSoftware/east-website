@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Object;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
@@ -35,8 +36,8 @@ use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Object\Item
  */
+#[CoversClass(Item::class)]
 class ItemTest extends TestCase
 {
     use ObjectTestTrait;
@@ -98,7 +99,7 @@ class ItemTest extends TestCase
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
-        $findSlugService->expects(self::once())->method('process');
+        $findSlugService->expects($this->once())->method('process');
 
         self::assertInstanceOf(
             Item::class,
@@ -116,7 +117,7 @@ class ItemTest extends TestCase
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
-        $findSlugService->expects(self::once())->method('process');
+        $findSlugService->expects($this->once())->method('process');
 
         self::assertInstanceOf(
             Item::class,

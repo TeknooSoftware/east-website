@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Doctrine\DBSource\Common;
 
 use Doctrine\Persistence\ObjectRepository;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository;
@@ -34,8 +35,8 @@ use Teknoo\Tests\East\Common\Doctrine\DBSource\Common\RepositoryTestTrait;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository
  */
+#[CoversClass(TypeRepository::class)]
 class TypeRepositoryTest extends TestCase
 {
     use RepositoryTestTrait;

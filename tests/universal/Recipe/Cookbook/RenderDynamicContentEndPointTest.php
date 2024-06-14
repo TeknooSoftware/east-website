@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Cookbook;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -39,8 +40,8 @@ use Teknoo\Tests\Recipe\Cookbook\BaseCookbookTestTrait;
 /**
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- * @covers \Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint
  */
+#[CoversClass(RenderDynamicContentEndPoint::class)]
 class RenderDynamicContentEndPointTest extends TestCase
 {
     use BaseCookbookTestTrait;
