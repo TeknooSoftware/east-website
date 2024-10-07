@@ -26,14 +26,12 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
-use Teknoo\East\Website\Object\PublishableTrait;
 use Teknoo\Tests\East\Website\Object\Traits\PublishableTestTrait;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Type;
@@ -50,7 +48,6 @@ use function json_encode;
 #[CoversClass(Published::class)]
 #[CoversClass(Draft::class)]
 #[CoversClass(Content::class)]
-#[CoversTrait(PublishableTrait::class)]
 class ContentTest extends TestCase
 {
     use PublishableTestTrait;

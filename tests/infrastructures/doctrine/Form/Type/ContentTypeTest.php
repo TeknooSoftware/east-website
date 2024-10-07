@@ -29,7 +29,6 @@ use Doctrine\Bundle\MongoDBBundle\Form\Type\DocumentType;
 use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversTrait;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -37,7 +36,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Teknoo\East\Website\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\BlockType;
@@ -48,7 +46,6 @@ use Teknoo\East\Website\Doctrine\Form\Type\ContentType;
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-#[CoversTrait(TranslatableTrait::class)]
 #[CoversClass(ContentType::class)]
 class ContentTypeTest extends TestCase
 {

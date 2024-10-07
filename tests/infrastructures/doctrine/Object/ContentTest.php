@@ -26,12 +26,10 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Doctrine\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversTrait;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\Content as ContentOriginal;
 use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
-use Teknoo\East\Website\Object\PublishableTrait;
 use Teknoo\Tests\East\Website\Object\ContentTest as OriginalTest;
 
 /**
@@ -47,7 +45,6 @@ use Teknoo\Tests\East\Website\Object\ContentTest as OriginalTest;
 #[CoversClass(Published::class)]
 #[CoversClass(Draft::class)]
 #[CoversClass(ContentOriginal::class)]
-#[CoversTrait(PublishableTrait::class)]
 #[CoversClass(Content::class)]
 class ContentTest extends OriginalTest
 {

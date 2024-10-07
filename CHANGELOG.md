@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [9.2.4] - 2024-10-07
+### Stable Release
+- Update dev lib requirements
+
 ## [9.2.3] - 2024-06-03
 ### Stable Release
 - Remove useless dependency to `symfony/templating`
