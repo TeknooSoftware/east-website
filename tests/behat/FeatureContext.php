@@ -856,6 +856,8 @@ class FeatureContext implements Context
                         'decodedSanitizedParts',
                         'sanitizedHash',
                         'loadedStatesCaches',
+                        'calledMethodCache',
+                        'disableCalledMethodCache'
                     ])) {
                         continue;
                     }
