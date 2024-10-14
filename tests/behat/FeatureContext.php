@@ -95,6 +95,7 @@ use Throwable;
 use Twig\Environment;
 
 use function array_pop;
+use function bin2hex;
 use function current;
 use function dirname;
 use function explode;
@@ -103,10 +104,10 @@ use function json_decode;
 use function json_encode;
 use function parse_str;
 use function preg_match;
+use function random_bytes;
 use function random_int;
 use function str_replace;
 use function strlen;
-use function uniqid;
 
 /**
  * Defines application features from the specific context.
@@ -305,7 +306,7 @@ class FeatureContext implements Context
                 if ($id = $object->getId()) {
                     $this->featureContext->updatedObjects[$id] = $object;
                 } else {
-                    $object->setId(uniqid());
+                    $object->setId(bin2hex(random_bytes(23)));
                     $class = explode('\\', $object::class);
                     $this->featureContext->createdObjects[array_pop($class)][] = $object;
 

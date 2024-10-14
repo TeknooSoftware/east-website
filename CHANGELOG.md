@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [9.2.5] - 2024-10-14
+### Stable Release
+- Update requirement libraries
+- Use `random_bytes` instead of `uniqid`
+
 ## [9.2.4] - 2024-10-07
 ### Stable Release
 - Update dev lib requirements
