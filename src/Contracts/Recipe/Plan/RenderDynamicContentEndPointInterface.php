@@ -23,9 +23,9 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Contracts\Recipe\Cookbook;
+namespace Teknoo\East\Website\Contracts\Recipe\Plan;
 
-use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface as OriginalPlan;
+use Teknoo\Recipe\EditablePlanInterface;
 
 /**
  * Interface defining a HTTP EndPoint Recipe able to load a `Teknoo\East\Website\Object\Content` instance and render a
@@ -35,9 +35,7 @@ use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterf
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     http://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- *
- * @deprecated Use `Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface` instead
  */
-interface RenderDynamicContentEndPointInterface extends OriginalPlan
+interface RenderDynamicContentEndPointInterface extends EditablePlanInterface
 {
 }

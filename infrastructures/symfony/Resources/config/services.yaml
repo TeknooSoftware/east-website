@@ -15,7 +15,7 @@ services:
     teknoo.east.website.endpoint.content.bowl:
         class: '%teknoo.east.website.endpoint.content.bowl.class%'
         arguments:
-            - '@Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface'
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.content:
@@ -28,7 +28,7 @@ services:
     teknoo.east.website.endpoint.media.bowl:
         class: '%teknoo.east.website.endpoint.media.bowl.class%'
         arguments:
-            - '@Teknoo\East\Common\Contracts\Recipe\Cookbook\RenderMediaEndPointInterface'
+            - '@Teknoo\East\Common\Contracts\Recipe\Plan\RenderMediaEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.media:

@@ -23,19 +23,19 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\Tests\East\Website\Recipe\Cookbook;
+namespace Teknoo\Tests\East\Website\Recipe\Plan;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
-use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\RecipeInterface;
-use Teknoo\Tests\Recipe\Cookbook\BaseCookbookTestTrait;
+use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
 /**
  * @license     http://teknoo.software/license/mit         MIT License
@@ -44,7 +44,7 @@ use Teknoo\Tests\Recipe\Cookbook\BaseCookbookTestTrait;
 #[CoversClass(RenderDynamicContentEndPoint::class)]
 class RenderDynamicContentEndPointTest extends TestCase
 {
-    use BaseCookbookTestTrait;
+    use EditablePlanTestTrait;
 
     private ?RecipeInterface $recipe = null;
 
@@ -116,7 +116,7 @@ class RenderDynamicContentEndPointTest extends TestCase
         return $this->renderError;
     }
 
-    public function buildCookbook(): RenderDynamicContentEndPoint
+    public function buildPlan(): RenderDynamicContentEndPoint
     {
         return new RenderDynamicContentEndPoint(
             $this->getRecipe(),

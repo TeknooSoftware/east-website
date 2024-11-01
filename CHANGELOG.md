@@ -1,5 +1,14 @@
 # Teknoo Software - Website - Change Log
 
+## [10.0.0] - 2024-11-01
+### Stable Release
+- Migrate to `Teknoo Recipe` 6.
+- Rename `Cookbook` to `Plan`.
+    - Old classes and interfaces are deprecated.
+- Migrate to `EditablePlan` all previous `Cookbook` / `Plan`.
+- Migrate the decoration in Symfony DI to the East Foundation Plan to register the `MenuMiddleware`.
+- Migrate the decoration in CRUD and STATIC Plan to register the `LoadTranslationsInterface` middleware.
+
 ## [9.2.5] - 2024-10-14
 ### Stable Release
 - Update requirement libraries
@@ -620,7 +629,7 @@ not supported, all users' passwords must be converted before switching to this v
 ## [4.0.0] - 2021-01-24
 ### Stable Release
 - Migrate to Recipe 2.3+ and Tekno 3.3
-- Migrate all classics services endpoints to Cookbook and Recipe.
+- Migrate all classics services endpoints to Plan and Recipe.
 - Remove all traits in main namespace with implementation in infrastructures namespaces.
 - All cookbooks and recipes, and majors of step are defined in the main namespace, only specialized steps are defined in infrastructures namespace.
 - Remove AdminEditEndPoint, AdminListEndPoint, AdminNewEndPoint, ContentEndPointTrait and MediaEndPointTrait.

@@ -32,19 +32,20 @@ use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Common\Service\DeletingService;
+use Teknoo\East\Foundation\Recipe\PlanInterface;
 use Teknoo\East\Foundation\Recipe\RecipeInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
-use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\ContentWriter;
@@ -112,16 +113,12 @@ return [
         ->constructor(get(MenuGenerator::class)),
 
     //Middleware
-    RecipeInterface::class => decorate(static function ($previous, ContainerInterface $container) {
-        if ($previous instanceof RecipeInterface) {
-            $previous = $previous->cook(
-                [$container->get(MenuMiddleware::class), 'execute'],
-                MenuMiddleware::class,
-                [],
-                MenuMiddleware::MIDDLEWARE_PRIORITY
-            );
-        }
-
+    PlanInterface::class => decorate(static function (PlanInterface $previous, ContainerInterface $container) {
+        /** @var MenuMiddleware $menuMiddleware */
+        $previous = $previous->add(
+            $container->get(MenuMiddleware::class)->execute(...),
+            MenuMiddleware::MIDDLEWARE_PRIORITY
+        );
         return $previous;
     }),
 
@@ -135,7 +132,7 @@ return [
     OriginalRecipeInterface::class => get(Recipe::class),
     Recipe::class => create(),
 
-    //Cookbook
+    //Plan
     RenderDynamicContentEndPointInterface::class => get(RenderDynamicContentEndPoint::class),
     RenderDynamicContentEndPoint::class => static function (
         ContainerInterface $container

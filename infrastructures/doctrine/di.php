@@ -28,7 +28,6 @@ namespace Teknoo\East\Website\Doctrine;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as OdmClassMetadata;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
-use Doctrine\ODM\MongoDB\Repository\GridFSRepository;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\Driver\FileLocator;
 use Doctrine\Persistence\ObjectManager;
@@ -36,11 +35,16 @@ use Doctrine\Persistence\ObjectRepository;
 use Exception;
 use ProxyManager\Proxy\GhostObjectInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\StreamFactoryInterface;
 use SimpleXMLElement;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\CreateObjectEndPointInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\DeleteObjectEndPointInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\EditObjectEndPointInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\ListObjectEndPointInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\MinifierCommandInterface;
+use Teknoo\East\Common\Contracts\Recipe\Plan\RenderStaticContentEndPointInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
@@ -73,7 +77,6 @@ use Teknoo\East\Website\Doctrine\Translatable\Wrapper\WrapperInterface;
 use Teknoo\East\Common\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
 use function DI\create;
 use function DI\decorate;
@@ -270,31 +273,87 @@ return [
     },
 
     // @codeCoverageIgnoreStart
-    OriginalRecipeInterface::class . ':CRUD' => decorate(
-        static function ($previous, ContainerInterface $container): OriginalRecipeInterface {
-            if ($previous instanceof OriginalRecipeInterface) {
-                $previous = $previous->cook(
-                    action: $container->get(LoadTranslationsInterface::class),
-                    name: LoadTranslationsInterface::class,
-                    position: 0,
-                );
-            }
+    CreateObjectEndPointInterface::class => decorate(
+        static function (
+            CreateObjectEndPointInterface $plan,
+            ContainerInterface $container,
+        ): CreateObjectEndPointInterface {
+            $plan->add(
+                action: $container->get(LoadTranslationsInterface::class),
+                position: 1,
+            );
 
-            return $previous;
+            return $plan;
         }
     ),
 
-    OriginalRecipeInterface::class . ':Static' => decorate(
-        static function ($previous, ContainerInterface $container): OriginalRecipeInterface {
-            if ($previous instanceof OriginalRecipeInterface) {
-                $previous = $previous->cook(
-                    action: $container->get(LoadTranslationsInterface::class),
-                    name: LoadTranslationsInterface::class,
-                    position: 0,
-                );
-            }
+    DeleteObjectEndPointInterface::class => decorate(
+        static function (
+            DeleteObjectEndPointInterface $plan,
+            ContainerInterface $container,
+        ): DeleteObjectEndPointInterface {
+            $plan->add(
+                action: $container->get(LoadTranslationsInterface::class),
+                position: 1,
+            );
 
-            return $previous;
+            return $plan;
+        }
+    ),
+
+    EditObjectEndPointInterface::class => decorate(
+        static function (
+            EditObjectEndPointInterface $plan,
+            ContainerInterface $container,
+        ): EditObjectEndPointInterface {
+            $plan->add(
+                action: $container->get(LoadTranslationsInterface::class),
+                position: 1,
+            );
+
+            return $plan;
+        }
+    ),
+
+    ListObjectEndPointInterface::class => decorate(
+        static function (
+            ListObjectEndPointInterface $plan,
+            ContainerInterface $container,
+        ): ListObjectEndPointInterface {
+            $plan->add(
+                action: $container->get(LoadTranslationsInterface::class),
+                position: 1,
+            );
+
+            return $plan;
+        }
+    ),
+
+    MinifierCommandInterface::class => decorate(
+        static function (
+            MinifierCommandInterface $plan,
+            ContainerInterface $container,
+        ): MinifierCommandInterface {
+            $plan->add(
+                action: $container->get(MinifierCommandInterface::class),
+                position: 1,
+            );
+
+            return $plan;
+        }
+    ),
+
+    RenderStaticContentEndPointInterface::class => decorate(
+        static function (
+            RenderStaticContentEndPointInterface $plan,
+            ContainerInterface $container,
+        ): RenderStaticContentEndPointInterface {
+            $plan->add(
+                action: $container->get(LoadTranslationsInterface::class),
+                position: 1,
+            );
+
+            return $plan;
         }
     ),
     // @codeCoverageIgnoreEnd
