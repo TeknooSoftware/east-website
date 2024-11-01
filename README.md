@@ -230,9 +230,9 @@ News from Teknoo Website 4.x
 ----------------------------
 This library requires PHP 7.4 or newer and it's only compatible with Symfony 4.4 or newer
 - Migrate to Recipe 2.3+ and Tekno 3.3
-- Migrate all classics services endpoints to Cookbook and Recipe.
+- Migrate all classics services endpoints to Plan and Recipe.
 - Remove all traits in main namespace with implementation in infrastructures namespaces.
-- All cookbooks and recipes, and majors of step are defined in the main namespace, only specialized steps are defined in infrastructures namespace.
+- All plans and recipes, and majors of step are defined in the main namespace, only specialized steps are defined in infrastructures namespace.
 - Remove AdminEditEndPoint, AdminListEndPoint, AdminNewEndPoint, ContentEndPointTrait and MediaEndPointTrait.
 - Update Symfony configuration to manage this new architecture. Remove all services dedicated for each objects in Website, replaced by only agnostic endpoint. All configuration is pass in route.
 

@@ -60,7 +60,7 @@ use Teknoo\East\CommonBundle\TeknooEastCommonBundle;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Object\StoredPassword;
 use Teknoo\East\Common\Object\User;
-use Teknoo\East\Common\Recipe\Cookbook\RenderStaticContentEndPoint;
+use Teknoo\East\Common\Recipe\Plan\RenderStaticContentEndPoint;
 use Teknoo\East\FoundationBundle\EastFoundationBundle;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Client\ResponseInterface as EastResponse;
@@ -68,7 +68,7 @@ use Teknoo\East\Foundation\EndPoint\RecipeEndPoint;
 use Teknoo\East\Foundation\Manager\Manager;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Middleware\MiddlewareInterface;
-use Teknoo\East\Foundation\Recipe\CookbookInterface;
+use Teknoo\East\Foundation\Recipe\PlanInterface;
 use Teknoo\East\Foundation\Router\Result;
 use Teknoo\East\Foundation\Router\ResultInterface as RouterResultInterface;
 use Teknoo\East\Foundation\Router\RouterInterface;
@@ -88,8 +88,8 @@ use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Common\Object\Media as BaseMedia;
 use Teknoo\East\Common\Object\Media;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
-use Teknoo\East\Common\Recipe\Cookbook\RenderMediaEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
+use Teknoo\East\Common\Recipe\Plan\RenderMediaEndPoint;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Throwable;
 use Twig\Environment;
@@ -689,7 +689,7 @@ class FeatureContext implements Context
 
     private function buildManager(ServerRequest $request): Manager
     {
-        $manager = new Manager($this->container->get(CookbookInterface::class));
+        $manager = new Manager($this->container->get(PlanInterface::class));
 
         $this->response = null;
         $this->error = null;

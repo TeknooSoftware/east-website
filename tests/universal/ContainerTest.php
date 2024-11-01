@@ -41,14 +41,14 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
-use Teknoo\East\Website\Contracts\Recipe\Cookbook\RenderDynamicContentEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
-use Teknoo\East\Website\Recipe\Cookbook\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\ContentWriter;

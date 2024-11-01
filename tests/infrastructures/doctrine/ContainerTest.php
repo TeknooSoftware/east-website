@@ -423,18 +423,6 @@ class ContainerTest extends TestCase
         );
     }
 
-    public function testOriginalRecipeInterfaceCrud()
-    {
-        $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
-
-        self::assertInstanceOf(
-            OriginalRecipeInterface::class,
-            $container->get(OriginalRecipeInterface::class . ':CRUD')
-        );
-    }
-
     public function testOriginalRecipeInterfaceStatic()
     {
         $container = $this->buildContainer();
