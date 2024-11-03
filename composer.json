@@ -100,7 +100,7 @@
         "doctrine/common": "^3.4.5",
         "doctrine/mongodb-odm": "^2.9",
         "doctrine/mongodb-odm-bundle": "^4.7||^5",
-        "doctrine/persistence": "^3.4",
+        "doctrine/persistence": "^3.4||^4",
         "league/uri": "^7.4",
         "league/oauth2-client": "^2.7",
         "knpuniversity/oauth2-client-bundle": "^2.18"
