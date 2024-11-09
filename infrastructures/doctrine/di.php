@@ -335,7 +335,7 @@ return [
             ContainerInterface $container,
         ): MinifierCommandInterface {
             $plan->add(
-                action: $container->get(MinifierCommandInterface::class),
+                action: $container->get(LoadTranslationsInterface::class),
                 position: 1,
             );
 

@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.0.1] - 2024-11-09
+### Stable Release
+- Fix mistake into Doctrine DI MigrationCommand decoration
+
 ## [10.0.0] - 2024-11-01
 ### Stable Release
 - Migrate to `Teknoo Recipe` 6.
