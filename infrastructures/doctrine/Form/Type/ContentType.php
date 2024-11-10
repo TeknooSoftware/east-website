@@ -38,6 +38,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Common\Object\User;
+use Teknoo\East\Translation\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Content\Published;

@@ -30,7 +30,7 @@ use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
-use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Ingredient\Ingredient;

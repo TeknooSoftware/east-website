@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.0.2] - 2024-11-09
+### Stable Release
+- Remove Translation Doctrine extension and migrate to dedicated package `teknoo/east-translation`.
+
 ## [10.0.1] - 2024-11-09
 ### Stable Release
 - Fix mistake into Doctrine DI MigrationCommand decoration
@@ -12,6 +16,7 @@
 - Migrate to `EditablePlan` all previous `Cookbook` / `Plan`.
 - Migrate the decoration in Symfony DI to the East Foundation Plan to register the `MenuMiddleware`.
 - Migrate the decoration in CRUD and STATIC Plan to register the `LoadTranslationsInterface` middleware.
+- Remove Translation Doctrine extension and migrate to dedicated package `teknoo/east-translation`.           
 
 ## [9.2.5] - 2024-10-14
 ### Stable Release

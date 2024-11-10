@@ -61,7 +61,8 @@
         "teknoo/states": "^6.4.1",
         "teknoo/recipe": "^6",
         "teknoo/east-common": "^3",
-        "teknoo/east-foundation": "^8"
+        "teknoo/east-foundation": "^8",
+        "teknoo/east-translation": "^1"
     },
     "require-dev": {
         "ext-simplexml" : "*",

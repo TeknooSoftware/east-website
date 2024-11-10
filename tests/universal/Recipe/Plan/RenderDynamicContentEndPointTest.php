@@ -28,7 +28,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Website\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\LoadContent;

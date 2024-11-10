@@ -27,7 +27,7 @@ namespace Teknoo\East\Website\Service;
 
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
-use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
+use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;

@@ -15,32 +15,6 @@ Example with Symfony
 
     //These operations are not reauired with teknoo/east-website-symfony
 
-    //config/packages/di_bridge.yaml:
-    di_bridge:
-        compilation_path: '%kernel.project_dir%/var/cache/phpdi'
-        definitions:
-          - '%kernel.project_dir%/config/di.php'
-    
-    //config/packages/east_foundation.yaml:
-    di_bridge:
-        definitions:
-            - '%kernel.project_dir%/vendor/teknoo/east-foundation/src/di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-foundation/infrastructures/symfony/Resources/config/di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-foundation/infrastructures/symfony/Resources/config/laminas_di.php'
-        import:
-            Psr\Log\LoggerInterface: 'logger'
-
-    //config/packages/east_common_di.yaml:
-    di_bridge:
-        definitions:
-            - '%kernel.project_dir%/vendor/teknoo/east-common/src/di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/symfony/Resources/config/di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/symfony/Resources/config/laminas_di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/doctrine/di.php'
-            - '%kernel.project_dir%/vendor/teknoo/east-common/infrastructures/di.php'
-        import:
-            Doctrine\Persistence\ObjectManager: 'doctrine_mongodb.odm.default_document_manager'
-
     //config/packages/east_website_di.yaml:
     di_bridge:
         definitions:
@@ -49,9 +23,6 @@ Example with Symfony
     
     //bundles.php
     ...
-    Teknoo\DI\SymfonyBridge\DIBridgeBundle::class => ['all' => true],
-    Teknoo\East\FoundationBundle\EastFoundationBundle::class => ['all' => true],
-    Teknoo\East\CommonBundle\TeknooEastCommonBundle::class => ['all' => true],
     Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle::class => ['all' => true],
 
     //In doctrine config (east_website_doctrine_mongodb.yaml)
@@ -131,7 +102,6 @@ To install this library with composer, run this command :
 To start a project with Symfony :
 
     symfony new your_project_name new
-    composer require teknoo/composer-install
     composer require teknoo/east-website-symfony    
 
 This library requires :

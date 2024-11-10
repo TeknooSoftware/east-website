@@ -33,6 +33,7 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Translation\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 
