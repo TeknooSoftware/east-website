@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--infrastructures/doctrine/config/translate/Content.mongodb.translate.yml-->
-<east-website-translation xmlns="http://xml.teknoo.it/schemas/doctrine/east-website-translation"
+<east-translation xmlns="http://xml.teknoo.it/schemas/doctrine/east-translation"
                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                          xsi:schemaLocation="http://xml.teknoo.it/schemas/doctrine/east-website-translation
-                                              http://xml.teknoo.it/schemas/doctrine/east-website-translation.xsd">
+                          xsi:schemaLocation="http://xml.teknoo.it/schemas/doctrine/east-translation
+                                              http://xml.teknoo.it/schemas/doctrine/east-translation.xsd">
 
     <object name="Teknoo\East\Website\Doctrine\Object\Content"
             object-class="Teknoo\East\Website\Object\Content"
@@ -14,4 +14,4 @@
         <field field-name="parts" />
         <field field-name="sanitizedParts" />
     </object>
-</east-website-translation>
+</east-translation>
