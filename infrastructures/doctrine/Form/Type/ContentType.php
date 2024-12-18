@@ -241,8 +241,10 @@ class ContentType extends AbstractType
 
         $resolver->setDefaults(array(
             'data_class' => Content::class,
-            'doctrine_type' => '',
         ));
+
+        $resolver->setRequired(['doctrine_type']);
+        $resolver->setAllowedTypes('doctrine_type', 'string');
 
         return $this;
     }

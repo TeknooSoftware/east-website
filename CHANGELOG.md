@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.0.3] - 2024-12-18
+### Stable Release
+- Update `ContentType` and `ItemType` to set `doctrine_type` as required instead of as an option.
+
 ## [10.0.2] - 2024-11-09
 ### Stable Release
 - Remove Translation Doctrine extension and migrate to dedicated package `teknoo/east-translation`.

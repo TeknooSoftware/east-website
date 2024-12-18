@@ -103,8 +103,10 @@ class ItemType extends AbstractType
 
         $resolver->setDefaults(array(
             'data_class' => Item::class,
-            'doctrine_type' => '',
         ));
+
+        $resolver->setRequired(['doctrine_type']);
+        $resolver->setAllowedTypes('doctrine_type', 'string');
 
         return $this;
     }
