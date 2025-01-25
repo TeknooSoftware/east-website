@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.0.4] - 2025-01-25
+### Stable Release
+- Update to support Doctrine ODM 2.10 and ODM Bundle 5.1
+
 ## [10.0.3] - 2024-12-18
 ### Stable Release
 - Update `ContentType` and `ItemType` to set `doctrine_type` as required instead of as an option.
