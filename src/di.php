@@ -27,7 +27,6 @@ namespace Teknoo\East\Website;
 
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -94,15 +93,8 @@ return [
             $translationManager = $container->get(TranslationManagerInterface::class);
         }
 
-        $proxyDetector = null;
-        if ($container->has(ProxyDetectorInterface::class)) {
-            $proxyDetector = $container->get(ProxyDetectorInterface::class);
-        }
-
         return new MenuGenerator(
             itemLoader: $container->get(ItemLoader::class),
-            contentLoader: $container->get(ContentLoader::class),
-            proxyDetector: $proxyDetector,
             preloadItemsLocations: $defaultMenuLocations,
             translationManager: $translationManager,
         );

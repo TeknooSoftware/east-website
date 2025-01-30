@@ -35,7 +35,6 @@ use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use Teknoo\East\Website\Service\MenuGenerator;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -67,40 +66,13 @@ class MenuGeneratorTest extends TestCase
     }
 
     /**
-     * @return ContentLoader|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getContentLoader(): ContentLoader
-    {
-        if (!$this->contentLoader instanceof ContentLoader) {
-            $this->contentLoader = $this->createMock(ContentLoader::class);
-        }
-
-        return $this->contentLoader;
-    }
-
-    /**
      * @return MenuGenerator
      */
     public function buildService()
     {
         return new MenuGenerator(
             $this->getItemLoader(),
-            $this->getContentLoader(),
-            new class implements ProxyDetectorInterface {
-                public function checkIfInstanceBehindProxy(
-                    object $object,
-                    PromiseInterface $promise
-                ): ProxyDetectorInterface {
-                    if ($object instanceof Content && 'c4' === $object->getId()) {
-                        $promise->fail(new \Exception());
-                    } else {
-                        $promise->success($object);
-                    }
-
-                    return $this;
-                }
-            },
-            ['foo']
+            ['foo'],
         );
     }
 
@@ -141,16 +113,6 @@ class MenuGeneratorTest extends TestCase
                 return $this->getItemLoader();
             });
 
-        $this->getContentLoader()
-            ->expects($this->any())
-            ->method('query')
-            ->with(new PublishedContentFromIdsQuery(['c1', 'c2']))
-            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($content1, $content2, $content3) {
-                $promise->success([$content1, $content2, $content3]);
-
-                return $this->getContentLoader();
-            });
-
         $stack = [];
         $service = $this->buildService();
         foreach ($service->extract('location1') as $key=>$element) {
@@ -177,16 +139,6 @@ class MenuGeneratorTest extends TestCase
                 $promise->success([]);
 
                 return $this->getItemLoader();
-            });
-
-        $this->getContentLoader()
-            ->expects($this->any())
-            ->method('query')
-            ->with(new PublishedContentFromIdsQuery([]))
-            ->willReturnCallback(function ($value, PromiseInterface $promise)  {
-                $promise->success([]);
-
-                return $this->getContentLoader();
             });
 
         $stack = [];

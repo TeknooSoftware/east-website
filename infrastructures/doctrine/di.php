@@ -28,10 +28,7 @@ namespace Teknoo\East\Website\Doctrine;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
-use Exception;
-use ProxyManager\Proxy\GhostObjectInterface;
 use Psr\Container\ContainerInterface;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
@@ -45,7 +42,6 @@ use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\Recipe\Promise\PromiseInterface;
 
 return [
     ContentRepositoryInterface::class => static function (ContainerInterface $container): ContentRepositoryInterface {
@@ -95,30 +91,5 @@ return [
             "Error, repository of class %s are not currently managed",
             $repository::class
         ));
-    },
-
-    ProxyDetectorInterface::class => static function (): ProxyDetectorInterface {
-        return new class implements ProxyDetectorInterface {
-            public function checkIfInstanceBehindProxy(
-                object $object,
-                PromiseInterface $promise
-            ): ProxyDetectorInterface {
-                if (!$object instanceof GhostObjectInterface) {
-                    $promise->fail(new Exception('Object is not behind a proxy'));
-
-                    return $this;
-                }
-
-                if ($object->isProxyInitialized()) {
-                    $promise->fail(new Exception('Proxy is already initialized'));
-
-                    return $this;
-                }
-
-                $promise->success($object);
-
-                return $this;
-            }
-        };
     },
 ];

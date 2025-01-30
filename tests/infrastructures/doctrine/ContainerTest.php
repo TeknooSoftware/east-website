@@ -42,19 +42,11 @@ use ProxyManager\Proxy\GhostObjectInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
-use Teknoo\East\Website\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
-use Teknoo\East\Translation\Doctrine\Translatable\Mapping\DriverInterface;
-use Teknoo\East\Translation\Doctrine\Translatable\TranslatableListener;
-use Teknoo\East\Translation\Doctrine\Translatable\TranslationManager;
-use Teknoo\East\Translation\Doctrine\Translatable\Wrapper\WrapperInterface;
-use Teknoo\East\Common\Middleware\LocaleMiddleware;
 use Teknoo\East\Website\Object\Type;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
-use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
 /**
@@ -169,79 +161,6 @@ class ContainerTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
         $this->generateTestForRepositoryWithUnsupportedRepository(Type::class, TypeRepositoryInterface::class);
-    }
-
-    public function testProxyDetectorInterface()
-    {
-        $container = $this->buildContainer();
-        $proxyDetector = $container->get(ProxyDetectorInterface::class);
-
-        $p1 = $this->createMock(PromiseInterface::class);
-        $p1->expects($this->never())->method('success');
-        $p1->expects($this->once())->method('fail');
-
-        self::assertInstanceOf(
-            ProxyDetectorInterface::class,
-            $proxyDetector->checkIfInstanceBehindProxy(new \stdClass(), $p1)
-        );
-
-        $p2 = $this->createMock(PromiseInterface::class);
-        $p2->expects($this->never())->method('success');
-        $p2->expects($this->once())->method('fail');
-
-        self::assertInstanceOf(
-            ProxyDetectorInterface::class,
-            $proxyDetector->checkIfInstanceBehindProxy(new class implements GhostObjectInterface {
-                public function setProxyInitializer(?\Closure $initializer = null): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function getProxyInitializer(): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function initializeProxy(): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function isProxyInitialized(): bool
-                {
-                    return true;
-                }
-            }, $p2)
-        );
-
-        $p3 = $this->createMock(PromiseInterface::class);
-        $p3->expects($this->once())->method('success');
-        $p3->expects($this->never())->method('fail');
-
-        self::assertInstanceOf(
-            ProxyDetectorInterface::class,
-            $proxyDetector->checkIfInstanceBehindProxy(new class implements GhostObjectInterface {
-                public function setProxyInitializer(?\Closure $initializer = null): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function getProxyInitializer(): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function initializeProxy(): never
-                {
-                    throw new \RuntimeException('Must not be called');
-                }
-
-                public function isProxyInitialized(): bool
-                {
-                    return false;
-                }
-            }, $p3)
-        );
     }
 
     public function testOriginalRecipeInterfaceStatic()

@@ -29,7 +29,6 @@ use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Teknoo\East\Common\Contracts\Service\ProxyDetectorInterface;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -175,7 +174,6 @@ class ContainerTest extends TestCase
         $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
         $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
         $container->set(TranslationManagerInterface::class, $this->createMock(TranslationManagerInterface::class));
-        $container->set(ProxyDetectorInterface::class, $this->createMock(ProxyDetectorInterface::class));
         $container->set('teknoo.east.website.menu_generator.default_locations', ['foo']);
         $loader = $container->get(MenuGenerator::class);
 
