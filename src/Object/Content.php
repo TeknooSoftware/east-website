@@ -90,7 +90,7 @@ class Content implements
 
     protected ?string $slug = null;
 
-    protected ?Type $type = null;
+    protected ?string $description = null;
 
     protected string $parts = '{}';
 
@@ -102,12 +102,12 @@ class Content implements
 
     protected string $sanitizedHash = '';
 
-    /**
-     * @var array<string>
-     */
-    protected array $tags = [];
+    protected ?Type $type = null;
 
-    protected ?string $description = null;
+    /**
+     * @var iterable<Tag>
+     */
+    protected iterable $tags = [];
 
     protected ?string $localeField = null;
 
@@ -147,7 +147,7 @@ class Content implements
         return $this->author;
     }
 
-    public function setAuthor(?User $author): Content
+    public function setAuthor(?User $author): self
     {
         $this->author = $author;
 
@@ -159,7 +159,7 @@ class Content implements
         return $this->title;
     }
 
-    public function setTitle(?string $title): Content
+    public function setTitle(?string $title): self
     {
         $this->title = (string) $title;
 
@@ -176,7 +176,7 @@ class Content implements
         return $this->subtitle;
     }
 
-    public function setSubtitle(?string $subtitle = null): Content
+    public function setSubtitle(?string $subtitle = null): self
     {
         $this->subtitle = (string) $subtitle;
 
@@ -210,7 +210,7 @@ class Content implements
         return $this;
     }
 
-    public function setSlug(?string $slug): Content
+    public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
 
@@ -222,7 +222,7 @@ class Content implements
         return $this->type;
     }
 
-    public function setType(?Type $type): Content
+    public function setType(?Type $type): self
     {
         $this->type = $type;
 
@@ -274,7 +274,7 @@ class Content implements
     /**
      * @param array<mixed>|null $parts
      */
-    public function setParts(?array $parts): Content
+    public function setParts(?array $parts): self
     {
         $this->decodedParts = null;
         $this->parts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
@@ -293,7 +293,7 @@ class Content implements
     /**
      * @param array<mixed>|null $parts
      */
-    public function setSanitizedParts(?array $parts, string $salt): Content
+    public function setSanitizedParts(?array $parts, string $salt): self
     {
         $this->decodedSanitizedParts = null;
         $this->sanitizedParts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
@@ -303,17 +303,17 @@ class Content implements
     }
 
     /**
-     * @return array<string>
+     * @return iterable<Tag>
      */
-    public function getTags(): array
+    public function getTags(): iterable
     {
         return $this->tags;
     }
 
     /**
-     * @param array<string> $tags
+     * @param iterable<Tag> $tags
      */
-    public function setTags(array $tags): Content
+    public function setTags(iterable $tags): self
     {
         $this->tags = $tags;
 
@@ -325,7 +325,7 @@ class Content implements
         return (string) $this->description;
     }
 
-    public function setDescription(?string $description): Content
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
 

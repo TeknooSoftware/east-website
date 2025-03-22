@@ -47,7 +47,7 @@ class Draft implements StateInterface
 
     public function publishingAt(): callable
     {
-        return function (DateTimeInterface $dateTime): Content {
+        return function (DateTimeInterface $dateTime): self {
             $this->publishedAt = $dateTime;
 
             $this->updateStates();

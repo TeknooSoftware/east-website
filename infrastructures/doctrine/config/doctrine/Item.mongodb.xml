@@ -8,8 +8,7 @@
     <document
             name="Teknoo\East\Website\Doctrine\Object\Item"
             collection="items"
-            inheritance-type="SINGLE_COLLECTION"
-    >
+            inheritance-type="SINGLE_COLLECTION">
         <reference-one
                 field="parent"
                 store-as="dbRefWithDb"
@@ -24,12 +23,13 @@
                 field="content"
                 store-as="dbRefWithDb"
                 target-document="Teknoo\East\Website\Doctrine\Object\Content">
-            <cascade />
+            <cascade/>
         </reference-one>
-        <reference-many field="children"
-                        target-document="Teknoo\East\Website\Doctrine\Object\Item"
-                        mapped-by="parent"
-                        store-empty-array="true">
+        <reference-many
+                field="children"
+                target-document="Teknoo\East\Website\Doctrine\Object\Item"
+                mapped-by="parent"
+                store-empty-array="true">
             <cascade>
                 <all/>
             </cascade>

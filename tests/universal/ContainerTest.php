@@ -36,22 +36,34 @@ use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Manager\Manager;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Router\RouterInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
+use Teknoo\East\Website\Loader\CommentLoader;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
+use Teknoo\East\Website\Loader\PostLoader;
+use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
+use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
+use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\Website\Writer\ContentWriter;
 use Teknoo\East\Website\Writer\ItemWriter;
+use Teknoo\East\Website\Writer\PostWriter;
+use Teknoo\East\Website\Writer\TagWriter;
 use Teknoo\East\Website\Writer\TypeWriter;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
@@ -100,6 +112,21 @@ class ContainerTest extends TestCase
         $this->generateTestForLoader(ItemLoader::class, ItemRepositoryInterface::class);
     }
 
+    public function testCommentLoader()
+    {
+        $this->generateTestForLoader(CommentLoader::class, CommentRepositoryInterface::class);
+    }
+
+    public function testTagLoader()
+    {
+        $this->generateTestForLoader(TagLoader::class, TagRepositoryInterface::class);
+    }
+
+    public function testPostLoader()
+    {
+        $this->generateTestForLoader(PostLoader::class, PostRepositoryInterface::class);
+    }
+
     public function testContentLoader()
     {
         $this->generateTestForLoader(ContentLoader::class, ContentRepositoryInterface::class);
@@ -132,6 +159,21 @@ class ContainerTest extends TestCase
     public function testContentWriter()
     {
         $this->generateTestForWriter(ContentWriter::class);
+    }
+
+    public function testCommentWriter()
+    {
+        $this->generateTestForWriter(CommentWriter::class);
+    }
+
+    public function testTagWriter()
+    {
+        $this->generateTestForWriter(TagWriter::class);
+    }
+
+    public function testPostWriter()
+    {
+        $this->generateTestForWriter(PostWriter::class);
     }
 
     public function testTypeWriter()
@@ -236,6 +278,17 @@ class ContainerTest extends TestCase
         );
     }
 
+    public function testLoadPost()
+    {
+        $container = $this->buildContainer();
+        $container->set(PostRepositoryInterface::class, $this->createMock(PostRepositoryInterface::class));
+
+        self::assertInstanceOf(
+            LoadPost::class,
+            $container->get(LoadPost::class)
+        );
+    }
+
     public function testRenderDynamicContentEndPoint()
     {
         $container = $this->buildContainer();
@@ -254,6 +307,27 @@ class ContainerTest extends TestCase
         self::assertInstanceOf(
             RenderDynamicContentEndPointInterface::class,
             $container->get(RenderDynamicContentEndPointInterface::class)
+        );
+    }
+
+    public function testRenderDynamicPostEndPoint()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
+        $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
+        $container->set(LoadPost::class, $this->createMock(LoadPost::class));
+        $container->set(Render::class, $this->createMock(Render::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+
+        self::assertInstanceOf(
+            RenderDynamicPostEndPoint::class,
+            $container->get(RenderDynamicPostEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            RenderDynamicPostEndPointInterface::class,
+            $container->get(RenderDynamicPostEndPointInterface::class)
         );
     }
 }

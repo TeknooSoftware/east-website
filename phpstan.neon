@@ -7,6 +7,9 @@ parameters:
             message: '#Call to an undefined method [a-zA-Z0-9\\_]+::createQueryBuilder\(\)#'
             path: infrastructures/doctrine/Form/Type/*
         -
+            message: '#Cannot cast mixed to string#'
+            path:  infrastructures/symfony/Form/DataMapper/*
+        -
             message: '#array#'
             path: src/Object/Content.php
         -

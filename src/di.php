@@ -33,21 +33,33 @@ use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Recipe\PlanInterface;
 use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
+use Teknoo\East\Website\Loader\CommentLoader;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
+use Teknoo\East\Website\Loader\PostLoader;
+use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
+use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
+use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\Website\Writer\ContentWriter;
 use Teknoo\East\Website\Writer\ItemWriter;
+use Teknoo\East\Website\Writer\PostWriter;
+use Teknoo\East\Website\Writer\TagWriter;
 use Teknoo\East\Website\Writer\TypeWriter;
 use Teknoo\Recipe\Recipe;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
@@ -58,26 +70,44 @@ use function DI\get;
 
 return [
     //Loaders
+    CommentLoader::class => create(CommentLoader::class)
+        ->constructor(get(CommentRepositoryInterface::class)),
     ItemLoader::class => create(ItemLoader::class)
         ->constructor(get(ItemRepositoryInterface::class)),
     ContentLoader::class => create(ContentLoader::class)
         ->constructor(get(ContentRepositoryInterface::class)),
+    PostLoader::class => create(PostLoader::class)
+        ->constructor(get(PostRepositoryInterface::class)),
+    TagLoader::class => create(TagLoader::class)
+        ->constructor(get(TagRepositoryInterface::class)),
     TypeLoader::class => create(TypeLoader::class)
         ->constructor(get(TypeRepositoryInterface::class)),
 
     //Writer
+    CommentWriter::class => create(CommentWriter::class)
+        ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     ItemWriter::class => create(ItemWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     ContentWriter::class => create(ContentWriter::class)
+        ->constructor(get(ManagerInterface::class), get(DatesService::class)),
+    PostWriter::class => create(PostWriter::class)
+        ->constructor(get(ManagerInterface::class), get(DatesService::class)),
+    TagWriter::class => create(TagWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
     TypeWriter::class => create(TypeWriter::class)
         ->constructor(get(ManagerInterface::class), get(DatesService::class)),
 
     //Deleting
+    'teknoo.east.website.deleting.comment' => create(DeletingService::class)
+        ->constructor(get(CommentWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.item' => create(DeletingService::class)
         ->constructor(get(ItemWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.content' => create(DeletingService::class)
         ->constructor(get(ContentWriter::class), get(DatesService::class)),
+    'teknoo.east.website.deleting.post' => create(DeletingService::class)
+        ->constructor(get(PostWriter::class), get(DatesService::class)),
+    'teknoo.east.website.deleting.tag' => create(DeletingService::class)
+        ->constructor(get(TagWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.type' => create(DeletingService::class)
         ->constructor(get(TypeWriter::class), get(DatesService::class)),
 
@@ -118,6 +148,10 @@ return [
         ->constructor(
             get(ContentLoader::class)
         ),
+    LoadPost::class => create()
+        ->constructor(
+            get(PostLoader::class)
+        ),
 
     //Base recipe
     OriginalRecipeInterface::class => get(Recipe::class),
@@ -137,6 +171,24 @@ return [
             recipe: $container->get(OriginalRecipeInterface::class),
             extractSlug: $container->get(ExtractSlug::class),
             loadContent: $container->get(LoadContent::class),
+            loadTranslationsInterface: $loadTranslations,
+            render: $container->get(Render::class),
+            renderError: $container->get(RenderError::class)
+        );
+    },
+    RenderDynamicPostEndPointInterface::class => get(RenderDynamicPostEndPoint::class),
+    RenderDynamicPostEndPoint::class => static function (
+        ContainerInterface $container
+    ): RenderDynamicPostEndPoint {
+        $loadTranslations = null;
+        if ($container->has(LoadTranslationsInterface::class)) {
+            $loadTranslations = $container->get(LoadTranslationsInterface::class);
+        }
+
+        return new RenderDynamicPostEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class),
+            extractSlug: $container->get(ExtractSlug::class),
+            loadPost: $container->get(LoadPost::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
             renderError: $container->get(RenderError::class)

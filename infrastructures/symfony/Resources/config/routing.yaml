@@ -5,6 +5,14 @@ _teknoo_website_media:
         _controller: 'teknoo.east.common.endpoint.media'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
 
+_teknoo_website_post:
+    path: '/post/{slug}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.post'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+
 _teknoo_website_content:
     path: '/{slug}'
     methods:  ['GET']

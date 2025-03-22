@@ -1,6 +1,7 @@
 parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.post.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
 
     teknoo.east.website.admin.rendering.clean_html: true
@@ -25,6 +26,19 @@ services:
             - '@teknoo.east.website.endpoint.content.bowl'
             - '@service_container'
 
+    teknoo.east.website.endpoint.post.bowl:
+        class: '%teknoo.east.website.endpoint.post.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.post:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.post.bowl'
+            - '@service_container'
+
     teknoo.east.website.endpoint.media.bowl:
         class: '%teknoo.east.website.endpoint.media.bowl.class%'
         arguments:
@@ -44,11 +58,32 @@ services:
         tags:
             - { name: "twig.extension" }
 
+    Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper:
+        class: 'Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
+        arguments:
+            - '@Teknoo\East\Foundation\Time\DatesService'
+
     Teknoo\East\Website\Doctrine\Form\Type\ContentType:
         class: 'Teknoo\East\Website\Doctrine\Form\Type\ContentType'
         arguments:
             - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
             - '%teknoo.east.website.sanitize.default_context%'
             - '%teknoo.east.website.sanitize.salt%'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\Website\Doctrine\Form\Type\PostType:
+        class: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        arguments:
+            - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
+            - '%teknoo.east.website.sanitize.default_context%'
+            - '%teknoo.east.website.sanitize.salt%'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\WebsiteBundle\Form\Type\CommentType:
+        class: 'Teknoo\East\WebsiteBundle\Form\Type\CommentType'
+        arguments:
+            - '@Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
         tags:
             - {name: form.type}

@@ -17,6 +17,15 @@ Feature: Delete an element, from the dbms server via an HTTP request
     And It is redirect to "/admin/contents"
     And the last object updated must be deleted
 
+  Scenario: Delete a post
+    Given I have DI With Symfony initialized
+    And a twig templating engine
+    And a object of type "Teknoo\East\Website\Doctrine\Object\Post" with id "foo"
+    When Symfony will receive the DELETE request "https://foo.com/admin/post/delete/foo"
+    Then The client must accept a response
+    And It is redirect to "/admin/posts"
+    And the last object updated must be deleted
+
   Scenario: Delete an item
     Given I have DI With Symfony initialized
     And a twig templating engine
