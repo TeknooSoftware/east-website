@@ -28,8 +28,8 @@ namespace Teknoo\Tests\East\Website\Doctrine\Object;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Teknoo\East\Website\Doctrine\Object\Post;
 use Teknoo\East\Website\Object\Post as PostOriginal;
-use Teknoo\East\Website\Object\Post\Draft;
-use Teknoo\East\Website\Object\Post\Published;
+use Teknoo\East\Website\Object\Content\Draft;
+use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\Tests\East\Website\Object\PostTest as OriginalTest;
 
 /**
