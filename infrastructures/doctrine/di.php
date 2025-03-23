@@ -51,7 +51,7 @@ use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Post;
-use Teknoo\East\Website\Object\Comment;
+use Teknoo\East\Website\Doctrine\Object\Comment;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 

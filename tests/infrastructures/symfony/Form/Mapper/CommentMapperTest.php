@@ -231,13 +231,13 @@ class CommentMapperTest extends TestCase
 
         $formsList[] = $form;
 
-        $moderateAt = new DateTimeImmutable('2025-03-20 12:00:00');
+        $moderatedAt = new DateTimeImmutable('2025-03-20 12:00:00');
         $this->getDatesService()
             ->expects($this->once())
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callback) use ($moderateAt) {
-                    $callback($moderateAt);
+                function (callable $callback) use ($moderatedAt) {
+                    $callback($moderatedAt);
 
                     return $this->getDatesService();
                 }
@@ -249,7 +249,7 @@ class CommentMapperTest extends TestCase
         self::assertEquals('ip', $comment->getRemoteIp());
         self::assertEquals('title', $comment->getTitle());
         self::assertEquals('content', $comment->getContent());
-        self::assertEquals($moderateAt, $comment->getModeratedAt());
+        self::assertEquals($moderatedAt, $comment->getModeratedAt());
         self::assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
         self::assertEquals('moderatedTitle', $comment->getModeratedTitle());
         self::assertEquals( 'moderatedContent', $comment->getModeratedContent());
@@ -264,7 +264,7 @@ class CommentMapperTest extends TestCase
             title: 'title',
             content: 'content',
             postAt: $date = new DateTimeImmutable('2025-03-15 12:00:00'),
-            moderatedAt: $moderateAt = new DateTimeImmutable('2025-03-20 12:00:00'),
+            moderatedAt: $moderatedAt = new DateTimeImmutable('2025-03-20 12:00:00'),
             moderatedAuthor: 'moderatedAuthor',
             moderatedTitle: 'moderatedTitle',
             moderatedContent: 'moderatedContent',
@@ -305,7 +305,7 @@ class CommentMapperTest extends TestCase
         self::assertEquals('ip', $comment->getRemoteIp());
         self::assertEquals('title', $comment->getTitle());
         self::assertEquals('content', $comment->getContent());
-        self::assertEquals($moderateAt, $comment->getModeratedAt());
+        self::assertEquals($moderatedAt, $comment->getModeratedAt());
         self::assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
         self::assertEquals('moderatedTitle', $comment->getModeratedTitle());
         self::assertEquals( 'moderatedContent', $comment->getModeratedContent());

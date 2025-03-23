@@ -23,54 +23,41 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Object;
+namespace Teknoo\Tests\East\Website\Doctrine\Object;
 
-use Stringable;
-use Teknoo\East\Common\Contracts\Object\DeletableInterface;
-use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
-use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
-use Teknoo\East\Common\Object\ObjectTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Object\Comment as CommentOriginal;
+use Teknoo\East\Website\Object\Comment\Moderated;
+use Teknoo\East\Website\Object\Comment\Published;
+use Teknoo\East\Website\Object\Post;
+use Teknoo\Tests\East\Website\Object\CommentTest as OriginalTest;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ *
+ * @link        http://teknoo.software/east Project website
+ *
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
+ *
  */
-class Tag implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
+#[CoversClass(Published::class)]
+#[CoversClass(Moderated::class)]
+#[CoversClass(CommentOriginal::class)]
+#[CoversClass(Comment::class)]
+class CommentTest extends OriginalTest
 {
-    use ObjectTrait;
-
-    private string $name = '';
-
-    private bool $isHighlighted = false;
-
-    public function getName(): string
+    public function buildObject(): Comment
     {
-        return $this->name;
-    }
-
-    public function setName(string $name): Tag
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function __toString(): string
-    {
-        return $this->getName();
-    }
-
-    public function isHighlighted(): bool
-    {
-        return $this->isHighlighted;
-    }
-
-    public function setIsHighlighted(bool $isHighlighted): Tag
-    {
-        $this->isHighlighted = $isHighlighted;
-
-        return $this;
+        return new Comment(
+            post: $this->createMock(Post::class),
+            author: 'authorName',
+            remoteIp: '127.0.0.1',
+            title: 'commentTitle',
+            content: 'commentContent',
+            postAt: new \DateTimeImmutable('2025-03-19 01:02:03'),
+        );
     }
 }

@@ -68,16 +68,16 @@ class TagTest extends TestCase
         );
     }
 
-    public function testIsMajor()
+    public function testIsHighlighted()
     {
-        self::assertIsBool($this->buildObject()->isMajor());
+        self::assertIsBool($this->buildObject()->isHighlighted());
     }
 
-    public function testSetMajor()
+    public function testSetIsHighlighted()
     {
         self::assertInstanceOf(
             Tag::class,
-            $this->buildObject()->setIsMajor(true),
+            $this->buildObject()->setIsHighlighted(true),
         );
     }
 }

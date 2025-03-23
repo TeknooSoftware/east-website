@@ -23,54 +23,26 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Object;
+namespace Teknoo\East\Website\Doctrine\Object;
 
-use Stringable;
-use Teknoo\East\Common\Contracts\Object\DeletableInterface;
-use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
-use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
-use Teknoo\East\Common\Object\ObjectTrait;
+use Teknoo\East\Website\Object\Comment as OriginalComment;
+use Teknoo\States\Automated\AutomatedTrait;
+use Teknoo\States\Doctrine\StandardTrait;
 
 /**
+ * Comment specialization in doctrine as document.
+ * The translation is now directly provided by an full internal extension embedded in this library.
+ * Implement States's Doctrine Document feature via the trait `Teknoo\States\Doctrine\Document\StandardTrait`
+ *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class Tag implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
+class Comment extends OriginalComment
 {
-    use ObjectTrait;
-
-    private string $name = '';
-
-    private bool $isHighlighted = false;
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): Tag
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function __toString(): string
-    {
-        return $this->getName();
-    }
-
-    public function isHighlighted(): bool
-    {
-        return $this->isHighlighted;
-    }
-
-    public function setIsHighlighted(bool $isHighlighted): Tag
-    {
-        $this->isHighlighted = $isHighlighted;
-
-        return $this;
+    use AutomatedTrait;
+    use StandardTrait {
+        AutomatedTrait::updateStates insteadof StandardTrait;
     }
 }

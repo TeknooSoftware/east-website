@@ -39,7 +39,7 @@ Feature: Create an element, with slug or not stored into a the dbms server via a
     And An object "Post" must be persisted
     And It is redirect to "/admin/post/edit/[a-zA-Z0-9]+"
     When the client follows the redirection
-    And I should get in the form '{"author":null,"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
 
   Scenario: Create a post without defined locale
     Given I have DI With Symfony initialized
@@ -50,7 +50,7 @@ Feature: Create an element, with slug or not stored into a the dbms server via a
     And An object "Post" must be persisted
     And It is redirect to "/admin/post/edit/[a-zA-Z0-9]+"
     When the client follows the redirection
-    And I should get in the form '{"author":null,"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
 
   Scenario: Create an item
     Given I have DI With Symfony initialized

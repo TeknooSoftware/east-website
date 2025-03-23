@@ -23,54 +23,55 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Object;
+namespace Teknoo\Tests\East\Website\Doctrine\Object;
 
-use Stringable;
-use Teknoo\East\Common\Contracts\Object\DeletableInterface;
-use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
-use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
-use Teknoo\East\Common\Object\ObjectTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\East\Website\Doctrine\Object\Post;
+use Teknoo\East\Website\Object\Post as PostOriginal;
+use Teknoo\East\Website\Object\Post\Draft;
+use Teknoo\East\Website\Object\Post\Published;
+use Teknoo\Tests\East\Website\Object\PostTest as OriginalTest;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ *
+ * @link        http://teknoo.software/east Project website
+ *
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
+ *
  */
-class Tag implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
+#[CoversClass(Published::class)]
+#[CoversClass(Draft::class)]
+#[CoversClass(PostOriginal::class)]
+#[CoversClass(Post::class)]
+class PostTest extends OriginalTest
 {
-    use ObjectTrait;
-
-    private string $name = '';
-
-    private bool $isHighlighted = false;
-
-    public function getName(): string
+    public function buildObject(): Post
     {
-        return $this->name;
+        return new Post();
     }
 
-    public function setName(string $name): Tag
+    public function testGetLocaleField()
     {
-        $this->name = $name;
-
-        return $this;
+        self::assertEquals(
+            'fooBar',
+            $this->generateObjectPopulated(['localeField' => 'fooBar'])->getLocaleField()
+        );
     }
 
-    public function __toString(): string
+    public function testSetLocaleField()
     {
-        return $this->getName();
-    }
+        $Object = $this->buildObject();
+        self::assertInstanceOf(
+            $Object::class,
+            $Object->setLocaleField('fooBar')
+        );
 
-    public function isHighlighted(): bool
-    {
-        return $this->isHighlighted;
-    }
-
-    public function setIsHighlighted(bool $isHighlighted): Tag
-    {
-        $this->isHighlighted = $isHighlighted;
-
-        return $this;
+        self::assertEquals(
+            'fooBar',
+            $Object->getLocaleField()
+        );
     }
 }

@@ -56,10 +56,10 @@ class TagType extends AbstractType
         );
 
         $builder->add(
-            child: 'isMajor',
+            child: 'isHighlighted',
             type: CheckboxType::class,
             options: [
-                'required' => true,
+                'required' => false,
                 'false_values' => [
                     null,
                     '0',

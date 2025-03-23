@@ -55,16 +55,16 @@ class Comment implements
     use ProxyTrait;
 
     public function __construct(
-        private Post $post,
-        private string $author,
-        private string $remoteIp,
-        private string $title,
-        private string $content,
-        private DateTimeInterface $postAt,
-        private ?DateTimeInterface $moderatedAt = null,
-        private ?string $moderatedAuthor = null,
-        private ?string $moderatedTitle = null,
-        private ?string $moderatedContent = null,
+        protected Post $post,
+        protected string $author,
+        protected string $remoteIp,
+        protected string $title,
+        protected string $content,
+        protected DateTimeInterface $postAt,
+        protected ?DateTimeInterface $moderatedAt = null,
+        protected ?string $moderatedAuthor = null,
+        protected ?string $moderatedTitle = null,
+        protected ?string $moderatedContent = null,
     ) {
         $this->initializeStateProxy();
         $this->updateStates();

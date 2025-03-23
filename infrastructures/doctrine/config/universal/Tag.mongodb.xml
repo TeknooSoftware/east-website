@@ -8,7 +8,7 @@
     <document name="Teknoo\East\Website\Object\Tag" collection="tags">
         <id type="string" strategy="UUID"/>
         <field field-name="name" type="string" nullable="false"/>
-        <field field-name="isMajor" name="is_major" type="boolean" nullable="true" index="true"/>
+        <field field-name="isHighlighted" name="is_highlighted" type="boolean" nullable="true" index="true"/>
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date"/>
         <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>

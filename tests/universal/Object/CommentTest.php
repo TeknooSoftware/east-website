@@ -45,7 +45,7 @@ class CommentTest extends TestCase
 {
     use PopulateObjectTrait;
 
-    protected function buildObject()
+    public function buildObject()
     {
         return new Comment(
             post: $this->createMock(Post::class),

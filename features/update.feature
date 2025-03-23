@@ -16,7 +16,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3&post%5Bslug%5D=foo"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"title":"foo2","subtitle":"bar3","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
 
   Scenario: Update a post and update slug
     Given I have DI With Symfony initialized
@@ -25,7 +25,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
 
   Scenario: Update a post with an empty locale
     Given I have DI With Symfony initialized
@@ -35,7 +35,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
 
   Scenario: Update an item without update slug
     Given I have DI With Symfony initialized
