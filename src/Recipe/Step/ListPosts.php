@@ -25,17 +25,25 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use Countable;
 use DateTimeInterface;
 use DomainException;
 use RuntimeException;
 use SensitiveParameter;
+use Teknoo\East\Common\Query\Exception\LoadingException;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Object\Tag;
+use Teknoo\East\Website\Query\Post\PublishedPostsListInTagQuery;
+use Teknoo\East\Website\Query\Post\PublishedPostsListQuery;
+use Teknoo\Recipe\ChefInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 use Throwable;
+
+use function ceil;
 
 /**
  * Step recipe to load a published Post instance, from its slug, thank to the Post's loader and put it into the
@@ -47,7 +55,7 @@ use Throwable;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class LoadPost
+class ListPosts
 {
     public function __construct(
         private readonly PostLoader $postLoader,
@@ -55,41 +63,50 @@ class LoadPost
     ) {
     }
 
-    public function __invoke(string $slug, ManagerInterface $manager): self
-    {
-        $error = static function (#[SensitiveParameter] Throwable $error) use ($manager): void {
-            if ($error instanceof DomainException) {
-                $error = new DomainException($error->getMessage(), 404, $error);
-            }
-
-            $manager->error($error);
-        };
-
-        /** @var Promise<Post, mixed, mixed> $fetchPromise */
-        $fetchPromise = new Promise(
-            static function (Post $post) use ($manager, $error): void {
-                $type = $post->getType();
-                if (null === $type) {
-                    $error(new RuntimeException('Post type is not available'));
-
-                    return;
+    public function __invoke(
+        ManagerInterface $manager,
+        int $itemsPerPage,
+        int $page,
+        ?Tag $tag = null,
+    ): self {
+        $promise = new Promise(
+            static function (iterable $posts) use ($itemsPerPage, $manager): void {
+                $pageCount = 1;
+                if ($posts instanceof Countable) {
+                    $pageCount = (int) ceil($posts->count() / $itemsPerPage);
                 }
 
-                $manager->updateWorkPlan([
-                    Post::class => $post,
-                    'objectInstance' => $post,
-                    'objectViewKey' => 'post',
-                    'template' => $type->getTemplate(),
-                ]);
+                $manager->updateWorkPlan(
+                    [
+                        'postsCollection' => $posts,
+                        'pageCount' => $pageCount,
+                    ],
+                );
             },
-            $error
+            static fn (Throwable $throwable): ChefInterface => $manager->error($throwable),
         );
 
         $this->datesService->passMeTheDate(
-            fn (DateTimeInterface $date) => $this->postLoader->fetch(
-                new PublishedPostFromSlugQuery($slug, $date),
-                $fetchPromise
-            ),
+            function (DateTimeInterface $now) use ($tag, $promise, $itemsPerPage, $page): void {
+                if (null === $tag) {
+                    $query = new PublishedPostsListQuery(
+                        $now,
+                        $itemsPerPage,
+                        ($page - 1) * $itemsPerPage,
+                    );
+                } else {
+                    $query = new PublishedPostsListInTagQuery(
+                        $tag,
+                        $now,
+                        $itemsPerPage,
+                        ($page - 1) * $itemsPerPage,
+                    );
+                }
+
+                $this->datesService->passMeTheDate(
+                    fn (DateTimeInterface $date) => $this->postLoader->query($query, $promise),
+                );
+            }
         );
 
         return $this;

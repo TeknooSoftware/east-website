@@ -23,39 +23,39 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\Tests\East\Website\Query\Content;
+namespace Teknoo\Tests\East\Website\Query\Tag;
 
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\East\Common\Query\Expr\Lower;
+use Teknoo\East\Website\Query\Tag\TagFromNameQuery;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Common\Query\Expr\In;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
-use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Website\Object\Post;
+use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
+use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-#[CoversClass(PublishedContentFromIdsQuery::class)]
-class PublishedContentFromIdsQueryTest extends TestCase
+#[CoversClass(TagFromNameQuery::class)]
+class TagFromNameQueryTest extends TestCase
 {
-    use QueryCollectionTestTrait;
+    use QueryElementTestTrait;
 
     /**
      * @inheritDoc
      */
-    public function buildQuery(): QueryCollectionInterface
+    public function buildQuery(): QueryElementInterface
     {
-        return new PublishedContentFromIdsQuery(['fooBar'], new DateTimeImmutable('2025-03-24'));
+        return new TagFromNameQuery('fooBar');
     }
 
-    public function testExecute()
+    public function testFetch()
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -65,12 +65,17 @@ class PublishedContentFromIdsQueryTest extends TestCase
         $promise->expects($this->never())->method('fail');
 
         $repository->expects($this->once())
-            ->method('findBy')
-            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->method('findOneBy')
+            ->with(
+                [
+                    'name' => 'fooBar',
+                ],
+                $promise
+            );
 
         self::assertInstanceOf(
-            PublishedContentFromIdsQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
+            TagFromNameQuery::class,
+            $this->buildQuery()->fetch($loader, $repository, $promise)
         );
     }
 }

@@ -29,6 +29,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Object\Content;
@@ -44,10 +45,9 @@ class LoadContentTest extends TestCase
 {
     private ?ContentLoader $contentLoader = null;
 
-    /**
-     * @return ContentLoader|MockObject
-     */
-    private function getContentLoader(): ContentLoader
+    private ?DatesService $datesService = null;
+
+    private function getContentLoader(): ContentLoader&MockObject
     {
         if (!$this->contentLoader instanceof ContentLoader) {
             $this->contentLoader = $this->createMock(ContentLoader::class);
@@ -56,9 +56,21 @@ class LoadContentTest extends TestCase
         return $this->contentLoader;
     }
 
+    private function getDatesService(): DatesService&MockObject
+    {
+        if (!$this->datesService instanceof DatesService) {
+            $this->datesService = $this->createMock(DatesService::class);
+        }
+
+        return $this->datesService;
+    }
+
     public function buildStep(): LoadContent
     {
-        return new LoadContent($this->getContentLoader());
+        return new LoadContent(
+            $this->getContentLoader(),
+            $this->getDatesService(),
+        );
     }
 
     public function testInvokeBadSlug()
@@ -95,6 +107,17 @@ class LoadContentTest extends TestCase
             'template' => 'foo',
         ]);
 
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
         $this->getContentLoader()
             ->expects($this->any())
             ->method('fetch')
@@ -125,6 +148,17 @@ class LoadContentTest extends TestCase
         );
         $manager->expects($this->never())->method('updateWorkPlan');
 
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
         $this->getContentLoader()
             ->expects($this->any())
             ->method('fetch')
@@ -152,6 +186,17 @@ class LoadContentTest extends TestCase
             new \DomainException('foo', 404, new \DomainException('foo'))
         );
         $manager->expects($this->never())->method('updateWorkPlan');
+
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
 
         $this->getContentLoader()
             ->expects($this->any())

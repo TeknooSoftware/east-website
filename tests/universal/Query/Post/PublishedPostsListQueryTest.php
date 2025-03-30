@@ -23,27 +23,25 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\Tests\East\Website\Query\Content;
+namespace Teknoo\Tests\East\Website\Query\Post;
 
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\Query\Expr\Lower;
+use Teknoo\East\Website\Query\Post\PublishedPostsListQuery;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Common\Query\Expr\In;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-#[CoversClass(PublishedContentFromIdsQuery::class)]
-class PublishedContentFromIdsQueryTest extends TestCase
+#[CoversClass(PublishedPostsListQuery::class)]
+class PublishedPostsListQueryTest extends TestCase
 {
     use QueryCollectionTestTrait;
 
@@ -52,7 +50,7 @@ class PublishedContentFromIdsQueryTest extends TestCase
      */
     public function buildQuery(): QueryCollectionInterface
     {
-        return new PublishedContentFromIdsQuery(['fooBar'], new DateTimeImmutable('2025-03-24'));
+        return new PublishedPostsListQuery(new DateTimeImmutable('2025-03-24'), 10, 3);
     }
 
     public function testExecute()
@@ -66,10 +64,10 @@ class PublishedContentFromIdsQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->with(['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,],);
 
         self::assertInstanceOf(
-            PublishedContentFromIdsQuery::class,
+            PublishedPostsListQuery::class,
             $this->buildQuery()->execute($loader, $repository, $promise)
         );
     }

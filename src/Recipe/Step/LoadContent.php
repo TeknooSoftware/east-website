@@ -25,10 +25,12 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use DateTimeInterface;
 use DomainException;
 use RuntimeException;
 use SensitiveParameter;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Object\Content;
@@ -49,6 +51,7 @@ class LoadContent
 {
     public function __construct(
         private readonly ContentLoader $contentLoader,
+        private readonly DatesService $datesService,
     ) {
     }
 
@@ -82,9 +85,11 @@ class LoadContent
             $error
         );
 
-        $this->contentLoader->fetch(
-            new PublishedContentFromSlugQuery($slug),
-            $fetchPromise
+        $this->datesService->passMeTheDate(
+            fn (DateTimeInterface $date) => $this->contentLoader->fetch(
+                new PublishedContentFromSlugQuery($slug, $date),
+                $fetchPromise
+            ),
         );
 
         return $this;

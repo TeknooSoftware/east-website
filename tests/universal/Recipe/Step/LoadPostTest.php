@@ -29,6 +29,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Object\Post;
@@ -44,10 +45,9 @@ class LoadPostTest extends TestCase
 {
     private ?PostLoader $postLoader = null;
 
-    /**
-     * @return PostLoader|MockObject
-     */
-    private function getPostLoader(): PostLoader
+    private ?DatesService $datesService = null;
+
+    private function getPostLoader(): PostLoader&MockObject
     {
         if (!$this->postLoader instanceof PostLoader) {
             $this->postLoader = $this->createMock(PostLoader::class);
@@ -56,9 +56,18 @@ class LoadPostTest extends TestCase
         return $this->postLoader;
     }
 
+    private function getDatesService(): DatesService&MockObject
+    {
+        if (!$this->datesService instanceof DatesService) {
+            $this->datesService = $this->createMock(DatesService::class);
+        }
+
+        return $this->datesService;
+    }
+
     public function buildStep(): LoadPost
     {
-        return new LoadPost($this->getPostLoader());
+        return new LoadPost($this->getPostLoader(), $this->getDatesService());
     }
 
     public function testInvokeBadSlug()
@@ -95,6 +104,17 @@ class LoadPostTest extends TestCase
             'template' => 'foo',
         ]);
 
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
         $this->getPostLoader()
             ->expects($this->any())
             ->method('fetch')
@@ -125,6 +145,17 @@ class LoadPostTest extends TestCase
         );
         $manager->expects($this->never())->method('updateWorkPlan');
 
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
         $this->getPostLoader()
             ->expects($this->any())
             ->method('fetch')
@@ -152,6 +183,17 @@ class LoadPostTest extends TestCase
             new \DomainException('foo', 404, new \DomainException('foo'))
         );
         $manager->expects($this->never())->method('updateWorkPlan');
+
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new \DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
 
         $this->getPostLoader()
             ->expects($this->any())

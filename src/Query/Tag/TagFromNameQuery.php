@@ -23,39 +23,30 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Query\Content;
+namespace Teknoo\East\Website\Query\Tag;
 
-use DateTimeInterface;
-use DomainException;
-use Teknoo\East\Common\Query\Expr\Lower;
-use Teknoo\Recipe\Promise\Promise;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\East\Common\Contracts\Object\PublishableInterface;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 
 /**
- * Class implementing query to load a non soft-deleted Content instance from its slug, and pass result to the
- * passed promise.
- *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @implements QueryElementInterface<Content>
+ * @implements QueryElementInterface<Tag>
  */
-class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableInterface
+class TagFromNameQuery implements QueryElementInterface, ImmutableInterface
 {
     use ImmutableTrait;
 
     public function __construct(
-        private readonly string $slug,
-        private readonly DateTimeInterface $now,
+        private readonly string $name,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -65,31 +56,11 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
         RepositoryInterface $repository,
         PromiseInterface $promise
     ): QueryElementInterface {
-        /** @var Promise<Content, mixed, Content> $fetchingPromise */
-        $fetchingPromise = new Promise(
-            onSuccess: static function ($object, PromiseInterface $next): void {
-                if (
-                    $object instanceof PublishableInterface
-                    && $object->getPublishedAt() instanceof DateTimeInterface
-                ) {
-                    $next->success($object);
-                } else {
-                    $next->fail(new DomainException('Content not found', 404));
-                }
-            },
-            allowNext: true
-        );
-
         $repository->findOneBy(
             [
-                'slug' => $this->slug,
-                'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
+                'name' => $this->name,
             ],
-            $fetchingPromise->next(
-                promise: $promise,
-                autoCall: true,
-            ),
+            $promise,
         );
 
         return $this;

@@ -23,23 +23,23 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Query\Content;
+namespace Teknoo\East\Website\Query\Post;
 
 use DateTimeInterface;
-use DomainException;
-use Teknoo\East\Common\Query\Expr\Lower;
-use Teknoo\Recipe\Promise\Promise;
-use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Website\Object\Content;
-use Teknoo\East\Common\Contracts\Object\PublishableInterface;
-use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Query\Enum\Direction;
+use Teknoo\East\Common\Query\Expr\Lower;
+use Teknoo\East\Common\Query\Expr\ObjectReference;
+use Teknoo\East\Website\Object\Post;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
- * Class implementing query to load a non soft-deleted Content instance from its slug, and pass result to the
+ * Class implementing query to load a non soft-deleted Post instance from its slug, and pass result to the
  * passed promise.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
@@ -47,49 +47,41 @@ use Teknoo\Immutable\ImmutableTrait;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  *
- * @implements QueryElementInterface<Content>
+ * @implements QueryCollectionInterface<Post>
  */
-class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableInterface
+class PublishedPostsListInTagQuery implements QueryCollectionInterface, ImmutableInterface
 {
     use ImmutableTrait;
+    use PublishedPostListQueryTrait;
 
     public function __construct(
-        private readonly string $slug,
+        private readonly Tag $tag,
         private readonly DateTimeInterface $now,
+        private readonly int $limit,
+        private readonly int $offset,
     ) {
         $this->uniqueConstructorCheck();
     }
 
-    public function fetch(
+    public function execute(
         LoaderInterface $loader,
         RepositoryInterface $repository,
         PromiseInterface $promise
-    ): QueryElementInterface {
-        /** @var Promise<Content, mixed, Content> $fetchingPromise */
-        $fetchingPromise = new Promise(
-            onSuccess: static function ($object, PromiseInterface $next): void {
-                if (
-                    $object instanceof PublishableInterface
-                    && $object->getPublishedAt() instanceof DateTimeInterface
-                ) {
-                    $next->success($object);
-                } else {
-                    $next->fail(new DomainException('Content not found', 404));
-                }
-            },
-            allowNext: true
-        );
-
-        $repository->findOneBy(
-            [
-                'slug' => $this->slug,
+    ): QueryCollectionInterface {
+        $this->doQuery(
+            criteria: [
+                'tags' => new ObjectReference($this->tag),
                 'publishedAt' => new Lower($this->now),
                 'deletedAt' => null,
             ],
-            $fetchingPromise->next(
-                promise: $promise,
-                autoCall: true,
-            ),
+            orderBy: [
+                'publishedAt' => Direction::Desc,
+                'title' => Direction::Desc,
+            ],
+            limit: $this->limit,
+            offset: $this->offset,
+            repository: $repository,
+            promise: $promise,
         );
 
         return $this;

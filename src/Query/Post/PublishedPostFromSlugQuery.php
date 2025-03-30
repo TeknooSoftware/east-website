@@ -27,6 +27,7 @@ namespace Teknoo\East\Website\Query\Post;
 
 use DateTimeInterface;
 use DomainException;
+use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
@@ -54,6 +55,7 @@ class PublishedPostFromSlugQuery implements QueryElementInterface, ImmutableInte
 
     public function __construct(
         private readonly string $slug,
+        private readonly DateTimeInterface $now,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -81,6 +83,7 @@ class PublishedPostFromSlugQuery implements QueryElementInterface, ImmutableInte
         $repository->findOneBy(
             [
                 'slug' => $this->slug,
+                'publishedAt' => new Lower($this->now),
                 'deletedAt' => null,
             ],
             $fetchingPromise->next(

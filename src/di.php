@@ -27,6 +27,7 @@ namespace Teknoo\East\Website;
 
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -40,6 +41,8 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
@@ -50,8 +53,12 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
+use Teknoo\East\Website\Recipe\Step\ExtractTag;
+use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -146,11 +153,13 @@ return [
     //Steps
     LoadContent::class => create()
         ->constructor(
-            get(ContentLoader::class)
+            get(ContentLoader::class),
+            get(DatesService::class),
         ),
     LoadPost::class => create()
         ->constructor(
-            get(PostLoader::class)
+            get(PostLoader::class),
+            get(DatesService::class),
         ),
 
     //Base recipe
@@ -158,6 +167,45 @@ return [
     Recipe::class => create(),
 
     //Plan
+    ListAllPostsOfTagsEndPointInterface::class => get(ListAllPostsOfTagsEndPoint::class),
+    ListAllPostsOfTagsEndPoint::class => static function (
+        ContainerInterface $container,
+    ): ListAllPostsOfTagsEndPoint {
+        $loadTranslations = null;
+        if ($container->has(LoadTranslationsInterface::class)) {
+            $loadTranslations = $container->get(LoadTranslationsInterface::class);
+        }
+
+        return new ListAllPostsOfTagsEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class),
+            extractPage: $container->get(ExtractPage::class),
+            extractTag: $container->get(ExtractTag::class),
+            listPosts: $container->get(ListPosts::class),
+            loadTranslationsInterface: $loadTranslations,
+            render: $container->get(Render::class),
+            renderError: $container->get(RenderError::class)
+        );
+    },
+
+    ListAllPostsEndPointInterface::class => get(ListAllPostsEndPoint::class),
+    ListAllPostsEndPoint::class => static function (
+        ContainerInterface $container,
+    ) {
+        $loadTranslations = null;
+        if ($container->has(LoadTranslationsInterface::class)) {
+            $loadTranslations = $container->get(LoadTranslationsInterface::class);
+        }
+
+        return new ListAllPostsEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class),
+            extractPage: $container->get(ExtractPage::class),
+            listPosts: $container->get(ListPosts::class),
+            loadTranslationsInterface: $loadTranslations,
+            render: $container->get(Render::class),
+            renderError: $container->get(RenderError::class)
+        );
+    },
+
     RenderDynamicContentEndPointInterface::class => get(RenderDynamicContentEndPoint::class),
     RenderDynamicContentEndPoint::class => static function (
         ContainerInterface $container
@@ -173,7 +221,7 @@ return [
             loadContent: $container->get(LoadContent::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
-            renderError: $container->get(RenderError::class)
+            renderError: $container->get(RenderError::class),
         );
     },
     RenderDynamicPostEndPointInterface::class => get(RenderDynamicPostEndPoint::class),
@@ -191,7 +239,7 @@ return [
             loadPost: $container->get(LoadPost::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
-            renderError: $container->get(RenderError::class)
+            renderError: $container->get(RenderError::class),
         );
     },
 ];
