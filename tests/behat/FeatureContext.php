@@ -26,6 +26,8 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Behat;
 
 use Behat\Behat\Context\Context;
+use DateTime;
+use DateTimeInterface;
 use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\Persistence\ObjectManager;
@@ -61,6 +63,7 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Object\StoredPassword;
 use Teknoo\East\Common\Object\User;
 use Teknoo\East\Common\Recipe\Plan\RenderStaticContentEndPoint;
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\FoundationBundle\EastFoundationBundle;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Client\ResponseInterface as EastResponse;
@@ -167,6 +170,8 @@ class FeatureContext implements Context
 
     public $updatedObjects = [];
 
+    private ?DateTimeInterface $now = null;
+
     /**
      * @Given I have DI initialized
      */
@@ -196,6 +201,13 @@ class FeatureContext implements Context
         $this->container = $containerDefinition->build();
 
         $this->container->set(ObjectManager::class, $this->buildObjectManager());
+
+        $this->container->get(DatesService::class)->setCurrentDate($this->getCurrentDate());
+    }
+
+    private function getCurrentDate(): DateTimeInterface
+    {
+        return $this->datetime ??= new DateTime();
     }
 
     /**
@@ -783,14 +795,20 @@ class FeatureContext implements Context
      */
     public function anAvailablePageWithTheSlugOfType(string $slug, string $type): void
     {
-        $this->getObjectRepository(Content::class)->setObject(
-            ['slug' => $slug],
-            (new Content())->setSlug($type)
-                ->setType($this->type)
-                ->setParts(['block1' => 'hello', 'block2' => 'world'])
-                ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
-                ->setPublishedAt(new \DateTime('2017-11-25'))
-        );
+        $this->getObjectRepository(Content::class)
+            ->setObject(
+                [
+                    'publishedAt' => [
+                        'lte' => $this->getCurrentDate(),
+                    ],
+                    'slug' => $slug,
+                ],
+                (new Content())->setSlug($type)
+                    ->setType($this->type)
+                    ->setParts(['block1' => 'hello', 'block2' => 'world'])
+                    ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
+                    ->setPublishedAt(new DateTime('2017-11-25'))
+            );
     }
 
     /**
@@ -1019,6 +1037,8 @@ class FeatureContext implements Context
             EngineInterface::class,
             new Engine($this->twig)
         );
+
+        $container->get(DatesService::class)->setCurrentDate($this->getCurrentDate());
 
         $response = $this->symfonyKernel->handle($serverRequest);
 

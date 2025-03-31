@@ -29,6 +29,7 @@ use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Common\Query\Enum\Direction;
 use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\East\Common\Query\Expr\ObjectReference;
 use Teknoo\East\Website\Object\Tag;
@@ -52,7 +53,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
      */
     public function buildQuery(): QueryCollectionInterface
     {
-        return new PublishedPostsListInTagQuery(new Tag(), new DateTimeImmutable('2025-03-24'), 10, 3);
+        return new PublishedPostsListInTagQuery(new Tag(), new DateTimeImmutable('2025-03-24'), 12, 3);
     }
 
     public function testExecute()
@@ -61,8 +62,36 @@ class PublishedPostsListInTagQueryTest extends TestCase
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects($this->never())->method('success');
+        $promise->expects($this->once())
+            ->method('success')
+            ->with(
+                self::callback(
+                    fn($r) => $r instanceof \Countable
+                        && $r instanceof \IteratorAggregate
+                        && 20 === $r->count()
+                        && $r->getIterator() instanceof \Iterator
+                )
+            );
         $promise->expects($this->never())->method('fail');
+
+        $repository->expects($this->once())
+            ->method('count')
+            ->with(
+                [
+                    'tags' => new ObjectReference(new Tag()),
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'deletedAt' => null,
+                ],
+                self::callback(
+                    fn($p) => $p instanceof PromiseInterface
+                )
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                    $promise->success(20);
+
+                    return $repository;
+                }
+            );
 
         $repository->expects($this->once())
             ->method('findBy')
@@ -72,6 +101,69 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                     'deletedAt' => null,
                 ]
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                    $promise->success($this->createMock(\Iterator::class));
+
+                    return $repository;
+                }
+            );
+
+        self::assertInstanceOf(
+            PublishedPostsListInTagQuery::class,
+            $this->buildQuery()->execute($loader, $repository, $promise)
+        );
+    }
+
+    public function testExecuteErrorOnCount()
+    {
+        $loader = $this->createMock(LoaderInterface::class);
+        $repository = $this->createMock(RepositoryInterface::class);
+        $promise = $this->createMock(PromiseInterface::class);
+
+        $promise->expects($this->never())->method('success');
+        $promise->expects($this->once())->method('fail');
+
+        $repository->expects($this->once())
+            ->method('count')
+            ->with(
+                [
+                    'tags' => new ObjectReference(new Tag()),
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'deletedAt' => null,
+                ],
+                self::callback(
+                    fn($p) => $p instanceof PromiseInterface
+                )
+            )->willReturnCallback(function (array $criteria, PromiseInterface $promise) use ($repository) {
+                $promise->fail(new \Exception());
+
+                return $repository;
+            }
+            );
+
+        $repository->expects($this->once())
+            ->method('findBy')
+            ->with(
+                [
+                    'tags' => new ObjectReference(new Tag()),
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'deletedAt' => null,
+                ],
+                self::callback(
+                    fn($p) => $p instanceof PromiseInterface
+                ),
+                [
+                    'publishedAt' => Direction::Desc,
+                    'title' => Direction::Desc,
+                ],
+                12,
+                3
+            )->willReturnCallback(function (array $criteria, PromiseInterface $promise) use ($repository) {
+                $promise->success($this->createMock(\Iterator::class));
+
+                return $repository;
+            }
             );
 
         self::assertInstanceOf(

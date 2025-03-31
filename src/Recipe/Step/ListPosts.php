@@ -69,6 +69,10 @@ class ListPosts
         int $page,
         ?Tag $tag = null,
     ): self {
+        if ($itemsPerPage < 1) {
+            $itemsPerPage = 1;
+        }
+
         $promise = new Promise(
             static function (iterable $posts) use ($itemsPerPage, $manager): void {
                 $pageCount = 1;

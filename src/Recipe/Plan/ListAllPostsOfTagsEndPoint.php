@@ -30,7 +30,7 @@ use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
-use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\Recipe\Bowl\Bowl;
@@ -47,7 +47,7 @@ use Teknoo\Recipe\RecipeInterface;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class ListAllPostsOfTagsEndPoint implements ListAllPostsEndPointInterface
+class ListAllPostsOfTagsEndPoint implements ListAllPostsOfTagsEndPointInterface
 {
     use EditablePlanTrait;
 

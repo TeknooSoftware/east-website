@@ -25,9 +25,16 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Step;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Loader\PostLoader;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -36,5 +43,110 @@ use Teknoo\East\Website\Recipe\Step\ListPosts;
 #[CoversClass(ListPosts::class)]
 class ListPostsTest extends TestCase
 {
+    private (PostLoader&MockObject)|null $postLoader = null;
 
+    private (DatesService&MockObject)|null $datesService = null;
+
+    private function getPostLoader(): PostLoader&MockObject
+    {
+        if (!$this->postLoader instanceof PostLoader) {
+            $this->postLoader = $this->createMock(PostLoader::class);
+        }
+
+        return $this->postLoader;
+    }
+
+    private function getDatesService(): DatesService&MockObject
+    {
+        if (!$this->datesService instanceof DatesService) {
+            $this->datesService = $this->createMock(DatesService::class);
+        }
+
+        return $this->datesService;
+    }
+
+    private function buildStep(): ListPosts
+    {
+        return new ListPosts(
+            $this->getPostLoader(),
+            $this->getDatesService(),
+        );
+    }
+
+    public function testInvokeWithoutTag()
+    {
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getpostLoader()
+            ->expects($this->any())
+            ->method('query')
+            ->willReturnCallback(
+                function ($query, PromiseInterface $promise) {
+                    $promise->success(new \ArrayObject([]));
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        self::assertInstanceOf(
+            ListPosts::class,
+            $this->buildStep()(
+                $manager,
+                0,
+                1,
+            )
+        );
+    }
+
+    public function testInvokeWithTag()
+    {
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getpostLoader()
+            ->expects($this->any())
+            ->method('query')
+            ->willReturnCallback(
+                function ($query, PromiseInterface $promise) {
+                    $promise->success(new \ArrayObject([]));
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        self::assertInstanceOf(
+            ListPosts::class,
+            $this->buildStep()(
+                $manager,
+                0,
+                1,
+                $this->createMock(Tag::class),
+            )
+        );
+    }
 }

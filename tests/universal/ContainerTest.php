@@ -29,6 +29,7 @@ use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -43,6 +44,8 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -54,8 +57,12 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
+use Teknoo\East\Website\Recipe\Step\ExtractTag;
+use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -286,6 +293,49 @@ class ContainerTest extends TestCase
         self::assertInstanceOf(
             LoadPost::class,
             $container->get(LoadPost::class)
+        );
+    }
+
+    public function testListAllPostsEndPoint()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
+        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
+        $container->set(ListPosts::class, $this->createMock(ListPosts::class));
+        $container->set(Render::class, $this->createMock(Render::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+
+        self::assertInstanceOf(
+            ListAllPostsEndPoint::class,
+            $container->get(ListAllPostsEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            ListAllPostsEndPointInterface::class,
+            $container->get(ListAllPostsEndPointInterface::class)
+        );
+    }
+
+    public function testListAllPostsOfTagsEndPoint()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
+        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
+        $container->set(ExtractTag::class, $this->createMock(ExtractTag::class));
+        $container->set(ListPosts::class, $this->createMock(ListPosts::class));
+        $container->set(Render::class, $this->createMock(Render::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+
+        self::assertInstanceOf(
+            ListAllPostsOfTagsEndPoint::class,
+            $container->get(ListAllPostsOfTagsEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            ListAllPostsOfTagsEndPointInterface::class,
+            $container->get(ListAllPostsOfTagsEndPointInterface::class)
         );
     }
 
