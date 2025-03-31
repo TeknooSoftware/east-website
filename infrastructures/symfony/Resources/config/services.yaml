@@ -2,6 +2,8 @@ parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.post.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.posts.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.posts_of_tag.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
 
     teknoo.east.website.admin.rendering.clean_html: true
@@ -37,6 +39,32 @@ services:
         public: true
         arguments:
             - '@teknoo.east.website.endpoint.post.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.posts.bowl:
+        class: '%teknoo.east.website.endpoint.posts.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.posts:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.posts.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.posts_of_tag.bowl:
+        class: '%teknoo.east.website.endpoint.posts_of_tag.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.posts_of_tag:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.posts_of_tag.bowl'
             - '@service_container'
 
     teknoo.east.website.endpoint.media.bowl:

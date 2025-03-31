@@ -13,6 +13,22 @@ _teknoo_website_post:
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         cleanHtml: "%teknoo.east.website.rendering.clean_html%"
 
+_teknoo_website_list_post:
+    path: '/posts/'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+
+_teknoo_website_list_post_tag:
+    path: '/posts/{tag}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts_of_tag'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+
 _teknoo_website_content:
     path: '/{slug}'
     methods:  ['GET']
