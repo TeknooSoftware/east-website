@@ -207,7 +207,7 @@ class FeatureContext implements Context
 
     private function getCurrentDate(): DateTimeInterface
     {
-        return $this->datetime ??= new DateTime();
+        return $this->now ??= new DateTime();
     }
 
     /**
