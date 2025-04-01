@@ -31,6 +31,7 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
@@ -51,6 +52,8 @@ class RenderDynamicPostEndPointTest extends TestCase
     private ?ExtractSlug $extractSlug = null;
 
     private ?LoadPost $loadPost = null;
+
+    private ?ListTags $listTags = null;
 
     private ?Render $render = null;
 
@@ -93,6 +96,18 @@ class RenderDynamicPostEndPointTest extends TestCase
     }
 
     /**
+     * @return ListTags|MockObject
+     */
+    public function getListTags(): ListTags
+    {
+        if (null === $this->listTags) {
+            $this->listTags = $this->createMock(ListTags::class);
+        }
+
+        return $this->listTags;
+    }
+
+    /**
      * @return Render|MockObject
      */
     public function getRender(): Render
@@ -122,6 +137,7 @@ class RenderDynamicPostEndPointTest extends TestCase
             $this->getRecipe(),
             $this->getExtractSlug(),
             $this->getLoadPost(),
+            $this->getListTags(),
             $this->createMock(LoadTranslationsInterface::class),
             $this->getRender(),
             $this->getRenderError()

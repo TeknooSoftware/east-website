@@ -29,6 +29,7 @@ use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Loader\PostLoader;
@@ -107,6 +108,7 @@ class ListPostsTest extends TestCase
                 $manager,
                 0,
                 1,
+                $this->createMock(ParametersBag::class),
             )
         );
     }
@@ -145,6 +147,7 @@ class ListPostsTest extends TestCase
                 $manager,
                 0,
                 1,
+                $this->createMock(ParametersBag::class),
                 $this->createMock(Tag::class),
             )
         );

@@ -63,6 +63,7 @@ use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -302,6 +303,7 @@ class ContainerTest extends TestCase
         $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
         $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
         $container->set(ListPosts::class, $this->createMock(ListPosts::class));
+        $container->set(ListTags::class, $this->createMock(ListTags::class));
         $container->set(Render::class, $this->createMock(Render::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
         $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
@@ -324,6 +326,7 @@ class ContainerTest extends TestCase
         $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
         $container->set(ExtractTag::class, $this->createMock(ExtractTag::class));
         $container->set(ListPosts::class, $this->createMock(ListPosts::class));
+        $container->set(ListTags::class, $this->createMock(ListTags::class));
         $container->set(Render::class, $this->createMock(Render::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
         $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
@@ -366,6 +369,7 @@ class ContainerTest extends TestCase
         $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
         $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
         $container->set(LoadPost::class, $this->createMock(LoadPost::class));
+        $container->set(ListTags::class, $this->createMock(ListTags::class));
         $container->set(Render::class, $this->createMock(Render::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
         $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));

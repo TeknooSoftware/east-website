@@ -32,6 +32,7 @@ use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Ingredient\Ingredient;
 use Teknoo\Recipe\Plan\EditablePlanTrait;
@@ -54,6 +55,7 @@ class ListAllPostsEndPoint implements ListAllPostsEndPointInterface
         RecipeInterface $recipe,
         private readonly ExtractPage $extractPage,
         private readonly ListPosts $listPosts,
+        private readonly ListTags $listTags,
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
         private readonly Render $render,
         private readonly RenderError $renderError
@@ -70,11 +72,13 @@ class ListAllPostsEndPoint implements ListAllPostsEndPointInterface
 
         $recipe = $recipe->cook($this->listPosts, ListPosts::class, [], 20);
 
+        $recipe = $recipe->cook($this->listTags, ListTags::class, [], 30);
+
         if (null !== $this->loadTranslationsInterface) {
-            $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
+            $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 40);
         }
 
-        $recipe = $recipe->cook($this->render, Render::class, [], 30);
+        $recipe = $recipe->cook($this->render, Render::class, [], 50);
 
         return $recipe->onError(new Bowl($this->renderError, []));
     }

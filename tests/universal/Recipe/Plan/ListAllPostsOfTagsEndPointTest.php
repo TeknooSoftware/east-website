@@ -36,6 +36,7 @@ use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\RecipeInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
@@ -55,6 +56,8 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
     private ?ExtractTag $extractTag = null;
 
     private ?ListPosts $listPosts = null;
+
+    private ?ListTags $listTags = null;
 
     private ?Render $render = null;
 
@@ -109,6 +112,18 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
     }
 
     /**
+     * @return ListTags|MockObject
+     */
+    public function getListTags(): ListTags
+    {
+        if (null === $this->listTags) {
+            $this->listTags = $this->createMock(ListTags::class);
+        }
+
+        return $this->listTags;
+    }
+
+    /**
      * @return Render|MockObject
      */
     public function getRender(): Render
@@ -139,6 +154,7 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
             $this->getExtractPage(),
             $this->getExtractTag(),
             $this->getListPosts(),
+            $this->getListTags(),
             $this->createMock(LoadTranslationsInterface::class),
             $this->getRender(),
             $this->getRenderError()

@@ -13,6 +13,9 @@ parameters:
     teknoo.east.website.sanitize.salt: '%env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT)%'
     env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT): youmustchangeit
 
+    teknoo.east.website.template.posts.list: '@@@TeknooEastWebsite/Posts/list.html.twig'
+    teknoo.east.website.template.posts.list_with_tags: '@@@TeknooEastWebsite/Posts/list-with-tags.html.twig'
+
 services:
     #Generic endpoints
     teknoo.east.website.endpoint.content.bowl:
@@ -44,7 +47,7 @@ services:
     teknoo.east.website.endpoint.posts.bowl:
         class: '%teknoo.east.website.endpoint.posts.bowl.class%'
         arguments:
-            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.posts:
@@ -57,7 +60,7 @@ services:
     teknoo.east.website.endpoint.posts_of_tag.bowl:
         class: '%teknoo.east.website.endpoint.posts_of_tag.bowl.class%'
         arguments:
-            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.posts_of_tag:

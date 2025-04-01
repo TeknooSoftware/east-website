@@ -59,6 +59,7 @@ use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -151,6 +152,19 @@ return [
     }),
 
     //Steps
+    ExtractTag::class => create()
+        ->constructor(
+            get(TagLoader::class),
+        ),
+    ListPosts::class => create()
+        ->constructor(
+            get(PostLoader::class),
+            get(DatesService::class),
+        ),
+    ListTags::class => create()
+        ->constructor(
+            get(TagLoader::class),
+        ),
     LoadContent::class => create()
         ->constructor(
             get(ContentLoader::class),
@@ -181,6 +195,7 @@ return [
             extractPage: $container->get(ExtractPage::class),
             extractTag: $container->get(ExtractTag::class),
             listPosts: $container->get(ListPosts::class),
+            listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
             renderError: $container->get(RenderError::class)
@@ -200,6 +215,7 @@ return [
             recipe: $container->get(OriginalRecipeInterface::class),
             extractPage: $container->get(ExtractPage::class),
             listPosts: $container->get(ListPosts::class),
+            listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
             renderError: $container->get(RenderError::class)
@@ -237,6 +253,7 @@ return [
             recipe: $container->get(OriginalRecipeInterface::class),
             extractSlug: $container->get(ExtractSlug::class),
             loadPost: $container->get(LoadPost::class),
+            listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
             renderError: $container->get(RenderError::class),

@@ -1,0 +1,72 @@
+<?php
+
+/*
+ * East Website.
+ *
+ * LICENSE
+ *
+ * This source file is subject to the MIT license
+ * it is available in LICENSE file at the root of this package
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to richard@teknoo.software so we can send you a copy immediately.
+ *
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ *
+ * @link        https://teknoo.software/east-collection/website Project website
+ *
+ * @license     https://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
+
+declare(strict_types=1);
+
+namespace Teknoo\East\Website\Recipe\Step;
+
+use Teknoo\East\Common\View\ParametersBag;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Website\Loader\TagLoader;
+use Teknoo\East\Website\Query\Tag\TagQuery;
+use Teknoo\Recipe\ChefInterface;
+use Teknoo\Recipe\Promise\Promise;
+use Throwable;
+
+/**
+ * Step recipe to load a published Post instance, from its slug, thank to the Post's loader and put it into the
+ * workplan at Post::class key, and `objectInstance`. The template file to use with the fetched post is also
+ * injected to the template.
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ * @license     https://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
+class ListTags
+{
+    public function __construct(
+        private readonly TagLoader $tagLoader,
+    ) {
+    }
+
+    public function __invoke(
+        ManagerInterface $manager,
+        ParametersBag $bag,
+    ): self {
+        $promise = new Promise(
+            static function (iterable $tags) use ($manager, $bag): void {
+                $manager->updateWorkPlan(['tagsCollection' => $tags]);
+                $bag->set('tagsCollection', $tags);
+            },
+            static fn (Throwable $throwable): ChefInterface => $manager->error($throwable),
+        );
+
+        $this->tagLoader->query(
+            new TagQuery(),
+            $promise,
+        );
+
+        return $this;
+    }
+}

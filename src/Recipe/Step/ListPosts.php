@@ -27,10 +27,7 @@ namespace Teknoo\East\Website\Recipe\Step;
 
 use Countable;
 use DateTimeInterface;
-use DomainException;
-use RuntimeException;
-use SensitiveParameter;
-use Teknoo\East\Common\Query\Exception\LoadingException;
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Object\Tag;
@@ -39,8 +36,6 @@ use Teknoo\East\Website\Query\Post\PublishedPostsListQuery;
 use Teknoo\Recipe\ChefInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\PostLoader;
-use Teknoo\East\Website\Object\Post;
-use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 use Throwable;
 
 use function ceil;
@@ -67,6 +62,7 @@ class ListPosts
         ManagerInterface $manager,
         int $itemsPerPage,
         int $page,
+        ParametersBag $bag,
         ?Tag $tag = null,
     ): self {
         if ($itemsPerPage < 1) {
@@ -74,7 +70,7 @@ class ListPosts
         }
 
         $promise = new Promise(
-            static function (iterable $posts) use ($itemsPerPage, $manager): void {
+            static function (iterable $posts) use ($itemsPerPage, $manager, $bag): void {
                 $pageCount = 1;
                 if ($posts instanceof Countable) {
                     $pageCount = (int) ceil($posts->count() / $itemsPerPage);
@@ -86,6 +82,9 @@ class ListPosts
                         'pageCount' => $pageCount,
                     ],
                 );
+
+                $bag->set('postsCollection', $posts);
+                $bag->set('pageCount', $pageCount);
             },
             static fn (Throwable $throwable): ChefInterface => $manager->error($throwable),
         );

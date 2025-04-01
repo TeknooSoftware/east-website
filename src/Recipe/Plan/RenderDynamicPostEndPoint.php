@@ -31,6 +31,7 @@ use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
+use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\Recipe\Bowl\Bowl;
 use Teknoo\Recipe\Ingredient\Ingredient;
@@ -54,6 +55,7 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
         RecipeInterface $recipe,
         private readonly ExtractSlug $extractSlug,
         private readonly LoadPost $loadPost,
+        private readonly ListTags $listTags,
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
         private readonly Render $render,
         private readonly RenderError $renderError
@@ -68,6 +70,8 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
         $recipe = $recipe->cook($this->extractSlug, ExtractSlug::class, [], 10);
 
         $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 20);
+
+        $recipe = $recipe->cook($this->listTags, ListTags::class, [], 20);
 
         if (null !== $this->loadTranslationsInterface) {
             $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
