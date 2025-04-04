@@ -25,9 +25,14 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Query\Tag;
 
+use DateTimeInterface;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\Query\Enum\Direction;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\Lower;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Object\Tag;
+use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -43,12 +48,14 @@ use Teknoo\Immutable\ImmutableTrait;
  *
  * @implements QueryCollectionInterface<Tag>
  */
-class TagQuery implements QueryCollectionInterface, ImmutableInterface
+class PublishedTagQuery implements QueryCollectionInterface, ImmutableInterface
 {
     use ImmutableTrait;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly PostRepositoryInterface $postRepository,
+        private readonly DateTimeInterface $now,
+    ) {
         $this->uniqueConstructorCheck();
     }
 
@@ -60,14 +67,33 @@ class TagQuery implements QueryCollectionInterface, ImmutableInterface
         RepositoryInterface $repository,
         PromiseInterface $promise
     ): QueryCollectionInterface {
-        $repository->findBy(
-            criteria: [
-                'deletedAt' => null
+        $this->postRepository->distinctBy(
+            'tags.id',
+            [
+                'publishedAt' => new Lower($this->now),
+                'deletedAt' => null,
             ],
-            promise: $promise,
-            orderBy: [
-                'name' => Direction::Asc,
-            ],
+            new Promise(
+                function (array $tags) use ($repository, $promise): void {
+                    if (empty($tags)) {
+                        $promise->success([]);
+
+                        return;
+                    }
+
+                    $repository->findBy(
+                        criteria: [
+                            'deletedAt' => null,
+                            'id' => new In($tags)
+                        ],
+                        promise: $promise,
+                        orderBy: [
+                            'name' => Direction::Asc,
+                        ],
+                    );
+                },
+                $promise->fail(...),
+            ),
         );
 
         return $this;

@@ -278,7 +278,6 @@ class ContentTest extends TestCase
                 $loader,
                 $findSlugService,
                 'slug',
-                ['titleValue'],
             )
         );
     }

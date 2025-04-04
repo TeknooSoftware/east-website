@@ -56,6 +56,12 @@ class TagType extends AbstractType
         );
 
         $builder->add(
+            child: 'slug',
+            type: TextType::class,
+            options: ['required' => false],
+        );
+
+        $builder->add(
             child: 'isHighlighted',
             type: CheckboxType::class,
             options: [

@@ -26,22 +26,34 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Object;
 
 use Stringable;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Object\SluggableInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
 use Teknoo\East\Common\Object\ObjectTrait;
+use Teknoo\East\Common\Service\FindSlugService;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
+ *
+ * @implements SluggableInterface<IdentifiedObjectInterface>
  */
-class Tag implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
+class Tag implements
+    IdentifiedObjectInterface,
+    DeletableInterface,
+    TimestampableInterface,
+    SluggableInterface,
+    Stringable
 {
     use ObjectTrait;
 
     private string $name = '';
+
+    protected ?string $slug = null;
 
     private bool $isHighlighted = false;
 
@@ -70,6 +82,40 @@ class Tag implements IdentifiedObjectInterface, DeletableInterface, Timestampabl
     public function setIsHighlighted(bool $isHighlighted): Tag
     {
         $this->isHighlighted = $isHighlighted;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function prepareSlugNear(
+        LoaderInterface $loader,
+        FindSlugService $findSlugService,
+        string $slugField
+    ): SluggableInterface {
+        $slugValue = $this->getSlug();
+        if (empty($slugValue)) {
+            $slugValue = $this->getName();
+        }
+
+        $findSlugService->process(
+            $loader,
+            $slugField,
+            $this,
+            [
+                $slugValue
+            ]
+        );
+
+        return $this;
+    }
+
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

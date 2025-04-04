@@ -30,7 +30,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\East\Common\Query\Expr\Lower;
-use Teknoo\East\Website\Query\Tag\TagFromNameQuery;
+use Teknoo\East\Website\Query\Tag\TagFromSlugQuery;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -42,8 +42,8 @@ use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-#[CoversClass(TagFromNameQuery::class)]
-class TagFromNameQueryTest extends TestCase
+#[CoversClass(TagFromSlugQuery::class)]
+class TagFromSlugQueryTest extends TestCase
 {
     use QueryElementTestTrait;
 
@@ -52,7 +52,7 @@ class TagFromNameQueryTest extends TestCase
      */
     public function buildQuery(): QueryElementInterface
     {
-        return new TagFromNameQuery('fooBar');
+        return new TagFromSlugQuery('fooBar');
     }
 
     public function testFetch()
@@ -68,13 +68,13 @@ class TagFromNameQueryTest extends TestCase
             ->method('findOneBy')
             ->with(
                 [
-                    'name' => 'fooBar',
+                    'slug' => 'fooBar',
                 ],
                 $promise
             );
 
         self::assertInstanceOf(
-            TagFromNameQuery::class,
+            TagFromSlugQuery::class,
             $this->buildQuery()->fetch($loader, $repository, $promise)
         );
     }

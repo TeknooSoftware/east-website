@@ -28,12 +28,13 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
-use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
-use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\RecipeInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
@@ -49,13 +50,11 @@ class RenderDynamicPostEndPointTest extends TestCase
 
     private ?RecipeInterface $recipe = null;
 
-    private ?ExtractSlug $extractSlug = null;
-
     private ?LoadPost $loadPost = null;
 
     private ?ListTags $listTags = null;
 
-    private ?Render $render = null;
+    private ?RenderFormInterface $render = null;
 
     private ?RenderError $renderError = null;
 
@@ -69,18 +68,6 @@ class RenderDynamicPostEndPointTest extends TestCase
         }
 
         return $this->recipe;
-    }
-
-    /**
-     * @return ExtractSlug|MockObject
-     */
-    public function getExtractSlug(): ExtractSlug
-    {
-        if (null === $this->extractSlug) {
-            $this->extractSlug = $this->createMock(ExtractSlug::class);
-        }
-
-        return $this->extractSlug;
     }
 
     /**
@@ -108,12 +95,12 @@ class RenderDynamicPostEndPointTest extends TestCase
     }
 
     /**
-     * @return Render|MockObject
+     * @return RenderFormInterface|MockObject
      */
-    public function getRender(): Render
+    public function getRender(): RenderFormInterface
     {
         if (null === $this->render) {
-            $this->render = $this->createMock(Render::class);
+            $this->render = $this->createMock(RenderFormInterface::class);
         }
 
         return $this->render;
@@ -135,10 +122,11 @@ class RenderDynamicPostEndPointTest extends TestCase
     {
         return new RenderDynamicPostEndPoint(
             $this->getRecipe(),
-            $this->getExtractSlug(),
             $this->getLoadPost(),
             $this->getListTags(),
             $this->createMock(LoadTranslationsInterface::class),
+            $this->createMock(CreateObject::class),
+            $this->createMock(FormHandlingInterface::class),
             $this->getRender(),
             $this->getRenderError()
         );

@@ -12,6 +12,26 @@ _teknoo_website_post:
         _controller: 'teknoo.east.website.endpoint.post'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+        objectClass: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+        formOptions:
+            commentClass: 'Teknoo\East\Website\Doctrine\Object\Comment'
+    requirements:
+        slug: ((?!_wdt|_profiler).).+
+
+_teknoo_website_post_comment:
+    path: '/post/{slug}/comment'
+    methods:  ['POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.post.comment'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+        objectClass: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+        formOptions:
+            commentClass: 'Teknoo\East\Website\Doctrine\Object\Comment'
+    requirements:
+        slug: ((?!_wdt|_profiler).).+
 
 _teknoo_website_list_posts:
     path: '/posts/'
@@ -24,7 +44,7 @@ _teknoo_website_list_posts:
         itemsPerPage: 10
 
 _teknoo_website_list_posts_tag:
-    path: '/posts/{tag}'
+    path: '/posts/by/{tag}'
     methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.website.endpoint.posts_of_tag'
@@ -32,6 +52,8 @@ _teknoo_website_list_posts_tag:
         template: "%teknoo.east.website.template.posts.list_with_tags%"
         cleanHtml: "%teknoo.east.website.rendering.clean_html%"
         itemsPerPage: 10
+    requirements:
+        tag: ((?!_wdt|_profiler).).+
 
 _teknoo_website_content:
     path: '/{slug}'

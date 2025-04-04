@@ -276,6 +276,7 @@ _teknoo_website_admin_tag_edit:
         loader: '@Teknoo\East\Website\Loader\TagLoader'
         template: '@@TeknooEastWebsite/AdminTag/edit.html.twig'
         writer: '@Teknoo\East\Website\Writer\TagWriter'
+        slugField: 'slug'
         cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_tag_new:
@@ -291,6 +292,7 @@ _teknoo_website_admin_tag_new:
         route: '_teknoo_website_admin_tag_edit'
         template: '@@TeknooEastWebsite/AdminTag/new.html.twig'
         writer: '@Teknoo\East\Website\Writer\TagWriter'
+        slugField: 'slug'
         cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
 
 _teknoo_website_admin_tag_delete:

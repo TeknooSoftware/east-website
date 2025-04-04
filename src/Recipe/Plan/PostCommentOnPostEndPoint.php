@@ -26,12 +26,16 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Recipe\Plan;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Stringable;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 use Teknoo\East\Common\Recipe\Step\CreateObject;
-use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
-use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
+use Teknoo\East\Common\Recipe\Step\SaveObject;
+use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Recipe\Step\ListTags;
@@ -50,7 +54,7 @@ use Teknoo\Recipe\RecipeInterface;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
+class PostCommentOnPostEndPoint implements PostCommentOnPostEndPointInterface
 {
     use EditablePlanTrait;
 
@@ -61,8 +65,12 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
         private readonly CreateObject $createObject,
         private readonly FormHandlingInterface $formHandling,
+        private readonly FormProcessingInterface $formProcessing,
+        private readonly SaveObject $saveObject,
+        private readonly RedirectClientInterface $redirectClient,
         private readonly RenderFormInterface $renderForm,
         private readonly RenderError $renderError,
+        private readonly string|Stringable|null $defaultErrorTemplate = null,
     ) {
         $this->fill($recipe);
     }
@@ -70,14 +78,16 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
     protected function populateRecipe(RecipeInterface $recipe): RecipeInterface
     {
         $recipe = $recipe->require(new Ingredient(ServerRequestInterface::class, 'request'));
-        $recipe = $recipe->require(new Ingredient('string', 'slug'));
+        $recipe = $recipe->require(new Ingredient(requiredType: WriterInterface::class, name: 'writer'));
+        $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'objectClass'));
+        $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'formClass'));
 
-        $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 20);
+        $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 10);
 
-        $recipe = $recipe->cook($this->listTags, ListTags::class, [], 20);
+        $recipe = $recipe->cook($this->listTags, ListTags::class, [], 10);
 
         if (null !== $this->loadTranslationsInterface) {
-            $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
+            $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 15);
         }
 
         $recipe = $recipe->cook(
@@ -86,12 +96,26 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
             [
                 'constructorArguments' => Post::class
             ],
-            30,
+            20,
         );
 
-        $recipe = $recipe->cook($this->formHandling, FormHandlingInterface::class, [], 40);
+        $recipe = $recipe->cook($this->formHandling, FormHandlingInterface::class, [], 30);
 
-        $recipe = $recipe->cook($this->renderForm, RenderFormInterface::class, [], 50);
+        $recipe = $recipe->cook($this->formProcessing, FormProcessingInterface::class, [], 40);
+
+        $recipe = $recipe->cook($this->saveObject, SaveObject::class, [], 50);
+
+        $recipe = $recipe->cook($this->redirectClient, RedirectClientInterface::class, [], 60);
+
+        $recipe = $recipe->cook($this->renderForm, RenderFormInterface::class, [], 70);
+
+        $recipe = $recipe->onError(new Bowl($this->renderError, []));
+
+        $this->addToWorkplan('nextStep', RenderFormInterface::class);
+
+        if (null !== $this->defaultErrorTemplate) {
+            $this->addToWorkplan('errorTemplate', (string) $this->defaultErrorTemplate);
+        }
 
         return $recipe->onError(new Bowl($this->renderError, []));
     }

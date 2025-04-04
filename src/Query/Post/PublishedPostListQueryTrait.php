@@ -110,7 +110,7 @@ trait PublishedPostListQueryTrait
             orderBy: $orderBy,
             limit: $limit,
             offset: $offset,
-            hydrate: ['tags '],
+            hydrate: ['tags'],
         );
 
         return $this;

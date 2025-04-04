@@ -29,20 +29,20 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
-use Teknoo\East\WebsiteBundle\Form\Type\CommentType;
+use Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-#[CoversClass(CommentType::class)]
+#[CoversClass(ModerateCommentType::class)]
 class CommentTypeTest extends TestCase
 {
     use FormTestTrait;
 
     public function buildForm()
     {
-        return new CommentType(
+        return new ModerateCommentType(
             $this->createMock(CommentMapper::class),
         );
     }
@@ -50,7 +50,7 @@ class CommentTypeTest extends TestCase
     public function testConfigureOptions()
     {
         self::assertInstanceOf(
-            CommentType::class,
+            ModerateCommentType::class,
             $this->buildForm()->configureOptions(
                 $this->createMock(OptionsResolver::class)
             )

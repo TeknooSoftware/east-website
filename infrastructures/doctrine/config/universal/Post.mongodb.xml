@@ -51,5 +51,10 @@
                 <all/>
             </cascade>
         </reference-many>
+        <indexes>
+            <index name="tags_index">
+                <key name="id" order="asc"/>
+            </index>
+        </indexes>
     </document>
 </doctrine-mongo-mapping>

@@ -23,46 +23,19 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Query\Tag;
+namespace Teknoo\East\Website\Contracts\Recipe\Plan;
 
-use Teknoo\East\Website\Object\Tag;
-use Teknoo\Recipe\Promise\PromiseInterface;
-use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
-use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
-use Teknoo\Immutable\ImmutableInterface;
-use Teknoo\Immutable\ImmutableTrait;
+use Teknoo\Recipe\EditablePlanInterface;
 
 /**
+ * Interface defining a HTTP EndPoint Recipe able to load a `Teknoo\East\Website\Object\Content` instance and render a
+ * page via a template engine and send it to the client.
+ *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
- *
- * @implements QueryElementInterface<Tag>
  */
-class TagFromNameQuery implements QueryElementInterface, ImmutableInterface
+interface PostCommentOnPostEndPointInterface extends EditablePlanInterface
 {
-    use ImmutableTrait;
-
-    public function __construct(
-        private readonly string $name,
-    ) {
-        $this->uniqueConstructorCheck();
-    }
-
-    public function fetch(
-        LoaderInterface $loader,
-        RepositoryInterface $repository,
-        PromiseInterface $promise
-    ): QueryElementInterface {
-        $repository->findOneBy(
-            [
-                'name' => $this->name,
-            ],
-            $promise,
-        );
-
-        return $this;
-    }
 }

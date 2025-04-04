@@ -32,7 +32,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Website\Object\Comment;
-use Teknoo\East\Website\Object\Type;
 use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
 
 /**
@@ -43,7 +42,7 @@ use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class CommentType extends AbstractType
+class ModerateCommentType extends AbstractType
 {
     public function __construct(
         private readonly CommentMapper $commentMapper,
@@ -51,7 +50,7 @@ class CommentType extends AbstractType
     }
 
     /**
-     * @param FormBuilderInterface<Type> $builder
+     * @param FormBuilderInterface<Comment> $builder
      * @param array<string, mixed> $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options): self

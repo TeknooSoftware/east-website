@@ -29,6 +29,9 @@ use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
@@ -370,7 +373,9 @@ class ContainerTest extends TestCase
         $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
         $container->set(LoadPost::class, $this->createMock(LoadPost::class));
         $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(Render::class, $this->createMock(Render::class));
+        $container->set(CreateObject::class, $this->createMock(CreateObject::class));
+        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
+        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
         $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
 

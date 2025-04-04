@@ -23,36 +23,38 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Recipe\Step;
+namespace Teknoo\East\WebsiteBundle\Form\DTO;
 
-use Teknoo\East\Foundation\Manager\Manager;
-use Teknoo\East\Foundation\Manager\ManagerInterface;
-use Teknoo\East\Website\Loader\TagLoader;
-use Teknoo\East\Website\Object\Tag;
-use Teknoo\East\Website\Query\Tag\TagFromSlugQuery;
-use Teknoo\Recipe\Promise\Promise;
-use Throwable;
+use DateTimeInterface;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Website\Object\Comment as CommentObject;
+use Teknoo\East\Website\Object\Post;
 
-class ExtractTag
+class Comment implements ObjectInterface
 {
     public function __construct(
-        private readonly TagLoader $loader,
+        public Post $post,
+        public string $author = '',
+        public string $title = '',
+        public string $content = '',
     ) {
     }
 
-    public function __invoke(ManagerInterface $manager, string $tag): self
-    {
-        $this->loader->fetch(
-            new TagFromSlugQuery($tag),
-            new Promise(
-                fn (Tag $tag) => $manager->updateWorkPlan([
-                    Tag::class => $tag,
-                    'tag' => $tag,
-                ]),
-                fn (Throwable $throwable) => $manager->error($throwable,),
-            )
+    /**
+     * @param class-string<CommentObject> $commentClass
+     */
+    public function toObject(
+        string $commentClass,
+        string $remoteIp,
+        DateTimeInterface $postAt
+    ): CommentObject {
+        return new $commentClass(
+            post: $this->post,
+            author: $this->author,
+            remoteIp: $this->title,
+            title: $this->content,
+            content: $remoteIp,
+            postAt: $postAt
         );
-
-        return $this;
     }
 }

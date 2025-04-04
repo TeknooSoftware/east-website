@@ -2,6 +2,7 @@ parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.post.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.post.comment.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.posts.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.posts_of_tag.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
@@ -42,6 +43,19 @@ services:
         public: true
         arguments:
             - '@teknoo.east.website.endpoint.post.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.post.comment.bowl:
+        class: '%teknoo.east.website.endpoint.post.comment.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.post.comment:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.post.comment.bowl'
             - '@service_container'
 
     teknoo.east.website.endpoint.posts.bowl:
@@ -112,9 +126,18 @@ services:
         tags:
             - {name: form.type}
 
-    Teknoo\East\WebsiteBundle\Form\Type\CommentType:
-        class: 'Teknoo\East\WebsiteBundle\Form\Type\CommentType'
+    Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType:
+        class: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'
         arguments:
             - '@Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\WebsiteBundle\Form\Type\NewCommentType:
+        class: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+        arguments:
+            - '@Teknoo\East\Website\Writer\CommentWriter'
+            - '@Teknoo\East\Foundation\Time\DatesService'
+            - '@request_stack'
         tags:
             - {name: form.type}

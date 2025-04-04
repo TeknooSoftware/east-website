@@ -28,6 +28,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Step;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -103,7 +104,6 @@ class LoadContentTest extends TestCase
         $manager->expects($this->once())->method('updateWorkPlan')->with([
             Content::class => $content,
             'objectInstance' => $content,
-            'objectViewKey' => 'content',
             'template' => 'foo',
         ]);
 
@@ -129,11 +129,15 @@ class LoadContentTest extends TestCase
                 }
             );
 
+        $bag = $this->createMock(ParametersBag::class);
+        $bag->expects($this->once())->method('set')->with('content');
+
         self::assertInstanceOf(
             LoadContent::class,
             $this->buildStep()(
                 'foo',
-                $manager
+                $manager,
+                $bag,
             )
         );
     }
@@ -174,7 +178,8 @@ class LoadContentTest extends TestCase
             LoadContent::class,
             $this->buildStep()(
                 'foo',
-                $manager
+                $manager,
+                $this->createMock(ParametersBag::class),
             )
         );
     }
@@ -213,7 +218,8 @@ class LoadContentTest extends TestCase
             LoadContent::class,
             $this->buildStep()(
                 'foo',
-                $manager
+                $manager,
+                $this->createMock(ParametersBag::class),
             )
         );
     }

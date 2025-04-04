@@ -32,8 +32,8 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Loader\TagLoader;
-use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\Promise\PromiseInterface;
 
@@ -45,6 +45,8 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 class ListTagsTest extends TestCase
 {
     private (TagLoader&MockObject)|null $tagLoader = null;
+    private (PostRepositoryInterface&MockObject)|null $postRepository = null;
+    private (DatesService&MockObject)|null $datesService = null;
 
     private function getTagLoader(): TagLoader&MockObject
     {
@@ -55,15 +57,46 @@ class ListTagsTest extends TestCase
         return $this->tagLoader;
     }
 
+    private function getPostRepository(): PostRepositoryInterface&MockObject
+    {
+        if (!$this->postRepository instanceof PostRepositoryInterface) {
+            $this->postRepository = $this->createMock(PostRepositoryInterface::class);
+        }
+
+        return $this->postRepository;
+    }
+
+    private function getDatesService(): DatesService&MockObject
+    {
+        if (!$this->datesService instanceof DatesService) {
+            $this->datesService = $this->createMock(DatesService::class);
+        }
+
+        return $this->datesService;
+    }
+
     private function buildStep(): ListTags
     {
         return new ListTags(
             $this->getTagLoader(),
+            $this->getPostRepository(),
+            $this->getDatesService(),
         );
     }
 
     public function testInvokeWithoutTag()
     {
+        $this->getDatesService()
+            ->expects($this->any())
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function ($callable) {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');

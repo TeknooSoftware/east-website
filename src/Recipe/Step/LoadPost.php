@@ -29,6 +29,7 @@ use DateTimeInterface;
 use DomainException;
 use RuntimeException;
 use SensitiveParameter;
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\Promise;
@@ -55,8 +56,11 @@ class LoadPost
     ) {
     }
 
-    public function __invoke(string $slug, ManagerInterface $manager): self
-    {
+    public function __invoke(
+        string $slug,
+        ManagerInterface $manager,
+        ParametersBag $bag,
+    ): self {
         $error = static function (#[SensitiveParameter] Throwable $error) use ($manager): void {
             if ($error instanceof DomainException) {
                 $error = new DomainException($error->getMessage(), 404, $error);
@@ -67,7 +71,7 @@ class LoadPost
 
         /** @var Promise<Post, mixed, mixed> $fetchPromise */
         $fetchPromise = new Promise(
-            static function (Post $post) use ($manager, $error): void {
+            static function (Post $post) use ($manager, $error, $bag): void {
                 $type = $post->getType();
                 if (null === $type) {
                     $error(new RuntimeException('Post type is not available'));
@@ -78,9 +82,11 @@ class LoadPost
                 $manager->updateWorkPlan([
                     Post::class => $post,
                     'objectInstance' => $post,
-                    'objectViewKey' => 'post',
                     'template' => $type->getTemplate(),
                 ]);
+
+                $bag->set('content', $post);
+                $bag->set('post', $post);
             },
             $error
         );

@@ -27,10 +27,16 @@ namespace Teknoo\East\Website;
 
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\SaveObject;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Recipe\PlanInterface;
 use Teknoo\East\Foundation\Time\DatesService;
@@ -43,6 +49,7 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
@@ -55,6 +62,7 @@ use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\PostCommentOnPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
@@ -164,6 +172,8 @@ return [
     ListTags::class => create()
         ->constructor(
             get(TagLoader::class),
+            get(PostRepositoryInterface::class),
+            get(DatesService::class),
         ),
     LoadContent::class => create()
         ->constructor(
@@ -222,6 +232,33 @@ return [
         );
     },
 
+    PostCommentOnPostEndPointInterface::class => get(PostCommentOnPostEndPoint::class),
+    PostCommentOnPostEndPoint::class => static function (
+        ContainerInterface $container,
+    ): PostCommentOnPostEndPoint {
+        $loadTranslations = null;
+        if ($container->has(LoadTranslationsInterface::class)) {
+            $loadTranslations = $container->get(LoadTranslationsInterface::class);
+        }
+
+        $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
+
+        return new PostCommentOnPostEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class),
+            loadPost: $container->get(LoadPost::class),
+            listTags: $container->get(ListTags::class),
+            loadTranslationsInterface: $loadTranslations,
+            createObject: $container->get(CreateObject::class),
+            formHandling: $container->get(FormHandlingInterface::class),
+            formProcessing: $container->get(FormProcessingInterface::class),
+            saveObject: $container->get(SaveObject::class),
+            redirectClient: $container->get(RedirectClientInterface::class),
+            renderForm: $container->get(RenderFormInterface::class),
+            renderError: $container->get(RenderError::class),
+            defaultErrorTemplate: $defaultErrorTemplate,
+        );
+    },
+
     RenderDynamicContentEndPointInterface::class => get(RenderDynamicContentEndPoint::class),
     RenderDynamicContentEndPoint::class => static function (
         ContainerInterface $container
@@ -251,11 +288,12 @@ return [
 
         return new RenderDynamicPostEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
-            extractSlug: $container->get(ExtractSlug::class),
             loadPost: $container->get(LoadPost::class),
             listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
-            render: $container->get(Render::class),
+            createObject: $container->get(CreateObject::class),
+            formHandling: $container->get(FormHandlingInterface::class),
+            renderForm: $container->get(RenderFormInterface::class),
             renderError: $container->get(RenderError::class),
         );
     },

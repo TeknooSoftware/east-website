@@ -27,8 +27,11 @@ namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
+use Throwable;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -79,5 +82,68 @@ class TagTest extends TestCase
             Tag::class,
             $this->buildObject()->setIsHighlighted(true),
         );
+    }
+
+    public function testGetSlug()
+    {
+        self::assertEquals(
+            'fooBar',
+            $this->generateObjectPopulated(['slug' => 'fooBar'])->getSlug()
+        );
+    }
+
+    public function testPrepareSlugNear()
+    {
+        $loader = $this->createMock(LoaderInterface::class);
+
+        $findSlugService = $this->createMock(FindSlugService::class);
+        $findSlugService->expects($this->once())->method('process');
+
+        self::assertInstanceOf(
+            Tag::class,
+            $this->buildObject()->setName('titleValue')->prepareSlugNear(
+                $loader,
+                $findSlugService,
+                'slug',
+            )
+        );
+    }
+
+    public function testPrepareSlugNearWithCurrentSlugValue()
+    {
+        $loader = $this->createMock(LoaderInterface::class);
+
+        $findSlugService = $this->createMock(FindSlugService::class);
+        $findSlugService->expects($this->once())->method('process');
+
+        self::assertInstanceOf(
+            Tag::class,
+            $this->buildObject()->setSlug('currentValue')->prepareSlugNear(
+                $loader,
+                $findSlugService,
+                'slug',
+                ['currentValue'],
+            )
+        );
+    }
+
+    public function testSetSlug()
+    {
+        $object = $this->buildObject();
+        self::assertInstanceOf(
+            $object::class,
+            $object->setSlug('fooBar')
+        );
+
+        self::assertEquals(
+            'fooBar',
+            $object->getSlug()
+        );
+    }
+
+    public function testSetSlugExceptionOnBadArgument()
+    {
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setSlug(new stdClass());
     }
 }

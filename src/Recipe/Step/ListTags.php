@@ -25,10 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use DateTimeInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Loader\TagLoader;
-use Teknoo\East\Website\Query\Tag\TagQuery;
+use Teknoo\East\Website\Query\Tag\PublishedTagQuery;
 use Teknoo\Recipe\ChefInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Throwable;
@@ -47,6 +50,8 @@ class ListTags
 {
     public function __construct(
         private readonly TagLoader $tagLoader,
+        private readonly PostRepositoryInterface $postRepository,
+        private readonly DatesService $datesService,
     ) {
     }
 
@@ -62,9 +67,16 @@ class ListTags
             static fn (Throwable $throwable): ChefInterface => $manager->error($throwable),
         );
 
-        $this->tagLoader->query(
-            new TagQuery(),
-            $promise,
+        $this->datesService->passMeTheDate(
+            function (DateTimeInterface $now) use ($promise): void {
+                $this->tagLoader->query(
+                    new PublishedTagQuery(
+                        $this->postRepository,
+                        $now,
+                    ),
+                    $promise,
+                );
+            }
         );
 
         return $this;
