@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\WebsiteBundle\Form\Type;
 
-use DateTimeImmutable;
+use DateTimeInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -34,6 +34,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Writer\CommentWriter;
@@ -58,6 +59,7 @@ class NewCommentType extends AbstractType
         private readonly CommentWriter $commentWriter,
         private readonly DatesService $datesService,
         private readonly RequestStack $requestStack,
+        private readonly ManagerInterface $manager,
     ) {
     }
 
@@ -89,8 +91,9 @@ class NewCommentType extends AbstractType
                 }
 
                 $this->datesService->passMeTheDate(
-                    function (DateTimeImmutable $date) use ($dto, $options): void {
+                    function (DateTimeInterface $date) use ($dto, $options): void {
                         $dto->persistInto(
+                            $this->manager,
                             $this->commentWriter,
                             $options['comment_class'],
                             implode(',', $this->requestStack->getMainRequest()?->getClientIps() ?? []),

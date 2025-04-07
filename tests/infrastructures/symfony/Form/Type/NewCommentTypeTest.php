@@ -37,6 +37,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Doctrine\Object\Comment;
 use Teknoo\East\Website\Writer\CommentWriter;
@@ -69,6 +70,7 @@ class NewCommentTypeTest extends TestCase
             $this->createMock(CommentWriter::class),
             $this->getDatesService(),
             $this->createMock(RequestStack::class),
+            $this->createMock(ManagerInterface::class),
         );
     }
     protected function getOptions(): array

@@ -26,10 +26,13 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\WebsiteBundle\DTO;
 
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Common\Contracts\Writer\WriterInterface;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Object\Comment as DoctrineComment;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\WebsiteBundle\Form\DTO\Comment;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -61,6 +64,8 @@ class CommentTest extends TestCase
             'boo',
         );
 
+        $objectComment = $this->createMock(\Teknoo\East\Website\Object\Comment::class);
+
         $writer = $this->createMock(WriterInterface::class);
         $writer->expects($this->once())
             ->method('save')
@@ -73,11 +78,26 @@ class CommentTest extends TestCase
                     'boo',
                     $now = new \DateTimeImmutable('2025-01-01 00:00:00'),
                 )
-        );
+            )->willReturnCallback(
+                function ($object, PromiseInterface $promise) use ($writer, $objectComment) {
+                    self::assertInstanceOf(\Teknoo\East\Website\Object\Comment::class, $objectComment);
+                    $promise->success($objectComment);
+                    return $writer;
+                }
+            );
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->once())
+            ->method('updateWorkPlan')
+            ->with([
+                \Teknoo\East\Website\Object\Comment::class => $objectComment,
+                ObjectInterface::class => $objectComment,
+            ]);
 
         self::assertInstanceOf(
             Comment::class,
             $dto->persistInto(
+                $manager,
                 $writer,
                 DoctrineComment::class,
                 '127.0.0.1',

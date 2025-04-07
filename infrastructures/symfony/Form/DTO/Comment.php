@@ -28,6 +28,7 @@ namespace Teknoo\East\WebsiteBundle\Form\DTO;
 use DateTimeInterface;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Common\Contracts\Writer\WriterInterface;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\Recipe\Promise\Promise;
@@ -48,6 +49,7 @@ class Comment implements ObjectInterface
      * @param class-string<CommentObject> $commentClass
      */
     public function persistInto(
+        ManagerInterface $manager,
         WriterInterface $writer,
         string $commentClass,
         string $remoteIp,
@@ -63,6 +65,12 @@ class Comment implements ObjectInterface
                 postAt: $postAt,
             ),
             new Promise(
+                onSuccess: static function (CommentObject $comment) use ($manager): void {
+                    $manager->updateWorkPlan([
+                        CommentObject::class => $comment,
+                        ObjectInterface::class => $comment,
+                    ]);
+                },
                 onFail: fn (Throwable $throwable) => throw $throwable,
             ),
         );

@@ -51,7 +51,7 @@ services:
     teknoo.east.website.endpoint.post.comment.bowl:
         class: '%teknoo.east.website.endpoint.post.comment.bowl.class%'
         arguments:
-            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface'
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface'
             - 0
 
     teknoo.east.website.endpoint.post.comment:
@@ -142,5 +142,6 @@ services:
             - '@Teknoo\East\Website\Writer\CommentWriter'
             - '@Teknoo\East\Foundation\Time\DatesService'
             - '@request_stack'
+            - '@Teknoo\East\Foundation\Manager\ManagerInterface'
         tags:
             - {name: form.type}
