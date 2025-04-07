@@ -26,10 +26,10 @@ _teknoo_website_post_comment:
         _controller: 'teknoo.east.website.endpoint.post.comment'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         cleanHtml: "%teknoo.east.website.rendering.clean_html%"
-        objectClass: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
+        objectClass: '%teknoo.east.website.dto.comment.class%'
         formClass: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
         formOptions:
-            commentClass: 'Teknoo\East\Website\Doctrine\Object\Comment'
+            comment_class: '%teknoo.east.website.persisted.comment.class%'
     requirements:
         slug: ((?!_wdt|_profiler).).+
 

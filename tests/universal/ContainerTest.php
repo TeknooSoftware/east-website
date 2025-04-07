@@ -30,12 +30,15 @@ use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
 use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\SaveObject;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Manager\Manager;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
@@ -49,6 +52,7 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -62,6 +66,7 @@ use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\PostCommentOnPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
@@ -342,6 +347,33 @@ class ContainerTest extends TestCase
         self::assertInstanceOf(
             ListAllPostsOfTagsEndPointInterface::class,
             $container->get(ListAllPostsOfTagsEndPointInterface::class)
+        );
+    }
+
+    public function testPostCommentOnPostEndPoint()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
+        $container->set(LoadPost::class, $this->createMock(LoadPost::class));
+        $container->set(ListTags::class, $this->createMock(ListTags::class));
+        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(CreateObject::class, $this->createMock(CreateObject::class));
+        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
+        $container->set(FormProcessingInterface::class, $this->createMock(FormProcessingInterface::class));
+        $container->set(SaveObject::class, $this->createMock(SaveObject::class));
+        $container->set(RedirectClientInterface::class, $this->createMock(RedirectClientInterface::class));
+        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
+
+        self::assertInstanceOf(
+            PostCommentOnPostEndPoint::class,
+            $container->get(PostCommentOnPostEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            PostCommentOnPostEndPointInterface::class,
+            $container->get(PostCommentOnPostEndPointInterface::class)
         );
     }
 

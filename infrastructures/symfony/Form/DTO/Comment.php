@@ -27,8 +27,11 @@ namespace Teknoo\East\WebsiteBundle\Form\DTO;
 
 use DateTimeInterface;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
+use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Object\Post;
+use Teknoo\Recipe\Promise\Promise;
+use Throwable;
 
 class Comment implements ObjectInterface
 {
@@ -41,20 +44,29 @@ class Comment implements ObjectInterface
     }
 
     /**
+     * @param WriterInterface<\Teknoo\East\Website\Object\Comment> $writer
      * @param class-string<CommentObject> $commentClass
      */
-    public function toObject(
+    public function persistInto(
+        WriterInterface $writer,
         string $commentClass,
         string $remoteIp,
         DateTimeInterface $postAt
-    ): CommentObject {
-        return new $commentClass(
-            post: $this->post,
-            author: $this->author,
-            remoteIp: $this->title,
-            title: $this->content,
-            content: $remoteIp,
-            postAt: $postAt
+    ): self {
+        $writer->save(
+            new $commentClass(
+                post: $this->post,
+                author: $this->author,
+                remoteIp: $remoteIp,
+                title: $this->title,
+                content: $this->content,
+                postAt: $postAt,
+            ),
+            new Promise(
+                onFail: fn (Throwable $throwable) => throw $throwable,
+            ),
         );
+
+        return $this;
     }
 }

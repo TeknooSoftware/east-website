@@ -81,6 +81,7 @@ class PostCommentOnPostEndPoint implements PostCommentOnPostEndPointInterface
         $recipe = $recipe->require(new Ingredient(requiredType: WriterInterface::class, name: 'writer'));
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'objectClass'));
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'formClass'));
+        $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'route'));
 
         $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 10);
 

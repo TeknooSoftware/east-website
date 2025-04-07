@@ -17,6 +17,9 @@ parameters:
     teknoo.east.website.template.posts.list: '@@@TeknooEastWebsite/Posts/list.html.twig'
     teknoo.east.website.template.posts.list_with_tags: '@@@TeknooEastWebsite/Posts/list-with-tags.html.twig'
 
+    teknoo.east.website.dto.comment.class: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
+    teknoo.east.website.persisted.comment.class: 'Teknoo\East\Website\Doctrine\Object\Comment'
+
 services:
     #Generic endpoints
     teknoo.east.website.endpoint.content.bowl:

@@ -68,11 +68,11 @@ class NewCommentType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): self
     {
         if (
-            !isset($options['commentClass'])
-            || !is_string($options['commentClass'])
-            || !is_a($options['commentClass'], CommentObject::class, true)
+            !isset($options['comment_class'])
+            || !is_string($options['comment_class'])
+            || !is_a($options['comment_class'], CommentObject::class, true)
         ) {
-            throw new TypeError('The option "commentClass" must be a class-string<CommentObject>');
+            throw new TypeError('The option "comment_class" must be a class-string<CommentObject>');
         }
 
         $builder->add('author', TextType::class, ['required' => true]);
@@ -90,12 +90,11 @@ class NewCommentType extends AbstractType
 
                 $this->datesService->passMeTheDate(
                     function (DateTimeImmutable $date) use ($dto, $options): void {
-                        $this->commentWriter->save(
-                            $dto->toObject(
-                                $options['commentClass'],
-                                implode(',', $this->requestStack->getMainRequest()?->getClientIps()),
-                                $date,
-                            ),
+                        $dto->persistInto(
+                            $this->commentWriter,
+                            $options['comment_class'],
+                            implode(',', $this->requestStack->getMainRequest()?->getClientIps() ?? []),
+                            $date,
                         );
                     }
                 );
@@ -113,8 +112,8 @@ class NewCommentType extends AbstractType
             'data_class' => Comment::class,
         ]);
 
-        $resolver->setRequired(['commentClass']);
-        $resolver->setAllowedTypes('commentClass', 'string');
+        $resolver->setRequired(['comment_class']);
+        $resolver->setAllowedTypes('comment_class', 'string');
 
 
         return $this;

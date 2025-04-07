@@ -36,7 +36,7 @@ use Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType;
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(ModerateCommentType::class)]
-class CommentTypeTest extends TestCase
+class ModerateCommentTypeTest extends TestCase
 {
     use FormTestTrait;
 
