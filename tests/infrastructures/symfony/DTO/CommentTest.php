@@ -27,12 +27,10 @@ namespace Teknoo\Tests\East\WebsiteBundle\DTO;
 
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
-use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Doctrine\Object\Comment as DoctrineComment;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\WebsiteBundle\Form\DTO\Comment;
-use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -57,6 +55,7 @@ class CommentTest extends TestCase
 
     public function testPersistInto()
     {
+        $now = new \DateTimeImmutable('2025-01-01 00:00:00');
         $dto = new Comment(
             $post = $this->createMock(Post::class),
             'foo',
@@ -64,27 +63,18 @@ class CommentTest extends TestCase
             'boo',
         );
 
-        $objectComment = $this->createMock(\Teknoo\East\Website\Object\Comment::class);
+        $post->expects($this->any())
+            ->method('getSlug')
+            ->willReturn('fooo');
 
-        $writer = $this->createMock(WriterInterface::class);
-        $writer->expects($this->once())
-            ->method('save')
-            ->with(
-                new DoctrineComment(
-                    $post,
-                    'foo',
-                    '127.0.0.1',
-                    'bar',
-                    'boo',
-                    $now = new \DateTimeImmutable('2025-01-01 00:00:00'),
-                )
-            )->willReturnCallback(
-                function ($object, PromiseInterface $promise) use ($writer, $objectComment) {
-                    self::assertInstanceOf(\Teknoo\East\Website\Object\Comment::class, $objectComment);
-                    $promise->success($objectComment);
-                    return $writer;
-                }
-            );
+        $objectComment = new DoctrineComment(
+            $post,
+            'foo',
+            '127.0.0.1',
+            'bar',
+            'boo',
+            $now,
+        );
 
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->once())
@@ -92,13 +82,15 @@ class CommentTest extends TestCase
             ->with([
                 \Teknoo\East\Website\Object\Comment::class => $objectComment,
                 ObjectInterface::class => $objectComment,
+                'parameters' => [
+                    'slug' => 'fooo',
+                ],
             ]);
 
         self::assertInstanceOf(
             Comment::class,
             $dto->persistInto(
                 $manager,
-                $writer,
                 DoctrineComment::class,
                 '127.0.0.1',
                 $now,

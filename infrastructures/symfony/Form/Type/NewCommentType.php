@@ -34,10 +34,11 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Teknoo\East\CommonBundle\Contracts\Form\FormManagerAwareInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Object\Comment as CommentObject;
-use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\WebsiteBundle\Form\DTO\Comment;
 use TypeError;
 
@@ -53,13 +54,11 @@ use function is_string;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class NewCommentType extends AbstractType
+class NewCommentType extends AbstractType implements FormManagerAwareInterface
 {
     public function __construct(
-        private readonly CommentWriter $commentWriter,
         private readonly DatesService $datesService,
         private readonly RequestStack $requestStack,
-        private readonly ManagerInterface $manager,
     ) {
     }
 
@@ -77,24 +76,59 @@ class NewCommentType extends AbstractType
             throw new TypeError('The option "comment_class" must be a class-string<CommentObject>');
         }
 
-        $builder->add('author', TextType::class, ['required' => true]);
-        $builder->add('title', TextType::class, ['required' => true]);
-        $builder->add('content', TextareaType::class, ['required' => true]);
+        if (
+            !isset($options['manager'])
+            || !$options['manager'] instanceof ManagerInterface
+        ) {
+            throw new TypeError('The option "manager" must be an instance of ' . ManagerInterface::class);
+        }
+
+        $builder->add(
+            'author',
+            TextType::class,
+            [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(),
+                ]
+            ]
+        );
+
+        $builder->add(
+            'title',
+            TextType::class,
+            [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(),
+                ]
+            ]
+        );
+
+        $builder->add(
+            'content',
+            TextareaType::class,
+            [
+                'required' => true,
+                'constraints' => [
+                    new NotBlank(),
+                ]
+            ]
+        );
 
         $builder->addEventListener(
             FormEvents::POST_SUBMIT,
             function (FormEvent $event) use ($options): void {
                 $dto = $event->getData();
 
-                if (!$dto instanceof Comment) {
+                if (!$dto instanceof Comment || !$event->getForm()->isValid()) {
                     return;
                 }
 
                 $this->datesService->passMeTheDate(
                     function (DateTimeInterface $date) use ($dto, $options): void {
                         $dto->persistInto(
-                            $this->manager,
-                            $this->commentWriter,
+                            $options['manager'],
                             $options['comment_class'],
                             implode(',', $this->requestStack->getMainRequest()?->getClientIps() ?? []),
                             $date,
@@ -115,9 +149,9 @@ class NewCommentType extends AbstractType
             'data_class' => Comment::class,
         ]);
 
-        $resolver->setRequired(['comment_class']);
+        $resolver->setRequired(['comment_class', 'manager']);
         $resolver->setAllowedTypes('comment_class', 'string');
-
+        $resolver->setAllowedTypes('manager', ManagerInterface::class);
 
         return $this;
     }

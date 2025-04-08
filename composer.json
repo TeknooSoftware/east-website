@@ -60,7 +60,7 @@
         "teknoo/immutable": "^3.0.19",
         "teknoo/states": "^6.4.3",
         "teknoo/recipe": "^6.0.3",
-        "teknoo/east-common": "^3.2",
+        "teknoo/east-common": "^3.3",
         "teknoo/east-foundation": "^8.0.4",
         "teknoo/east-translation": "^1.0.3"
     },
@@ -94,6 +94,7 @@
         "symfony/security-http": "^6.4||^7.2",
         "symfony/security-bundle": "^6.4||^7.2",
         "symfony/translation": "^6.4||^7.2",
+        "symfony/validator": "^6.4||^7.2",
         "symfony/yaml": "^6.4||^7.2",
         "symfony/var-dumper": "^6.4||^7.2",
         "twig/twig": "^3.19",

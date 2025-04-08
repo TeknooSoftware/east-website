@@ -27,53 +27,45 @@ namespace Teknoo\East\WebsiteBundle\Form\DTO;
 
 use DateTimeInterface;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
-use Teknoo\East\Common\Contracts\Writer\WriterInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Object\Post;
-use Teknoo\Recipe\Promise\Promise;
-use Throwable;
 
 class Comment implements ObjectInterface
 {
     public function __construct(
         public Post $post,
-        public string $author = '',
-        public string $title = '',
-        public string $content = '',
+        public ?string $author = '',
+        public ?string $title = '',
+        public ?string $content = '',
     ) {
     }
 
     /**
-     * @param WriterInterface<\Teknoo\East\Website\Object\Comment> $writer
      * @param class-string<CommentObject> $commentClass
      */
     public function persistInto(
         ManagerInterface $manager,
-        WriterInterface $writer,
         string $commentClass,
         string $remoteIp,
         DateTimeInterface $postAt
     ): self {
-        $writer->save(
-            new $commentClass(
-                post: $this->post,
-                author: $this->author,
-                remoteIp: $remoteIp,
-                title: $this->title,
-                content: $this->content,
-                postAt: $postAt,
-            ),
-            new Promise(
-                onSuccess: static function (CommentObject $comment) use ($manager): void {
-                    $manager->updateWorkPlan([
-                        CommentObject::class => $comment,
-                        ObjectInterface::class => $comment,
-                    ]);
-                },
-                onFail: fn (Throwable $throwable) => throw $throwable,
-            ),
+        $comment = new $commentClass(
+            post: $this->post,
+            author: (string) $this->author,
+            remoteIp: $remoteIp,
+            title: (string) $this->title,
+            content: (string) $this->content,
+            postAt: $postAt,
         );
+
+        $manager->updateWorkPlan([
+            CommentObject::class => $comment,
+            ObjectInterface::class => $comment,
+            'parameters' => [
+                'slug' => $this->post->getSlug(),
+            ],
+        ]);
 
         return $this;
     }

@@ -40,7 +40,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Doctrine\Object\Comment;
-use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\WebsiteBundle\Form\Type\NewCommentType;
 use TypeError;
 
@@ -67,7 +66,6 @@ class NewCommentTypeTest extends TestCase
     public function buildForm()
     {
         return new NewCommentType(
-            $this->createMock(CommentWriter::class),
             $this->getDatesService(),
             $this->createMock(RequestStack::class),
             $this->createMock(ManagerInterface::class),
@@ -75,7 +73,10 @@ class NewCommentTypeTest extends TestCase
     }
     protected function getOptions(): array
     {
-        return ['comment_class' => Comment::class];
+        return [
+            'comment_class' => Comment::class,
+            'manager' => $this->createMock(ManagerInterface::class),
+        ];
     }
 
     public function testConfigureOptions()
@@ -106,6 +107,15 @@ class NewCommentTypeTest extends TestCase
         );
     }
 
+    public function testBuildFormWithWrongManager()
+    {
+        $this->expectException(TypeError::class);
+        $this->buildForm()->buildForm(
+            $this->createMock(FormBuilder::class),
+            ['comment_class' => Comment::class],
+        );
+    }
+
     public function testBuildFormOnSubmitWithWrongDTOInstance()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
@@ -133,7 +143,7 @@ class NewCommentTypeTest extends TestCase
         );
     }
 
-    public function testBuildFormOnSubmitWithGoodDTOInstance()
+    public function testBuildFormOnSubmitWithGoodDTOInstanceAndFormValid()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
 
@@ -149,7 +159,9 @@ class NewCommentTypeTest extends TestCase
                     $dto = $this->createMock(\Teknoo\East\WebsiteBundle\Form\DTO\Comment::class);
                     $dto->expects($this->once())->method('persistInto');
 
-                    $callback(new FormEvent($this->createMock(FormInterface::class), $dto));
+                    $form = $this->createMock(FormInterface::class);
+                    $form->expects($this->once())->method('isValid')->willReturn(true);
+                    $callback(new FormEvent($form, $dto));
 
                     return $builder;
                 }
@@ -164,6 +176,40 @@ class NewCommentTypeTest extends TestCase
                     return $this->getDatesService();
                 }
         );
+
+        self::assertInstanceOf(
+            AbstractType::class,
+            $this->buildForm()->buildForm($builder, $this->getOptions())
+        );
+    }
+
+    public function testBuildFormOnSubmitWithGoodDTOInstanceAndFormNotValid()
+    {
+        $builder = $this->createMock(FormBuilderInterface::class);
+
+        $builder->expects($this->any())
+            ->method('add')
+            ->willReturnSelf();
+
+        $builder->expects($this->any())
+            ->method('addEventListener')
+            ->willReturnCallback(
+                function ($event, $callback) use ($builder) {
+                    self::assertEquals(FormEvents::POST_SUBMIT, $event);
+                    $dto = $this->createMock(\Teknoo\East\WebsiteBundle\Form\DTO\Comment::class);
+                    $dto->expects($this->never())->method('persistInto');
+
+                    $form = $this->createMock(FormInterface::class);
+                    $form->expects($this->once())->method('isValid')->willReturn(false);
+                    $callback(new FormEvent($form, $dto));
+
+                    return $builder;
+                }
+            );
+
+        $this->getDatesService()
+            ->expects($this->never())
+            ->method('passMeTheDate');
 
         self::assertInstanceOf(
             AbstractType::class,

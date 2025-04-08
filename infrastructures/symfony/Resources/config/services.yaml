@@ -139,7 +139,6 @@ services:
     Teknoo\East\WebsiteBundle\Form\Type\NewCommentType:
         class: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
         arguments:
-            - '@Teknoo\East\Website\Writer\CommentWriter'
             - '@Teknoo\East\Foundation\Time\DatesService'
             - '@request_stack'
             - '@Teknoo\East\Foundation\Manager\ManagerInterface'
