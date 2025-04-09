@@ -31,6 +31,14 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Object\Post;
 
+/**
+ * @todo
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ * @license     https://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
 class Comment implements ObjectInterface
 {
     public function __construct(

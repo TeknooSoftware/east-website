@@ -37,9 +37,7 @@ use Teknoo\Recipe\Promise\Promise;
 use Throwable;
 
 /**
- * Step recipe to load a published Post instance, from its slug, thank to the Post's loader and put it into the
- * workplan at Post::class key, and `objectInstance`. The template file to use with the fetched post is also
- * injected to the template.
+ * @todo
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

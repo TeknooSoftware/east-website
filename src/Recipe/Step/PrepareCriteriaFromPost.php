@@ -25,12 +25,9 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use Teknoo\East\Common\Query\Expr\ObjectReference;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
-use Teknoo\East\Website\Loader\TagLoader;
-use Teknoo\East\Website\Object\Tag;
-use Teknoo\East\Website\Query\Tag\TagFromSlugQuery;
-use Teknoo\Recipe\Promise\Promise;
-use Throwable;
+use Teknoo\East\Website\Object\Post;
 
 /**
  * @todo
@@ -40,25 +37,28 @@ use Throwable;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class ExtractTag
+class PrepareCriteriaFromPost
 {
-    public function __construct(
-        private readonly TagLoader $loader,
-    ) {
-    }
+    /**
+     * @param array<string, mixed> $criteria
+     */
+    public function __invoke(
+        ManagerInterface $manager,
+        ?Post $post = null,
+        array $criteria = [],
+    ): self {
+        if (!$post) {
+            throw new \RuntimeException(
+                message: 'Post is not loaded',
+                code: 403
+            );
+        }
 
-    public function __invoke(ManagerInterface $manager, string $tag): self
-    {
-        $this->loader->fetch(
-            new TagFromSlugQuery($tag),
-            new Promise(
-                fn (Tag $tag) => $manager->updateWorkPlan([
-                    Tag::class => $tag,
-                    'tag' => $tag,
-                ]),
-                fn (Throwable $throwable) => $manager->error($throwable,),
-            )
-        );
+        $criteria['post'] = new ObjectReference($post);
+
+        $manager->updateWorkPlan([
+            'criteria' => $criteria,
+        ]);
 
         return $this;
     }

@@ -34,7 +34,7 @@ use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
 /**
- * Symfony form to edit East Website Page's Type and theirs dynamics blocks
+ * @todo
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

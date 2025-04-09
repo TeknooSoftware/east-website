@@ -25,17 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Query\Tag;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
-use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\East\Website\Query\Tag\TagFromSlugQuery;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Website\Object\Post;
-use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
 
 /**

@@ -35,6 +35,8 @@ use Teknoo\East\Common\Object\ObjectTrait;
 use Teknoo\East\Common\Service\FindSlugService;
 
 /**
+ * @todo
+ *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     https://teknoo.software/license/mit         MIT License

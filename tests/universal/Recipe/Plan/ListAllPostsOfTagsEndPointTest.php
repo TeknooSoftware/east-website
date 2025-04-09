@@ -30,7 +30,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
-use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;

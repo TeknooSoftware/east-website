@@ -31,8 +31,7 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface
 use Teknoo\East\Website\Object\Comment;
 
 /**
- * Object loader in charge of object `Teknoo\East\Website\Object\Comment`.
- * Must provide an implementation of `CommentRepositoryInterface` to be able work.
+ * @todo
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

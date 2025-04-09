@@ -29,13 +29,22 @@ use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\ListObjectsAccessControlInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\ObjectAccessControlInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\SearchFormLoaderInterface;
 use Teknoo\East\Common\Recipe\Step\CreateObject;
+use Teknoo\East\Common\Recipe\Step\DeleteObject;
+use Teknoo\East\Common\Recipe\Step\ExtractOrder;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
+use Teknoo\East\Common\Recipe\Step\JumpIf;
+use Teknoo\East\Common\Recipe\Step\LoadListObjects;
+use Teknoo\East\Common\Recipe\Step\LoadObject;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\RenderList;
 use Teknoo\East\Common\Recipe\Step\SaveObject;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Recipe\PlanInterface;
@@ -47,8 +56,11 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\DeleteCommentOfPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListCommentsOfPostEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ModerateCommentOfPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -60,8 +72,11 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
+use Teknoo\East\Website\Recipe\Plan\DeleteCommentOfPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ListCommentsOfPostEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ModerateCommentOfPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\PostCommentOnPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
@@ -70,6 +85,8 @@ use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
+use Teknoo\East\Website\Recipe\Step\LoadPostFromRequest;
+use Teknoo\East\Website\Recipe\Step\PrepareCriteriaFromPost;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\Website\Writer\ContentWriter;
@@ -83,6 +100,7 @@ use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 use function DI\create;
 use function DI\decorate;
 use function DI\get;
+use function DI\value;
 
 return [
     //Loaders
@@ -185,6 +203,11 @@ return [
             get(PostLoader::class),
             get(DatesService::class),
         ),
+    LoadPostFromRequest::class => create()
+        ->constructor(
+            get(PostLoader::class),
+        ),
+    PrepareCriteriaFromPost::class => create(),
 
     //Base recipe
     OriginalRecipeInterface::class => get(Recipe::class),
@@ -229,6 +252,74 @@ return [
             loadTranslationsInterface: $loadTranslations,
             render: $container->get(Render::class),
             renderError: $container->get(RenderError::class)
+        );
+    },
+
+    ListCommentsOfPostEndPointInterface::class => get(ListCommentsOfPostEndPoint::class),
+    ListCommentsOfPostEndPoint::class => create()
+        ->constructor(
+            get(OriginalRecipeInterface::class . ':CRUD'),
+            get(ExtractPage::class),
+            get(ExtractOrder::class),
+            get(LoadPostFromRequest::class),
+            get(PrepareCriteriaFromPost::class),
+            get(LoadListObjects::class),
+            get(RenderList::class),
+            get(RenderError::class),
+            get(SearchFormLoaderInterface::class),
+            get(ListObjectsAccessControlInterface::class),
+            get('teknoo.east.common.get_default_error_template'),
+            value([]),
+        ),
+
+    ModerateCommentOfPostEndPointInterface::class => get(ModerateCommentOfPostEndPoint::class),
+    ModerateCommentOfPostEndPoint::class => static function (
+        ContainerInterface $container
+    ): ModerateCommentOfPostEndPoint {
+        $accessControl = null;
+        if ($container->has(ObjectAccessControlInterface::class)) {
+            $accessControl = $container->get(ObjectAccessControlInterface::class);
+        }
+
+        $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
+
+        return new ModerateCommentOfPostEndPoint(
+            $container->get(OriginalRecipeInterface::class . ':CRUD'),
+            $container->get(LoadPostFromRequest::class),
+            $container->get(PrepareCriteriaFromPost::class),
+            $container->get(LoadObject::class),
+            $container->get(FormHandlingInterface::class),
+            $container->get(FormProcessingInterface::class),
+            $container->get(SaveObject::class),
+            $container->get(RenderFormInterface::class),
+            $container->get(RenderError::class),
+            $accessControl,
+            $defaultErrorTemplate,
+        );
+    },
+    DeleteCommentOfPostEndPointInterface::class => get(DeleteCommentOfPostEndPoint::class),
+    DeleteCommentOfPostEndPoint::class => static function (
+        ContainerInterface $container,
+    ): DeleteCommentOfPostEndPoint {
+        $accessControl = null;
+        if ($container->has(ObjectAccessControlInterface::class)) {
+            $accessControl = $container->get(ObjectAccessControlInterface::class);
+        }
+
+        $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
+
+        return new DeleteCommentOfPostEndPoint(
+            $container->get(OriginalRecipeInterface::class . ':CRUD'),
+            $container->get(LoadPostFromRequest::class),
+            $container->get(PrepareCriteriaFromPost::class),
+            $container->get(LoadObject::class),
+            $container->get(DeleteObject::class),
+            $container->get(JumpIf::class),
+            $container->get(RedirectClientInterface::class),
+            $container->get(Render::class),
+            $container->get(RenderError::class),
+            $accessControl,
+            $defaultErrorTemplate,
         );
     },
 

@@ -26,9 +26,9 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Recipe\Step;
 
 use Teknoo\East\Foundation\Manager\ManagerInterface;
-use Teknoo\East\Website\Loader\TagLoader;
-use Teknoo\East\Website\Object\Tag;
-use Teknoo\East\Website\Query\Tag\TagFromSlugQuery;
+use Teknoo\East\Website\Loader\PostLoader;
+use Teknoo\East\Website\Object\Post;
+use Teknoo\East\Website\Query\Post\PostFromSlugQuery;
 use Teknoo\Recipe\Promise\Promise;
 use Throwable;
 
@@ -40,24 +40,32 @@ use Throwable;
  * @license     https://teknoo.software/license/mit         MIT License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class ExtractTag
+class LoadPostFromRequest
 {
     public function __construct(
-        private readonly TagLoader $loader,
+        private PostLoader $postLoader,
     ) {
     }
 
-    public function __invoke(ManagerInterface $manager, string $tag): self
-    {
-        $this->loader->fetch(
-            new TagFromSlugQuery($tag),
+    /**
+     * @param array<string, string> $parameters
+     */
+    public function __invoke(
+        ManagerInterface $manager,
+        string $id,
+        array $parameters = [],
+    ): self {
+        $parameters['postId'] = $id;
+
+        $this->postLoader->load(
+            $id,
             new Promise(
-                fn (Tag $tag) => $manager->updateWorkPlan([
-                    Tag::class => $tag,
-                    'tag' => $tag,
+                static fn (Post $post) => $manager->updateWorkPlan([
+                    'post' => $post,
+                    'parameters' => $parameters,
                 ]),
-                fn (Throwable $throwable) => $manager->error($throwable,),
-            )
+                static fn (Throwable $error) => $manager->error($error),
+            ),
         );
 
         return $this;

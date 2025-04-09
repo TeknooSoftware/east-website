@@ -60,7 +60,7 @@
         "teknoo/immutable": "^3.0.19",
         "teknoo/states": "^6.4.3",
         "teknoo/recipe": "^6.0.3",
-        "teknoo/east-common": "^3.3",
+        "teknoo/east-common": "^3.4",
         "teknoo/east-foundation": "^8.0.4",
         "teknoo/east-translation": "^1.0.3"
     },

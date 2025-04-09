@@ -7,6 +7,10 @@ parameters:
     teknoo.east.website.endpoint.posts_of_tag.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
 
+    teknoo.east.website.endpoint.comment.list.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.comment.moderate.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.comment.delete.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+
     teknoo.east.website.admin.rendering.clean_html: true
     teknoo.east.website.rendering.clean_html: false
 
@@ -85,6 +89,45 @@ services:
         public: true
         arguments:
             - '@teknoo.east.website.endpoint.posts_of_tag.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.list.bowl:
+        class: '%teknoo.east.website.endpoint.comment.list.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListCommentsOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.list:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.list.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.moderate.bowl:
+        class: '%teknoo.east.website.endpoint.comment.moderate.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ModerateCommentOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.moderate:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.moderate.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.delete.bowl:
+        class: '%teknoo.east.website.endpoint.comment.delete.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\DeleteCommentOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.delete:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.delete.bowl'
             - '@service_container'
 
     teknoo.east.website.endpoint.media.bowl:

@@ -28,8 +28,7 @@ namespace Teknoo\East\Website\Contracts\Recipe\Plan;
 use Teknoo\Recipe\EditablePlanInterface;
 
 /**
- * Interface defining a HTTP EndPoint Recipe able to load a `Teknoo\East\Website\Object\Content` instance and render a
- * page via a template engine and send it to the client.
+ * @todo
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

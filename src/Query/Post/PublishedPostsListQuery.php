@@ -37,8 +37,7 @@ use Teknoo\Immutable\ImmutableTrait;
 use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
- * Class implementing query to load a non soft-deleted Post instance from its slug, and pass result to the
- * passed promise.
+ * @todo
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
