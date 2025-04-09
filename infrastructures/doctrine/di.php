@@ -62,15 +62,7 @@ return [
             return new OdmContentRepository($repository);
         }
 
-        $repository = $container->get(ObjectManager::class)->getRepository(Content::class);
-        if ($repository instanceof ObjectRepository) {
-            return new ContentRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new ContentRepository($repository);
     },
 
     PostRepositoryInterface::class => static function (ContainerInterface $container): PostRepositoryInterface {
@@ -79,15 +71,7 @@ return [
             return new OdmPostRepository($repository);
         }
 
-        $repository = $container->get(ObjectManager::class)->getRepository(Post::class);
-        if ($repository instanceof ObjectRepository) {
-            return new PostRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new PostRepository($repository);
     },
 
     CommentRepositoryInterface::class => static function (ContainerInterface $container): CommentRepositoryInterface {
@@ -96,15 +80,7 @@ return [
             return new OdmCommentRepository($repository);
         }
 
-        $repository = $container->get(ObjectManager::class)->getRepository(Comment::class);
-        if ($repository instanceof ObjectRepository) {
-            return new CommentRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new CommentRepository($repository);
     },
 
     ItemRepositoryInterface::class => static function (ContainerInterface $container): ItemRepositoryInterface {
@@ -113,14 +89,7 @@ return [
             return new OdmItemRepository($repository);
         }
 
-        if ($repository instanceof ObjectRepository) {
-            return new ItemRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new ItemRepository($repository);
     },
 
     TypeRepositoryInterface::class => static function (ContainerInterface $container): TypeRepositoryInterface {
@@ -129,14 +98,7 @@ return [
             return new OdmTypeRepository($repository);
         }
 
-        if ($repository instanceof ObjectRepository) {
-            return new TypeRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new TypeRepository($repository);
     },
 
     TagRepositoryInterface::class => static function (ContainerInterface $container): TagRepositoryInterface {
@@ -145,13 +107,6 @@ return [
             return new OdmTagRepository($repository);
         }
 
-        if ($repository instanceof ObjectRepository) {
-            return new TagRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new TagRepository($repository);
     },
 ];

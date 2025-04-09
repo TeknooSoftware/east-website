@@ -101,18 +101,6 @@ class ContainerTest extends TestCase
         );
     }
 
-    private function generateTestForRepositoryWithUnsupportedRepository(string $objectClass, string $repositoryClass)
-    {
-        $container = $this->buildContainer();
-        $objectManager = $this->createMock(ObjectManager::class);
-        $objectManager->expects($this->any())->method('getRepository')->with($objectClass)->willReturn(
-            $this->createMock(\DateTime::class)
-        );
-
-        $container->set(ObjectManager::class, $objectManager);
-        $container->get($repositoryClass);
-    }
-
     public function testItemRepositoryWithObjectRepository()
     {
         $this->generateTestForRepository(Item::class, ItemRepositoryInterface::class, ObjectRepository::class);
@@ -171,42 +159,6 @@ class ContainerTest extends TestCase
     public function testTypeRepositoryWithDocumentRepository()
     {
         $this->generateTestForRepository(Type::class, TypeRepositoryInterface::class, DocumentRepository::class);
-    }
-
-    public function testItemRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Item::class, ItemRepositoryInterface::class);
-    }
-
-    public function testContentRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Content::class, ContentRepositoryInterface::class);
-    }
-
-    public function testTagRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Tag::class, TagRepositoryInterface::class);
-    }
-
-    public function testPostRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Post::class, PostRepositoryInterface::class);
-    }
-
-    public function testCommentRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Comment::class, CommentRepositoryInterface::class);
-    }
-
-    public function testTypeRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Type::class, TypeRepositoryInterface::class);
     }
 
     public function testOriginalRecipeInterfaceStatic()
