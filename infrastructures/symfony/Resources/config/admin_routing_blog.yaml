@@ -72,7 +72,7 @@ _teknoo_website_admin_post_comment_moderate:
     defaults:
         _controller: 'teknoo.east.website.endpoint.comment.moderate'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
-        formClass: 'Teknoo\East\Website\Doctrine\Form\Type\ModerateCommentType'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'
         loader: '@Teknoo\East\Website\Loader\CommentLoader'
         slugField: 'slug'
         template: '@@TeknooEastWebsite/AdminComment/moderate.html.twig'
