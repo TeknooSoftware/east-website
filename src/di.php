@@ -256,21 +256,35 @@ return [
     },
 
     ListCommentsOfPostEndPointInterface::class => get(ListCommentsOfPostEndPoint::class),
-    ListCommentsOfPostEndPoint::class => create()
-        ->constructor(
-            get(OriginalRecipeInterface::class . ':CRUD'),
-            get(ExtractPage::class),
-            get(ExtractOrder::class),
-            get(LoadPostFromRequest::class),
-            get(PrepareCriteriaFromPost::class),
-            get(LoadListObjects::class),
-            get(RenderList::class),
-            get(RenderError::class),
-            get(SearchFormLoaderInterface::class),
-            get(ListObjectsAccessControlInterface::class),
-            get('teknoo.east.common.get_default_error_template'),
-            value([]),
-        ),
+    ListCommentsOfPostEndPoint::class => static function (
+        ContainerInterface $container,
+    ): ListCommentsOfPostEndPoint {
+        $formLoader = null;
+        if ($container->has(SearchFormLoaderInterface::class)) {
+            $formLoader = $container->get(SearchFormLoaderInterface::class);
+        }
+
+        $accessControl = null;
+        if ($container->has(ListObjectsAccessControlInterface::class)) {
+            $accessControl = $container->get(ListObjectsAccessControlInterface::class);
+        }
+
+        $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
+
+        return new ListCommentsOfPostEndPoint(
+            recipe: $container->get(OriginalRecipeInterface::class . ':CRUD'),
+            extractPage: $container->get(ExtractPage::class),
+            extractOrder: $container->get(ExtractOrder::class),
+            loadAccountFromRequest: $container->get(LoadPostFromRequest::class),
+            prepareCriteriaFromPost: $container->get(PrepareCriteriaFromPost::class),
+            loadListObjects: $container->get(LoadListObjects::class),
+            renderList: $container->get(RenderList::class),
+            renderError: $container->get(RenderError::class),
+            searchFormLoader: $formLoader,
+            listObjectsAccessControl: $accessControl,
+            defaultErrorTemplate: $defaultErrorTemplate,
+        );
+    },
 
     ModerateCommentOfPostEndPointInterface::class => get(ModerateCommentOfPostEndPoint::class),
     ModerateCommentOfPostEndPoint::class => static function (
@@ -284,17 +298,17 @@ return [
         $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
 
         return new ModerateCommentOfPostEndPoint(
-            $container->get(OriginalRecipeInterface::class . ':CRUD'),
-            $container->get(LoadPostFromRequest::class),
-            $container->get(PrepareCriteriaFromPost::class),
-            $container->get(LoadObject::class),
-            $container->get(FormHandlingInterface::class),
-            $container->get(FormProcessingInterface::class),
-            $container->get(SaveObject::class),
-            $container->get(RenderFormInterface::class),
-            $container->get(RenderError::class),
-            $accessControl,
-            $defaultErrorTemplate,
+            recipe: $container->get(OriginalRecipeInterface::class . ':CRUD'),
+            loadAccountFromRequest: $container->get(LoadPostFromRequest::class),
+            prepareCriteriaFromPost: $container->get(PrepareCriteriaFromPost::class),
+            loadObject: $container->get(LoadObject::class),
+            formHandling: $container->get(FormHandlingInterface::class),
+            formProcessing: $container->get(FormProcessingInterface::class),
+            saveObject: $container->get(SaveObject::class),
+            renderForm: $container->get(RenderFormInterface::class),
+            renderError: $container->get(RenderError::class),
+            objectAccessControl: $accessControl,
+            defaultErrorTemplate: $defaultErrorTemplate,
         );
     },
     DeleteCommentOfPostEndPointInterface::class => get(DeleteCommentOfPostEndPoint::class),
@@ -309,17 +323,17 @@ return [
         $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
 
         return new DeleteCommentOfPostEndPoint(
-            $container->get(OriginalRecipeInterface::class . ':CRUD'),
-            $container->get(LoadPostFromRequest::class),
-            $container->get(PrepareCriteriaFromPost::class),
-            $container->get(LoadObject::class),
-            $container->get(DeleteObject::class),
-            $container->get(JumpIf::class),
-            $container->get(RedirectClientInterface::class),
-            $container->get(Render::class),
-            $container->get(RenderError::class),
-            $accessControl,
-            $defaultErrorTemplate,
+            recipe: $container->get(OriginalRecipeInterface::class . ':CRUD'),
+            loadAccountFromRequest: $container->get(LoadPostFromRequest::class),
+            prepareCriteriaFromPost: $container->get(PrepareCriteriaFromPost::class),
+            loadObject: $container->get(LoadObject::class),
+            deleteObject: $container->get(DeleteObject::class),
+            jumpIf: $container->get(JumpIf::class),
+            redirectClient: $container->get(RedirectClientInterface::class),
+            render: $container->get(Render::class),
+            renderError: $container->get(RenderError::class),
+            objectAccessControl: $accessControl,
+            defaultErrorTemplate: $defaultErrorTemplate,
         );
     },
 

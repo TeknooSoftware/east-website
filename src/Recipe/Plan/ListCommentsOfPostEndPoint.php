@@ -63,9 +63,9 @@ class ListCommentsOfPostEndPoint extends ListObjectEndPoint implements ListComme
         RenderList $renderList,
         RenderError $renderError,
         SearchFormLoaderInterface $searchFormLoader,
-        ListObjectsAccessControlInterface $listObjectsAccessControl,
+        ?ListObjectsAccessControlInterface $listObjectsAccessControl,
         string|Stringable $defaultErrorTemplate,
-        array $loadListObjectsWiths,
+        array $loadListObjectsWiths = [],
     ) {
         parent::__construct(
             recipe: $recipe,
