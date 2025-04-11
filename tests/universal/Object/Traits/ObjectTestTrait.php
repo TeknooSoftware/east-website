@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Object\Traits;
 
-use Teknoo\East\Website\Object\DeletableInterface;
+use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License

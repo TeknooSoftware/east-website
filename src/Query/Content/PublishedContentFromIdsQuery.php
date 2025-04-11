@@ -70,7 +70,6 @@ class PublishedContentFromIdsQuery implements QueryCollectionInterface, Immutabl
             [
                 'id' => new In($this->ids),
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             $promise
         );

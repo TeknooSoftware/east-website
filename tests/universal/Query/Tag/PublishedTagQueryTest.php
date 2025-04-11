@@ -83,7 +83,6 @@ class PublishedTagQueryTest extends TestCase
             ->method('findBy')
             ->with(
                 [
-                    'deletedAt' => null,
                     'id' => new In(['foo', 'bar'])
                 ],
                 $promise,
@@ -97,7 +96,6 @@ class PublishedTagQueryTest extends TestCase
                     self::assertEquals(
                         [
                             'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                            'deletedAt' => null,
                         ],
                         $criteria
                     );
@@ -134,7 +132,6 @@ class PublishedTagQueryTest extends TestCase
                     self::assertEquals(
                         [
                             'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                            'deletedAt' => null,
                         ],
                         $criteria
                     );

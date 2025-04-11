@@ -71,7 +71,6 @@ class PublishedPostsListInTagQuery implements QueryCollectionInterface, Immutabl
             criteria: [
                 'tags' => new ObjectReference($this->tag),
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             orderBy: [
                 'publishedAt' => Direction::Desc,

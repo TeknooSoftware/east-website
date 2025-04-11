@@ -65,7 +65,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
         self::assertInstanceOf(
             PublishedPostFromSlugQuery::class,

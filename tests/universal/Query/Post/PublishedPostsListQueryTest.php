@@ -74,7 +74,7 @@ class PublishedPostsListQueryTest extends TestCase
         $repository->expects($this->once())
             ->method('count')
             ->with(
-                ['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,],
+                ['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),],
                 self::callback(
                     fn($p) => $p instanceof PromiseInterface
                 )
@@ -88,7 +88,7 @@ class PublishedPostsListQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,],)
+            ->with(['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24'))],)
             ->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository) {
                     $promise->success($this->createMock(\Iterator::class));

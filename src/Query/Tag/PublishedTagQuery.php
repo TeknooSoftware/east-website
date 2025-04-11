@@ -72,7 +72,6 @@ class PublishedTagQuery implements QueryCollectionInterface, ImmutableInterface
             'tags.id',
             [
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             new Promise(
                 function (array $tags) use ($repository, $promise): void {
@@ -84,7 +83,6 @@ class PublishedTagQuery implements QueryCollectionInterface, ImmutableInterface
 
                     $repository->findBy(
                         criteria: [
-                            'deletedAt' => null,
                             'id' => new In($tags)
                         ],
                         promise: $promise,

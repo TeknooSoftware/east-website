@@ -84,7 +84,6 @@ class PublishedContentFromSlugQuery implements QueryElementInterface, ImmutableI
             [
                 'slug' => $this->slug,
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             $fetchingPromise->next(
                 promise: $promise,

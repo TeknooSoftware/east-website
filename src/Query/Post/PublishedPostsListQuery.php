@@ -67,7 +67,6 @@ class PublishedPostsListQuery implements QueryCollectionInterface, ImmutableInte
         $this->doQuery(
             criteria: [
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             orderBy: [
                 'publishedAt' => Direction::Desc,

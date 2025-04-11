@@ -84,7 +84,6 @@ class PublishedPostFromSlugQuery implements QueryElementInterface, ImmutableInte
             criteria: [
                 'slug' => $this->slug,
                 'publishedAt' => new Lower($this->now),
-                'deletedAt' => null,
             ],
             promise: $fetchingPromise->next(
                 promise: $promise,

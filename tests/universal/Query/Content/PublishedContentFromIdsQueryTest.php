@@ -66,7 +66,7 @@ class PublishedContentFromIdsQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
         self::assertInstanceOf(
             PublishedContentFromIdsQuery::class,

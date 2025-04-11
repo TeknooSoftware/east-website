@@ -80,7 +80,6 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                    'deletedAt' => null,
                 ],
                 self::callback(
                     fn($p) => $p instanceof PromiseInterface
@@ -99,7 +98,6 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                    'deletedAt' => null,
                 ]
             )->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository) {
@@ -130,7 +128,6 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                    'deletedAt' => null,
                 ],
                 self::callback(
                     fn($p) => $p instanceof PromiseInterface
@@ -148,7 +145,6 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                    'deletedAt' => null,
                 ],
                 self::callback(
                     fn($p) => $p instanceof PromiseInterface
