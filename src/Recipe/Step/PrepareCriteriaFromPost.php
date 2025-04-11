@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use DomainException;
 use Teknoo\East\Common\Query\Expr\ObjectReference;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Post;
@@ -48,10 +49,14 @@ class PrepareCriteriaFromPost
         array $criteria = [],
     ): self {
         if (!$post) {
-            throw new \RuntimeException(
-                message: 'Post is not loaded',
-                code: 403
+            $manager->error(
+                new DomainException(
+                    message: 'Post is not loaded',
+                    code: 404
+                )
             );
+
+            return $this;
         }
 
         $criteria['post'] = new ObjectReference($post);

@@ -56,18 +56,49 @@ class Comment implements
     use AutomatedTrait;
     use ProxyTrait;
 
+    protected Post $post;
+
+    protected ?string $moderatedContent = null;
+
+    protected ?string $moderatedTitle = null;
+
+    protected ?string $moderatedAuthor = null;
+
+    protected ?DateTimeInterface $moderatedAt = null;
+
+    protected DateTimeInterface $postAt;
+
+    protected string $content;
+
+    protected string $title;
+
+    protected string $remoteIp;
+
+    protected string $author;
+
     public function __construct(
-        protected Post $post,
-        protected string $author,
-        protected string $remoteIp,
-        protected string $title,
-        protected string $content,
-        protected DateTimeInterface $postAt,
-        protected ?DateTimeInterface $moderatedAt = null,
-        protected ?string $moderatedAuthor = null,
-        protected ?string $moderatedTitle = null,
-        protected ?string $moderatedContent = null,
+        Post $post,
+        string $author,
+        string $remoteIp,
+        string $title,
+        string $content,
+        DateTimeInterface $postAt,
+        ?DateTimeInterface $moderatedAt = null,
+        ?string $moderatedAuthor = null,
+        ?string $moderatedTitle = null,
+        ?string $moderatedContent = null,
     ) {
+        $this->author = $author;
+        $this->remoteIp = $remoteIp;
+        $this->title = $title;
+        $this->content = $content;
+        $this->postAt = $postAt;
+        $this->moderatedAt = $moderatedAt;
+        $this->moderatedAuthor = $moderatedAuthor;
+        $this->moderatedTitle = $moderatedTitle;
+        $this->moderatedContent = $moderatedContent;
+        $this->post = $post;
+
         $this->initializeStateProxy();
         $this->updateStates();
     }

@@ -31,13 +31,22 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\ListObjectsAccessControlInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\ObjectAccessControlInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\SearchFormLoaderInterface;
 use Teknoo\East\Common\Recipe\Step\CreateObject;
+use Teknoo\East\Common\Recipe\Step\DeleteObject;
+use Teknoo\East\Common\Recipe\Step\ExtractOrder;
 use Teknoo\East\Common\Recipe\Step\ExtractPage;
 use Teknoo\East\Common\Recipe\Step\ExtractSlug;
+use Teknoo\East\Common\Recipe\Step\JumpIf;
+use Teknoo\East\Common\Recipe\Step\LoadListObjects;
+use Teknoo\East\Common\Recipe\Step\LoadObject;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
+use Teknoo\East\Common\Recipe\Step\RenderList;
 use Teknoo\East\Common\Recipe\Step\SaveObject;
 use Teknoo\East\Common\Service\DeletingService;
 use Teknoo\East\Foundation\Manager\Manager;
@@ -50,8 +59,11 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\DeleteCommentOfPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ListCommentsOfPostEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Plan\ModerateCommentOfPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface as DbManagerInterface;
@@ -64,8 +76,11 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
+use Teknoo\East\Website\Recipe\Plan\DeleteCommentOfPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ListCommentsOfPostEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ModerateCommentOfPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\PostCommentOnPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
@@ -74,6 +89,8 @@ use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
+use Teknoo\East\Website\Recipe\Step\LoadPostFromRequest;
+use Teknoo\East\Website\Recipe\Step\PrepareCriteriaFromPost;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\Website\Writer\ContentWriter;
@@ -324,6 +341,83 @@ class ContainerTest extends TestCase
         self::assertInstanceOf(
             ListAllPostsEndPointInterface::class,
             $container->get(ListAllPostsEndPointInterface::class)
+        );
+    }
+    public function testListCommentsOfPostEndPoint()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
+        $container->set(SearchFormLoaderInterface::class, $this->createMock(SearchFormLoaderInterface::class));
+        $container->set(ListObjectsAccessControlInterface::class, $this->createMock(ListObjectsAccessControlInterface::class));
+        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
+        $container->set(ExtractOrder::class, $this->createMock(ExtractOrder::class));
+        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
+        $container->set(LoadListObjects::class, $this->createMock(LoadListObjects::class));
+        $container->set(RenderList::class, $this->createMock(RenderList::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
+
+        self::assertInstanceOf(
+            ListCommentsOfPostEndPoint::class,
+            $container->get(ListCommentsOfPostEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            ListCommentsOfPostEndPointInterface::class,
+            $container->get(ListCommentsOfPostEndPointInterface::class)
+        );
+    }
+
+    public function testModerateCommentOfPostEndPointInterface()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
+        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
+        $container->set(LoadObject::class, $this->createMock(LoadObject::class));
+        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
+        $container->set(FormProcessingInterface::class, $this->createMock(FormProcessingInterface::class));
+        $container->set(SaveObject::class, $this->createMock(SaveObject::class));
+        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(ObjectAccessControlInterface::class, $this->createMock(ObjectAccessControlInterface::class));
+        $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
+
+        self::assertInstanceOf(
+            ModerateCommentOfPostEndPoint::class,
+            $container->get(ModerateCommentOfPostEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            ModerateCommentOfPostEndPointInterface::class,
+            $container->get(ModerateCommentOfPostEndPointInterface::class)
+        );
+    }
+
+    public function testDeleteCommentOfPostEndPointInterface()
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
+        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
+        $container->set(LoadObject::class, $this->createMock(LoadObject::class));
+        $container->set(DeleteObject::class, $this->createMock(DeleteObject::class));
+        $container->set(JumpIf::class, $this->createMock(JumpIf::class));
+        $container->set(RedirectClientInterface::class, $this->createMock(RedirectClientInterface::class));
+        $container->set(Render::class, $this->createMock(Render::class));
+        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(ObjectAccessControlInterface::class, $this->createMock(ObjectAccessControlInterface::class));
+        $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
+
+        self::assertInstanceOf(
+            DeleteCommentOfPostEndPoint::class,
+            $container->get(DeleteCommentOfPostEndPoint::class)
+        );
+
+        self::assertInstanceOf(
+            DeleteCommentOfPostEndPointInterface::class,
+            $container->get(DeleteCommentOfPostEndPointInterface::class)
         );
     }
 
