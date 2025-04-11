@@ -60,9 +60,9 @@
         "teknoo/immutable": "^3.0.19",
         "teknoo/states": "^6.4.3",
         "teknoo/recipe": "^6.0.3",
-        "teknoo/east-common": "^3.4",
+        "teknoo/east-common": "^3.5",
         "teknoo/east-foundation": "^8.0.4",
-        "teknoo/east-translation": "^1.0.3"
+        "teknoo/east-translation": "^1.1.1"
     },
     "require-dev": {
         "ext-simplexml" : "*",
@@ -75,7 +75,7 @@
         "symfony/property-access": "^6.4||^7.2",
         "nikic/php-parser": "^4.18||^5.4",
         "behat/behat": "^3.18.1",
-        "teknoo/bridge-phpdi-symfony": "^6.1",
+        "teknoo/bridge-phpdi-symfony": "^6.1.1",
         "psr/cache": "^3",
         "symfony/config": "^6.4||^7.2",
         "symfony/console": "^6.4||^7.2",
