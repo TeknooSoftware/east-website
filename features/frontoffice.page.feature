@@ -3,7 +3,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
   contents, stored into a database server or cluster. And serve it via a HTTP response.
   A dynamic page can host several contents, in different blocks, according to the type of the page
 
-  Scenario: Render and Serve a content
+  Scenario: Render and Serve a page content
     Given I have DI initialized
     And I register a router
     And a Content Loader
@@ -16,7 +16,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     Then The client must accept a response
     And I should get "block1:hello block2:world"
 
-  Scenario: Render and Serve a sanitized content
+  Scenario: Render and Serve a sanitized page content
     Given I have DI initialized
     And I register a router
     And a Content Loader
@@ -29,7 +29,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     Then The client must accept a response
     And I should get "block1:hello block2:world"
 
-  Scenario: Return 404 page when the content is not available
+  Scenario: Return 404 page when the page is not available
     Given I have DI initialized
     And I register a router
     And a Content Loader
@@ -41,7 +41,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     When The server will receive the request "https://foo.com/page/bar-foo"
     Then The client must accept an error
 
-  Scenario: Return error when the content has an error
+  Scenario: Return error when the page has an error
     Given I have DI initialized
     And I register a router
     And a Content Loader
