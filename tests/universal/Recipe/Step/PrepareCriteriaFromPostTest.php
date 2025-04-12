@@ -31,7 +31,6 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Query\Expr\ObjectReference;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Post;
-use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\PrepareCriteriaFromPost;
 
 /**

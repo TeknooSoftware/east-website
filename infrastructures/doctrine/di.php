@@ -27,7 +27,6 @@ namespace Teknoo\East\Website\Doctrine;
 
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Doctrine\Persistence\ObjectManager;
-use Doctrine\Persistence\ObjectRepository;
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
@@ -47,7 +46,6 @@ use Teknoo\East\Website\Doctrine\DBSource\ODM\CommentRepository as OdmCommentRep
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\TagRepository as OdmTagRepository;
-use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Post;

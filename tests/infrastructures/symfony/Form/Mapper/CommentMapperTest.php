@@ -37,7 +37,6 @@ use Teknoo\East\Website\Object\Comment;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
 
-use function PHPUnit\Framework\assertEquals;
 use function ucfirst;
 
 /**

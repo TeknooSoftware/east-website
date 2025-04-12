@@ -30,7 +30,6 @@ use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Website\Query\QueryInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License

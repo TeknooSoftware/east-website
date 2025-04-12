@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object\Comment;
 
-use DateTimeInterface;
 use Teknoo\East\Website\Object\Comment;
 use Teknoo\States\State\StateInterface;
 use Teknoo\States\State\StateTrait;
