@@ -36,7 +36,8 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 use Traversable;
 
 /**
- * @todo
+ * Trait used by PublishedPostsListInTagQuery and PublishedPostsListQuery to execute a paginated query about a list of
+ * published posts
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

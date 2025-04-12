@@ -40,7 +40,8 @@ use Teknoo\Recipe\Plan\EditablePlanTrait;
 use Teknoo\Recipe\RecipeInterface;
 
 /**
- * @todo
+ * HTTP EndPoint Recipe able to list and load all `Teknoo\East\Website\Object\Post` instances with  a specific tag
+ * via a pagination system.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

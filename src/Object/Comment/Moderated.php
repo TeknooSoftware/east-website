@@ -31,7 +31,8 @@ use Teknoo\States\State\StateInterface;
 use Teknoo\States\State\StateTrait;
 
 /**
- * @todo
+ * Comment's state representing a published moderated comment instance. Public author, title and comment represents
+ * moderated values.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

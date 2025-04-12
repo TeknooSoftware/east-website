@@ -31,7 +31,8 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Object\Post;
 
 /**
- * @todo
+ * Object loader in charge of object `Teknoo\East\Website\Object\Post`.
+ * Must provide an implementation of `PostRepositoryInterface` to be able work.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

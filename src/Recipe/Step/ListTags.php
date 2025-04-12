@@ -37,7 +37,8 @@ use Teknoo\Recipe\Promise\Promise;
 use Throwable;
 
 /**
- * @todo
+ * Step to list all tags used at least by a published post at the current date returned by the `DatesService`. This
+ * step use the `TagLoader` and the query `PublishedTagQuery`
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

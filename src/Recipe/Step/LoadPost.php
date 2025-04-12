@@ -39,7 +39,10 @@ use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 use Throwable;
 
 /**
- * @todo
+ * Similar to LoadContent, step recipe to load a published Post instance (published before the current date), from its
+ * slug, thank to the Post's loader and put it into the workplan at Post::class key, and `objectInstance`.
+ * The template file to use with the fetched content is also injected to the template.
+ *  The content is also inject to view's variables through of the Bag, under the keys `content` and `post`.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

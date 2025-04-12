@@ -31,7 +31,9 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Object\Post;
 
 /**
- * @todo
+ * Step to prepare criteria to use in a ListObjectEndPoint plan to filter comment, or other Post's components
+ * or Post's relationship from the Post present in the Workplan. If there are no Plan, an 404 error is thrown.
+ * Previous value of criteria are conserved
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

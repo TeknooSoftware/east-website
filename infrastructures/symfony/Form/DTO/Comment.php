@@ -32,7 +32,8 @@ use Teknoo\East\Website\Object\Comment as CommentObject;
 use Teknoo\East\Website\Object\Post;
 
 /**
- * @todo
+ * DTO to represent a comment filled by an user to persist. The DTO own a method to create a persisted Comment Object
+ * and pass it to the dedicated comment writer.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

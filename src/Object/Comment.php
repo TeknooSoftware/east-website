@@ -39,7 +39,9 @@ use Teknoo\States\Automated\AutomatedTrait;
 use Teknoo\States\Proxy\ProxyTrait;
 
 /**
- * @todo
+ * Comment represent a comment posted by a visitor on a Post. A Comment has a post date, an author, title and content.
+ * But a Comment can be moderated. Original values can not be replaced, only moderated value. Original value still
+ * present in the object, but are not publicly accessible according to the Comment's state (Published or Moderated)
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

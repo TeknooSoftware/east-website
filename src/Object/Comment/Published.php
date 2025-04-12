@@ -25,13 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object\Comment;
 
-use DateTimeInterface;
 use Teknoo\East\Website\Object\Comment;
 use Teknoo\States\State\StateInterface;
 use Teknoo\States\State\StateTrait;
 
 /**
- * @todo
+ * Comment's state representing a published non moderated comment instance. Public author, title and comment represents
+ * original values.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

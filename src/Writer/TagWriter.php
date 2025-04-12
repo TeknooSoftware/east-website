@@ -33,7 +33,10 @@ use Teknoo\East\Website\Object\Tag;
 use Throwable;
 
 /**
- * @todo
+ * Object writer in charge of object `Teknoo\East\Website\Object\Tag`.
+ * The writer will update object's timestamp before update. The object persisted will be passed, with its new id for
+ * new persisted object, to the promise, else the error is also passed to the promise.
+ * Must provide an implementation of `Teknoo\East\Common\Contracts\DBSource\ManagerInterface` to be able work.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

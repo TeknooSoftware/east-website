@@ -33,7 +33,7 @@ use Teknoo\Recipe\Promise\Promise;
 use Throwable;
 
 /**
- * @todo
+ * Step to load, from the slug a tag thanks to the `TagLoader` and inject it into the Workplan under the key Tag::class
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

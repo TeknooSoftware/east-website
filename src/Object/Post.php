@@ -26,7 +26,8 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Object;
 
 /**
- * @todo
+ * Post is a special content who can be commented by used. Posts can be listed in list, optionaly filtered by a tag.
+ * Content represent a static page of a website, a post represent an article in a blog
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

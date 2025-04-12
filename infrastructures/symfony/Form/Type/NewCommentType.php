@@ -47,7 +47,9 @@ use function is_a;
 use function is_string;
 
 /**
- * @todo
+ * Form type to allow user to add a comment to a post. This form use the DTO Comment and not a Persisted Comment object
+ * The DTO is able to convert to a persisted comment and persist it into the dedicated writer on the post submit event
+ * of this form
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

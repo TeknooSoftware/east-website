@@ -35,7 +35,8 @@ use Teknoo\East\Common\Object\ObjectTrait;
 use Teknoo\East\Common\Service\FindSlugService;
 
 /**
- * @todo
+ * Class to define persisted tags of posts or contents. A ttag is defined by a name and a slug and can be used to
+ * classify  posts or content and list them. A tag can be highlighted
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

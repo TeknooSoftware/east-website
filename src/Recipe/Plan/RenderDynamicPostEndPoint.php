@@ -42,7 +42,8 @@ use Teknoo\Recipe\Plan\EditablePlanTrait;
 use Teknoo\Recipe\RecipeInterface;
 
 /**
- * @todo
+ * HTTP EndPoint Recipe able to load a `Teknoo\East\Website\Object\Post` instance and render a page via a template
+ * engine and send it to the client.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

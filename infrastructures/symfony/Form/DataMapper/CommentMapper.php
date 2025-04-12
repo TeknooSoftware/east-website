@@ -34,7 +34,10 @@ use Traversable;
 use function array_values;
 
 /**
- * @todo
+ * DataMapper dedicated to Comment. On Comment, original content are readonly.
+ * Only Moderated properties can be updated.
+ * This datamapper will fill all form's fields, but it will only fetch moderations fields and call the dedicated
+ * Comment's method (moderate) to update its moderation values and its states. All other changes will be ignored
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

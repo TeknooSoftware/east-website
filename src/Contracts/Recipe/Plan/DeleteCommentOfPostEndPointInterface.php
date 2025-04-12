@@ -28,7 +28,8 @@ namespace Teknoo\East\Website\Contracts\Recipe\Plan;
 use Teknoo\Recipe\EditablePlanInterface;
 
 /**
- * @todo
+ * Interface defining a HTTP EndPoint Recipe able to delete a comment of a specific post and redirect
+ * client to the comment list of the post
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

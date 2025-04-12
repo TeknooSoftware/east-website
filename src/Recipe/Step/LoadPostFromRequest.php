@@ -28,12 +28,12 @@ namespace Teknoo\East\Website\Recipe\Step;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Object\Post;
-use Teknoo\East\Website\Query\Post\PostFromSlugQuery;
 use Teknoo\Recipe\Promise\Promise;
 use Throwable;
 
 /**
- * @todo
+ * Step to load a post from it's id. Post can be not published. And inject it into the workplan and prepare the
+ * parameter to compute the redirection route. Previous routes's parameters are conserved
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

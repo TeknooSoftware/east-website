@@ -37,7 +37,8 @@ use Teknoo\Immutable\ImmutableTrait;
 use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
- * @todo
+ * Class implementing query to list published Posts instances according to pagination parameters, and pass
+ * result to the passed promise.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

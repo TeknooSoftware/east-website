@@ -35,7 +35,8 @@ use Teknoo\East\Website\Object\Comment;
 use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
 
 /**
- * @todo
+ * Form Type used to moderate a comment. Original field are disabled, only moderation fields can be updated.
+ * This form can only be used with a CommentMapper instance to load and persist values
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

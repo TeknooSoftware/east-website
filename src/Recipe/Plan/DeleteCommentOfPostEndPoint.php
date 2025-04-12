@@ -42,7 +42,7 @@ use Teknoo\Recipe\Plan\EditablePlanTrait;
 use Teknoo\Recipe\RecipeInterface;
 
 /**
- * @todo
+ * HTTP EndPoint Recipe able to delete a comment of a specific post and redirect  client to the comment list of the post
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

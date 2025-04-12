@@ -39,9 +39,10 @@ use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
 use Throwable;
 
 /**
- * Step recipe to load a published Content instance, from its slug, thank to the Content's loader and put it into the
- * workplan at Content::class key, and `objectInstance`. The template file to use with the fetched content is also
- * injected to the template.
+ * Step recipe to load a published Content instance (published before the current date), from its slug, thank to
+ * the Content's loader and put it into the workplan at Content::class key, and `objectInstance`. The template file
+ * to use with the fetched content is also injected to the template.
+ * The content is also inject to view's variables through of the Bag, under the key `content`.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

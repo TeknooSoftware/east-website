@@ -42,7 +42,8 @@ use Teknoo\Recipe\Plan\EditablePlanTrait;
 use Teknoo\Recipe\RecipeInterface;
 
 /**
- * @todo
+ * HTTP EndPoint Recipe able to moderate Comment instance and persist change. The state of the Comment will be updated
+ * to Moderated.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

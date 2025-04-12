@@ -31,7 +31,8 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Object\Tag;
 
 /**
- * @todo
+ * Object loader in charge of object `Teknoo\East\Website\Object\Tag`.
+ * Must provide an implementation of `TagRepositoryInterface` to be able work.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

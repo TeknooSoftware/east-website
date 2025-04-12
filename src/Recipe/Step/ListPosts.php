@@ -41,7 +41,11 @@ use Throwable;
 use function ceil;
 
 /**
- * @todo
+ * Step to list all published post at the current date returned by the `DatesService`. If a Tag instance is passed, the
+ * list of posts will be filtered on it. A pagination is also available, item per page and the page can be defined via
+ * `$itemsPerPage` and `page`.
+ * This step use the `PostLoader` and the query `PublishedPostsListQuery` or `PublishedPostsListInTagQuery` if a Tag
+ * instance is passed.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
