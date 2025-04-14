@@ -127,7 +127,7 @@ class Item implements
         return $this->getName();
     }
 
-    public function setName(string $name): Item
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -161,7 +161,7 @@ class Item implements
         return $this;
     }
 
-    public function setSlug(?string $slug): Item
+    public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
 
@@ -173,7 +173,7 @@ class Item implements
         return $this->content;
     }
 
-    public function setContent(?Content $content): Item
+    public function setContent(?Content $content): self
     {
         $this->content = $content;
 
@@ -185,7 +185,7 @@ class Item implements
         return $this->location;
     }
 
-    public function setLocation(?string $location): Item
+    public function setLocation(?string $location): self
     {
         $this->location = (string) $location;
 
@@ -197,7 +197,7 @@ class Item implements
         return (int) $this->position;
     }
 
-    public function setPosition(int $position): Item
+    public function setPosition(int $position): self
     {
         $this->position = $position;
 
@@ -210,7 +210,7 @@ class Item implements
         return !empty($this->hidden);
     }
 
-    public function setHidden(bool $isHidden): Item
+    public function setHidden(bool $isHidden): self
     {
         $this->hidden = $isHidden;
 
@@ -222,7 +222,7 @@ class Item implements
         return $this->parent;
     }
 
-    public function setParent(?Item $parent): Item
+    public function setParent(?Item $parent): self
     {
         $this->parent = $parent;
 
@@ -240,7 +240,7 @@ class Item implements
     /**
      * @param iterable<Item> $children
      */
-    public function setChildren(iterable $children): Item
+    public function setChildren(iterable $children): self
     {
         $this->children = $children;
 

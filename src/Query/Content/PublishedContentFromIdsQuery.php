@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Query\Content;
 
+use DateTimeInterface;
+use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -53,7 +55,8 @@ class PublishedContentFromIdsQuery implements QueryCollectionInterface, Immutabl
      * @param array<int, string|int> $ids
      */
     public function __construct(
-        private readonly array $ids
+        private readonly array $ids,
+        private readonly DateTimeInterface $now,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -66,7 +69,7 @@ class PublishedContentFromIdsQuery implements QueryCollectionInterface, Immutabl
         $repository->findBy(
             [
                 'id' => new In($this->ids),
-                'deletedAt' => null,
+                'publishedAt' => new Lower($this->now),
             ],
             $promise
         );

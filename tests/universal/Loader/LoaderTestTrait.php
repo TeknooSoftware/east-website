@@ -30,7 +30,6 @@ use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
-use Teknoo\East\Website\Query\QueryInterface;
 
 /**
  * @license     https://teknoo.software/license/mit         MIT License
@@ -79,7 +78,7 @@ trait LoaderTestTrait
         $this->getRepositoryMock()
             ->expects($this->any())
             ->method('findOneBy')
-            ->with(['id'=>'fooBar', 'deletedAt'=>null], $promiseMock)
+            ->with(['id'=>'fooBar'], $promiseMock)
             ->willThrowException(new \Exception());
 
         self::assertInstanceOf(
@@ -100,7 +99,7 @@ trait LoaderTestTrait
         $this->getRepositoryMock()
             ->expects($this->any())
             ->method('findOneBy')
-            ->with(['id'=>'fooBar', 'deletedAt'=>null], $promiseMock);
+            ->with(['id'=>'fooBar'], $promiseMock);
 
         self::assertInstanceOf(
             LoaderInterface::class,

@@ -40,8 +40,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Common\Object\User;
 use Teknoo\East\Translation\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Doctrine\Object\Content;
+use Teknoo\East\Website\Object\Content as OriginalContent;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Content\Published;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
 use function str_replace;
@@ -74,7 +76,7 @@ class ContentType extends AbstractType
         $data = $event->getData();
         $form = $event->getForm();
 
-        if (!$data instanceof Content || !$data->getType() instanceof Type) {
+        if (!$data instanceof OriginalContent || !$data->getType() instanceof Type) {
             return;
         }
 
@@ -132,7 +134,7 @@ class ContentType extends AbstractType
         $data = $event->getData();
         $contentObject = $form->getNormData();
 
-        if (!$contentObject instanceof Content || !$contentObject->getType() instanceof Type) {
+        if (!$contentObject instanceof OriginalContent || !$contentObject->getType() instanceof Type) {
             return;
         }
 
@@ -203,6 +205,21 @@ class ContentType extends AbstractType
                     ->createQueryBuilder()
                         ->field('deletedAt')->equals(null)
                         ->sort('name', 'asc')
+            ]
+        );
+
+        $builder->add(
+            'tags',
+            $options['doctrine_type'],
+            [
+                'class' => Tag::class,
+                'required' => false,
+                'multiple' => true,
+                'choice_label' => 'name',
+                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
+                    ->createQueryBuilder()
+                    ->field('deletedAt')->equals(null)
+                    ->sort('name', 'asc')
             ]
         );
         $builder->add('title', TextType::class, ['required' => true]);

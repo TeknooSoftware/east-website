@@ -1,0 +1,90 @@
+# post
+_teknoo_website_admin_post_list:
+    path: '/posts'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.list'
+        defaultOrderDirection: 'ASC'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        itemsPerPage: 20
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        template: '@@TeknooEastWebsite/AdminPost/list.html.twig'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_post_edit:
+    path: '/post/edit/{id}'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.edit'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        formClass: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        formOptions: { "doctrine_type": "%teknoo.east.common.form_type.doctrine.class%"}
+        isTranslatable: true
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/AdminPost/edit.html.twig'
+        writer: '@Teknoo\East\Website\Writer\PostWriter'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_post_new:
+    path: '/post/new'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.new'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        formClass: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        formOptions: { "doctrine_type": "%teknoo.east.common.form_type.doctrine.class%"}
+        isTranslatable: true
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        objectClass: 'Teknoo\East\Website\Doctrine\Object\Post'
+        route: '_teknoo_website_admin_post_edit'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/AdminPost/new.html.twig'
+        writer: '@Teknoo\East\Website\Writer\PostWriter'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_post_delete:
+    path: '/post/delete/{id}'
+    methods:  ['GET', 'DELETE']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.delete'
+        deleter: '@teknoo.east.website.deleting.post'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        route: '_teknoo_website_admin_post_list'
+
+# comment
+_teknoo_website_admin_post_comment_list:
+    path: '/post/{postId}/comments'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.list'
+        defaultOrderDirection: 'ASC'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        itemsPerPage: 20
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        template: '@@TeknooEastWebsite/AdminComment/list.html.twig'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_post_comment_moderate:
+    path: '/post/{postId}/comment/{id}'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.moderate'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/AdminComment/moderate.html.twig'
+        writer: '@Teknoo\East\Website\Writer\CommentWriter'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_post_comment_delete:
+    path: '/post/{postId}/comment/delete/{id}'
+    methods:  ['GET', 'DELETE']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.delete'
+        deleter: '@teknoo.east.website.deleting.comment'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        route: '_teknoo_website_admin_post_comment_list'

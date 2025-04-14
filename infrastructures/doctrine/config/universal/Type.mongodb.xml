@@ -9,9 +9,9 @@
         <id type="string" strategy="UUID"/>
         <field field-name="name" type="string" nullable="false"/>
         <field field-name="template" type="string" nullable="false"/>
-        <field field-name="blocks" type="hash" />
+        <field field-name="blocks" type="hash"/>
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
-        <field field-name="updatedAt" name="updated_at" type="date" />
-        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true" />
+        <field field-name="updatedAt" name="updated_at" type="date"/>
+        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>
     </document>
 </doctrine-mongo-mapping>

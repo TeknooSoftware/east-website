@@ -27,20 +27,30 @@ namespace Teknoo\East\Website\Doctrine;
 
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
 use Doctrine\Persistence\ObjectManager;
-use Doctrine\Persistence\ObjectRepository;
 use Psr\Container\ContainerInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ContentRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\PostRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\CommentRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\ItemRepository;
 use Teknoo\East\Website\Doctrine\DBSource\Common\TypeRepository;
+use Teknoo\East\Website\Doctrine\DBSource\Common\TagRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ContentRepository as OdmContentRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\PostRepository as OdmPostRepository;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\CommentRepository as OdmCommentRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\ItemRepository as OdmItemRepository;
 use Teknoo\East\Website\Doctrine\DBSource\ODM\TypeRepository as OdmTypeRepository;
-use Teknoo\East\Website\Doctrine\Exception\NotSupportedException;
+use Teknoo\East\Website\Doctrine\DBSource\ODM\TagRepository as OdmTagRepository;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Doctrine\Object\Post;
+use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
 return [
@@ -50,15 +60,25 @@ return [
             return new OdmContentRepository($repository);
         }
 
-        $repository = $container->get(ObjectManager::class)->getRepository(Content::class);
-        if ($repository instanceof ObjectRepository) {
-            return new ContentRepository($repository);
+        return new ContentRepository($repository);
+    },
+
+    PostRepositoryInterface::class => static function (ContainerInterface $container): PostRepositoryInterface {
+        $repository = $container->get(ObjectManager::class)->getRepository(Post::class);
+        if ($repository instanceof DocumentRepository) {
+            return new OdmPostRepository($repository);
         }
 
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new PostRepository($repository);
+    },
+
+    CommentRepositoryInterface::class => static function (ContainerInterface $container): CommentRepositoryInterface {
+        $repository = $container->get(ObjectManager::class)->getRepository(Comment::class);
+        if ($repository instanceof DocumentRepository) {
+            return new OdmCommentRepository($repository);
+        }
+
+        return new CommentRepository($repository);
     },
 
     ItemRepositoryInterface::class => static function (ContainerInterface $container): ItemRepositoryInterface {
@@ -67,14 +87,7 @@ return [
             return new OdmItemRepository($repository);
         }
 
-        if ($repository instanceof ObjectRepository) {
-            return new ItemRepository($repository);
-        }
-
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new ItemRepository($repository);
     },
 
     TypeRepositoryInterface::class => static function (ContainerInterface $container): TypeRepositoryInterface {
@@ -83,13 +96,15 @@ return [
             return new OdmTypeRepository($repository);
         }
 
-        if ($repository instanceof ObjectRepository) {
-            return new TypeRepository($repository);
+        return new TypeRepository($repository);
+    },
+
+    TagRepositoryInterface::class => static function (ContainerInterface $container): TagRepositoryInterface {
+        $repository = $container->get(ObjectManager::class)->getRepository(Tag::class);
+        if ($repository instanceof DocumentRepository) {
+            return new OdmTagRepository($repository);
         }
 
-        throw new NotSupportedException(sprintf(
-            "Error, repository of class %s are not currently managed",
-            $repository::class
-        ));
+        return new TagRepository($repository);
     },
 ];

@@ -73,7 +73,6 @@ class TopItemByLocationQuery implements QueryCollectionInterface, ImmutableInter
         $repository->findBy(
             criteria: [
                 'location' => $locations,
-                'deletedAt' => null,
             ],
             promise: $promise,
             orderBy: [

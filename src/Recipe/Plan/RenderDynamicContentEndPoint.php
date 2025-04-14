@@ -64,6 +64,7 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
     protected function populateRecipe(RecipeInterface $recipe): RecipeInterface
     {
         $recipe = $recipe->require(new Ingredient(ServerRequestInterface::class, 'request'));
+        $recipe = $recipe->require(new Ingredient('string', 'slug'));
 
         $recipe = $recipe->cook($this->extractSlug, ExtractSlug::class, [], 10);
 
@@ -73,7 +74,7 @@ class RenderDynamicContentEndPoint implements RenderDynamicContentEndPointInterf
             $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
         }
 
-        $recipe = $recipe->cook($this->render, Render::class, [], 30);
+        $recipe = $recipe->cook($this->render, Render::class, [], 50);
 
         return $recipe->onError(new Bowl($this->renderError, []));
     }
