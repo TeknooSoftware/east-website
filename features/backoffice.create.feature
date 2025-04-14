@@ -31,6 +31,27 @@ Feature: Create an element, with slug or not stored into a the dbms server via a
     When the client follows the redirection
     And I should get in the form '{"author":null,"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
 
+  Scenario: Create a post
+    Given I have DI With Symfony initialized
+    And a twig templating engine
+    When Symfony will receive the POST request "https://foo.com/admin/post/new" with "post%5Btitle%5D=foo&post%5Bsubtitle%5D=bar"
+    Then The client must accept a response
+    And An object "Post" must be persisted
+    And It is redirect to "/admin/post/edit/[a-zA-Z0-9]+"
+    When the client follows the redirection
+    And I should get in the form '{"author":null,"comments":[],"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+
+  Scenario: Create a post without defined locale
+    Given I have DI With Symfony initialized
+    And an empty locale
+    And a twig templating engine
+    When Symfony will receive the POST request "https://foo.com/admin/post/new" with "post%5Btitle%5D=foo&post%5Bsubtitle%5D=bar"
+    Then The client must accept a response
+    And An object "Post" must be persisted
+    And It is redirect to "/admin/post/edit/[a-zA-Z0-9]+"
+    When the client follows the redirection
+    And I should get in the form '{"author":null,"comments":[],"title":"foo","subtitle":"bar","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+
   Scenario: Create an item
     Given I have DI With Symfony initialized
     And a twig templating engine

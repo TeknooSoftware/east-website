@@ -1,0 +1,74 @@
+<?php
+
+/*
+ * East Website.
+ *
+ * LICENSE
+ *
+ * This source file is subject to the MIT license
+ * it is available in LICENSE file at the root of this package
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to richard@teknoo.software so we can send you a copy immediately.
+ *
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ *
+ * @link        https://teknoo.software/east-collection/website Project website
+ *
+ * @license     https://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
+
+declare(strict_types=1);
+
+namespace Teknoo\East\Website\Object\Comment;
+
+use Teknoo\East\Website\Object\Comment;
+use Teknoo\States\State\StateInterface;
+use Teknoo\States\State\StateTrait;
+
+/**
+ * Comment's state representing a published non moderated comment instance. Public author, title and comment represents
+ * original values.
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ * @license     https://teknoo.software/license/mit         MIT License
+ * @author      Richard Déloge <richard@teknoo.software>
+ *
+ * @mixin Comment
+ */
+class Published implements StateInterface
+{
+    use StateTrait;
+
+    public function isModerated(): callable
+    {
+        return function (): bool {
+            return false;
+        };
+    }
+
+    public function getPublicAuthor(): callable
+    {
+        return function (): string {
+            return $this->getAuthor();
+        };
+    }
+
+    public function getPublicTitle(): callable
+    {
+        return function (): string {
+            return $this->getTitle();
+        };
+    }
+
+    public function getPublicContent(): callable
+    {
+        return function (): string {
+            return $this->getContent();
+        };
+    }
+}

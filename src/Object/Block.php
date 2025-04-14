@@ -54,7 +54,7 @@ class Block implements Stringable
         return $this->getName();
     }
 
-    public function setName(string $name): Block
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -66,7 +66,7 @@ class Block implements Stringable
         return $this->type;
     }
 
-    public function setType(BlockType $type): Block
+    public function setType(BlockType $type): self
     {
         $this->type = $type;
 

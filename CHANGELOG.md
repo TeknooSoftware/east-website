@@ -1,5 +1,17 @@
 # Teknoo Software - Website - Change Log
 
+## [10.1.0] - 2025-04-14
+### Stable Release
+- Add Blog feature with `Post`, categorized by `Tag` with `Comment` and moderation
+  - Blog's `Post` are translatable
+  - The library provides queries and endpoints to list tags with pagination and tag filtering
+  - User can comment post
+  - Routes are availables in dedicated routing.yaml file to avoid enable blog feature and comment feature when there 
+    are not required
+- Drop Support of PHP 8.2
+- Drop Support of Doctrine Persistence 3
+- Fix bug in compliance with Doctrine Persistence 4
+
 ## [10.0.6] - 2025-02-07
 ### Stable Release
 - Update dev lib requirements

@@ -15,8 +15,8 @@
         <field field-name="position" type="int" index="true" order="true"/>
         <field field-name="hidden" type="bool" index="true" nullable="false"/>
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
-        <field field-name="updatedAt" name="updated_at" type="date" />
-        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true" />
+        <field field-name="updatedAt" name="updated_at" type="date"/>
+        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>
         <reference-one
                 field="parent"
                 target-document="Teknoo\East\Website\Object\Item"
@@ -31,12 +31,13 @@
                 field="content"
                 store-as="dbRefWithDb"
                 target-document="Teknoo\East\Website\Object\Content">
-            <cascade />
+            <cascade/>
         </reference-one>
-        <reference-many field="children"
-                        target-document="Teknoo\East\Website\Object\Item"
-                        mapped-by="parent"
-                        store-empty-array="true">
+        <reference-many
+                field="children"
+                target-document="Teknoo\East\Website\Object\Item"
+                mapped-by="parent"
+                store-empty-array="true">
             <cascade>
                 <all/>
             </cascade>

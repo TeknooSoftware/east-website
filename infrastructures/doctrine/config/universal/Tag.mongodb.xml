@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--infrastructures/doctrine/config/universal/Tag.mongodb.yml-->
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                                            http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Teknoo\East\Website\Object\Tag" collection="tags">
+        <id type="string" strategy="UUID"/>
+        <field field-name="name" type="string" nullable="false"/>
+        <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>
+        <field field-name="isHighlighted" name="is_highlighted" type="boolean" nullable="true" index="true"/>
+        <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
+        <field field-name="updatedAt" name="updated_at" type="date"/>
+        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>
+    </document>
+</doctrine-mongo-mapping>

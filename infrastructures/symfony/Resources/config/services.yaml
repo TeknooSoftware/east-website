@@ -1,7 +1,15 @@
 parameters:
     #Bowls
     teknoo.east.website.endpoint.content.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.post.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.post.comment.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.posts.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.posts_of_tag.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
     teknoo.east.website.endpoint.media.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+
+    teknoo.east.website.endpoint.comment.list.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.comment.moderate.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
+    teknoo.east.website.endpoint.comment.delete.bowl.class: 'Teknoo\Recipe\Bowl\FiberRecipeBowl'
 
     teknoo.east.website.admin.rendering.clean_html: true
     teknoo.east.website.rendering.clean_html: false
@@ -9,6 +17,12 @@ parameters:
     teknoo.east.website.sanitize.default_context: ~
     teknoo.east.website.sanitize.salt: '%env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT)%'
     env(TEKNOO_EAST_WEBSITE_SANITIZE_SALT): youmustchangeit
+
+    teknoo.east.website.template.posts.list: '@@@TeknooEastWebsite/Posts/list.html.twig'
+    teknoo.east.website.template.posts.list_with_tags: '@@@TeknooEastWebsite/Posts/list-with-tags.html.twig'
+
+    teknoo.east.website.dto.comment.class: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
+    teknoo.east.website.persisted.comment.class: 'Teknoo\East\Website\Doctrine\Object\Comment'
 
 services:
     #Generic endpoints
@@ -23,6 +37,97 @@ services:
         public: true
         arguments:
             - '@teknoo.east.website.endpoint.content.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.post.bowl:
+        class: '%teknoo.east.website.endpoint.post.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.post:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.post.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.post.comment.bowl:
+        class: '%teknoo.east.website.endpoint.post.comment.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.post.comment:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.post.comment.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.posts.bowl:
+        class: '%teknoo.east.website.endpoint.posts.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.posts:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.posts.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.posts_of_tag.bowl:
+        class: '%teknoo.east.website.endpoint.posts_of_tag.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsOfTagsEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.posts_of_tag:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.posts_of_tag.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.list.bowl:
+        class: '%teknoo.east.website.endpoint.comment.list.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ListCommentsOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.list:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.list.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.moderate.bowl:
+        class: '%teknoo.east.website.endpoint.comment.moderate.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\ModerateCommentOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.moderate:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.moderate.bowl'
+            - '@service_container'
+
+    teknoo.east.website.endpoint.comment.delete.bowl:
+        class: '%teknoo.east.website.endpoint.comment.delete.bowl.class%'
+        arguments:
+            - '@Teknoo\East\Website\Contracts\Recipe\Plan\DeleteCommentOfPostEndPointInterface'
+            - 0
+
+    teknoo.east.website.endpoint.comment.delete:
+        class: 'Teknoo\East\Foundation\EndPoint\RecipeEndPoint'
+        public: true
+        arguments:
+            - '@teknoo.east.website.endpoint.comment.delete.bowl'
             - '@service_container'
 
     teknoo.east.website.endpoint.media.bowl:
@@ -44,11 +149,41 @@ services:
         tags:
             - { name: "twig.extension" }
 
+    Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper:
+        class: 'Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
+        arguments:
+            - '@Teknoo\East\Foundation\Time\DatesService'
+
     Teknoo\East\Website\Doctrine\Form\Type\ContentType:
         class: 'Teknoo\East\Website\Doctrine\Form\Type\ContentType'
         arguments:
             - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
             - '%teknoo.east.website.sanitize.default_context%'
             - '%teknoo.east.website.sanitize.salt%'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\Website\Doctrine\Form\Type\PostType:
+        class: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        arguments:
+            - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
+            - '%teknoo.east.website.sanitize.default_context%'
+            - '%teknoo.east.website.sanitize.salt%'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType:
+        class: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'
+        arguments:
+            - '@Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\WebsiteBundle\Form\Type\NewCommentType:
+        class: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+        arguments:
+            - '@Teknoo\East\Foundation\Time\DatesService'
+            - '@request_stack'
+            - '@Teknoo\East\Foundation\Manager\ManagerInterface'
         tags:
             - {name: form.type}

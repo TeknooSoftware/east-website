@@ -1,7 +1,7 @@
 # item
 _teknoo_website_admin_item_list:
     path: '/items'
-    methods:  ['GET', 'POST']
+    methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.list'
         defaultOrderDirection: 'ASC'
@@ -56,7 +56,7 @@ _teknoo_website_admin_item_delete:
 # content
 _teknoo_website_admin_content_list:
     path: '/contents'
-    methods:  ['GET', 'POST']
+    methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.list'
         defaultOrderDirection: 'ASC'
@@ -111,7 +111,7 @@ _teknoo_website_admin_content_delete:
 # media
 _teknoo_website_admin_media_list:
     path: '/media'
-    methods:  ['GET', 'POST']
+    methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.list'
         defaultOrderDirection: 'ASC'
@@ -149,7 +149,7 @@ _teknoo_website_admin_media_delete:
 # type
 _teknoo_website_admin_type_list:
     path: '/types'
-    methods:  ['GET', 'POST']
+    methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.list'
         defaultOrderDirection: 'ASC'
@@ -197,10 +197,63 @@ _teknoo_website_admin_type_delete:
         loader: '@Teknoo\East\Website\Loader\TypeLoader'
         route: '_teknoo_website_admin_type_list'
 
+# tag
+_teknoo_website_admin_tag_list:
+    path: '/tags'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.list'
+        defaultOrderDirection: 'ASC'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        itemsPerPage: 20
+        loader: '@Teknoo\East\Website\Loader\TagLoader'
+        template: '@@TeknooEastWebsite/AdminTag/list.html.twig'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_tag_edit:
+    path: '/tag/edit/{id}'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.edit'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\TagType'
+        formOptions: { }
+        loader: '@Teknoo\East\Website\Loader\TagLoader'
+        template: '@@TeknooEastWebsite/AdminTag/edit.html.twig'
+        writer: '@Teknoo\East\Website\Writer\TagWriter'
+        slugField: 'slug'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_tag_new:
+    path: '/tag/new'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.new'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\TagType'
+        formOptions: { }
+        loader: '@Teknoo\East\Website\Loader\TagLoader'
+        objectClass: 'Teknoo\East\Website\Object\Tag'
+        route: '_teknoo_website_admin_tag_edit'
+        template: '@@TeknooEastWebsite/AdminTag/new.html.twig'
+        writer: '@Teknoo\East\Website\Writer\TagWriter'
+        slugField: 'slug'
+        cleanHtml: "%teknoo.east.website.admin.rendering.clean_html%"
+
+_teknoo_website_admin_tag_delete:
+    path: '/tag/delete/{id}'
+    methods:  ['GET', 'DELETE']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.delete'
+        deleter: '@teknoo.east.website.deleting.tag'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        loader: '@Teknoo\East\Website\Loader\TagLoader'
+        route: '_teknoo_website_admin_tag_list'
+
 # user
 _teknoo_website_admin_user_list:
     path: '/users'
-    methods:  ['GET', 'POST']
+    methods:  ['GET']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.list'
         defaultOrderDirection: 'ASC'

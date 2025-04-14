@@ -37,6 +37,11 @@ use Symfony\Component\Form\FormBuilderInterface;
  */
 trait FormTestTrait
 {
+    protected function getOptions(): array
+    {
+        return ['doctrine_type' => DocumentType::class];
+    }
+
     public function testBuildForm()
     {
         $builder = $this->createMock(FormBuilderInterface::class);
@@ -71,7 +76,7 @@ trait FormTestTrait
 
         self::assertInstanceOf(
             AbstractType::class,
-            $this->buildForm()->buildForm($builder, ['doctrine_type' => DocumentType::class])
+            $this->buildForm()->buildForm($builder, $this->getOptions())
         );
     }
 }

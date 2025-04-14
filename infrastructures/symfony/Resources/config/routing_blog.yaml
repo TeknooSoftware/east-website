@@ -1,0 +1,31 @@
+_teknoo_website_post:
+    path: '/post/{slug}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.post'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+    requirements:
+        slug: ((?!_wdt|_profiler).).+
+
+_teknoo_website_list_posts:
+    path: '/posts/'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        template: "%teknoo.east.website.template.posts.list%"
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+        itemsPerPage: 10
+
+_teknoo_website_list_posts_tag:
+    path: '/posts/by/{tag}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts_of_tag'
+        errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
+        template: "%teknoo.east.website.template.posts.list_with_tags%"
+        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+        itemsPerPage: 10
+    requirements:
+        tag: ((?!_wdt|_profiler).).+

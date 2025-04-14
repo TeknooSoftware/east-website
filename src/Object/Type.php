@@ -62,7 +62,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
         return $this->name;
     }
 
-    public function setName(string $name): Type
+    public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -79,7 +79,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
         return $this->template;
     }
 
-    public function setTemplate(string $template): Type
+    public function setTemplate(string $template): self
     {
         $this->template = $template;
 
@@ -101,7 +101,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
     /**
      * @param Block[] $blocks
      */
-    public function setBlocks(array $blocks): Type
+    public function setBlocks(array $blocks): self
     {
         $this->blocks = [];
 

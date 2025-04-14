@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--infrastructures/doctrine/config/universal/Comment.mongodb.yml-->
+<doctrine-mongo-mapping xmlns="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping
+                                            http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
+
+    <document name="Teknoo\East\Website\Object\Comment" collection="comments" inheritance-type="COLLECTION_PER_CLASS">
+        <id type="string" strategy="UUID"/>
+        <field field-name="author" type="string" nullable="false"/>
+        <field field-name="remoteIp" name="remote_ip" type="string" nullable="false"/>
+        <field field-name="title" type="string" nullable="false"/>
+        <field field-name="content" type="string" nullable="false"/>
+        <field field-name="postAt" name="post_at" type="date" nullable="false"/>
+        <field field-name="moderatedAt" name="moderated_at" type="date" nullable="true"/>
+        <field field-name="moderatedAuthor" name="moderated_author" type="string" nullable="true"/>
+        <field field-name="moderatedTitle" name="moderated_title" type="string" nullable="true"/>
+        <field field-name="moderatedContent" name="moderated_content" type="string" nullable="true"/>
+        <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
+        <field field-name="updatedAt" name="updated_at" type="date"/>
+        <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>
+        <field field-name="publishedAt" name="published_at" type="date" nullable="true" index="true"/>
+        <reference-one
+                field="post"
+                target-document="Teknoo\East\Website\Doctrine\Object\Post"
+                inversed-by="comments"
+                store-as="dbRefWithDb">
+            <cascade>
+                <all/>
+            </cascade>
+        </reference-one>
+    </document>
+</doctrine-mongo-mapping>

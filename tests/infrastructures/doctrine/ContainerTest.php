@@ -27,25 +27,23 @@ namespace Teknoo\Tests\East\Website\Doctrine;
 
 use DI\Container;
 use DI\ContainerBuilder;
-use Doctrine\ODM\MongoDB\Configuration;
-use Doctrine\ODM\MongoDB\DocumentManager;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
-use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
-use Doctrine\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
-use Doctrine\Persistence\Mapping\Driver\FileLocator;
-use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
-use ProxyManager\Proxy\GhostObjectInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\CommentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
+use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Doctrine\Object\Post;
+use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
 
@@ -103,18 +101,6 @@ class ContainerTest extends TestCase
         );
     }
 
-    private function generateTestForRepositoryWithUnsupportedRepository(string $objectClass, string $repositoryClass)
-    {
-        $container = $this->buildContainer();
-        $objectManager = $this->createMock(ObjectManager::class);
-        $objectManager->expects($this->any())->method('getRepository')->with($objectClass)->willReturn(
-            $this->createMock(\DateTime::class)
-        );
-
-        $container->set(ObjectManager::class, $objectManager);
-        $container->get($repositoryClass);
-    }
-
     public function testItemRepositoryWithObjectRepository()
     {
         $this->generateTestForRepository(Item::class, ItemRepositoryInterface::class, ObjectRepository::class);
@@ -123,6 +109,21 @@ class ContainerTest extends TestCase
     public function testContentRepositoryWithObjectRepository()
     {
         $this->generateTestForRepository(Content::class, ContentRepositoryInterface::class, ObjectRepository::class);
+    }
+
+    public function testTagRepositoryWithObjectRepository()
+    {
+        $this->generateTestForRepository(Tag::class, TagRepositoryInterface::class, ObjectRepository::class);
+    }
+
+    public function testPostRepositoryWithObjectRepository()
+    {
+        $this->generateTestForRepository(Post::class, PostRepositoryInterface::class, ObjectRepository::class);
+    }
+
+    public function testCommentRepositoryWithObjectRepository()
+    {
+        $this->generateTestForRepository(Comment::class, CommentRepositoryInterface::class, ObjectRepository::class);
     }
 
     public function testTypeRepositoryWithObjectRepository()
@@ -140,27 +141,24 @@ class ContainerTest extends TestCase
         $this->generateTestForRepository(Content::class, ContentRepositoryInterface::class, DocumentRepository::class);
     }
 
+    public function testTagRepositoryWithDocumentRepository()
+    {
+        $this->generateTestForRepository(Tag::class, TagRepositoryInterface::class, DocumentRepository::class);
+    }
+
+    public function testPostRepositoryWithDocumentRepository()
+    {
+        $this->generateTestForRepository(Post::class, PostRepositoryInterface::class, DocumentRepository::class);
+    }
+
+    public function testCommentRepositoryWithDocumentRepository()
+    {
+        $this->generateTestForRepository(Comment::class, CommentRepositoryInterface::class, DocumentRepository::class);
+    }
+
     public function testTypeRepositoryWithDocumentRepository()
     {
         $this->generateTestForRepository(Type::class, TypeRepositoryInterface::class, DocumentRepository::class);
-    }
-
-    public function testItemRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Item::class, ItemRepositoryInterface::class);
-    }
-
-    public function testContentRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Content::class, ContentRepositoryInterface::class);
-    }
-
-    public function testTypeRepositoryWithUnsupportedRepository()
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->generateTestForRepositoryWithUnsupportedRepository(Type::class, TypeRepositoryInterface::class);
     }
 
     public function testOriginalRecipeInterfaceStatic()

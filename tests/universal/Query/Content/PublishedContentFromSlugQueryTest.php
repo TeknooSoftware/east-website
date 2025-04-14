@@ -25,9 +25,11 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Query\Content;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -49,7 +51,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
      */
     public function buildQuery(): QueryElementInterface
     {
-        return new PublishedContentFromSlugQuery('fooBar');
+        return new PublishedContentFromSlugQuery('fooBar', new DateTimeImmutable('2025-03-24'));
     }
 
     public function testFetch()
@@ -63,7 +65,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'deletedAt' => null,], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), ], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
 
         self::assertInstanceOf(
             PublishedContentFromSlugQuery::class,
