@@ -396,9 +396,7 @@ return [
             loadPost: $container->get(LoadPost::class),
             listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
-            createObject: $container->get(CreateObject::class),
-            formHandling: $container->get(FormHandlingInterface::class),
-            renderForm: $container->get(RenderFormInterface::class),
+            render: $container->get(Render::class),
             renderError: $container->get(RenderError::class),
         );
     },

@@ -499,9 +499,7 @@ class ContainerTest extends TestCase
         $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
         $container->set(LoadPost::class, $this->createMock(LoadPost::class));
         $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(CreateObject::class, $this->createMock(CreateObject::class));
-        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
-        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
+        $container->set(Render::class, $this->createMock(Render::class));
         $container->set(RenderError::class, $this->createMock(RenderError::class));
         $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
 

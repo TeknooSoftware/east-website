@@ -26,10 +26,11 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Behat;
 
 use Behat\Behat\Context\Context;
-use DateTime;
-use DateTimeInterface;
+use Behat\Hook\BeforeScenario;
 use DI\Container;
 use DI\ContainerBuilder;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use Doctrine\Persistence\ObjectManager;
@@ -62,10 +63,14 @@ use Teknoo\DI\SymfonyBridge\DIBridgeBundle;
 use Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\CommonBundle\TeknooEastCommonBundle;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\GetStreamFromMediaInterface;
+use Teknoo\East\Common\Loader\MediaLoader;
+use Teknoo\East\Common\Object\Media as BaseMedia;
+use Teknoo\East\Common\Object\Media;
 use Teknoo\East\Common\Object\StoredPassword;
 use Teknoo\East\Common\Object\User;
+use Teknoo\East\Common\Recipe\Plan\RenderMediaEndPoint;
 use Teknoo\East\Common\Recipe\Plan\RenderStaticContentEndPoint;
-use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\FoundationBundle\EastFoundationBundle;
 use Teknoo\East\Foundation\Client\ClientInterface;
 use Teknoo\East\Foundation\Client\ResponseInterface as EastResponse;
@@ -79,22 +84,23 @@ use Teknoo\East\Foundation\Router\ResultInterface as RouterResultInterface;
 use Teknoo\East\Foundation\Router\RouterInterface;
 use Teknoo\East\Foundation\Template\EngineInterface;
 use Teknoo\East\Foundation\Template\ResultInterface;
+use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Twig\Template\Engine;
+use Teknoo\East\Website\Object\Tag;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
+use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
 use Teknoo\East\WebsiteBundle\TeknooEastWebsiteBundle;
 use Teknoo\East\Website\Contracts\DBSource\Repository\ContentRepositoryInterface;
-use Teknoo\East\Common\Contracts\Recipe\Step\GetStreamFromMediaInterface;
 use Teknoo\East\Website\Doctrine\Object\Content;
+use Teknoo\East\Website\Doctrine\Object\Post;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
-use Teknoo\East\Common\Loader\MediaLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
-use Teknoo\East\Common\Object\Media as BaseMedia;
-use Teknoo\East\Common\Object\Media;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
-use Teknoo\East\Common\Recipe\Plan\RenderMediaEndPoint;
+use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Throwable;
 use Twig\Environment;
@@ -113,6 +119,8 @@ use function random_bytes;
 use function random_int;
 use function str_replace;
 use function strlen;
+
+use const E_USER_NOTICE;
 
 /**
  * Defines application features from the specific context.
@@ -139,19 +147,14 @@ class FeatureContext implements Context
 
     private ?TypeLoader $typeLoader = null;
 
-    /**
-     * @var RecipeEndPoint
-     */
     private ?RecipeEndPoint $mediaEndPoint = null;
 
-    /**
-     * @var RecipeEndPoint
-     */
     private ?RecipeEndPoint $contentEndPoint = null;
 
-    /**
-     * @var RecipeEndPoint
-     */
+    private ?RecipeEndPoint $postsEndPoint = null;
+
+    private ?RecipeEndPoint $postEndPoint = null;
+
     private ?RecipeEndPoint $staticEndPoint = null;
 
     private ?Type $type = null;
@@ -172,7 +175,15 @@ class FeatureContext implements Context
 
     public $updatedObjects = [];
 
+    public $tags = [];
+
     private ?DateTimeInterface $now = null;
+
+    #[BeforeScenario]
+    public function prepareScenario(): void
+    {
+        \error_reporting(E_ALL);
+    }
 
     /**
      * @Given I have DI initialized
@@ -378,8 +389,7 @@ class FeatureContext implements Context
 
     public function getObjectRepository(string $className): ObjectRepository
     {
-        return $this->objectRepository[$className] ?? $this->objectRepository[$className] =
-                new class($className) implements ObjectRepository {
+        return $this->objectRepository[$className] ??= new class($className) implements ObjectRepository {
             private string $className;
 
             /**
@@ -387,7 +397,9 @@ class FeatureContext implements Context
              */
             private $object;
 
-            private array $criteria;
+            private array $allObjects = [];
+
+            private array $criteria = [];
 
             public function __construct(string $className)
             {
@@ -403,6 +415,7 @@ class FeatureContext implements Context
             {
                 $this->criteria = $criteria;
                 $this->object = $object;
+                $this->allObjects[] = $object;
 
                 return $this;
             }
@@ -413,10 +426,12 @@ class FeatureContext implements Context
 
             public function findAll(): array
             {
+                return [];
             }
 
             public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
             {
+                return \array_reverse($this->allObjects);
             }
 
             public function findOneBy(array $criteria): ?object
@@ -429,7 +444,10 @@ class FeatureContext implements Context
                     unset($criteria['or']);
                 }
                 
-                if (isset($criteria['slug']) && 'page-with-error' === $criteria['slug']) {
+                if (
+                    isset($criteria['slug'])
+                    && ('page-with-error' === $criteria['slug'] || 'post-with-error' === $criteria['slug'])
+                ) {
                     throw new Exception('Error', 404);
                 }
 
@@ -589,6 +607,14 @@ class FeatureContext implements Context
                             $request = $request->withAttribute($key, $value);
                         }
 
+                        if ('/posts' === $path) {
+                            $manager->updateWorkPlan([
+                                'itemsPerPage' => 10,
+                                'page' => '1',
+                                'template' => 'Acme:MyBundle:list.html.twig',
+                            ]);
+                        }
+
                         $manager->updateWorkPlan([RouterResultInterface::class => $result]);
 
                         $manager->continueExecution($client, $request);
@@ -614,6 +640,12 @@ class FeatureContext implements Context
         switch ($controllerName) {
             case 'contentEndPoint':
                 $controller = $this->contentEndPoint;
+                break;
+            case 'postEndPoint':
+                $controller = $this->postEndPoint;
+                break;
+            case 'postsEndPoint':
+                $controller = $this->postsEndPoint;
                 break;
             case 'staticEndPoint':
                 $params = ['template' => 'Acme:MyBundle:template.html.twig'];
@@ -772,14 +804,15 @@ class FeatureContext implements Context
     }
 
     /**
-     * @Given a type of page, called :name with :blockNumber blocks :blocks and template :template with :config
+     * @Given a type of :contentType, called :name with :blockNumber blocks :blocks and template :template with :config
      */
     public function aTypeOfPageCalledWithBlocksAndTemplateWith(
         string $name,
         int $blockNumber,
         string $blocks,
         string $template,
-        string $config
+        string $config,
+        string $contentType
     ) :void {
         $this->type = new Type();
         $this->type->setName($name);
@@ -793,12 +826,38 @@ class FeatureContext implements Context
         $this->templateContent = $config;
     }
 
-    /**
-     * @Given an available page with the slug :slug of type :type
-     */
-    public function anAvailablePageWithTheSlugOfType(string $slug, string $type): void
+    private function getTag(string $name): Tag
     {
-        $this->getObjectRepository(Content::class)
+        return $this->tags[$name] ??= (new Tag)->setName($name)->setSlug($name);
+    }
+
+    /**
+     * @Given an available :contentType with the slug :slug of type :type
+     * @Given an available :contentType with the slug :slug of type :type and tag :tag
+     */
+    public function anAvailablePageWithTheSlugOfType(
+        string $contentType,
+        string $slug,
+        string $type,
+        ?string $tag = null
+    ): void {
+        $className = match($contentType) {
+            'post' => Post::class,
+            default => Content::class,
+        };
+
+        $object = (new $className())
+            ->setSlug($slug)
+            ->setType($this->type)
+            ->setParts(['block1' => 'hello', 'block2' => 'world'])
+            ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
+            ->setPublishedAt(new DateTime('2017-11-25'));
+
+        if ($tag) {
+            $object->setTags([$this->getTag($tag)]);
+        }
+
+        $this->getObjectRepository($className)
             ->setObject(
                 [
                     'publishedAt' => [
@@ -806,11 +865,7 @@ class FeatureContext implements Context
                     ],
                     'slug' => $slug,
                 ],
-                (new Content())->setSlug($type)
-                    ->setType($this->type)
-                    ->setParts(['block1' => 'hello', 'block2' => 'world'])
-                    ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
-                    ->setPublishedAt(new DateTime('2017-11-25'))
+                $object
             );
     }
 
@@ -823,6 +878,35 @@ class FeatureContext implements Context
             $this->container->get(RenderDynamicContentEndPoint::class),
             $this->container
         );
+    }
+
+    /**
+     * @Given a Endpoint able to render and serve post.
+     */
+    public function aEndpointAbleToRenderAndServePost(): void
+    {
+        $this->postEndPoint = new RecipeEndPoint(
+            $this->container->get(RenderDynamicPostEndPoint::class),
+            $this->container
+        );
+
+        \error_reporting(E_ALL & ~E_USER_NOTICE);
+    }
+
+    /**
+     * @Given a Endpoint able to render and serve list of posts.
+     */
+    public function aEndpointAbleToRenderAndServeListOfPosts(): void
+    {
+        $this->postsEndPoint = new RecipeEndPoint(
+            $this->container->get(ListAllPostsEndPoint::class),
+            $this->container
+        );
+
+        \error_reporting(E_ALL & ~E_USER_NOTICE);
+
+        $this->templateToCall = 'Acme:MyBundle:list.html.twig';
+        $this->templateContent = 'list: {posts}';
     }
 
     public function buildResultObject (string $body): ResultInterface
@@ -909,19 +993,31 @@ class FeatureContext implements Context
                 $this->context = $context;
             }
 
-            public function render(PromiseInterface $promise, $name, array $parameters = array()): EngineInterface
+            public function render(PromiseInterface $promise, $view, array $parameters = array()): EngineInterface
             {
-                if ('404-error' === $name) {
+                if ('404-error' === $view) {
                     $promise->fail(new Exception('Error 404'));
 
                     return $this;
                 }
 
-                Assert::assertEquals($this->context->templateToCall, $name);
+                Assert::assertEquals($this->context->templateToCall, $view);
 
                 $keys = [];
                 $values = [];
-                if (isset($parameters['content']) && $parameters['content'] instanceof Content) {
+                if (isset($parameters['post']) && $parameters['post'] instanceof Post) {
+                    foreach ($parameters['post']->getParts()->toArray() as $key=>$value) {
+                        $keys[] = '{'.$key.'}';
+                        $values[] = $value;
+                    }
+                } elseif (isset($parameters['postsCollection'])) {
+                    $keys[] = '{posts}';
+                    $value = '';
+                    foreach ($parameters['postsCollection'] as $post) {
+                        $value .= $post->getSlug() . ':';
+                    }
+                    $values[] = \trim($value, ':');
+                } elseif (isset($parameters['content']) && $parameters['content'] instanceof Content) {
                     foreach ($parameters['content']->getParts()->toArray() as $key=>$value) {
                         $keys[] = '{'.$key.'}';
                         $values[] = $value;
@@ -947,9 +1043,9 @@ class FeatureContext implements Context
     }
 
     /**
-     * @Given a templating engine for sanitized content
+     * @Given a templating engine for sanitized :contentType
      */
-    public function aTemplatingEngineForSanitizedContent(): void
+    public function aTemplatingEngineForSanitizedContent(string $contentType): void
     {
         $this->templating = new class($this) implements EngineInterface {
             private $context;
@@ -962,19 +1058,24 @@ class FeatureContext implements Context
                 $this->context = $context;
             }
 
-            public function render(PromiseInterface $promise, $name, array $parameters = array()): EngineInterface
+            public function render(PromiseInterface $promise, $view, array $parameters = array()): EngineInterface
             {
-                if ('404-error' === $name) {
+                if ('404-error' === $view) {
                     $promise->fail(new Exception('Error 404'));
 
                     return $this;
                 }
 
-                Assert::assertEquals($this->context->templateToCall, $name);
+                Assert::assertEquals($this->context->templateToCall, $view);
 
                 $keys = [];
                 $values = [];
-                if (isset($parameters['content']) && $parameters['content'] instanceof Content) {
+                if (isset($parameters['post']) && $parameters['post'] instanceof Post) {
+                    foreach ($parameters['post']->getSanitizedParts('fooBar')->toArray() as $key=>$value) {
+                        $keys[] = '{'.$key.'}';
+                        $values[] = $value;
+                    }
+                } elseif (isset($parameters['content']) && $parameters['content'] instanceof Content) {
                     foreach ($parameters['content']->getSanitizedParts('fooBar')->toArray() as $key=>$value) {
                         $keys[] = '{'.$key.'}';
                         $values[] = $value;
@@ -987,11 +1088,11 @@ class FeatureContext implements Context
                 return $this;
             }
 
-            public function exists($name)
+            public function exists($view)
             {
             }
 
-            public function supports($name)
+            public function supports($view)
             {
             }
         };

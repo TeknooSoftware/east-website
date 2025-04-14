@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Query\Post;
 
+use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
@@ -34,6 +35,8 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Traversable;
+
+use function is_array;
 
 /**
  * Trait used by PublishedPostsListInTagQuery and PublishedPostsListQuery to execute a paginated query about a list of
@@ -67,6 +70,10 @@ trait PublishedPostListQueryTrait
                 /** @var Promise<int, mixed, mixed> $countPromise */
                 $countPromise = new Promise(
                     static function (int $count) use ($promise, $result): void {
+                        if (is_array($result)) {
+                            $result = new ArrayIterator($result);
+                        }
+
                         $iterator = new class ($count, $result) implements Countable, IteratorAggregate {
                             /**
                              * @param Traversable<Post> $iterator

@@ -1,6 +1,6 @@
 # Teknoo Software - Website - Change Log
 
-## [10.1.0] - 2025-04-XX
+## [10.1.0] - 2025-04-14
 ### Stable Release
 - Add Blog feature with `Post`, categorized by `Tag` with `Comment` and moderation
   - Blog's `Post` are translatable

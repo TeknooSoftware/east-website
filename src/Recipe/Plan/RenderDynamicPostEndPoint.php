@@ -29,6 +29,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
 use Teknoo\East\Common\Recipe\Step\CreateObject;
+use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -58,9 +59,7 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
         private readonly LoadPost $loadPost,
         private readonly ListTags $listTags,
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
-        private readonly CreateObject $createObject,
-        private readonly FormHandlingInterface $formHandling,
-        private readonly RenderFormInterface $renderForm,
+        private readonly Render $render,
         private readonly RenderError $renderError,
     ) {
         $this->fill($recipe);
@@ -79,18 +78,7 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
             $recipe = $recipe->cook($this->loadTranslationsInterface, LoadTranslationsInterface::class, [], 25);
         }
 
-        $recipe = $recipe->cook(
-            $this->createObject,
-            CreateObject::class,
-            [
-                'constructorArguments' => Post::class
-            ],
-            30,
-        );
-
-        $recipe = $recipe->cook($this->formHandling, FormHandlingInterface::class, [], 40);
-
-        $recipe = $recipe->cook($this->renderForm, RenderFormInterface::class, [], 50);
+        $recipe = $recipe->cook($this->render, Render::class, [], 50);
 
         return $recipe->onError(new Bowl($this->renderError, []));
     }

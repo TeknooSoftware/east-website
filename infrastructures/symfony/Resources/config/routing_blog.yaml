@@ -5,10 +5,6 @@ _teknoo_website_post:
         _controller: 'teknoo.east.website.endpoint.post'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         cleanHtml: "%teknoo.east.website.rendering.clean_html%"
-        objectClass: '%teknoo.east.website.dto.comment.class%'
-        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
-        formOptions:
-            comment_class: '%teknoo.east.website.persisted.comment.class%'
     requirements:
         slug: ((?!_wdt|_profiler).).+
 

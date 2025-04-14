@@ -11,7 +11,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     And a Endpoint able to render and serve page.
     And a type of page, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1:{block1} block2:{block2}"
     And an available page with the slug "foo-bar" of type "type1"
-    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.]+)#is" to controller "contentEndPoint"
+    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.\-]+)#is" to controller "contentEndPoint"
     When The server will receive the request "https://foo.com/page/foo-bar"
     Then The client must accept a response
     And I should get "block1:hello block2:world"
@@ -24,7 +24,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     And a Endpoint able to render and serve page.
     And a type of page, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1:{block1} block2:{block2}"
     And an available page with the slug "foo-bar" of type "type1"
-    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.]+)#is" to controller "contentEndPoint"
+    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.\-]+)#is" to controller "contentEndPoint"
     When The server will receive the request "https://foo.com/page/foo-bar"
     Then The client must accept a response
     And I should get "block1:hello block2:world"
@@ -37,7 +37,7 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     And a Endpoint able to render and serve page.
     And a type of page, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1{block1} block2{block2}"
     And an available page with the slug "foo-bar" of type "type1"
-    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.]+)#is" to controller "contentEndPoint"
+    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.\-]+)#is" to controller "contentEndPoint"
     When The server will receive the request "https://foo.com/page/bar-foo"
     Then The client must accept an error
 
@@ -49,6 +49,6 @@ Feature: Rendering and return an HTML dynamic page stored into a database server
     And a Endpoint able to render and serve page.
     And a type of page, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1{block1} block2{block2}"
     And an available page with the slug "page-with-error" of type "type1"
-    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.]+)#is" to controller "contentEndPoint"
+    And The router can process the request "#/page/(?P<slug>[a-zA-Z0-9\.\-]+)#is" to controller "contentEndPoint"
     When The server will receive the request "https://foo.com/page/page-with-error"
     Then The client must accept an error

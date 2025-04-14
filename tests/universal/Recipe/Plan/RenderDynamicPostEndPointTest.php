@@ -28,9 +28,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
-use Teknoo\East\Common\Contracts\Recipe\Step\RenderFormInterface;
-use Teknoo\East\Common\Recipe\Step\CreateObject;
+use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ListTags;
@@ -54,7 +52,7 @@ class RenderDynamicPostEndPointTest extends TestCase
 
     private ?ListTags $listTags = null;
 
-    private ?RenderFormInterface $render = null;
+    private ?Render $render = null;
 
     private ?RenderError $renderError = null;
 
@@ -95,12 +93,12 @@ class RenderDynamicPostEndPointTest extends TestCase
     }
 
     /**
-     * @return RenderFormInterface|MockObject
+     * @return Render|MockObject
      */
-    public function getRender(): RenderFormInterface
+    public function getRender(): Render
     {
-        if (null === $this->render) {
-            $this->render = $this->createMock(RenderFormInterface::class);
+        if (null === $this->renderError) {
+            $this->render = $this->createMock(Render::class);
         }
 
         return $this->render;
@@ -125,8 +123,6 @@ class RenderDynamicPostEndPointTest extends TestCase
             $this->getLoadPost(),
             $this->getListTags(),
             $this->createMock(LoadTranslationsInterface::class),
-            $this->createMock(CreateObject::class),
-            $this->createMock(FormHandlingInterface::class),
             $this->getRender(),
             $this->getRenderError()
         );
