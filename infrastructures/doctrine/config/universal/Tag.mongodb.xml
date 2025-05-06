@@ -9,7 +9,7 @@
         <id type="string" strategy="UUID"/>
         <field field-name="name" type="string" nullable="false"/>
         <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>
-        <field field-name="isHighlighted" name="is_highlighted" type="boolean" nullable="true" index="true"/>
+        <field field-name="isHighlighted" name="is_highlighted" type="bool" nullable="true" index="true"/>
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date"/>
         <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>

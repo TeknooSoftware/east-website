@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.1.1] - 2025-05-06
+### Stable Release
+- Fix deprecation with Doctrine ODM 2.1+
+
 ## [10.1.0] - 2025-04-14
 ### Stable Release
 - Add Blog feature with `Post`, categorized by `Tag` with `Comment` and moderation
