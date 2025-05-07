@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.1.2] - 2025-05-07
+### Stable Release
+- Fix issue in Post mapping
+
 ## [10.1.1] - 2025-05-06
 ### Stable Release
 - Fix deprecation with Doctrine ODM 2.1+

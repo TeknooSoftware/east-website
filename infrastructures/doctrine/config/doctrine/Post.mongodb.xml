@@ -8,6 +8,15 @@
     <document name="Teknoo\East\Website\Doctrine\Object\Post"
               collection="posts"
               inheritance-type="SINGLE_COLLECTION">
+        <reference-many
+                field="comments"
+                target-document="Teknoo\East\Website\Doctrine\Object\Comment"
+                mapped-by="post"
+                store-empty-array="true">
+            <cascade>
+                <all/>
+            </cascade>
+        </reference-many>
         <lifecycle-callbacks>
             <lifecycle-callback type="postLoad" method="postLoadDoctrine"/>
         </lifecycle-callbacks>
