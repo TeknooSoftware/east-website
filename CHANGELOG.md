@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.1.3] - 2025-05-13
+### Stable Release
+- Fix coverage
+
 ## [10.1.2] - 2025-05-07
 ### Stable Release
 - Fix issue in Post mapping
