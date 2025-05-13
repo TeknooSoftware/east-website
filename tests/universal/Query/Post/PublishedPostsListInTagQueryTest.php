@@ -113,6 +113,63 @@ class PublishedPostsListInTagQueryTest extends TestCase
         );
     }
 
+    public function testExecuteWithArray()
+    {
+        $loader = $this->createMock(LoaderInterface::class);
+        $repository = $this->createMock(RepositoryInterface::class);
+        $promise = $this->createMock(PromiseInterface::class);
+
+        $promise->expects($this->once())
+            ->method('success')
+            ->with(
+                self::callback(
+                    fn($r) => $r instanceof \Countable
+                        && $r instanceof \IteratorAggregate
+                        && 20 === $r->count()
+                        && $r->getIterator() instanceof \Iterator
+                )
+            );
+        $promise->expects($this->never())->method('fail');
+
+        $repository->expects($this->once())
+            ->method('count')
+            ->with(
+                [
+                    'tags' => new ObjectReference(new Tag()),
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                ],
+                self::callback(
+                    fn($p) => $p instanceof PromiseInterface
+                )
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                    $promise->success(20);
+
+                    return $repository;
+                }
+            );
+
+        $repository->expects($this->once())
+            ->method('findBy')
+            ->with(
+                [
+                    'tags' => new ObjectReference(new Tag()),
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                ]
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                    $promise->success([]);
+
+                    return $repository;
+                }
+            );
+
+        self::assertInstanceOf(
+            PublishedPostsListInTagQuery::class,
+            $this->buildQuery()->execute($loader, $repository, $promise)
+        );
+    }
+
     public function testExecuteErrorOnCount()
     {
         $loader = $this->createMock(LoaderInterface::class);
