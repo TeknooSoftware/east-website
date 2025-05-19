@@ -4,9 +4,9 @@ _teknoo_website_post_comment:
     defaults:
         _controller: 'teknoo.east.website.endpoint.post.comment'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
-        cleanHtml: "%teknoo.east.website.rendering.clean_html%"
+        cleanHtml: '%teknoo.east.website.rendering.clean_html%'
         objectClass: '%teknoo.east.website.dto.comment.class%'
-        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+        formClass: "%teknoo.east.website.form.new_comment.type.class%"
         formOptions:
             comment_class: '%teknoo.east.website.persisted.comment.class%'
         route: '_teknoo_website_post'

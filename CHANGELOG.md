@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [10.1.4] - 2025-05-19
+### Stable Release
+- Add `teknoo.east.website.form.new_comment.type.class` option to allow customize the comment form class.
+
 ## [10.1.3] - 2025-05-13
 ### Stable Release
 - Fix coverage

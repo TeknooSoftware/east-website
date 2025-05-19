@@ -24,6 +24,8 @@ parameters:
     teknoo.east.website.dto.comment.class: 'Teknoo\East\WebsiteBundle\Form\DTO\Comment'
     teknoo.east.website.persisted.comment.class: 'Teknoo\East\Website\Doctrine\Object\Comment'
 
+    teknoo.east.website.form.new_comment.type.class: 'Teknoo\East\WebsiteBundle\Form\Type\NewCommentType'
+
 services:
     #Generic endpoints
     teknoo.east.website.endpoint.content.bowl:
