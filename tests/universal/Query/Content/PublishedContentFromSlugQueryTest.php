@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -38,7 +38,7 @@ use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
 use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(PublishedContentFromSlugQuery::class)]
@@ -54,7 +54,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
         return new PublishedContentFromSlugQuery('fooBar', new DateTimeImmutable('2025-03-24'));
     }
 
-    public function testFetch()
+    public function testFetch(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -65,15 +65,12 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), ], $this->callback(fn($pr) => $pr instanceof PromiseInterface));
+            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), ], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
 
-        self::assertInstanceOf(
-            PublishedContentFromSlugQuery::class,
-            $this->buildQuery()->fetch($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
 
-    public function testFetchFailing()
+    public function testFetchFailing(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -84,19 +81,16 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                 $promise->fail(new \RuntimeException());
 
                 return $repository;
             });
 
-        self::assertInstanceOf(
-            PublishedContentFromSlugQuery::class,
-            $this->buildQuery()->fetch($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
 
-    public function testFetchNotPublishable()
+    public function testFetchNotPublishable(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -107,19 +101,16 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                 $promise->success(new \stdClass());
 
                 return $repository;
             });
 
-        self::assertInstanceOf(
-            PublishedContentFromSlugQuery::class,
-            $this->buildQuery()->fetch($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
 
-    public function testFetchNotPublished()
+    public function testFetchNotPublished(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -130,9 +121,9 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                 $object = $this->createMock(Content::class);
-                $object->expects($this->any())->method('getPublishedAt')->willReturn(
+                $object->method('getPublishedAt')->willReturn(
                     null
                 );
                 $promise->success($object);
@@ -140,13 +131,10 @@ class PublishedContentFromSlugQueryTest extends TestCase
                 return $repository;
             });
 
-        self::assertInstanceOf(
-            PublishedContentFromSlugQuery::class,
-            $this->buildQuery()->fetch($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
 
-    public function testFetchPublished()
+    public function testFetchPublished(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -154,22 +142,19 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $promise->expects($this->once())
             ->method('success')
-            ->with($this->callback(fn($value) => $value instanceof Content));
+            ->with($this->callback(fn ($value): bool => $value instanceof Content));
         $promise->expects($this->never())->method('fail');
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository) {
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                 $content = $this->createMock(Content::class);
-                $content->expects($this->any())->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
+                $content->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
                 $promise->success($content);
 
                 return $repository;
             });
 
-        self::assertInstanceOf(
-            PublishedContentFromSlugQuery::class,
-            $this->buildQuery()->fetch($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
 }

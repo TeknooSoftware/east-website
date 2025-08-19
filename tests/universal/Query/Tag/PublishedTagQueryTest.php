@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -40,7 +40,7 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(PublishedTagQuery::class)]
@@ -70,13 +70,13 @@ class PublishedTagQueryTest extends TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
-        $promise->expects($this->any())->method('success');
+        $promise->method('success');
         $promise->expects($this->never())->method('fail');
 
         $repository->expects($this->once())
@@ -91,14 +91,11 @@ class PublishedTagQueryTest extends TestCase
         $this->getPostRepository()
             ->expects($this->once())
             ->method('distinctBy')->willReturnCallback(
-                function ($field, $criteria, $aPromise) {
-                    self::assertEquals('tags.id', $field);
-                    self::assertEquals(
-                        [
-                            'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                        ],
-                        $criteria
-                    );
+                function ($field, $criteria, $aPromise): \Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject {
+                    $this->assertEquals('tags.id', $field);
+                    $this->assertEquals([
+                        'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    ], $criteria);
 
                     $aPromise->success(['foo', 'bar']);
 
@@ -106,13 +103,10 @@ class PublishedTagQueryTest extends TestCase
                 }
             );
 
-        self::assertInstanceOf(
-            PublishedTagQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedTagQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }
 
-    public function testExecuteWithNoTags()
+    public function testExecuteWithNoTags(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -127,14 +121,11 @@ class PublishedTagQueryTest extends TestCase
         $this->getPostRepository()
             ->expects($this->once())
             ->method('distinctBy')->willReturnCallback(
-                function ($field, $criteria, $aPromise) {
-                    self::assertEquals('tags.id', $field);
-                    self::assertEquals(
-                        [
-                            'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
-                        ],
-                        $criteria
-                    );
+                function ($field, $criteria, $aPromise): \Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface&\PHPUnit\Framework\MockObject\MockObject {
+                    $this->assertEquals('tags.id', $field);
+                    $this->assertEquals([
+                        'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    ], $criteria);
 
                     $aPromise->success([]);
 
@@ -142,9 +133,6 @@ class PublishedTagQueryTest extends TestCase
                 }
             );
 
-        self::assertInstanceOf(
-            PublishedTagQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedTagQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }
 }

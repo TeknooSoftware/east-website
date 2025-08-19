@@ -13,8 +13,8 @@ parameters:
             message: '#array#'
             path: src/Object/Content.php
         -
-            message: '#Method class@anonymous#'
-            path: src/Query/Post/
+            message: '#has parameter \$iterator with no value type specified in iterable type Traversable#'
+            path:  src/Query/Post
         -
             message: '#[a-zA-Z0-9\\_]+::cook\(\) expects \(callable\(\): mixed\)|[a-zA-Z0-9\\_]+#'
             path: src/di.php

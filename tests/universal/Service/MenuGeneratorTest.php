@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
@@ -37,26 +38,15 @@ use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use Teknoo\East\Website\Service\MenuGenerator;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(MenuGenerator::class)]
 class MenuGeneratorTest extends TestCase
 {
-    /**
-     * @var ItemLoader
-     */
-    private $itemLoader;
+    private (ItemLoader&MockObject)|null $itemLoader = null;
 
-    /**
-     * @var ContentLoader
-     */
-    private $contentLoader;
-
-    /**
-     * @return ItemLoader|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getItemLoader(): ItemLoader
+    public function getItemLoader(): ItemLoader&MockObject
     {
         if (!$this->itemLoader instanceof ItemLoader) {
             $this->itemLoader = $this->createMock(ItemLoader::class);
@@ -65,10 +55,7 @@ class MenuGeneratorTest extends TestCase
         return $this->itemLoader;
     }
 
-    /**
-     * @return MenuGenerator
-     */
-    public function buildService()
+    public function buildService(): MenuGenerator
     {
         return new MenuGenerator(
             $this->getItemLoader(),
@@ -76,11 +63,11 @@ class MenuGeneratorTest extends TestCase
         );
     }
 
-    public function testExtract()
+    public function testExtract(): void
     {
         $item1 = (new Item())->setId('i1')->setLocation('location1');
         $item2 = (new Item())->setId('i2')->setLocation('location1')->setContent(
-            new class extends Content {
+            new class () extends Content {
                 public function getId(): string
                 {
                     return 'c1';
@@ -88,18 +75,19 @@ class MenuGeneratorTest extends TestCase
             }
         );
         $item3 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1)->setContent(
-            new class extends Content {
+            new class () extends Content {
                 public function getId(): string
                 {
                     return 'c2';
                 }
             }
-        );;
+        );
+        ;
         $item4 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1);
 
-        $content1 = (new Content())->setId('c1');
-        $content2 = (new Content())->setId('c2');
-        $content3 = (new Content())->setId('c3');
+        (new Content())->setId('c1');
+        (new Content())->setId('c2');
+        (new Content())->setId('c3');
         $content4 = (new Content())->setId('c4');
         $item4->setContent($content4);
 
@@ -107,7 +95,7 @@ class MenuGeneratorTest extends TestCase
             ->expects($this->once())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
-            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4) {
+            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([$item1, $item2, $item3, $item4]);
 
                 return $this->getItemLoader();
@@ -115,41 +103,40 @@ class MenuGeneratorTest extends TestCase
 
         $stack = [];
         $service = $this->buildService();
-        foreach ($service->extract('location1') as $key=>$element) {
+        foreach ($service->extract('location1') as $key => $element) {
             $stack[$key][] = $element;
         }
 
-        self::assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3, $item4]], $stack);
+        $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3, $item4]], $stack);
 
         $stack = [];
-        foreach ($service->extract('location1') as $key=>$element) {
+        foreach ($service->extract('location1') as $key => $element) {
             $stack[$key][] = $element;
         }
 
-        self::assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3, $item4]], $stack);
+        $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3, $item4]], $stack);
     }
 
-    public function testExtractWithoutTop()
+    public function testExtractWithoutTop(): void
     {
         $this->getItemLoader()
-            ->expects($this->any())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
-            ->willReturnCallback(function ($value, PromiseInterface $promise) {
+            ->willReturnCallback(function ($value, PromiseInterface $promise): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([]);
 
                 return $this->getItemLoader();
             });
 
         $stack = [];
-        foreach ($this->buildService()->extract('location1') as $key=>$element) {
+        foreach ($this->buildService()->extract('location1') as $key => $element) {
             $stack[$key][] = $element;
         }
 
-        self::assertEquals([], $stack);
+        $this->assertEquals([], $stack);
     }
 
-    public function testExtractWithoutContent()
+    public function testExtractWithoutContent(): void
     {
         $item1 = (new Item())->setId('i1')->setLocation('location1');
         $item2 = (new Item())->setId('i2')->setLocation('location1');
@@ -159,17 +146,17 @@ class MenuGeneratorTest extends TestCase
             ->expects($this->once())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
-            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3) {
+            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([$item1, $item2, $item3]);
 
                 return $this->getItemLoader();
             });
 
         $stack = [];
-        foreach ($this->buildService()->extract('location1') as $key=>$element) {
+        foreach ($this->buildService()->extract('location1') as $key => $element) {
             $stack[$key][] = $element;
         }
 
-        self::assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3]], $stack);
+        $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3]], $stack);
     }
 }

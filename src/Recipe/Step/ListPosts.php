@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -27,9 +27,11 @@ namespace Teknoo\East\Website\Recipe\Step;
 
 use Countable;
 use DateTimeInterface;
+use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Query\Post\PublishedPostsListInTagQuery;
 use Teknoo\East\Website\Query\Post\PublishedPostsListQuery;
@@ -49,7 +51,7 @@ use function ceil;
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 class ListPosts
@@ -71,6 +73,7 @@ class ListPosts
             $itemsPerPage = 1;
         }
 
+        /** @var Promise<iterable<Post>, mixed, mixed> $promise */
         $promise = new Promise(
             static function (iterable $posts) use ($itemsPerPage, $manager, $bag): void {
                 $pageCount = 1;
@@ -109,7 +112,7 @@ class ListPosts
                 }
 
                 $this->datesService->passMeTheDate(
-                    fn (DateTimeInterface $date) => $this->postLoader->query($query, $promise),
+                    fn (DateTimeInterface $date): LoaderInterface => $this->postLoader->query($query, $promise),
                 );
             }
         );

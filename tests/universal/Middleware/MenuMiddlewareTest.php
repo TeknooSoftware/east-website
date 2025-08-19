@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -26,24 +26,22 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Middleware;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Common\View\ParametersBag;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(MenuMiddleware::class)]
 class MenuMiddlewareTest extends TestCase
 {
-    /**
-     * @var MenuGenerator
-     */
-    private $menuGenerator;
+    private (MenuGenerator&MockObject)|null $menuGenerator = null;
 
-    public function getMenuGenerator(): MenuGenerator|\PHPUnit\Framework\MockObject\MockObject
+    public function getMenuGenerator(): MenuGenerator&MockObject
     {
         if (!$this->menuGenerator instanceof MenuGenerator) {
             $this->menuGenerator = $this->createMock(MenuGenerator::class);
@@ -57,13 +55,10 @@ class MenuMiddlewareTest extends TestCase
         return new MenuMiddleware($this->getMenuGenerator());
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $bag = $this->createMock(ParametersBag::class);
 
-        self::assertInstanceOf(
-            MenuMiddleware::class,
-            $this->buildMiddleware()->execute($bag)
-        );
+        $this->assertInstanceOf(MenuMiddleware::class, $this->buildMiddleware()->execute($bag));
     }
 }

@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -40,7 +40,7 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(PublishedPostsListInTagQuery::class)]
@@ -56,7 +56,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
         return new PublishedPostsListInTagQuery(new Tag(), new DateTimeImmutable('2025-03-24'), 12, 3);
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -66,7 +66,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
             ->method('success')
             ->with(
                 self::callback(
-                    fn($r) => $r instanceof \Countable
+                    fn ($r): bool => $r instanceof \Countable
                         && $r instanceof \IteratorAggregate
                         && 20 === $r->count()
                         && $r->getIterator() instanceof \Iterator
@@ -82,10 +82,10 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ],
                 self::callback(
-                    fn($p) => $p instanceof PromiseInterface
+                    fn ($p): bool => $p instanceof PromiseInterface
                 )
             )->willReturnCallback(
-                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                     $promise->success(20);
 
                     return $repository;
@@ -100,20 +100,17 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ]
             )->willReturnCallback(
-                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                     $promise->success($this->createMock(\Iterator::class));
 
                     return $repository;
                 }
             );
 
-        self::assertInstanceOf(
-            PublishedPostsListInTagQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedPostsListInTagQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }
 
-    public function testExecuteWithArray()
+    public function testExecuteWithArray(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -123,7 +120,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
             ->method('success')
             ->with(
                 self::callback(
-                    fn($r) => $r instanceof \Countable
+                    fn ($r): bool => $r instanceof \Countable
                         && $r instanceof \IteratorAggregate
                         && 20 === $r->count()
                         && $r->getIterator() instanceof \Iterator
@@ -139,10 +136,10 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ],
                 self::callback(
-                    fn($p) => $p instanceof PromiseInterface
+                    fn ($p): bool => $p instanceof PromiseInterface
                 )
             )->willReturnCallback(
-                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                     $promise->success(20);
 
                     return $repository;
@@ -157,20 +154,17 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ]
             )->willReturnCallback(
-                function (array $criteria, PromiseInterface $promise) use ($repository) {
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
                     $promise->success([]);
 
                     return $repository;
                 }
             );
 
-        self::assertInstanceOf(
-            PublishedPostsListInTagQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedPostsListInTagQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }
 
-    public function testExecuteErrorOnCount()
+    public function testExecuteErrorOnCount(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
@@ -187,13 +181,14 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ],
                 self::callback(
-                    fn($p) => $p instanceof PromiseInterface
+                    fn ($p): bool => $p instanceof PromiseInterface
                 )
-            )->willReturnCallback(function (array $criteria, PromiseInterface $promise) use ($repository) {
-                $promise->fail(new \Exception());
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
+                    $promise->fail(new \Exception());
 
-                return $repository;
-            }
+                    return $repository;
+                }
             );
 
         $repository->expects($this->once())
@@ -204,7 +199,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
                 ],
                 self::callback(
-                    fn($p) => $p instanceof PromiseInterface
+                    fn ($p): bool => $p instanceof PromiseInterface
                 ),
                 [
                     'publishedAt' => Direction::Desc,
@@ -212,16 +207,14 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 ],
                 12,
                 3
-            )->willReturnCallback(function (array $criteria, PromiseInterface $promise) use ($repository) {
-                $promise->success($this->createMock(\Iterator::class));
+            )->willReturnCallback(
+                function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
+                    $promise->success($this->createMock(\Iterator::class));
 
-                return $repository;
-            }
+                    return $repository;
+                }
             );
 
-        self::assertInstanceOf(
-            PublishedPostsListInTagQuery::class,
-            $this->buildQuery()->execute($loader, $repository, $promise)
-        );
+        $this->assertInstanceOf(PublishedPostsListInTagQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }
 }

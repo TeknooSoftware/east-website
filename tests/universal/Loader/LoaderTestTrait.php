@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Loader;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\Recipe\Promise\Promise;
@@ -32,19 +33,13 @@ use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 trait LoaderTestTrait
 {
-    /**
-     * @return RepositoryInterface|\PHPUnit\Framework\MockObject\MockObject
-     */
-    abstract public function getRepositoryMock(): RepositoryInterface;
+    abstract public function getRepositoryMock(): RepositoryInterface&MockObject;
 
-    /**
-     * @return LoaderInterface
-     */
     abstract public function buildLoader(): LoaderInterface;
 
     /**
@@ -52,19 +47,19 @@ trait LoaderTestTrait
      */
     abstract public function getEntity();
 
-    public function testLoadBadId()
+    public function testLoadBadId(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->load(new \stdClass(), new Promise());
     }
 
-    public function testLoadBadPromise()
+    public function testLoadBadPromise(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->load('fooBar', new \stdClass());
     }
 
-    public function testLoadWithError()
+    public function testLoadWithError(): void
     {
         /**
          * @var \PHPUnit\Framework\MockObject\MockObject $promiseMock
@@ -78,7 +73,7 @@ trait LoaderTestTrait
         $this->getRepositoryMock()
             ->expects($this->any())
             ->method('findOneBy')
-            ->with(['id'=>'fooBar'], $promiseMock)
+            ->with(['id' => 'fooBar'], $promiseMock)
             ->willThrowException(new \Exception());
 
         self::assertInstanceOf(
@@ -87,7 +82,7 @@ trait LoaderTestTrait
         );
     }
 
-    public function testLoad()
+    public function testLoad(): void
     {
         /**
          * @var \PHPUnit\Framework\MockObject\MockObject $promiseMock
@@ -99,7 +94,7 @@ trait LoaderTestTrait
         $this->getRepositoryMock()
             ->expects($this->any())
             ->method('findOneBy')
-            ->with(['id'=>'fooBar'], $promiseMock);
+            ->with(['id' => 'fooBar'], $promiseMock);
 
         self::assertInstanceOf(
             LoaderInterface::class,
@@ -107,19 +102,19 @@ trait LoaderTestTrait
         );
     }
 
-    public function testQueryBadQuery()
+    public function testQueryBadQuery(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->query(new \stdClass(), new Promise());
     }
 
-    public function testQueryBadPromise()
+    public function testQueryBadPromise(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->query($this->createMock(QueryCollectionInterface::class), new \stdClass());
     }
 
-    public function testQuery()
+    public function testQuery(): void
     {
         /**
          * @var \PHPUnit\Framework\MockObject\MockObject $promiseMock
@@ -145,19 +140,19 @@ trait LoaderTestTrait
         );
     }
 
-    public function testFetchBadFetch()
+    public function testFetchBadFetch(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->fetch(new \stdClass(), new Promise());
     }
 
-    public function testFetchBadPromise()
+    public function testFetchBadPromise(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildLoader()->fetch($this->createMock(QueryElementInterface::class), new \stdClass());
     }
 
-    public function testFetch()
+    public function testFetch(): void
     {
         /**
          * @var \PHPUnit\Framework\MockObject\MockObject $promiseMock
