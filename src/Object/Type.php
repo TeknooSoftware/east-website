@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -41,7 +41,7 @@ use function array_values;
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 class Type implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
@@ -92,7 +92,7 @@ class Type implements IdentifiedObjectInterface, DeletableInterface, Timestampab
     public function getBlocks(): array
     {
         return array_map(
-            static fn($key, $value): Block => new Block($key, BlockType::from($value)),
+            static fn ($key, $value): Block => new Block($key, BlockType::from($value)),
             array_keys($this->blocks),
             array_values($this->blocks)
         );

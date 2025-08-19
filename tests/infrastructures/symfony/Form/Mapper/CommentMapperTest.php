@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -40,7 +40,7 @@ use Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper;
 use function ucfirst;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(CommentMapper::class)]
@@ -63,7 +63,7 @@ class CommentMapperTest extends TestCase
         return new CommentMapper($this->getDatesService());
     }
 
-    public function testMapDataToFormsWithNotCommentObject()
+    public function testMapDataToFormsWithNotCommentObject(): void
     {
         $form = $this->createMock(FormInterface::class);
         $form->expects($this->never())->method('setData');
@@ -71,7 +71,7 @@ class CommentMapperTest extends TestCase
         $this->buildMapper()->mapDataToForms(new stdClass(), new ArrayIterator([$form]));
     }
 
-    public function testMapDataToFormsWithCommentObject()
+    public function testMapDataToFormsWithCommentObject(): void
     {
         $comment = new Comment(
             post: $post = $this->createMock(Post::class),
@@ -123,7 +123,7 @@ class CommentMapperTest extends TestCase
         $this->buildMapper()->mapDataToForms($comment, $forms);
     }
 
-    public function testMapFormsToDataWithNotCommentObject()
+    public function testMapFormsToDataWithNotCommentObject(): void
     {
         $form = $this->createMock(FormInterface::class);
         $form->expects($this->never())->method('setData');
@@ -132,7 +132,7 @@ class CommentMapperTest extends TestCase
         $this->buildMapper()->mapFormsToData(new ArrayIterator([$form]), $o);
     }
 
-    public function testMapFormsToDataWithCommentObjectNotModerated()
+    public function testMapFormsToDataWithCommentObjectNotModerated(): void
     {
         $comment = new Comment(
             post: $post = $this->createMock(Post::class),
@@ -161,14 +161,14 @@ class CommentMapperTest extends TestCase
 
         foreach ($keysList as $key => $value) {
             $form = $this->createMock(FormInterface::class);
-            $form->expects($this->any())->method('getName')->willReturn($key);
-            $form->expects($this->any())->method('getData')->willReturn($value);
+            $form->method('getName')->willReturn($key);
+            $form->method('getData')->willReturn($value);
 
             $formsList[] = $form;
         }
 
         $form = $this->createMock(FormInterface::class);
-        $form->expects($this->any())->method('getName')->willReturn('other');
+        $form->method('getName')->willReturn('other');
         $form->expects($this->never())->method('getData');
 
         $formsList[] = $form;
@@ -179,17 +179,17 @@ class CommentMapperTest extends TestCase
 
         $this->buildMapper()->mapFormsToData(new ArrayIterator($formsList), $comment);
 
-        self::assertEquals('author', $comment->getAuthor());
-        self::assertEquals('ip', $comment->getRemoteIp());
-        self::assertEquals('title', $comment->getTitle());
-        self::assertEquals('content', $comment->getContent());
-        self::assertNull($comment->getModeratedAt());
-        self::assertNull($comment->getModeratedAuthor());
-        self::assertNull($comment->getModeratedTitle());
-        self::assertNull($comment->getModeratedContent());
+        $this->assertEquals('author', $comment->getAuthor());
+        $this->assertEquals('ip', $comment->getRemoteIp());
+        $this->assertEquals('title', $comment->getTitle());
+        $this->assertEquals('content', $comment->getContent());
+        $this->assertNotInstanceOf(\DateTimeInterface::class, $comment->getModeratedAt());
+        $this->assertNull($comment->getModeratedAuthor());
+        $this->assertNull($comment->getModeratedTitle());
+        $this->assertNull($comment->getModeratedContent());
     }
 
-    public function testMapFormsToDataWithCommentObjectModerated()
+    public function testMapFormsToDataWithCommentObjectModerated(): void
     {
         $comment = new Comment(
             post: $post = $this->createMock(Post::class),
@@ -218,14 +218,14 @@ class CommentMapperTest extends TestCase
 
         foreach ($keysList as $key => $value) {
             $form = $this->createMock(FormInterface::class);
-            $form->expects($this->any())->method('getName')->willReturn($key);
-            $form->expects($this->any())->method('getData')->willReturn($value);
+            $form->method('getName')->willReturn($key);
+            $form->method('getData')->willReturn($value);
 
             $formsList[] = $form;
         }
 
         $form = $this->createMock(FormInterface::class);
-        $form->expects($this->any())->method('getName')->willReturn('other');
+        $form->method('getName')->willReturn('other');
         $form->expects($this->never())->method('getData');
 
         $formsList[] = $form;
@@ -235,7 +235,7 @@ class CommentMapperTest extends TestCase
             ->expects($this->once())
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callback) use ($moderatedAt) {
+                function (callable $callback) use ($moderatedAt): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
                     $callback($moderatedAt);
 
                     return $this->getDatesService();
@@ -244,17 +244,17 @@ class CommentMapperTest extends TestCase
 
         $this->buildMapper()->mapFormsToData(new ArrayIterator($formsList), $comment);
 
-        self::assertEquals('author', $comment->getAuthor());
-        self::assertEquals('ip', $comment->getRemoteIp());
-        self::assertEquals('title', $comment->getTitle());
-        self::assertEquals('content', $comment->getContent());
-        self::assertEquals($moderatedAt, $comment->getModeratedAt());
-        self::assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
-        self::assertEquals('moderatedTitle', $comment->getModeratedTitle());
-        self::assertEquals( 'moderatedContent', $comment->getModeratedContent());
+        $this->assertEquals('author', $comment->getAuthor());
+        $this->assertEquals('ip', $comment->getRemoteIp());
+        $this->assertEquals('title', $comment->getTitle());
+        $this->assertEquals('content', $comment->getContent());
+        $this->assertEquals($moderatedAt, $comment->getModeratedAt());
+        $this->assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
+        $this->assertEquals('moderatedTitle', $comment->getModeratedTitle());
+        $this->assertEquals('moderatedContent', $comment->getModeratedContent());
     }
 
-    public function testMapFormsToDataWithCommentObjectAlreadyModerated()
+    public function testMapFormsToDataWithCommentObjectAlreadyModerated(): void
     {
         $comment = new Comment(
             post: $post = $this->createMock(Post::class),
@@ -283,14 +283,14 @@ class CommentMapperTest extends TestCase
 
         foreach ($keysList as $key => $value) {
             $form = $this->createMock(FormInterface::class);
-            $form->expects($this->any())->method('getName')->willReturn($key);
-            $form->expects($this->any())->method('getData')->willReturn($value);
+            $form->method('getName')->willReturn($key);
+            $form->method('getData')->willReturn($value);
 
             $formsList[] = $form;
         }
 
         $form = $this->createMock(FormInterface::class);
-        $form->expects($this->any())->method('getName')->willReturn('other');
+        $form->method('getName')->willReturn('other');
         $form->expects($this->never())->method('getData');
 
         $formsList[] = $form;
@@ -300,13 +300,13 @@ class CommentMapperTest extends TestCase
 
         $this->buildMapper()->mapFormsToData(new ArrayIterator($formsList), $comment);
 
-        self::assertEquals('author', $comment->getAuthor());
-        self::assertEquals('ip', $comment->getRemoteIp());
-        self::assertEquals('title', $comment->getTitle());
-        self::assertEquals('content', $comment->getContent());
-        self::assertEquals($moderatedAt, $comment->getModeratedAt());
-        self::assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
-        self::assertEquals('moderatedTitle', $comment->getModeratedTitle());
-        self::assertEquals( 'moderatedContent', $comment->getModeratedContent());
+        $this->assertEquals('author', $comment->getAuthor());
+        $this->assertEquals('ip', $comment->getRemoteIp());
+        $this->assertEquals('title', $comment->getTitle());
+        $this->assertEquals('content', $comment->getContent());
+        $this->assertEquals($moderatedAt, $comment->getModeratedAt());
+        $this->assertEquals('moderatedAuthor', $comment->getModeratedAuthor());
+        $this->assertEquals('moderatedTitle', $comment->getModeratedTitle());
+        $this->assertEquals('moderatedContent', $comment->getModeratedContent());
     }
 }

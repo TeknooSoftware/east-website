@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -34,7 +34,7 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Recipe\Step\LoadPostFromRequest;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(LoadPostFromRequest::class)]
@@ -56,16 +56,15 @@ class LoadPostFromRequestTest extends TestCase
         return new LoadPostFromRequest($this->getPostLoader());
     }
 
-    public function testInvoke()
+    public function testInvoke(): void
     {
         $post = $this->createMock(Post::class);
 
         $this->getPostLoader()
-            ->expects($this->any())
             ->method('load')
             ->with('foo')
             ->willReturnCallback(
-                function ($id, $promise) use ($post) {
+                function ($id, $promise) use ($post): (\Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject)|null {
                     $promise->success($post);
 
                     return $this->getPostLoader();
@@ -85,26 +84,22 @@ class LoadPostFromRequestTest extends TestCase
             ])
             ->willReturnSelf();
 
-        self::assertInstanceOf(
-            LoadPostFromRequest::class,
-            $this->getStep()(
-                $manager,
-                'foo',
-                ['bar' => 'foo'],
-            )
-        );
+        $this->assertInstanceOf(LoadPostFromRequest::class, $this->getStep()(
+            $manager,
+            'foo',
+            ['bar' => 'foo'],
+        ));
     }
 
-    public function testInvokeNotFound()
+    public function testInvokeNotFound(): void
     {
         $post = $this->createMock(Post::class);
 
         $this->getPostLoader()
-            ->expects($this->any())
             ->method('load')
             ->with('foo')
             ->willReturnCallback(
-                function ($id, $promise) use ($post) {
+                function ($id, $promise) use ($post): (\Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject)|null {
                     $promise->fail(new \DomainException('Post not found', 404));
 
                     return $this->getPostLoader();
@@ -115,13 +110,10 @@ class LoadPostFromRequestTest extends TestCase
         $manager->expects($this->once())->method('error')->willReturnSelf();
         $manager->expects($this->never())->method('updateWorkPlan');
 
-        self::assertInstanceOf(
-            LoadPostFromRequest::class,
-            $this->getStep()(
-                $manager,
-                'foo',
-                ['bar' => 'foo'],
-            )
-        );
+        $this->assertInstanceOf(LoadPostFromRequest::class, $this->getStep()(
+            $manager,
+            'foo',
+            ['bar' => 'foo'],
+        ));
     }
 }

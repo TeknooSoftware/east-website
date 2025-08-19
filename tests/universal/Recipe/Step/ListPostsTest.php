@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -38,7 +38,7 @@ use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(ListPosts::class)]
@@ -74,17 +74,16 @@ class ListPostsTest extends TestCase
         );
     }
 
-    public function testInvokeWithoutTag()
+    public function testInvokeWithoutTag(): void
     {
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');
 
         $this->getDatesService()
-            ->expects($this->any())
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function ($callable) {
+                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
                     $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
@@ -92,38 +91,33 @@ class ListPostsTest extends TestCase
             );
 
         $this->getpostLoader()
-            ->expects($this->any())
             ->method('query')
             ->willReturnCallback(
-                function ($query, PromiseInterface $promise) {
+                function (\Teknoo\East\Common\Contracts\Query\QueryCollectionInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject {
                     $promise->success(new \ArrayObject([]));
 
                     return $this->getPostLoader();
                 }
             );
 
-        self::assertInstanceOf(
-            ListPosts::class,
-            $this->buildStep()(
-                $manager,
-                0,
-                1,
-                $this->createMock(ParametersBag::class),
-            )
-        );
+        $this->assertInstanceOf(ListPosts::class, $this->buildStep()(
+            $manager,
+            0,
+            1,
+            $this->createMock(ParametersBag::class),
+        ));
     }
 
-    public function testInvokeWithTag()
+    public function testInvokeWithTag(): void
     {
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');
 
         $this->getDatesService()
-            ->expects($this->any())
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function ($callable) {
+                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
                     $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
@@ -131,25 +125,21 @@ class ListPostsTest extends TestCase
             );
 
         $this->getpostLoader()
-            ->expects($this->any())
             ->method('query')
             ->willReturnCallback(
-                function ($query, PromiseInterface $promise) {
+                function (\Teknoo\East\Common\Contracts\Query\QueryCollectionInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject {
                     $promise->success(new \ArrayObject([]));
 
                     return $this->getPostLoader();
                 }
             );
 
-        self::assertInstanceOf(
-            ListPosts::class,
-            $this->buildStep()(
-                $manager,
-                0,
-                1,
-                $this->createMock(ParametersBag::class),
-                $this->createMock(Tag::class),
-            )
-        );
+        $this->assertInstanceOf(ListPosts::class, $this->buildStep()(
+            $manager,
+            0,
+            1,
+            $this->createMock(ParametersBag::class),
+            $this->createMock(Tag::class),
+        ));
     }
 }

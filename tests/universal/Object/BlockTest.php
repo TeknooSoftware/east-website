@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -32,7 +32,7 @@ use Teknoo\East\Website\Object\BlockType;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(Block::class)]
@@ -40,73 +40,49 @@ class BlockTest extends TestCase
 {
     use PopulateObjectTrait;
 
-    /**
-     * @return Block
-     */
     public function buildObject(): Block
     {
         return new Block('', BlockType::Text);
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['name' => 'fooBar'])->getName()
-        );
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['name' => 'fooBar'])->getName());
     }
 
-    public function testToString()
+    public function testToString(): void
     {
-        self::assertEquals(
-            'fooBar',
-            (string) $this->generateObjectPopulated(['name' => 'fooBar'])
-        );
+        $this->assertEquals('fooBar', (string) $this->generateObjectPopulated(['name' => 'fooBar']));
     }
 
-    public function testSetName()
+    public function testSetName(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setName('fooBar')
-        );
+        $this->assertInstanceOf($Object::class, $Object->setName('fooBar'));
 
-        self::assertEquals(
-            'fooBar',
-            $Object->getName()
-        );
+        $this->assertEquals('fooBar', $Object->getName());
     }
 
-    public function testSetNameExceptionOnBadArgument()
+    public function testSetNameExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setName(new \stdClass());
     }
 
-    public function testGetType()
+    public function testGetType(): void
     {
-        self::assertEquals(
-            BlockType::Textarea,
-            $this->generateObjectPopulated(['type' => BlockType::Textarea])->getType()
-        );
+        $this->assertEquals(BlockType::Textarea, $this->generateObjectPopulated(['type' => BlockType::Textarea])->getType());
     }
 
-    public function testSetType()
+    public function testSetType(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setType(BlockType::Raw)
-        );
+        $this->assertInstanceOf($Object::class, $Object->setType(BlockType::Raw));
 
-        self::assertEquals(
-            BlockType::Raw,
-            $Object->getType()
-        );
+        $this->assertEquals(BlockType::Raw, $Object->getType());
     }
 
-    public function testSetTypeExceptionOnBadArgument()
+    public function testSetTypeExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setType(new \stdClass());

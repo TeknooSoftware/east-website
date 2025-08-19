@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -34,7 +34,7 @@ use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(Item::class)]
@@ -42,335 +42,235 @@ class ItemTest extends TestCase
 {
     use ObjectTestTrait;
 
-    /**
-     * @return Item
-     */
     public function buildObject(): Item
     {
         return new Item();
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['name' => 'fooBar'])->getName()
-        );
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['name' => 'fooBar'])->getName());
     }
 
-    public function testToString()
+    public function testToString(): void
     {
-        self::assertEquals(
-            'fooBar',
-            (string) $this->generateObjectPopulated(['name' => 'fooBar'])
-        );
+        $this->assertEquals('fooBar', (string) $this->generateObjectPopulated(['name' => 'fooBar']));
     }
 
-    public function testSetName()
+    public function testSetName(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setName('fooBar')
-        );
+        $this->assertInstanceOf($Object::class, $Object->setName('fooBar'));
 
-        self::assertEquals(
-            'fooBar',
-            $Object->getName()
-        );
+        $this->assertEquals('fooBar', $Object->getName());
     }
 
-    public function testSetNameExceptionOnBadArgument()
+    public function testSetNameExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setName(new \stdClass());
     }
 
-    public function testGetSlug()
+    public function testGetSlug(): void
     {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['slug' => 'fooBar'])->getSlug()
-        );
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['slug' => 'fooBar'])->getSlug());
     }
 
-    public function testPrepareSlugNear()
+    public function testPrepareSlugNear(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');
 
-        self::assertInstanceOf(
-            Item::class,
-            $this->buildObject()->setName('nameValue')->prepareSlugNear(
-                $loader,
-                $findSlugService,
-                'slug',
-                ['nameValue'],
-            )
-        );
+        $this->assertInstanceOf(Item::class, $this->buildObject()->setName('nameValue')->prepareSlugNear(
+            $loader,
+            $findSlugService,
+            'slug',
+        ));
     }
 
-    public function testPrepareSlugNearWithCurrentSlugValue()
+    public function testPrepareSlugNearWithCurrentSlugValue(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');
 
-        self::assertInstanceOf(
-            Item::class,
-            $this->buildObject()->setSlug('currentValue')->prepareSlugNear(
-                $loader,
-                $findSlugService,
-                'slug',
-                ['currentValue'],
-            )
-        );
+        $this->assertInstanceOf(Item::class, $this->buildObject()->setSlug('currentValue')->prepareSlugNear(
+            $loader,
+            $findSlugService,
+            'slug',
+        ));
     }
 
-    public function testSetSlug()
+    public function testSetSlug(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setSlug('fooBar')
-        );
+        $this->assertInstanceOf($Object::class, $Object->setSlug('fooBar'));
 
-        self::assertEquals(
-            'fooBar',
-            $Object->getSlug()
-        );
+        $this->assertEquals('fooBar', $Object->getSlug());
     }
 
-    public function testSetSlugExceptionOnBadArgument()
+    public function testSetSlugExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setSlug(new \stdClass());
     }
 
-    public function testGetContent()
+    public function testGetContent(): void
     {
         $object = new Content();
-        self::assertEquals(
-            $object,
-            $this->generateObjectPopulated(['content' => $object])->getContent()
-        );
+        $this->assertEquals($object, $this->generateObjectPopulated(['content' => $object])->getContent());
     }
 
-    public function testSetContent()
+    public function testSetContent(): void
     {
         $object = new Content();
 
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            Item::class,
-            $Object->setContent($object)
-        );
+        $this->assertInstanceOf(Item::class, $Object->setContent($object));
 
-        self::assertEquals(
-            $object,
-            $Object->getContent()
-        );
+        $this->assertEquals($object, $Object->getContent());
 
-        self::assertInstanceOf(
-            Item::class,
-            $Object->setContent(null)
-        );
+        $this->assertInstanceOf(Item::class, $Object->setContent(null));
 
-        self::assertEmpty($Object->getContent());
+        $this->assertNotInstanceOf(\Teknoo\East\Website\Object\Content::class, $Object->getContent());
     }
 
-    public function testSetContentExceptionOnBadArgument()
+    public function testSetContentExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setContent(new \stdClass());
     }
 
-    public function testGetLocation()
+    public function testGetLocation(): void
     {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['location' => 'fooBar'])->getLocation()
-        );
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['location' => 'fooBar'])->getLocation());
     }
 
-    public function testSetLocation()
+    public function testSetLocation(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setLocation('fooBar')
-        );
+        $this->assertInstanceOf($Object::class, $Object->setLocation('fooBar'));
 
-        self::assertEquals(
-            'fooBar',
-            $Object->getLocation()
-        );
+        $this->assertEquals('fooBar', $Object->getLocation());
     }
 
-    public function testSetLocationExceptionOnBadArgument()
+    public function testSetLocationExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setLocation(new \stdClass());
     }
 
-    public function testIsHidden()
+    public function testIsHidden(): void
     {
-        self::assertFalse($this->generateObjectPopulated(['hidden' => false])->isHidden());
-        self::assertTrue($this->generateObjectPopulated(['hidden' => true])->isHidden());
+        $this->assertFalse($this->generateObjectPopulated(['hidden' => false])->isHidden());
+        $this->assertTrue($this->generateObjectPopulated(['hidden' => true])->isHidden());
     }
 
-    public function testSetHidden()
-    {
-        $Object = $this->buildObject();
-        self::assertFalse($Object->isHidden());
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setHidden(true)
-        );
-
-        self::assertTrue($Object->isHidden());
-    }
-
-    public function testGetLocaleField()
-    {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['localeField' => 'fooBar'])->getLocaleField()
-        );
-    }
-
-    public function testSetLocaleField()
+    public function testSetHidden(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setLocaleField('fooBar')
-        );
+        $this->assertFalse($Object->isHidden());
+        $this->assertInstanceOf($Object::class, $Object->setHidden(true));
 
-        self::assertEquals(
-            'fooBar',
-            $Object->getLocaleField()
-        );
+        $this->assertTrue($Object->isHidden());
     }
 
-    public function testSetLocaleFieldToNull()
+    public function testGetLocaleField(): void
+    {
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['localeField' => 'fooBar'])->getLocaleField());
+    }
+
+    public function testSetLocaleField(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setLocaleField(null)
-        );
+        $this->assertInstanceOf($Object::class, $Object->setLocaleField('fooBar'));
 
-        self::assertNull(
-            $Object->getLocaleField()
-        );
+        $this->assertEquals('fooBar', $Object->getLocaleField());
     }
 
-    public function testSetLocaleFieldExceptionOnBadArgument()
+    public function testSetLocaleFieldToNull(): void
+    {
+        $Object = $this->buildObject();
+        $this->assertInstanceOf($Object::class, $Object->setLocaleField(null));
+
+        $this->assertNull($Object->getLocaleField());
+    }
+
+    public function testSetLocaleFieldExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setLocaleField(new \stdClass());
     }
 
-    public function testGetPosition()
+    public function testGetPosition(): void
     {
-        self::assertEquals(
-            123,
-            $this->generateObjectPopulated(['position' => 123])->getPosition()
-        );
+        $this->assertEquals(123, $this->generateObjectPopulated(['position' => 123])->getPosition());
     }
 
-    public function testSetPosition()
+    public function testSetPosition(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setPosition(123)
-        );
+        $this->assertInstanceOf($Object::class, $Object->setPosition(123));
 
-        self::assertEquals(
-            123,
-            $Object->getPosition()
-        );
+        $this->assertEquals(123, $Object->getPosition());
     }
 
-    public function testSetPositionExceptionOnBadArgument()
+    public function testSetPositionExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setPosition(new \stdClass());
     }
-    
-    public function testGetParent()
+
+    public function testGetParent(): void
     {
         $object = new Item();
-        self::assertEquals(
-            $object,
-            $this->generateObjectPopulated(['parent' => $object])->getParent()
-        );
+        $this->assertEquals($object, $this->generateObjectPopulated(['parent' => $object])->getParent());
     }
 
-    public function testSetParent()
+    public function testSetParent(): void
     {
         $object = new Item();
 
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            Item::class,
-            $Object->setParent($object)
-        );
+        $this->assertInstanceOf(Item::class, $Object->setParent($object));
 
-        self::assertEquals(
-            $object,
-            $Object->getParent()
-        );
+        $this->assertEquals($object, $Object->getParent());
 
-        self::assertInstanceOf(
-            Item::class,
-            $Object->setParent(null)
-        );
+        $this->assertInstanceOf(Item::class, $Object->setParent(null));
 
-        self::assertEmpty($Object->getParent());
+        $this->assertNotInstanceOf(\Teknoo\East\Website\Object\Item::class, $Object->getParent());
     }
 
-    public function testSetParentExceptionOnBadArgument()
+    public function testSetParentExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setParent(new \stdClass());
     }
 
-    public function testGetChildren()
+    public function testGetChildren(): void
     {
-        self::assertEquals(
-            [],
-            $this->generateObjectPopulated(['children' => []])->getChildren()
-        );
+        $this->assertEquals([], $this->generateObjectPopulated(['children' => []])->getChildren());
     }
 
-    public function testSetChildren()
+    public function testSetChildren(): void
     {
         $Object = $this->buildObject();
-        self::assertInstanceOf(
-            $Object::class,
-            $Object->setChildren(['foo'=>'bar'])
-        );
+        $this->assertInstanceOf($Object::class, $Object->setChildren(['foo' => 'bar']));
 
-        self::assertEquals(
-            ['foo'=>'bar'],
-            $Object->getChildren()
-        );
+        $this->assertEquals(['foo' => 'bar'], $Object->getChildren());
     }
 
-    public function testSetChildrenExceptionOnBadArgument()
+    public function testSetChildrenExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setChildren(new \stdClass());
     }
 
-    public function testStatesListDeclaration()
+    public function testStatesListDeclaration(): void
     {
-        self::assertIsArray(Item::statesListDeclaration());
+        $this->assertIsArray(Item::statesListDeclaration());
     }
 }

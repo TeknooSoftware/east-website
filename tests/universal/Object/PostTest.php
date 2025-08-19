@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -31,7 +31,7 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(Post::class)]
@@ -39,23 +39,21 @@ class PostTest extends ContentTest
 {
     use PopulateObjectTrait;
 
+    #[\Override]
     public function buildObject(): Post
     {
         return new Post();
     }
 
-    public function testGetComments()
+    public function testGetComments(): void
     {
-        self::assertIsIterable($this->buildObject()->getComments());
+        $this->assertIsIterable($this->buildObject()->getComments());
     }
 
-    public function testSetComments()
+    public function testSetComments(): void
     {
-        self::assertInstanceOf(
-            Post::class,
-            $this->buildObject()->setComments([
-                $this->createMock(Comment::class),
-            ]),
-        );
+        $this->assertInstanceOf(Post::class, $this->buildObject()->setComments([
+            $this->createMock(Comment::class),
+        ]));
     }
 }

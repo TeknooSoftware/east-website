@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -40,24 +40,22 @@ use Teknoo\East\Website\Twig\Extension\SanitizedContent;
  *
  * @link        http://teknoo.software/east Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  *
  */
 #[CoversClass(SanitizedContent::class)]
 class SanitizedContentTest extends TestCase
 {
-    public function testGetFilters()
+    public function testGetFilters(): void
     {
-        self::assertIsArray(
-            (new SanitizedContent)->getFilters()
-        );
+        $this->assertIsArray((new SanitizedContent())->getFilters());
     }
 
-    public function testGetPartSanitizedPartsKeyFound()
+    public function testGetPartSanitizedPartsKeyFound(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
             ->method('getSanitizedParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
@@ -66,50 +64,44 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects($this->never())->method('sanitizeFor');
 
         $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
-            'bar',
-            $filter->getPart(
-                $content,
-                'foo',
-                'baba',
-                'hello',
-                'default'
-            )
-        );
-    }
-
-    public function testGetPartSanitizedPartsKeyNotFound()
-    {
-        $content = $this->createMock(Content::class);
-        $content->expects($this->any())
-            ->method('getSanitizedParts')
-            ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
-
-        $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
-        $sanitizer->expects($this->never())->method('sanitize');
-        $sanitizer->expects($this->never())->method('sanitizeFor');
-
-        $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
+        $this->assertEquals('bar', $filter->getPart(
+            $content,
+            'foo',
+            'baba',
             'hello',
-            $filter->getPart(
-                $content,
-                'bar',
-                'baba',
-                'hello',
-                'default'
-            )
-        );
+            'default'
+        ));
     }
 
-    public function testGetPartNotSanitizedPartsKeyFoundWithContext()
+    public function testGetPartSanitizedPartsKeyNotFound(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
+            ->method('getSanitizedParts')
+            ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
+
+        $sanitizer = $this->createMock(HtmlSanitizerInterface::class);
+        $sanitizer->expects($this->never())->method('sanitize');
+        $sanitizer->expects($this->never())->method('sanitizeFor');
+
+        $filter = new SanitizedContent($sanitizer);
+        $this->assertEquals('hello', $filter->getPart(
+            $content,
+            'bar',
+            'baba',
+            'hello',
+            'default'
+        ));
+    }
+
+    public function testGetPartNotSanitizedPartsKeyFoundWithContext(): void
+    {
+        $content = $this->createMock(Content::class);
+        $content
             ->method('getSanitizedParts')
             ->willReturn(null);
 
-        $content->expects($this->any())
+        $content
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
@@ -118,50 +110,44 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects($this->once())->method('sanitizeFor')->with('default', 'bar')->willReturn('bar2');
 
         $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
-            'bar2',
-            $filter->getPart(
-                $content,
-                'foo',
-                'baba',
-                'hello',
-                'default'
-            )
-        );
+        $this->assertEquals('bar2', $filter->getPart(
+            $content,
+            'foo',
+            'baba',
+            'hello',
+            'default'
+        ));
     }
 
-    public function testGetPartNotSanitizedWithoutSanitizer()
+    public function testGetPartNotSanitizedWithoutSanitizer(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
             ->method('getSanitizedParts')
             ->willReturn(null);
 
-        $content->expects($this->any())
+        $content
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
         $filter = new SanitizedContent(null);
-        self::assertEquals(
-            'bar',
-            $filter->getPart(
-                $content,
-                'foo',
-                'baba',
-                'hello',
-                'default'
-            )
-        );
+        $this->assertEquals('bar', $filter->getPart(
+            $content,
+            'foo',
+            'baba',
+            'hello',
+            'default'
+        ));
     }
 
-    public function testGetPartNotSanitizedPartsKeyFoundWithoutContext()
+    public function testGetPartNotSanitizedPartsKeyFoundWithoutContext(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
             ->method('getSanitizedParts')
             ->willReturn(null);
 
-        $content->expects($this->any())
+        $content
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
@@ -170,25 +156,22 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects($this->never())->method('sanitizeFor')->with('default', 'bar')->willReturn('bar2');
 
         $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
-            'bar1',
-            $filter->getPart(
-                $content,
-                'foo',
-                'baba',
-                'hello'
-            )
-        );
+        $this->assertEquals('bar1', $filter->getPart(
+            $content,
+            'foo',
+            'baba',
+            'hello'
+        ));
     }
 
-    public function testGetPartNotSanitizedPartsKeyNotFoundWithContext()
+    public function testGetPartNotSanitizedPartsKeyNotFoundWithContext(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
             ->method('getSanitizedParts')
             ->willReturn(null);
 
-        $content->expects($this->any())
+        $content
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
@@ -197,26 +180,23 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects($this->once())->method('sanitizeFor')->with('default', 'hello')->willReturn('bar2');
 
         $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
-            'bar2',
-            $filter->getPart(
-                $content,
-                'bar',
-                'baba',
-                'hello',
-                'default'
-            )
-        );
+        $this->assertEquals('bar2', $filter->getPart(
+            $content,
+            'bar',
+            'baba',
+            'hello',
+            'default'
+        ));
     }
 
-    public function testGetPartNotSanitizedPartsKeyNotFoundWithoutContext()
+    public function testGetPartNotSanitizedPartsKeyNotFoundWithoutContext(): void
     {
         $content = $this->createMock(Content::class);
-        $content->expects($this->any())
+        $content
             ->method('getSanitizedParts')
             ->willReturn(null);
 
-        $content->expects($this->any())
+        $content
             ->method('getParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
 
@@ -225,14 +205,11 @@ class SanitizedContentTest extends TestCase
         $sanitizer->expects($this->never())->method('sanitizeFor')->with('default', 'hello')->willReturn('bar2');
 
         $filter = new SanitizedContent($sanitizer);
-        self::assertEquals(
-            'bar1',
-            $filter->getPart(
-                $content,
-                'bar',
-                'baba',
-                'hello'
-            )
-        );
+        $this->assertEquals('bar1', $filter->getPart(
+            $content,
+            'bar',
+            'baba',
+            'hello'
+        ));
     }
 }

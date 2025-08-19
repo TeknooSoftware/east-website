@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -28,14 +28,14 @@ namespace Teknoo\Tests\East\Website\Object\Traits;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 trait ObjectTestTrait
 {
     use PopulateObjectTrait;
 
-    public function testGetId()
+    public function testGetId(): void
     {
         self::assertEquals(
             123,
@@ -43,7 +43,7 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetId()
+    public function testSetId(): void
     {
         $Object = $this->buildObject();
         self::assertInstanceOf(
@@ -57,13 +57,13 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetIdExceptionOnBadArgument()
+    public function testSetIdExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setId(new \stdClass());
     }
 
-    public function testCreatedAt()
+    public function testCreatedAt(): void
     {
         $date = new \DateTime('2017-06-13');
         self::assertEquals(
@@ -72,7 +72,7 @@ trait ObjectTestTrait
         );
     }
 
-    public function testUpdatedAt()
+    public function testUpdatedAt(): void
     {
         $date = new \DateTime('2017-06-13');
         self::assertEquals(
@@ -81,7 +81,7 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetUpdatedAt()
+    public function testSetUpdatedAt(): void
     {
         $date = new \DateTime('2017-06-13');
 
@@ -97,13 +97,13 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetUpdatedAtExceptionOnBadArgument()
+    public function testSetUpdatedAtExceptionOnBadArgument(): void
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setUpdatedAt(new \stdClass());
     }
 
-    public function testDeletedAt()
+    public function testDeletedAt(): void
     {
         $object = $this->buildObject();
         if (!$object instanceof DeletableInterface) {
@@ -118,7 +118,7 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetDeletedAt()
+    public function testSetDeletedAt(): void
     {
         $object = $this->buildObject();
         if (!$object instanceof DeletableInterface) {
@@ -140,7 +140,7 @@ trait ObjectTestTrait
         );
     }
 
-    public function testSetDeletedAtExceptionOnBadArgument()
+    public function testSetDeletedAtExceptionOnBadArgument(): void
     {
         $object = $this->buildObject();
         if (!$object instanceof DeletableInterface) {

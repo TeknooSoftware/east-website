@@ -1,5 +1,20 @@
 # Teknoo Software - Website - Change Log
 
+## [11.0.0] - 2025-08-19
+### Stable Release
+- Drop support of PHP 8.3
+- Requires PHP 8.4
+- Support Symfony 6.4.24+ or 7.3+
+- Update to Teknoo States 7
+- Update to Teknoo Recipe 7
+- Update to Teknoo East Foundation 7
+- Update to Teknoo East Common 4
+- Update to Teknoo East Translation 11
+- Update to PHPStan 2
+- Remove deprecated feature `Cookbook`, use `Plan` instead
+- Fix some bugs and QA issues
+- Switch license from MIT to 3-Clause BSD
+
 ## [10.1.4] - 2025-05-19
 ### Stable Release
 - Add `teknoo.east.website.form.new_comment.type.class` option to allow customize the comment form class.

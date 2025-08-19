@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -61,7 +61,7 @@ use const JSON_THROW_ON_ERROR;
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  *
  * @implements SluggableInterface<IdentifiedObjectInterface>
@@ -229,9 +229,6 @@ class Content implements
         return $this;
     }
 
-    /**
-     * @return ReadOnlyArray
-     */
     public function getParts(): ReadOnlyArray
     {
         if (null !== $this->decodedParts) {
@@ -240,7 +237,7 @@ class Content implements
 
         return $this->decodedParts = new ReadOnlyArray(
             (array) json_decode(
-                json: (string) $this->parts,
+                json: $this->parts,
                 associative: true,
                 depth: 512,
                 flags: JSON_THROW_ON_ERROR,
@@ -248,9 +245,6 @@ class Content implements
         );
     }
 
-    /**
-     * @return ReadOnlyArray|null
-     */
     public function getSanitizedParts(string $salt): ?ReadOnlyArray
     {
         if (null !== $this->decodedSanitizedParts) {
@@ -263,7 +257,7 @@ class Content implements
 
         return $this->decodedSanitizedParts = new ReadOnlyArray(
             (array) json_decode(
-                json: (string) $this->sanitizedParts,
+                json: $this->sanitizedParts,
                 associative: true,
                 depth: 512,
                 flags: JSON_THROW_ON_ERROR,
@@ -277,7 +271,7 @@ class Content implements
     public function setParts(?array $parts): self
     {
         $this->decodedParts = null;
-        $this->parts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
+        $this->parts = json_encode((array) $parts, JSON_THROW_ON_ERROR);
 
         return $this;
     }
@@ -296,7 +290,7 @@ class Content implements
     public function setSanitizedParts(?array $parts, string $salt): self
     {
         $this->decodedSanitizedParts = null;
-        $this->sanitizedParts = (string) json_encode((array) $parts, JSON_THROW_ON_ERROR);
+        $this->sanitizedParts = json_encode((array) $parts, JSON_THROW_ON_ERROR);
         $this->sanitizedHash = $this->computeSanitizedHash($this->sanitizedParts, $salt);
 
         return $this;

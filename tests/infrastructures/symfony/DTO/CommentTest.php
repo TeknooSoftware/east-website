@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -33,12 +33,12 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\East\WebsiteBundle\Form\DTO\Comment;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 class CommentTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $dto = new Comment(
             $this->createMock(Post::class),
@@ -47,13 +47,13 @@ class CommentTest extends TestCase
             'boo',
         );
 
-        self::assertInstanceOf(Post::class, $dto->post);
-        self::assertEquals('foo', $dto->author);
-        self::assertEquals('bar', $dto->title);
-        self::assertEquals('boo', $dto->content);
+        $this->assertInstanceOf(Post::class, $dto->post);
+        $this->assertEquals('foo', $dto->author);
+        $this->assertEquals('bar', $dto->title);
+        $this->assertEquals('boo', $dto->content);
     }
 
-    public function testPersistInto()
+    public function testPersistInto(): void
     {
         $now = new \DateTimeImmutable('2025-01-01 00:00:00');
         $dto = new Comment(
@@ -63,7 +63,7 @@ class CommentTest extends TestCase
             'boo',
         );
 
-        $post->expects($this->any())
+        $post
             ->method('getSlug')
             ->willReturn('fooo');
 
@@ -87,14 +87,11 @@ class CommentTest extends TestCase
                 ],
             ]);
 
-        self::assertInstanceOf(
-            Comment::class,
-            $dto->persistInto(
-                $manager,
-                DoctrineComment::class,
-                '127.0.0.1',
-                $now,
-            )
-        );
+        $this->assertInstanceOf(Comment::class, $dto->persistInto(
+            $manager,
+            DoctrineComment::class,
+            '127.0.0.1',
+            $now,
+        ));
     }
 }

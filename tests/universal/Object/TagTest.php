@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -34,7 +34,7 @@ use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 use Throwable;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(Tag::class)]
@@ -47,101 +47,73 @@ class TagTest extends TestCase
         return new Tag();
     }
 
-    public function testSetName()
+    public function testSetName(): void
     {
-        self::assertInstanceOf(
-            Tag::class,
-            $this->buildObject()->setName('foo')
-        );
+        $this->assertInstanceOf(Tag::class, $this->buildObject()->setName('foo'));
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
-        self::assertEquals(
-            'foo',
-            $this->buildObject()->setName('foo')->getName()
-        );
+        $this->assertEquals('foo', $this->buildObject()->setName('foo')->getName());
     }
 
-    public function testToString()
+    public function testToString(): void
     {
-        self::assertEquals(
-            'foo',
-            (string) $this->buildObject()->setName('foo')
-        );
+        $this->assertEquals('foo', (string) $this->buildObject()->setName('foo'));
     }
 
-    public function testIsHighlighted()
+    public function testIsHighlighted(): void
     {
-        self::assertIsBool($this->buildObject()->isHighlighted());
+        $this->assertIsBool($this->buildObject()->isHighlighted());
     }
 
-    public function testSetIsHighlighted()
+    public function testSetIsHighlighted(): void
     {
-        self::assertInstanceOf(
-            Tag::class,
-            $this->buildObject()->setIsHighlighted(true),
-        );
+        $this->assertInstanceOf(Tag::class, $this->buildObject()->setIsHighlighted(true));
     }
 
-    public function testGetSlug()
+    public function testGetSlug(): void
     {
-        self::assertEquals(
-            'fooBar',
-            $this->generateObjectPopulated(['slug' => 'fooBar'])->getSlug()
-        );
+        $this->assertEquals('fooBar', $this->generateObjectPopulated(['slug' => 'fooBar'])->getSlug());
     }
 
-    public function testPrepareSlugNear()
+    public function testPrepareSlugNear(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');
 
-        self::assertInstanceOf(
-            Tag::class,
-            $this->buildObject()->setName('titleValue')->prepareSlugNear(
-                $loader,
-                $findSlugService,
-                'slug',
-            )
-        );
+        $this->assertInstanceOf(Tag::class, $this->buildObject()->setName('titleValue')->prepareSlugNear(
+            $loader,
+            $findSlugService,
+            'slug',
+        ));
     }
 
-    public function testPrepareSlugNearWithCurrentSlugValue()
+    public function testPrepareSlugNearWithCurrentSlugValue(): void
     {
         $loader = $this->createMock(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');
 
-        self::assertInstanceOf(
-            Tag::class,
-            $this->buildObject()->setSlug('currentValue')->prepareSlugNear(
-                $loader,
-                $findSlugService,
-                'slug',
-                ['currentValue'],
-            )
-        );
+        $this->assertInstanceOf(Tag::class, $this->buildObject()->setSlug('currentValue')->prepareSlugNear(
+            $loader,
+            $findSlugService,
+            'slug',
+        ));
     }
 
-    public function testSetSlug()
+    public function testSetSlug(): void
     {
         $object = $this->buildObject();
-        self::assertInstanceOf(
-            $object::class,
-            $object->setSlug('fooBar')
-        );
+        $this->assertInstanceOf($object::class, $object->setSlug('fooBar'));
 
-        self::assertEquals(
-            'fooBar',
-            $object->getSlug()
-        );
+        $this->assertEquals('fooBar', $object->getSlug());
     }
 
-    public function testSetSlugExceptionOnBadArgument()
+    public function testSetSlugExceptionOnBadArgument(): void
     {
         $this->expectException(Throwable::class);
         $this->buildObject()->setSlug(new stdClass());

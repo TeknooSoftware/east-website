@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -35,7 +35,7 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(Comment::class)]
@@ -45,7 +45,7 @@ class CommentTest extends TestCase
 {
     use PopulateObjectTrait;
 
-    public function buildObject()
+    public function buildObject(): \Teknoo\East\Website\Object\Comment
     {
         return new Comment(
             post: $this->createMock(Post::class),
@@ -57,7 +57,7 @@ class CommentTest extends TestCase
         );
     }
 
-    protected function buildModerateObject()
+    protected function buildModerateObject(): \Teknoo\East\Website\Object\Comment
     {
         return new Comment(
             post: $this->createMock(Post::class),
@@ -73,201 +73,121 @@ class CommentTest extends TestCase
         );
     }
 
-    public function testStatesListDeclaration()
+    public function testStatesListDeclaration(): void
     {
-        self::assertIsArray(Comment::statesListDeclaration());
+        $this->assertIsArray(Comment::statesListDeclaration());
     }
 
-    public function testGetPost()
+    public function testGetPost(): void
     {
-        self::assertInstanceOf(
-            Post::class,
-            $this->buildObject()->getPost(),
-        );
+        $this->assertInstanceOf(Post::class, $this->buildObject()->getPost());
     }
 
-    public function testGetAuthor()
+    public function testGetAuthor(): void
     {
-        self::assertEquals(
-            'authorName',
-            $this->buildObject()->getAuthor(),
-        );
+        $this->assertEquals('authorName', $this->buildObject()->getAuthor());
     }
 
-    public function testGetRemoteIp()
+    public function testGetRemoteIp(): void
     {
-        self::assertEquals(
-            '127.0.0.1',
-            $this->buildObject()->getRemoteIp(),
-        );
+        $this->assertEquals('127.0.0.1', $this->buildObject()->getRemoteIp());
     }
 
-    public function testGetTitle()
+    public function testGetTitle(): void
     {
-        self::assertEquals(
-            'commentTitle',
-            $this->buildObject()->getTitle(),
-        );
+        $this->assertEquals('commentTitle', $this->buildObject()->getTitle());
     }
 
-    public function testGetContent()
+    public function testGetContent(): void
     {
-        self::assertEquals(
-            'commentContent',
-            $this->buildObject()->getContent(),
-        );
+        $this->assertEquals('commentContent', $this->buildObject()->getContent());
     }
 
-    public function testGetPostAt()
+    public function testGetPostAt(): void
     {
-        self::assertInstanceOf(
-            DateTimeImmutable::class,
-            $this->buildObject()->getPostAt(),
-        );
+        $this->assertInstanceOf(DateTimeImmutable::class, $this->buildObject()->getPostAt());
     }
 
-    public function testGetModeratedAt()
+    public function testGetModeratedAt(): void
     {
-        self::assertNull(
-            $this->buildObject()->getModeratedAt(),
-        );
+        $this->assertNotInstanceOf(\DateTimeInterface::class, $this->buildObject()->getModeratedAt());
 
-        self::assertInstanceOf(
-            DateTimeImmutable::class,
-            $this->buildModerateObject()->getModeratedAt(),
-        );
+        $this->assertInstanceOf(DateTimeImmutable::class, $this->buildModerateObject()->getModeratedAt());
     }
 
-    public function testGetModeratedAuthor()
+    public function testGetModeratedAuthor(): void
     {
-        self::assertNull(
-            $this->buildObject()->getModeratedAuthor(),
-        );
+        $this->assertNull($this->buildObject()->getModeratedAuthor());
 
-        self::assertEquals(
-            'moderatedAuthor',
-            $this->buildModerateObject()->getModeratedAuthor(),
-        );
+        $this->assertEquals('moderatedAuthor', $this->buildModerateObject()->getModeratedAuthor());
     }
 
-    public function testGetModeratedTitle()
+    public function testGetModeratedTitle(): void
     {
-        self::assertNull(
-            $this->buildObject()->getModeratedTitle(),
-        );
+        $this->assertNull($this->buildObject()->getModeratedTitle());
 
-        self::assertEquals(
-            'moderatedTitle',
-            $this->buildModerateObject()->getModeratedTitle(),
-        );
+        $this->assertEquals('moderatedTitle', $this->buildModerateObject()->getModeratedTitle());
     }
 
-    public function testGetModeratedContent()
+    public function testGetModeratedContent(): void
     {
-        self::assertNull(
-            $this->buildObject()->getModeratedContent(),
-        );
+        $this->assertNull($this->buildObject()->getModeratedContent());
 
-        self::assertEquals(
-            'moderatedContent',
-            $this->buildModerateObject()->getModeratedContent(),
-        );
-    }
-    
-    public function testIsModerated()
-    {
-        self::assertFalse($this->buildObject()->isModerated());
-        self::assertTrue($this->buildModerateObject()->isModerated());
-    }
-    
-    public function testGetPublicAuthor()
-    {
-        self::assertEquals(
-            'authorName',
-            $this->buildObject()->getPublicAuthor(),
-        );
-        
-        self::assertEquals(
-            'moderatedAuthor',
-            $this->buildModerateObject()->getPublicAuthor(),
-        );
-    }
-    
-    public function testGetPublicTitle()
-    {
-        self::assertEquals(
-            'commentTitle',
-            $this->buildObject()->getPublicTitle(),
-        );
-        
-        self::assertEquals(
-            'moderatedTitle',
-            $this->buildModerateObject()->getPublicTitle(),
-        );
-    }
-    
-    public function testGetPublicContent()
-    {
-        self::assertEquals(
-            'commentContent',
-            $this->buildObject()->getPublicContent(),
-        );
-        
-        self::assertEquals(
-            'moderatedContent',
-            $this->buildModerateObject()->getPublicContent(),
-        );
+        $this->assertEquals('moderatedContent', $this->buildModerateObject()->getModeratedContent());
     }
 
-    public function testModerate()
+    public function testIsModerated(): void
+    {
+        $this->assertFalse($this->buildObject()->isModerated());
+        $this->assertTrue($this->buildModerateObject()->isModerated());
+    }
+
+    public function testGetPublicAuthor(): void
+    {
+        $this->assertEquals('authorName', $this->buildObject()->getPublicAuthor());
+
+        $this->assertEquals('moderatedAuthor', $this->buildModerateObject()->getPublicAuthor());
+    }
+
+    public function testGetPublicTitle(): void
+    {
+        $this->assertEquals('commentTitle', $this->buildObject()->getPublicTitle());
+
+        $this->assertEquals('moderatedTitle', $this->buildModerateObject()->getPublicTitle());
+    }
+
+    public function testGetPublicContent(): void
+    {
+        $this->assertEquals('commentContent', $this->buildObject()->getPublicContent());
+
+        $this->assertEquals('moderatedContent', $this->buildModerateObject()->getPublicContent());
+    }
+
+    public function testModerate(): void
     {
         $comment = $this->buildObject();
-        self::assertFalse($comment->isModerated());
+        $this->assertFalse($comment->isModerated());
 
-        self::assertInstanceOf(
-            Comment::class,
-            $comment->moderate(
-                date: new DateTimeImmutable('2025-03-19 02:02:03'),
-                author: 'moderatedAuthor',
-                title: 'moderatedTitle',
-                content: 'moderatedContent',
-            )
-        );
+        $this->assertInstanceOf(Comment::class, $comment->moderate(
+            date: new DateTimeImmutable('2025-03-19 02:02:03'),
+            author: 'moderatedAuthor',
+            title: 'moderatedTitle',
+            content: 'moderatedContent',
+        ));
 
-        self::assertTrue($comment->isModerated());
-        self::assertEquals(
-            'authorName',
-            $this->buildObject()->getAuthor(),
-        );
+        $this->assertTrue($comment->isModerated());
+        $this->assertEquals('authorName', $this->buildObject()->getAuthor());
 
-        self::assertEquals(
-            '127.0.0.1',
-            $this->buildObject()->getRemoteIp(),
-        );
+        $this->assertEquals('127.0.0.1', $this->buildObject()->getRemoteIp());
 
-        self::assertEquals(
-            'commentTitle',
-            $this->buildObject()->getTitle(),
-        );
+        $this->assertEquals('commentTitle', $this->buildObject()->getTitle());
 
-        self::assertEquals(
-            'commentContent',
-            $this->buildObject()->getContent(),
-        );
+        $this->assertEquals('commentContent', $this->buildObject()->getContent());
 
-        self::assertEquals(
-            'moderatedContent',
-            $this->buildModerateObject()->getPublicContent(),
-        );
+        $this->assertEquals('moderatedContent', $this->buildModerateObject()->getPublicContent());
 
-        self::assertEquals(
-            'moderatedTitle',
-            $this->buildModerateObject()->getPublicTitle(),
-        );
+        $this->assertEquals('moderatedTitle', $this->buildModerateObject()->getPublicTitle());
 
-        self::assertEquals(
-            'moderatedAuthor',
-            $this->buildModerateObject()->getPublicAuthor(),
-        );
+        $this->assertEquals('moderatedAuthor', $this->buildModerateObject()->getPublicAuthor());
     }
 }

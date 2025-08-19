@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -36,14 +36,11 @@ use Twig\TwigFilter;
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 class SanitizedContent extends AbstractExtension
 {
-    /**
-     * @param object|HtmlSanitizerInterface|null $sanitizer
-     */
     public function __construct(
         private readonly ?object $sanitizer = null,
     ) {
@@ -52,6 +49,7 @@ class SanitizedContent extends AbstractExtension
     /**
      * @return array<TwigFilter>
      */
+    #[\Override]
     public function getFilters(): array
     {
         return [

@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -34,7 +34,7 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Recipe\Step\PrepareCriteriaFromPost;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(PrepareCriteriaFromPost::class)]
@@ -45,7 +45,7 @@ class PrepareCriteriaFromPostTest extends TestCase
         return new PrepareCriteriaFromPost();
     }
 
-    public function testInvoke()
+    public function testInvoke(): void
     {
         $post = $this->createMock(Post::class);
 
@@ -61,20 +61,15 @@ class PrepareCriteriaFromPostTest extends TestCase
             ])
             ->willReturnSelf();
 
-        self::assertInstanceOf(
-            PrepareCriteriaFromPost::class,
-            $this->getStep()(
-                $manager,
-                $post,
-                ['foo' => 'bar']
-            )
-        );
+        $this->assertInstanceOf(PrepareCriteriaFromPost::class, $this->getStep()(
+            $manager,
+            $post,
+            ['foo' => 'bar']
+        ));
     }
 
-    public function testInvokeWithoutPost()
+    public function testInvokeWithoutPost(): void
     {
-        $post = $this->createMock(Post::class);
-
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->once())
             ->method('error')
@@ -87,13 +82,10 @@ class PrepareCriteriaFromPostTest extends TestCase
         $manager->expects($this->never())
             ->method('updateWorkPlan');
 
-        self::assertInstanceOf(
-            PrepareCriteriaFromPost::class,
-            $this->getStep()(
-                $manager,
-                null,
-                ['foo' => 'bar']
-            )
-        );
+        $this->assertInstanceOf(PrepareCriteriaFromPost::class, $this->getStep()(
+            $manager,
+            null,
+            ['foo' => 'bar']
+        ));
     }
 }

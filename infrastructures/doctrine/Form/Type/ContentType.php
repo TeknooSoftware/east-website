@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -55,7 +55,7 @@ use function str_replace;
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 class ContentType extends AbstractType
@@ -184,12 +184,15 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'userIdentifier',
-                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
-                    ->createQueryBuilder()
+                'query_builder' => static function (ObjectRepository $repository): Builder {
+                    /** @var Builder $queryBuilder */
+                    $queryBuilder = $repository->createQueryBuilder();
+                    return $queryBuilder
                         ->field('deletedAt')->equals(null)
                         ->sort('firstName', 'asc')
                         ->sort('lastName', 'asc')
-                        ->sort('email', 'asc')
+                        ->sort('email', 'asc');
+                }
             ]
         );
 
@@ -201,10 +204,13 @@ class ContentType extends AbstractType
                 'required' => true,
                 'multiple' => false,
                 'choice_label' => 'name',
-                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
-                    ->createQueryBuilder()
+                'query_builder' => static function (ObjectRepository $repository): Builder {
+                    /** @var Builder $queryBuilder */
+                    $queryBuilder = $repository->createQueryBuilder();
+                    return $queryBuilder
                         ->field('deletedAt')->equals(null)
-                        ->sort('name', 'asc')
+                        ->sort('name', 'asc');
+                }
             ]
         );
 
@@ -216,10 +222,13 @@ class ContentType extends AbstractType
                 'required' => false,
                 'multiple' => true,
                 'choice_label' => 'name',
-                'query_builder' => static fn(ObjectRepository $repository): Builder => $repository
-                    ->createQueryBuilder()
-                    ->field('deletedAt')->equals(null)
-                    ->sort('name', 'asc')
+                'query_builder' => static function (ObjectRepository $repository): Builder {
+                    /** @var Builder $queryBuilder */
+                    $queryBuilder = $repository->createQueryBuilder();
+                    return $queryBuilder
+                        ->field('deletedAt')->equals(null)
+                        ->sort('name', 'asc');
+                }
             ]
         );
         $builder->add('title', TextType::class, ['required' => true]);
@@ -256,9 +265,9 @@ class ContentType extends AbstractType
     {
         parent::configureOptions($resolver);
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'data_class' => Content::class,
-        ));
+        ]);
 
         $resolver->setRequired(['doctrine_type']);
         $resolver->setAllowedTypes('doctrine_type', 'string');

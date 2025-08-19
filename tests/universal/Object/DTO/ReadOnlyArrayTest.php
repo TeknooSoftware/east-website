@@ -5,7 +5,7 @@
  *
  * LICENSE
  *
- * This source file is subject to the MIT license
+ * This source file is subject to the 3-Clause BSD license
  * it is available in LICENSE file at the root of this package
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
@@ -17,7 +17,7 @@
  *
  * @link        https://teknoo.software/east-collection/website Project website
  *
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 
@@ -31,7 +31,7 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\DTO\ReadOnlyArray;
 
 /**
- * @license     https://teknoo.software/license/mit         MIT License
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
 #[CoversClass(ReadOnlyArray::class)]
@@ -47,58 +47,49 @@ class ReadOnlyArrayTest extends TestCase
         );
     }
 
-    public function testOffsetExists()
+    public function testOffsetExists(): void
     {
         $object = $this->buildObject();
-        self::assertTrue(isset($object['foo']));
-        self::assertFalse(isset($object['foo1']));
+        $this->assertArrayHasKey('foo', $object);
+        $this->assertArrayNotHasKey('foo1', $object);
     }
 
-    public function testOffsetGet()
+    public function testOffsetGet(): void
     {
         $object = $this->buildObject();
-        self::assertEquals('bar', $object['foo']);
-        self::assertEquals(123, $object['bar']);
-        self::assertNull($object['foo1']);
+        $this->assertEquals('bar', $object['foo']);
+        $this->assertEquals(123, $object['bar']);
+        $this->assertNull($object['foo1']);
     }
 
-    public function testOffsetSet()
+    public function testOffsetSet(): void
     {
         $object = $this->buildObject();
         $this->expectException(BadMethodCallException::class);
         $object['foo'] = 'bar';
     }
 
-    public function testOffsetUnset()
+    public function testOffsetUnset(): void
     {
         $object = $this->buildObject();
         $this->expectException(BadMethodCallException::class);
         unset($object['foo']);
     }
 
-    public function testToArray()
+    public function testToArray(): void
     {
         $object = $this->buildObject();
-        self::assertEquals(
-            [
-                'foo' => 'bar',
-                'bar' => 123,
-            ],
-            $object->toArray(),
-        );
+        $this->assertEquals([
+            'foo' => 'bar',
+            'bar' => 123,
+        ], $object->toArray());
     }
 
-    public function testCount()
+    public function testCount(): void
     {
         $object = $this->buildObject();
-        self::assertEquals(
-            2,
-            count($object),
-        );
+        $this->assertCount(2, $object);
 
-        self::assertEquals(
-            2,
-            $object->count(),
-        );
+        $this->assertCount(2, $object);
     }
 }
