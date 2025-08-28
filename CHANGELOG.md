@@ -7,7 +7,7 @@
 - Support Symfony 6.4.24+ or 7.3+
 - Update to Teknoo States 7
 - Update to Teknoo Recipe 7
-- Update to Teknoo East Foundation 7
+- Update to Teknoo East Foundation 9
 - Update to Teknoo East Common 4
 - Update to Teknoo East Translation 11
 - Update to PHPStan 2
