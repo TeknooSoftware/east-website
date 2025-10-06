@@ -112,8 +112,7 @@
         "doctrine/persistence": "^4",
         "league/uri": "^7.5.1",
         "league/oauth2-client": "^2.8.1",
-        "knpuniversity/oauth2-client-bundle": "^2.18.3",
-        "rector/rector": "*"
+        "knpuniversity/oauth2-client-bundle": "^2.18.3"
     },
     "conflict": {
         "doctrine/persistence": "<3.0"
