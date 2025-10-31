@@ -1,5 +1,7 @@
 # behat.yml
 default:
+  calls:
+    error_reporting: 29695
   suites:
     default:
       contexts:

@@ -74,7 +74,7 @@
         "phpstan/extension-installer": "^1.4.3",
         "symfony/property-access": "^6.4.24||^7.3",
         "nikic/php-parser": "^5.6.1",
-        "behat/behat": "^3.23",
+        "behat/behat": "^3.26",
         "teknoo/bridge-phpdi-symfony": "^7.1",
         "psr/cache": "^3",
         "symfony/cache": "^6.4.24||^7.3",

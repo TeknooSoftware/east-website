@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [11.0.1] - 2025-08-19
+### Stable Release
+- fix issue with behat.
+
 ## [11.0.0] - 2025-08-19
 ### Stable Release
 - Drop support of PHP 8.3
