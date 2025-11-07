@@ -911,25 +911,27 @@ class FeatureContext implements Context
                 $ro = new ReflectionObject($object = $parameters['objectInstance']);
                 foreach ($ro->getProperties() as $rp) {
                     if (in_array($rp->getName(), [
-                        'id',
-                        'createdAt',
-                        'updatedAt',
-                        'deletedAt',
-                        'states',
                         'activesStates',
-                        'classesByStates',
-                        'statesAliasesList',
+                        'calledMethodCache',
                         'callerStatedClassesStack',
+                        'classesByStates',
+                        'compiledAssertions',
+                        'createdAt',
+                        'decodedParts',
+                        'decodedSanitizedParts',
+                        'defaultCallerStatedClassName',
+                        'deletedAt',
+                        'disableCalledMethodCache',
+                        'id',
+                        'listAttrAssertions',
+                        'loadedStatesCaches',
                         'localeField',
                         'publishedAt',
-                        'defaultCallerStatedClassName',
-                        'decodedParts',
-                        'sanitizedParts',
-                        'decodedSanitizedParts',
                         'sanitizedHash',
-                        'loadedStatesCaches',
-                        'calledMethodCache',
-                        'disableCalledMethodCache'
+                        'sanitizedParts',
+                        'states',
+                        'statesAliasesList',
+                        'updatedAt',
                     ])) {
                         continue;
                     }

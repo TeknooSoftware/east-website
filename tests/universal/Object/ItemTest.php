@@ -268,9 +268,4 @@ class ItemTest extends TestCase
         $this->expectException(\Throwable::class);
         $this->buildObject()->setChildren(new \stdClass());
     }
-
-    public function testStatesListDeclaration(): void
-    {
-        $this->assertIsArray(Item::statesListDeclaration());
-    }
 }

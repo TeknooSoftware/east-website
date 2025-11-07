@@ -40,8 +40,8 @@ use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\East\Website\Object\DTO\ReadOnlyArray;
-use Teknoo\States\Automated\Assertion\AssertionInterface;
-use Teknoo\States\Automated\Assertion\Property;
+use Teknoo\States\Attributes\Assertion\Property;
+use Teknoo\States\Attributes\StateClass;
 use Teknoo\States\Automated\Assertion\Property\IsInstanceOf;
 use Teknoo\States\Automated\Assertion\Property\IsNotInstanceOf;
 use Teknoo\States\Automated\AutomatedInterface;
@@ -66,6 +66,10 @@ use const JSON_THROW_ON_ERROR;
  *
  * @implements SluggableInterface<IdentifiedObjectInterface>
  */
+#[StateClass(Draft::class)]
+#[StateClass(Published::class)]
+#[Property(Draft::class, ['publishedAt', IsNotInstanceOf::class, DateTimeInterface::class])]
+#[Property(Published::class, ['publishedAt', IsInstanceOf::class, DateTimeInterface::class])]
 class Content implements
     IdentifiedObjectInterface,
     TranslatableInterface,
@@ -118,28 +122,6 @@ class Content implements
     {
         $this->initializeStateProxy();
         $this->updateStates();
-    }
-
-    /**
-     * @return array<string>
-     */
-    public static function statesListDeclaration(): array
-    {
-        return [
-            Draft::class,
-            Published::class,
-        ];
-    }
-
-    /**
-     * @return array<AssertionInterface>
-     */
-    protected function listAssertions(): array
-    {
-        return [
-            (new Property([Draft::class]))->with('publishedAt', new IsNotInstanceOf(DateTimeInterface::class)),
-            (new Property([Published::class]))->with('publishedAt', new IsInstanceOf(DateTimeInterface::class)),
-        ];
     }
 
     public function getAuthor(): ?User

@@ -324,11 +324,6 @@ class ContentTest extends TestCase
         $this->buildObject()->setTags(new stdClass());
     }
 
-    public function testStatesListDeclaration(): void
-    {
-        $this->assertIsArray(Content::statesListDeclaration());
-    }
-
     public function testGetLocaleField(): void
     {
         $this->assertEquals('fooBar', $this->generateObjectPopulated(['localeField' => 'fooBar'])->getLocaleField());

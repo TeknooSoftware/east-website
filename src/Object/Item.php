@@ -36,8 +36,8 @@ use Teknoo\East\Translation\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Object\Item\Available;
 use Teknoo\East\Website\Object\Item\Hidden;
 use Teknoo\East\Common\Service\FindSlugService;
-use Teknoo\States\Automated\Assertion\AssertionInterface;
-use Teknoo\States\Automated\Assertion\Property;
+use Teknoo\States\Attributes\Assertion\Property;
+use Teknoo\States\Attributes\StateClass;
 use Teknoo\States\Automated\Assertion\Property\IsEqual;
 use Teknoo\States\Automated\AutomatedInterface;
 use Teknoo\States\Automated\AutomatedTrait;
@@ -55,6 +55,10 @@ use Teknoo\States\Proxy\ProxyTrait;
  *
  * @implements SluggableInterface<IdentifiedObjectInterface>
  */
+#[StateClass(Hidden::class)]
+#[StateClass(Available::class)]
+#[Property(Hidden::class, ['hidden', IsEqual::class, true])]
+#[Property(Available::class, ['hidden', IsEqual::class, false])]
 class Item implements
     IdentifiedObjectInterface,
     TranslatableInterface,
@@ -93,28 +97,6 @@ class Item implements
     {
         $this->initializeStateProxy();
         $this->updateStates();
-    }
-
-    /**
-     * @return array<string>
-     */
-    public static function statesListDeclaration(): array
-    {
-        return [
-            Hidden::class,
-            Available::class,
-        ];
-    }
-
-    /**
-     * @return array<AssertionInterface>
-     */
-    protected function listAssertions(): array
-    {
-        return [
-            (new Property([Hidden::class]))->with('hidden', new IsEqual(true)),
-            (new Property([Available::class]))->with('hidden', new IsEqual(false)),
-        ];
     }
 
     public function getName(): string

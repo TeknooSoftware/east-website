@@ -1,5 +1,9 @@
 # Teknoo Software - Website - Change Log
 
+## [11.1.0] - 2025-11-07
+### Stable Release
+- Use Teknoo Stage 7.1 and Recipe 7.2
+
 ## [11.0.1] - 2025-08-19
 ### Stable Release
 - fix issue with behat.

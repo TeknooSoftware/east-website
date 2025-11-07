@@ -73,11 +73,6 @@ class CommentTest extends TestCase
         );
     }
 
-    public function testStatesListDeclaration(): void
-    {
-        $this->assertIsArray(Comment::statesListDeclaration());
-    }
-
     public function testGetPost(): void
     {
         $this->assertInstanceOf(Post::class, $this->buildObject()->getPost());

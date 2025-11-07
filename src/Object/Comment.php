@@ -31,7 +31,8 @@ use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
 use Teknoo\East\Website\Object\Comment\Moderated;
 use Teknoo\East\Website\Object\Comment\Published;
-use Teknoo\States\Automated\Assertion\Property;
+use Teknoo\States\Attributes\Assertion\Property;
+use Teknoo\States\Attributes\StateClass;
 use Teknoo\States\Automated\Assertion\Property\IsInstanceOf;
 use Teknoo\States\Automated\Assertion\Property\IsNotInstanceOf;
 use Teknoo\States\Automated\AutomatedInterface;
@@ -48,6 +49,10 @@ use Teknoo\States\Proxy\ProxyTrait;
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
+#[StateClass(Published::class)]
+#[StateClass(Moderated::class)]
+#[Property(Published::class, ['moderatedAt', IsNotInstanceOf::class, DateTimeInterface::class])]
+#[Property(Moderated::class, ['moderatedAt', IsInstanceOf::class, DateTimeInterface::class])]
 class Comment implements
     IdentifiedObjectInterface,
     AutomatedInterface,
@@ -103,25 +108,6 @@ class Comment implements
 
         $this->initializeStateProxy();
         $this->updateStates();
-    }
-
-    /**
-     * @return array<string>
-     */
-    public static function statesListDeclaration(): array
-    {
-        return [
-            Published::class,
-            Moderated::class,
-        ];
-    }
-
-    protected function listAssertions(): array
-    {
-        return [
-            (new Property([Published::class]))->with('moderatedAt', new IsNotInstanceOf(DateTimeInterface::class)),
-            (new Property([Moderated::class]))->with('moderatedAt', new IsInstanceOf(DateTimeInterface::class)),
-        ];
     }
 
     public function getPost(): Post
