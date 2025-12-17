@@ -46,12 +46,12 @@ class TagRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new TagRepository($this->getDoctrineObjectRepositoryMock());
+        return new TagRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 
     public function testWithNonSupportedRepository(): void
     {
         $this->expectException(\TypeError::class);
-        new TagRepository($this->createMock(ObjectRepository::class));
+        new TagRepository($this->createStub(ObjectRepository::class));
     }
 }

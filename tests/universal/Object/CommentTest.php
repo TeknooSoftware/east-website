@@ -45,10 +45,10 @@ class CommentTest extends TestCase
 {
     use PopulateObjectTrait;
 
-    public function buildObject(): \Teknoo\East\Website\Object\Comment
+    public function buildObject(): Comment
     {
         return new Comment(
-            post: $this->createMock(Post::class),
+            post: $this->createStub(Post::class),
             author: 'authorName',
             remoteIp: '127.0.0.1',
             title: 'commentTitle',
@@ -57,10 +57,10 @@ class CommentTest extends TestCase
         );
     }
 
-    protected function buildModerateObject(): \Teknoo\East\Website\Object\Comment
+    protected function buildModerateObject(): Comment
     {
         return new Comment(
-            post: $this->createMock(Post::class),
+            post: $this->createStub(Post::class),
             author: 'authorName',
             remoteIp: '127.0.0.1',
             title: 'commentTitle',

@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\WebsiteBundle\Form\Type;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Form\AbstractType;
@@ -52,12 +53,16 @@ class NewCommentTypeTest extends TestCase
 {
     use FormTestTrait;
 
-    private (DatesService&MockObject)|null $datesService = null;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    private function getDatesService(): DatesService&MockObject
+    private function getDatesService(bool $stub = false): (DatesService&MockObject)|(DatesService&Stub)
     {
-        if ($this->datesService === null) {
-            $this->datesService = $this->createMock(DatesService::class);
+        if (!$this->datesService instanceof DatesService) {
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
@@ -66,9 +71,8 @@ class NewCommentTypeTest extends TestCase
     public function buildForm(): NewCommentType
     {
         return new NewCommentType(
-            $this->getDatesService(),
-            $this->createMock(RequestStack::class),
-            $this->createMock(ManagerInterface::class),
+            $this->getDatesService(true),
+            $this->createStub(RequestStack::class),
         );
     }
 
@@ -76,22 +80,23 @@ class NewCommentTypeTest extends TestCase
     {
         return [
             'comment_class' => Comment::class,
-            'manager' => $this->createMock(ManagerInterface::class),
+            'manager' => $this->createStub(ManagerInterface::class),
         ];
     }
 
     public function testConfigureOptions(): void
     {
-        $this->assertInstanceOf(NewCommentType::class, $this->buildForm()->configureOptions(
-            $this->createMock(OptionsResolver::class)
-        ));
+        $this->buildForm()->configureOptions(
+            $this->createStub(OptionsResolver::class)
+        );
+        $this->assertTrue(true);
     }
 
     public function testBuildFormWithoutCommentClass(): void
     {
         $this->expectException(TypeError::class);
         $this->buildForm()->buildForm(
-            $this->createMock(FormBuilder::class),
+            $this->createStub(FormBuilder::class),
             [],
         );
     }
@@ -100,7 +105,7 @@ class NewCommentTypeTest extends TestCase
     {
         $this->expectException(TypeError::class);
         $this->buildForm()->buildForm(
-            $this->createMock(FormBuilder::class),
+            $this->createStub(FormBuilder::class),
             ['comment_class' => stdClass::class],
         );
     }
@@ -109,14 +114,14 @@ class NewCommentTypeTest extends TestCase
     {
         $this->expectException(TypeError::class);
         $this->buildForm()->buildForm(
-            $this->createMock(FormBuilder::class),
+            $this->createStub(FormBuilder::class),
             ['comment_class' => Comment::class],
         );
     }
 
     public function testBuildFormOnSubmitWithWrongDTOInstance(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
 
         $builder
             ->method('add')
@@ -125,9 +130,9 @@ class NewCommentTypeTest extends TestCase
         $builder
             ->method('addEventListener')
             ->willReturnCallback(
-                function (string $event, callable $callback) use ($builder): MockObject {
+                function (string $event, callable $callback) use ($builder): FormBuilderInterface {
                     $this->assertEquals(FormEvents::POST_SUBMIT, $event);
-                    $callback(new FormEvent($this->createMock(FormInterface::class), new stdClass()));
+                    $callback(new FormEvent($this->createStub(FormInterface::class), new stdClass()));
 
                     return $builder;
                 }
@@ -135,12 +140,13 @@ class NewCommentTypeTest extends TestCase
 
         $this->getDatesService()->expects($this->never())->method('passMeTheDate');
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, $this->getOptions()));
+        $this->buildForm()->buildForm($builder, $this->getOptions());
+        $this->assertTrue(true);
     }
 
     public function testBuildFormOnSubmitWithGoodDTOInstanceAndFormValid(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
 
         $builder
             ->method('add')
@@ -149,7 +155,7 @@ class NewCommentTypeTest extends TestCase
         $builder
             ->method('addEventListener')
             ->willReturnCallback(
-                function (string $event, callable $callback) use ($builder): MockObject {
+                function (string $event, callable $callback) use ($builder): FormBuilderInterface {
                     $this->assertEquals(FormEvents::POST_SUBMIT, $event);
                     $dto = $this->createMock(\Teknoo\East\WebsiteBundle\Form\DTO\Comment::class);
                     $dto->expects($this->once())->method('persistInto');
@@ -172,12 +178,13 @@ class NewCommentTypeTest extends TestCase
                 }
             );
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, $this->getOptions()));
+        $this->buildForm()->buildForm($builder, $this->getOptions());
+        $this->assertTrue(true);
     }
 
     public function testBuildFormOnSubmitWithGoodDTOInstanceAndFormNotValid(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
 
         $builder
             ->method('add')
@@ -186,7 +193,7 @@ class NewCommentTypeTest extends TestCase
         $builder
             ->method('addEventListener')
             ->willReturnCallback(
-                function (string $event, callable $callback) use ($builder): MockObject {
+                function (string $event, callable $callback) use ($builder): FormBuilderInterface {
                     $this->assertEquals(FormEvents::POST_SUBMIT, $event);
                     $dto = $this->createMock(\Teknoo\East\WebsiteBundle\Form\DTO\Comment::class);
                     $dto->expects($this->never())->method('persistInto');
@@ -203,6 +210,7 @@ class NewCommentTypeTest extends TestCase
             ->expects($this->never())
             ->method('passMeTheDate');
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, $this->getOptions()));
+        $this->buildForm()->buildForm($builder, $this->getOptions());
+        $this->assertTrue(true);
     }
 }

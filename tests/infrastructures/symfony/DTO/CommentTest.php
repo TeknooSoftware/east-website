@@ -41,7 +41,7 @@ class CommentTest extends TestCase
     public function testConstructor(): void
     {
         $dto = new Comment(
-            $this->createMock(Post::class),
+            $this->createStub(Post::class),
             'foo',
             'bar',
             'boo',
@@ -57,7 +57,7 @@ class CommentTest extends TestCase
     {
         $now = new \DateTimeImmutable('2025-01-01 00:00:00');
         $dto = new Comment(
-            $post = $this->createMock(Post::class),
+            $post = $this->createStub(Post::class),
             'foo',
             'bar',
             'boo',

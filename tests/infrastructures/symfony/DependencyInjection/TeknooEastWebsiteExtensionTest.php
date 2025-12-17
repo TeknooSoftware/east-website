@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\WebsiteBundle\DependencyInjection;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension;
@@ -38,12 +39,16 @@ use Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension;
 #[CoversClass(TeknooEastWebsiteExtension::class)]
 class TeknooEastWebsiteExtensionTest extends TestCase
 {
-    private (ContainerBuilder&MockObject)|null $container = null;
+    private (ContainerBuilder&MockObject)|(ContainerBuilder&Stub)|null $container = null;
 
-    private function getContainerBuilderMock(): ContainerBuilder&MockObject
+    private function getContainerBuilderMock(bool $stub = false): (ContainerBuilder&Stub)|(ContainerBuilder&MockObject)
     {
         if (!$this->container instanceof ContainerBuilder) {
-            $this->container = $this->createMock(ContainerBuilder::class);
+            if ($stub) {
+                $this->container = $this->createStub(ContainerBuilder::class);
+            } else {
+                $this->container = $this->createMock(ContainerBuilder::class);
+            }
         }
 
         return $this->container;
@@ -61,7 +66,7 @@ class TeknooEastWebsiteExtensionTest extends TestCase
 
     public function testLoad(): void
     {
-        $this->assertInstanceOf($this->getExtensionClass(), $this->buildExtension()->load([], $this->getContainerBuilderMock()));
+        $this->assertInstanceOf($this->getExtensionClass(), $this->buildExtension()->load([], $this->getContainerBuilderMock(true)));
     }
 
     public function testLoadErrorContainer(): void
@@ -73,6 +78,6 @@ class TeknooEastWebsiteExtensionTest extends TestCase
     public function testLoadErrorConfig(): void
     {
         $this->expectException(\TypeError::class);
-        $this->buildExtension()->load(new \stdClass(), $this->getContainerBuilderMock());
+        $this->buildExtension()->load(new \stdClass(), $this->getContainerBuilderMock(true));
     }
 }

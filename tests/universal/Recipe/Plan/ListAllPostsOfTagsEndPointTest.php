@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
@@ -48,99 +49,106 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
 {
     use EditablePlanTestTrait;
 
-    private ?RecipeInterface $recipe = null;
+    private (RecipeInterface&Stub)|(RecipeInterface&MockObject)|null $recipe = null;
 
-    private ?ExtractPage $extractPage = null;
+    private (ExtractPage&Stub)|(ExtractPage&MockObject)|null $extractPage = null;
 
-    private ?ExtractTag $extractTag = null;
+    private (ExtractTag&Stub)|(ExtractTag&MockObject)|null $extractTag = null;
 
-    private ?ListPosts $listPosts = null;
+    private (ListPosts&Stub)|(ListPosts&MockObject)|null $listPosts = null;
 
-    private ?ListTags $listTags = null;
+    private (ListTags&Stub)|(ListTags&MockObject)|null $listTags = null;
 
-    private ?Render $render = null;
+    private (Render&Stub)|(Render&MockObject)|null $render = null;
 
-    private ?RenderError $renderError = null;
+    private (RenderError&Stub)|(RenderError&MockObject)|null $renderError = null;
 
-    /**
-     * @return RecipeInterface|MockObject
-     */
-    public function getRecipe(): RecipeInterface
+    public function getRecipe(bool $stub = false): (RecipeInterface&Stub)|(RecipeInterface&MockObject)
     {
-        if (null === $this->recipe) {
-            $this->recipe = $this->createMock(RecipeInterface::class);
+        if (!$this->recipe instanceof RecipeInterface) {
+            if ($stub) {
+                $this->recipe = $this->createStub(RecipeInterface::class);
+            } else {
+                $this->recipe = $this->createMock(RecipeInterface::class);
+            }
         }
 
         return $this->recipe;
     }
 
-    /**
-     * @return ExtractPage|MockObject
-     */
-    public function getExtractPage(): ExtractPage
+    public function getExtractPage(bool $stub = false): (ExtractPage&Stub)|(ExtractPage&MockObject)
     {
-        if (null === $this->extractPage) {
-            $this->extractPage = $this->createMock(ExtractPage::class);
+        if (!$this->extractPage instanceof ExtractPage) {
+            if ($stub) {
+                $this->extractPage = $this->createStub(ExtractPage::class);
+            } else {
+                $this->extractPage = $this->createMock(ExtractPage::class);
+            }
         }
 
         return $this->extractPage;
     }
 
-    /**
-     * @return ExtractTag|MockObject
-     */
-    public function getExtractTag(): ExtractTag
+    public function getExtractTag(bool $stub = false): (ExtractTag&Stub)|(ExtractTag&MockObject)
     {
-        if (null === $this->extractTag) {
-            $this->extractTag = $this->createMock(ExtractTag::class);
+        if (!$this->extractTag instanceof ExtractTag) {
+            if ($stub) {
+                $this->extractTag = $this->createStub(ExtractTag::class);
+            } else {
+                $this->extractTag = $this->createMock(ExtractTag::class);
+            }
         }
 
         return $this->extractTag;
     }
 
-    /**
-     * @return ListPosts|MockObject
-     */
-    public function getListPosts(): ListPosts
+    public function getListPosts(bool $stub = false): (ListPosts&Stub)|(ListPosts&MockObject)
     {
-        if (null === $this->listPosts) {
-            $this->listPosts = $this->createMock(ListPosts::class);
+        if (!$this->listPosts instanceof ListPosts) {
+            if ($stub) {
+                $this->listPosts = $this->createStub(ListPosts::class);
+            } else {
+                $this->listPosts = $this->createMock(ListPosts::class);
+            }
         }
 
         return $this->listPosts;
     }
 
-    /**
-     * @return ListTags|MockObject
-     */
-    public function getListTags(): ListTags
+    public function getListTags(bool $stub = false): (ListTags&Stub)|(ListTags&MockObject)
     {
-        if (null === $this->listTags) {
-            $this->listTags = $this->createMock(ListTags::class);
+        if (!$this->listTags instanceof ListTags) {
+            if ($stub) {
+                $this->listTags = $this->createStub(ListTags::class);
+            } else {
+                $this->listTags = $this->createMock(ListTags::class);
+            }
         }
 
         return $this->listTags;
     }
 
-    /**
-     * @return Render|MockObject
-     */
-    public function getRender(): Render
+    public function getRender(bool $stub = false): (Render&Stub)|(Render&MockObject)
     {
-        if (null === $this->render) {
-            $this->render = $this->createMock(Render::class);
+        if (!$this->render instanceof Render) {
+            if ($stub) {
+                $this->render = $this->createStub(Render::class);
+            } else {
+                $this->render = $this->createMock(Render::class);
+            }
         }
 
         return $this->render;
     }
 
-    /**
-     * @return RenderError|MockObject
-     */
-    public function getRenderError(): RenderError
+    public function getRenderError(bool $stub = false): (RenderError&Stub)|(RenderError&MockObject)
     {
-        if (null === $this->renderError) {
-            $this->renderError = $this->createMock(RenderError::class);
+        if (!$this->renderError instanceof RenderError) {
+            if ($stub) {
+                $this->renderError = $this->createStub(RenderError::class);
+            } else {
+                $this->renderError = $this->createMock(RenderError::class);
+            }
         }
 
         return $this->renderError;
@@ -149,14 +157,14 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
     public function buildPlan(): ListAllPostsOfTagsEndPoint
     {
         return new ListAllPostsOfTagsEndPoint(
-            $this->getRecipe(),
-            $this->getExtractPage(),
-            $this->getExtractTag(),
-            $this->getListPosts(),
-            $this->getListTags(),
-            $this->createMock(LoadTranslationsInterface::class),
-            $this->getRender(),
-            $this->getRenderError()
+            $this->getRecipe(true),
+            $this->getExtractPage(true),
+            $this->getExtractTag(true),
+            $this->getListPosts(true),
+            $this->getListTags(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
         );
     }
 }

@@ -44,13 +44,13 @@ class CommentWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new CommentWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new CommentWriter($this->getObjectManager(true), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
-    public function getObject(): \Teknoo\East\Website\Object\Comment
+    public function getObject(): Comment
     {
         return new Comment(
-            post: $this->createMock(Post::class),
+            post: $this->createStub(Post::class),
             author: 'authorName',
             remoteIp: '127.0.0.1',
             title: 'commentTitle',

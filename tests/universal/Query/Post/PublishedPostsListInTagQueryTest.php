@@ -58,7 +58,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
 
     public function testExecute(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -101,7 +101,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 ]
             )->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success($this->createMock(\Iterator::class));
+                    $promise->success($this->createStub(\Iterator::class));
 
                     return $repository;
                 }
@@ -112,7 +112,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
 
     public function testExecuteWithArray(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -166,7 +166,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
 
     public function testExecuteErrorOnCount(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -209,7 +209,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 3
             )->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success($this->createMock(\Iterator::class));
+                    $promise->success($this->createStub(\Iterator::class));
 
                     return $repository;
                 }

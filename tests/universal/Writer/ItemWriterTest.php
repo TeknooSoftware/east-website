@@ -42,10 +42,10 @@ class ItemWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new ItemWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new ItemWriter($this->getObjectManager(true), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
-    public function getObject(): \Teknoo\East\Website\Object\Item
+    public function getObject(): Item
     {
         return new Item();
     }

@@ -77,7 +77,7 @@ class ContainerTest extends TestCase
     public function testManager(): void
     {
         $container = $this->buildContainer();
-        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager = $this->createStub(ObjectManager::class);
 
         $container->set(ObjectManager::class, $objectManager);
         $this->assertInstanceOf(ManagerInterface::class, $container->get(ManagerInterface::class));
@@ -86,9 +86,9 @@ class ContainerTest extends TestCase
     private function generateTestForRepository(string $objectClass, string $repositoryClass, string $repositoryType): void
     {
         $container = $this->buildContainer();
-        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager = $this->createStub(ObjectManager::class);
         $objectManager->method('getRepository')->with($objectClass)->willReturn(
-            $this->createMock($repositoryType)
+            $this->createStub($repositoryType)
         );
 
         $container->set(ObjectManager::class, $objectManager);
@@ -160,8 +160,8 @@ class ContainerTest extends TestCase
     public function testOriginalRecipeInterfaceStatic(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class . ':Static', $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(OriginalRecipeInterface::class . ':Static', $this->createStub(OriginalRecipeInterface::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(OriginalRecipeInterface::class, $container->get(OriginalRecipeInterface::class . ':Static'));
     }

@@ -45,6 +45,6 @@ class PostRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new PostRepository($this->getDoctrineObjectRepositoryMock());
+        return new PostRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 }

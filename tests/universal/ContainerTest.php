@@ -128,7 +128,7 @@ class ContainerTest extends TestCase
     private function generateTestForLoader(string $className, string $repositoryInterface): void
     {
         $container = $this->buildContainer();
-        $repository = $this->createMock($repositoryInterface);
+        $repository = $this->createStub($repositoryInterface);
 
         $container->set($repositoryInterface, $repository);
         $loader = $container->get($className);
@@ -169,7 +169,7 @@ class ContainerTest extends TestCase
     private function generateTestForWriter(string $className): void
     {
         $container = $this->buildContainer();
-        $objectManager = $this->createMock(DbManagerInterface::class);
+        $objectManager = $this->createStub(DbManagerInterface::class);
 
         $container->set(DbManagerInterface::class, $objectManager);
         $loader = $container->get($className);
@@ -210,7 +210,7 @@ class ContainerTest extends TestCase
     private function generateTestForDelete(string $key): void
     {
         $container = $this->buildContainer();
-        $objectManager = $this->createMock(DbManagerInterface::class);
+        $objectManager = $this->createStub(DbManagerInterface::class);
 
         $container->set(DbManagerInterface::class, $objectManager);
         $loader = $container->get($key);
@@ -236,9 +236,9 @@ class ContainerTest extends TestCase
     public function testMenuGenerator(): void
     {
         $container = $this->buildContainer();
-        $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
-        $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
-        $container->set(TranslationManagerInterface::class, $this->createMock(TranslationManagerInterface::class));
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set(ContentRepositoryInterface::class, $this->createStub(ContentRepositoryInterface::class));
+        $container->set(TranslationManagerInterface::class, $this->createStub(TranslationManagerInterface::class));
         $container->set('teknoo.east.website.menu_generator.default_locations', ['foo']);
         $loader = $container->get(MenuGenerator::class);
 
@@ -248,8 +248,8 @@ class ContainerTest extends TestCase
     public function testMenuMiddleware(): void
     {
         $container = $this->buildContainer();
-        $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
-        $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set(ContentRepositoryInterface::class, $this->createStub(ContentRepositoryInterface::class));
         $loader = $container->get(MenuMiddleware::class);
 
         $this->assertInstanceOf(MenuMiddleware::class, $loader);
@@ -263,10 +263,10 @@ class ContainerTest extends TestCase
 
         $container = $containerDefinition->build();
 
-        $container->set(LoggerInterface::class, $this->createMock(LoggerInterface::class));
-        $container->set(RouterInterface::class, $this->createMock(RouterInterface::class));
-        $container->set(ItemRepositoryInterface::class, $this->createMock(ItemRepositoryInterface::class));
-        $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
+        $container->set(LoggerInterface::class, $this->createStub(LoggerInterface::class));
+        $container->set(RouterInterface::class, $this->createStub(RouterInterface::class));
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set(ContentRepositoryInterface::class, $this->createStub(ContentRepositoryInterface::class));
 
         $manager1 = $container->get(Manager::class);
         $manager2 = $container->get(ManagerInterface::class);
@@ -281,7 +281,7 @@ class ContainerTest extends TestCase
     public function testLoadContent(): void
     {
         $container = $this->buildContainer();
-        $container->set(ContentRepositoryInterface::class, $this->createMock(ContentRepositoryInterface::class));
+        $container->set(ContentRepositoryInterface::class, $this->createStub(ContentRepositoryInterface::class));
 
         $this->assertInstanceOf(LoadContent::class, $container->get(LoadContent::class));
     }
@@ -289,7 +289,7 @@ class ContainerTest extends TestCase
     public function testLoadPost(): void
     {
         $container = $this->buildContainer();
-        $container->set(PostRepositoryInterface::class, $this->createMock(PostRepositoryInterface::class));
+        $container->set(PostRepositoryInterface::class, $this->createStub(PostRepositoryInterface::class));
 
         $this->assertInstanceOf(LoadPost::class, $container->get(LoadPost::class));
     }
@@ -297,13 +297,13 @@ class ContainerTest extends TestCase
     public function testListAllPostsEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
-        $container->set(ListPosts::class, $this->createMock(ListPosts::class));
-        $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(Render::class, $this->createMock(Render::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(ExtractPage::class, $this->createStub(ExtractPage::class));
+        $container->set(ListPosts::class, $this->createStub(ListPosts::class));
+        $container->set(ListTags::class, $this->createStub(ListTags::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(ListAllPostsEndPoint::class, $container->get(ListAllPostsEndPoint::class));
 
@@ -313,16 +313,16 @@ class ContainerTest extends TestCase
     public function testListCommentsOfPostEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
-        $container->set(SearchFormLoaderInterface::class, $this->createMock(SearchFormLoaderInterface::class));
-        $container->set(ListObjectsAccessControlInterface::class, $this->createMock(ListObjectsAccessControlInterface::class));
-        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
-        $container->set(ExtractOrder::class, $this->createMock(ExtractOrder::class));
-        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
-        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
-        $container->set(LoadListObjects::class, $this->createMock(LoadListObjects::class));
-        $container->set(RenderList::class, $this->createMock(RenderList::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createStub(OriginalRecipeInterface::class));
+        $container->set(SearchFormLoaderInterface::class, $this->createStub(SearchFormLoaderInterface::class));
+        $container->set(ListObjectsAccessControlInterface::class, $this->createStub(ListObjectsAccessControlInterface::class));
+        $container->set(ExtractPage::class, $this->createStub(ExtractPage::class));
+        $container->set(ExtractOrder::class, $this->createStub(ExtractOrder::class));
+        $container->set(LoadPostFromRequest::class, $this->createStub(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createStub(PrepareCriteriaFromPost::class));
+        $container->set(LoadListObjects::class, $this->createStub(LoadListObjects::class));
+        $container->set(RenderList::class, $this->createStub(RenderList::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(ListCommentsOfPostEndPoint::class, $container->get(ListCommentsOfPostEndPoint::class));
@@ -333,16 +333,16 @@ class ContainerTest extends TestCase
     public function testModerateCommentOfPostEndPointInterface(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
-        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
-        $container->set(LoadObject::class, $this->createMock(LoadObject::class));
-        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
-        $container->set(FormProcessingInterface::class, $this->createMock(FormProcessingInterface::class));
-        $container->set(SaveObject::class, $this->createMock(SaveObject::class));
-        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(ObjectAccessControlInterface::class, $this->createMock(ObjectAccessControlInterface::class));
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createStub(OriginalRecipeInterface::class));
+        $container->set(LoadPostFromRequest::class, $this->createStub(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createStub(PrepareCriteriaFromPost::class));
+        $container->set(LoadObject::class, $this->createStub(LoadObject::class));
+        $container->set(FormHandlingInterface::class, $this->createStub(FormHandlingInterface::class));
+        $container->set(FormProcessingInterface::class, $this->createStub(FormProcessingInterface::class));
+        $container->set(SaveObject::class, $this->createStub(SaveObject::class));
+        $container->set(RenderFormInterface::class, $this->createStub(RenderFormInterface::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(ObjectAccessControlInterface::class, $this->createStub(ObjectAccessControlInterface::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(ModerateCommentOfPostEndPoint::class, $container->get(ModerateCommentOfPostEndPoint::class));
@@ -353,16 +353,16 @@ class ContainerTest extends TestCase
     public function testDeleteCommentOfPostEndPointInterface(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadPostFromRequest::class, $this->createMock(LoadPostFromRequest::class));
-        $container->set(PrepareCriteriaFromPost::class, $this->createMock(PrepareCriteriaFromPost::class));
-        $container->set(LoadObject::class, $this->createMock(LoadObject::class));
-        $container->set(DeleteObject::class, $this->createMock(DeleteObject::class));
-        $container->set(JumpIf::class, $this->createMock(JumpIf::class));
-        $container->set(RedirectClientInterface::class, $this->createMock(RedirectClientInterface::class));
-        $container->set(Render::class, $this->createMock(Render::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(ObjectAccessControlInterface::class, $this->createMock(ObjectAccessControlInterface::class));
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createStub(OriginalRecipeInterface::class));
+        $container->set(LoadPostFromRequest::class, $this->createStub(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createStub(PrepareCriteriaFromPost::class));
+        $container->set(LoadObject::class, $this->createStub(LoadObject::class));
+        $container->set(DeleteObject::class, $this->createStub(DeleteObject::class));
+        $container->set(JumpIf::class, $this->createStub(JumpIf::class));
+        $container->set(RedirectClientInterface::class, $this->createStub(RedirectClientInterface::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(ObjectAccessControlInterface::class, $this->createStub(ObjectAccessControlInterface::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(DeleteCommentOfPostEndPoint::class, $container->get(DeleteCommentOfPostEndPoint::class));
@@ -373,14 +373,14 @@ class ContainerTest extends TestCase
     public function testListAllPostsOfTagsEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(ExtractPage::class, $this->createMock(ExtractPage::class));
-        $container->set(ExtractTag::class, $this->createMock(ExtractTag::class));
-        $container->set(ListPosts::class, $this->createMock(ListPosts::class));
-        $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(Render::class, $this->createMock(Render::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(ExtractPage::class, $this->createStub(ExtractPage::class));
+        $container->set(ExtractTag::class, $this->createStub(ExtractTag::class));
+        $container->set(ListPosts::class, $this->createStub(ListPosts::class));
+        $container->set(ListTags::class, $this->createStub(ListTags::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(ListAllPostsOfTagsEndPoint::class, $container->get(ListAllPostsOfTagsEndPoint::class));
 
@@ -390,17 +390,17 @@ class ContainerTest extends TestCase
     public function testPostCommentOnPostEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(LoadPost::class, $this->createMock(LoadPost::class));
-        $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
-        $container->set(CreateObject::class, $this->createMock(CreateObject::class));
-        $container->set(FormHandlingInterface::class, $this->createMock(FormHandlingInterface::class));
-        $container->set(FormProcessingInterface::class, $this->createMock(FormProcessingInterface::class));
-        $container->set(SaveObject::class, $this->createMock(SaveObject::class));
-        $container->set(RedirectClientInterface::class, $this->createMock(RedirectClientInterface::class));
-        $container->set(RenderFormInterface::class, $this->createMock(RenderFormInterface::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(LoadPost::class, $this->createStub(LoadPost::class));
+        $container->set(ListTags::class, $this->createStub(ListTags::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
+        $container->set(CreateObject::class, $this->createStub(CreateObject::class));
+        $container->set(FormHandlingInterface::class, $this->createStub(FormHandlingInterface::class));
+        $container->set(FormProcessingInterface::class, $this->createStub(FormProcessingInterface::class));
+        $container->set(SaveObject::class, $this->createStub(SaveObject::class));
+        $container->set(RedirectClientInterface::class, $this->createStub(RedirectClientInterface::class));
+        $container->set(RenderFormInterface::class, $this->createStub(RenderFormInterface::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(PostCommentOnPostEndPoint::class, $container->get(PostCommentOnPostEndPoint::class));
@@ -411,12 +411,12 @@ class ContainerTest extends TestCase
     public function testRenderDynamicContentEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
-        $container->set(LoadContent::class, $this->createMock(LoadContent::class));
-        $container->set(Render::class, $this->createMock(Render::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(ExtractSlug::class, $this->createStub(ExtractSlug::class));
+        $container->set(LoadContent::class, $this->createStub(LoadContent::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(RenderDynamicContentEndPoint::class, $container->get(RenderDynamicContentEndPoint::class));
 
@@ -426,13 +426,13 @@ class ContainerTest extends TestCase
     public function testRenderDynamicPostEndPoint(): void
     {
         $container = $this->buildContainer();
-        $container->set(OriginalRecipeInterface::class, $this->createMock(OriginalRecipeInterface::class));
-        $container->set(ExtractSlug::class, $this->createMock(ExtractSlug::class));
-        $container->set(LoadPost::class, $this->createMock(LoadPost::class));
-        $container->set(ListTags::class, $this->createMock(ListTags::class));
-        $container->set(Render::class, $this->createMock(Render::class));
-        $container->set(RenderError::class, $this->createMock(RenderError::class));
-        $container->set(LoadTranslationsInterface::class, $this->createMock(LoadTranslationsInterface::class));
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(ExtractSlug::class, $this->createStub(ExtractSlug::class));
+        $container->set(LoadPost::class, $this->createStub(LoadPost::class));
+        $container->set(ListTags::class, $this->createStub(ListTags::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(RenderDynamicPostEndPoint::class, $container->get(RenderDynamicPostEndPoint::class));
 

@@ -55,7 +55,7 @@ class PublishedPostsListQueryTest extends TestCase
 
     public function testExecute(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -91,7 +91,7 @@ class PublishedPostsListQueryTest extends TestCase
             ->with(['publishedAt' => new Lower(new DateTimeImmutable('2025-03-24'))], )
             ->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success($this->createMock(\Iterator::class));
+                    $promise->success($this->createStub(\Iterator::class));
 
                     return $repository;
                 }

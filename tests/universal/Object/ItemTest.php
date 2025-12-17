@@ -78,7 +78,7 @@ class ItemTest extends TestCase
 
     public function testPrepareSlugNear(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');
@@ -92,7 +92,7 @@ class ItemTest extends TestCase
 
     public function testPrepareSlugNearWithCurrentSlugValue(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
 
         $findSlugService = $this->createMock(FindSlugService::class);
         $findSlugService->expects($this->once())->method('process');

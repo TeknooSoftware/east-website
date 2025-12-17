@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
@@ -46,71 +47,76 @@ class RenderDynamicContentEndPointTest extends TestCase
 {
     use EditablePlanTestTrait;
 
-    private ?RecipeInterface $recipe = null;
+    private (RecipeInterface&Stub)|(RecipeInterface&MockObject)|null $recipe = null;
 
-    private ?ExtractSlug $extractSlug = null;
+    private (ExtractSlug&Stub)|(ExtractSlug&MockObject)|null $extractSlug = null;
 
-    private ?LoadContent $loadContent = null;
+    private (LoadContent&Stub)|(LoadContent&MockObject)|null $loadContent = null;
 
-    private ?Render $render = null;
+    private (Render&Stub)|(Render&MockObject)|null $render = null;
 
-    private ?RenderError $renderError = null;
+    private (RenderError&Stub)|(RenderError&MockObject)|null $renderError = null;
 
-    /**
-     * @return RecipeInterface|MockObject
-     */
-    public function getRecipe(): RecipeInterface
+    public function getRecipe(bool $stub = false): (RecipeInterface&Stub)|(RecipeInterface&MockObject)
     {
-        if (null === $this->recipe) {
-            $this->recipe = $this->createMock(RecipeInterface::class);
+        if (!$this->recipe instanceof RecipeInterface) {
+            if ($stub) {
+                $this->recipe = $this->createStub(RecipeInterface::class);
+            } else {
+                $this->recipe = $this->createMock(RecipeInterface::class);
+            }
         }
 
         return $this->recipe;
     }
 
-    /**
-     * @return ExtractSlug|MockObject
-     */
-    public function getExtractSlug(): ExtractSlug
+    public function getExtractSlug(bool $stub = false): (ExtractSlug&Stub)|(ExtractSlug&MockObject)
     {
-        if (null === $this->extractSlug) {
-            $this->extractSlug = $this->createMock(ExtractSlug::class);
+        if (!$this->extractSlug instanceof ExtractSlug) {
+            if ($stub) {
+                $this->extractSlug = $this->createStub(ExtractSlug::class);
+            } else {
+                $this->extractSlug = $this->createMock(ExtractSlug::class);
+            }
         }
 
         return $this->extractSlug;
     }
 
-    /**
-     * @return LoadContent|MockObject
-     */
-    public function getLoadContent(): LoadContent
+    public function getLoadContent(bool $stub = false): (LoadContent&Stub)|(LoadContent&MockObject)
     {
-        if (null === $this->loadContent) {
-            $this->loadContent = $this->createMock(LoadContent::class);
+        if (!$this->loadContent instanceof LoadContent) {
+            if ($stub) {
+                $this->loadContent = $this->createStub(LoadContent::class);
+            } else {
+                $this->loadContent = $this->createMock(LoadContent::class);
+            }
         }
 
         return $this->loadContent;
     }
 
-    /**
-     * @return Render|MockObject
-     */
-    public function getRender(): Render
+    public function getRender(bool $stub = false): (Render&Stub)|(Render&MockObject)
     {
-        if (null === $this->render) {
-            $this->render = $this->createMock(Render::class);
+        if (!$this->render instanceof Render) {
+            if ($stub) {
+                $this->render = $this->createStub(Render::class);
+            } else {
+                $this->render = $this->createMock(Render::class);
+            }
         }
 
         return $this->render;
     }
 
-    /**
-     * @return RenderError|MockObject
-     */
-    public function getRenderError(): RenderError
+    public function getRenderError(bool $stub = false): (RenderError&Stub)|(RenderError&MockObject)
     {
-        if (null === $this->renderError) {
-            $this->renderError = $this->createMock(RenderError::class);
+        if (!$this->renderError instanceof RenderError) {
+            if ($stub) {
+                $this->renderError = $this->createStub(RenderError::class);
+            } else {
+                $this->renderError = $this->createMock(RenderError::class);
+            }
         }
 
         return $this->renderError;
@@ -119,12 +125,12 @@ class RenderDynamicContentEndPointTest extends TestCase
     public function buildPlan(): RenderDynamicContentEndPoint
     {
         return new RenderDynamicContentEndPoint(
-            $this->getRecipe(),
-            $this->getExtractSlug(),
-            $this->getLoadContent(),
-            $this->createMock(LoadTranslationsInterface::class),
-            $this->getRender(),
-            $this->getRenderError()
+            $this->getRecipe(true),
+            $this->getExtractSlug(true),
+            $this->getLoadContent(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
         );
     }
 }

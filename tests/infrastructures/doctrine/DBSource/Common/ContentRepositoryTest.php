@@ -45,6 +45,6 @@ class ContentRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new ContentRepository($this->getDoctrineObjectRepositoryMock());
+        return new ContentRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 }

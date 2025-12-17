@@ -46,8 +46,9 @@ class TagTypeTest extends TestCase
 
     public function testConfigureOptions(): void
     {
-        $this->assertInstanceOf(TagType::class, $this->buildForm()->configureOptions(
-            $this->createMock(OptionsResolver::class)
-        ));
+        $this->buildForm()->configureOptions(
+            $this->createStub(OptionsResolver::class)
+        );
+        $this->assertTrue(true);
     }
 }

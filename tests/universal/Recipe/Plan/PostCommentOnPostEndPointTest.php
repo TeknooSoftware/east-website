@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
@@ -51,125 +52,166 @@ class PostCommentOnPostEndPointTest extends TestCase
 {
     use EditablePlanTestTrait;
 
-    private (RecipeInterface&MockObject)|null $recipe = null;
+    private (RecipeInterface&Stub)|(RecipeInterface&MockObject)|null $recipe = null;
 
-    private (LoadPost&MockObject)|null $loadPost = null;
+    private (LoadPost&Stub)|(LoadPost&MockObject)|null $loadPost = null;
 
-    private (ListTags&MockObject)|null $listTags = null;
+    private (ListTags&Stub)|(ListTags&MockObject)|null $listTags = null;
 
-    private (LoadTranslationsInterface&MockObject)|null $loadTranslations = null;
+    private (LoadTranslationsInterface&Stub)|(LoadTranslationsInterface&MockObject)|null $loadTranslations = null;
 
-    private (CreateObject&MockObject)|null $createObject = null;
+    private (CreateObject&Stub)|(CreateObject&MockObject)|null $createObject = null;
 
-    private (FormHandlingInterface&MockObject)|null $formHandling = null;
+    private (FormHandlingInterface&Stub)|(FormHandlingInterface&MockObject)|null $formHandling = null;
 
-    private (FormProcessingInterface&MockObject)|null $formProcessing = null;
+    private (FormProcessingInterface&Stub)|(FormProcessingInterface&MockObject)|null $formProcessing = null;
 
-    private (SaveObject&MockObject)|null $saveObject = null;
+    private (SaveObject&Stub)|(SaveObject&MockObject)|null $saveObject = null;
 
-    private (RedirectClientInterface&MockObject)|null $redirectClient = null;
+    private (RedirectClientInterface&Stub)|(RedirectClientInterface&MockObject)|null $redirectClient = null;
 
-    private (RenderFormInterface&MockObject)|null $renderForm = null;
+    private (RenderFormInterface&Stub)|(RenderFormInterface&MockObject)|null $renderForm = null;
 
-    private (RenderError&MockObject)|null $renderError = null;
+    private (RenderError&Stub)|(RenderError&MockObject)|null $renderError = null;
 
-    /**
-     * @return RecipeInterface|MockObject
-     */
-    public function getRecipe(): RecipeInterface
+    public function getRecipe(bool $stub = false): (RecipeInterface&Stub)|(RecipeInterface&MockObject)
     {
-        if (null === $this->recipe) {
-            $this->recipe = $this->createMock(RecipeInterface::class);
+        if (!$this->recipe instanceof RecipeInterface) {
+            if ($stub) {
+                $this->recipe = $this->createStub(RecipeInterface::class);
+            } else {
+                $this->recipe = $this->createMock(RecipeInterface::class);
+            }
         }
 
         return $this->recipe;
     }
 
-    public function getLoadPost(): LoadPost&MockObject
+    public function getLoadPost(bool $stub = false): (LoadPost&Stub)|(LoadPost&MockObject)
     {
-        if (null === $this->loadPost) {
-            $this->loadPost = $this->createMock(LoadPost::class);
+        if (!$this->loadPost instanceof LoadPost) {
+            if ($stub) {
+                $this->loadPost = $this->createStub(LoadPost::class);
+            } else {
+                $this->loadPost = $this->createMock(LoadPost::class);
+            }
         }
 
         return $this->loadPost;
     }
 
-    public function getListTags(): ListTags&MockObject
+    public function getListTags(bool $stub = false): (ListTags&Stub)|(ListTags&MockObject)
     {
-        if (null === $this->listTags) {
-            $this->listTags = $this->createMock(ListTags::class);
+        if (!$this->listTags instanceof ListTags) {
+            if ($stub) {
+                $this->listTags = $this->createStub(ListTags::class);
+            } else {
+                $this->listTags = $this->createMock(ListTags::class);
+            }
         }
 
         return $this->listTags;
     }
 
-    public function getLoadTranslations(): LoadTranslationsInterface&MockObject
+    public function getLoadTranslations(bool $stub = false): (LoadTranslationsInterface&Stub)|(LoadTranslationsInterface&MockObject)
     {
-        if (null === $this->loadTranslations) {
-            $this->loadTranslations = $this->createMock(LoadTranslationsInterface::class);
+        if (!$this->loadTranslations instanceof LoadTranslationsInterface) {
+            if ($stub) {
+                $this->loadTranslations = $this->createStub(LoadTranslationsInterface::class);
+            } else {
+                $this->loadTranslations = $this->createMock(LoadTranslationsInterface::class);
+            }
         }
 
         return $this->loadTranslations;
     }
 
-    public function getCreateObject(): CreateObject&MockObject
+    public function getCreateObject(bool $stub = false): (CreateObject&Stub)|(CreateObject&MockObject)
     {
-        if (null === $this->createObject) {
-            $this->createObject = $this->createMock(CreateObject::class);
+        if (!$this->createObject instanceof CreateObject) {
+            if ($stub) {
+                $this->createObject = $this->createStub(CreateObject::class);
+            } else {
+                $this->createObject = $this->createMock(CreateObject::class);
+            }
         }
 
         return $this->createObject;
     }
 
-    public function getFormHandling(): FormHandlingInterface&MockObject
+    public function getFormHandling(bool $stub = false): (FormHandlingInterface&Stub)|(FormHandlingInterface&MockObject)
     {
-        if (null === $this->formHandling) {
-            $this->formHandling = $this->createMock(FormHandlingInterface::class);
+        if (!$this->formHandling instanceof FormHandlingInterface) {
+            if ($stub) {
+                $this->formHandling = $this->createStub(FormHandlingInterface::class);
+            } else {
+                $this->formHandling = $this->createMock(FormHandlingInterface::class);
+            }
         }
 
         return $this->formHandling;
     }
 
-    public function getFormProcessing(): FormProcessingInterface&MockObject
+    public function getFormProcessing(bool $stub = false): (FormProcessingInterface&Stub)|(FormProcessingInterface&MockObject)
     {
-        if (null === $this->formProcessing) {
-            $this->formProcessing = $this->createMock(FormProcessingInterface::class);
+        if (!$this->formProcessing instanceof FormProcessingInterface) {
+            if ($stub) {
+                $this->formProcessing = $this->createStub(FormProcessingInterface::class);
+            } else {
+                $this->formProcessing = $this->createMock(FormProcessingInterface::class);
+            }
         }
 
         return $this->formProcessing;
     }
 
-    public function getSaveObject(): SaveObject&MockObject
+    public function getSaveObject(bool $stub = false): (SaveObject&Stub)|(SaveObject&MockObject)
     {
-        if (null === $this->saveObject) {
-            $this->saveObject = $this->createMock(SaveObject::class);
+        if (!$this->saveObject instanceof SaveObject) {
+            if ($stub) {
+                $this->saveObject = $this->createStub(SaveObject::class);
+            } else {
+                $this->saveObject = $this->createMock(SaveObject::class);
+            }
         }
 
         return $this->saveObject;
     }
 
-    public function getRedirectClient(): RedirectClientInterface&MockObject
+    public function getRedirectClient(bool $stub = false): (RedirectClientInterface&Stub)|(RedirectClientInterface&MockObject)
     {
-        if (null === $this->redirectClient) {
-            $this->redirectClient = $this->createMock(RedirectClientInterface::class);
+        if (!$this->redirectClient instanceof RedirectClientInterface) {
+            if ($stub) {
+                $this->redirectClient = $this->createStub(RedirectClientInterface::class);
+            } else {
+                $this->redirectClient = $this->createMock(RedirectClientInterface::class);
+            }
         }
 
         return $this->redirectClient;
     }
 
-    public function getRenderForm(): RenderFormInterface&MockObject
+    public function getRenderForm(bool $stub = false): (RenderFormInterface&Stub)|(RenderFormInterface&MockObject)
     {
-        if (null === $this->renderForm) {
-            $this->renderForm = $this->createMock(RenderFormInterface::class);
+        if (!$this->renderForm instanceof RenderFormInterface) {
+            if ($stub) {
+                $this->renderForm = $this->createStub(RenderFormInterface::class);
+            } else {
+                $this->renderForm = $this->createMock(RenderFormInterface::class);
+            }
         }
 
         return $this->renderForm;
     }
 
-    public function getRenderError(): RenderError&MockObject
+    public function getRenderError(bool $stub = false): (RenderError&Stub)|(RenderError&MockObject)
     {
-        if (null === $this->renderError) {
-            $this->renderError = $this->createMock(RenderError::class);
+        if (!$this->renderError instanceof RenderError) {
+            if ($stub) {
+                $this->renderError = $this->createStub(RenderError::class);
+            } else {
+                $this->renderError = $this->createMock(RenderError::class);
+            }
         }
 
         return $this->renderError;
@@ -178,17 +220,17 @@ class PostCommentOnPostEndPointTest extends TestCase
     public function buildPlan(): PostCommentOnPostEndPoint
     {
         return new PostCommentOnPostEndPoint(
-            $this->getRecipe(),
-            $this->getLoadPost(),
-            $this->getListTags(),
-            $this->getLoadTranslations(),
-            $this->getCreateObject(),
-            $this->getFormHandling(),
-            $this->getFormProcessing(),
-            $this->getSaveObject(),
-            $this->getRedirectClient(),
-            $this->getRenderForm(),
-            $this->getRenderError(),
+            $this->getRecipe(true),
+            $this->getLoadPost(true),
+            $this->getListTags(true),
+            $this->getLoadTranslations(true),
+            $this->getCreateObject(true),
+            $this->getFormHandling(true),
+            $this->getFormProcessing(true),
+            $this->getSaveObject(true),
+            $this->getRedirectClient(true),
+            $this->getRenderForm(true),
+            $this->getRenderError(true),
             'foo',
         );
     }

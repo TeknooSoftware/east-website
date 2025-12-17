@@ -53,7 +53,7 @@ class CommentTest extends OriginalTest
     public function buildObject(): Comment
     {
         return new Comment(
-            post: $this->createMock(Post::class),
+            post: $this->createStub(Post::class),
             author: 'authorName',
             remoteIp: '127.0.0.1',
             title: 'commentTitle',

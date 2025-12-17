@@ -53,7 +53,7 @@ class TopItemByLocationQueryTest extends TestCase
 
     public function testExecute(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 

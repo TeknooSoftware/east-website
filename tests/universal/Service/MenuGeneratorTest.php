@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
@@ -44,12 +45,16 @@ use Teknoo\East\Website\Service\MenuGenerator;
 #[CoversClass(MenuGenerator::class)]
 class MenuGeneratorTest extends TestCase
 {
-    private (ItemLoader&MockObject)|null $itemLoader = null;
+    private (ItemLoader&Stub)|(ItemLoader&MockObject)|null $itemLoader = null;
 
-    public function getItemLoader(): ItemLoader&MockObject
+    public function getItemLoader(bool $stub = false): (ItemLoader&Stub)|(ItemLoader&MockObject)
     {
         if (!$this->itemLoader instanceof ItemLoader) {
-            $this->itemLoader = $this->createMock(ItemLoader::class);
+            if ($stub) {
+                $this->itemLoader = $this->createStub(ItemLoader::class);
+            } else {
+                $this->itemLoader = $this->createMock(ItemLoader::class);
+            }
         }
 
         return $this->itemLoader;
@@ -58,7 +63,7 @@ class MenuGeneratorTest extends TestCase
     public function buildService(): MenuGenerator
     {
         return new MenuGenerator(
-            $this->getItemLoader(),
+            $this->getItemLoader(true),
             ['foo'],
         );
     }
@@ -119,7 +124,7 @@ class MenuGeneratorTest extends TestCase
 
     public function testExtractWithoutTop(): void
     {
-        $this->getItemLoader()
+        $this->getItemLoader(true)
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise): \Teknoo\East\Website\Loader\ItemLoader {

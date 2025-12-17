@@ -29,6 +29,7 @@ use ArrayIterator;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Form\FormInterface;
@@ -46,21 +47,24 @@ use function ucfirst;
 #[CoversClass(CommentMapper::class)]
 class CommentMapperTest extends TestCase
 {
-    private (DatesService&MockObject)|null $datesService = null;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    private function getDatesService(): DatesService&MockObject
+    private function getDatesService(bool $stub = false): (DatesService&Stub)|(DatesService&MockObject)
     {
         if (!$this->datesService instanceof DatesService) {
-            $this->datesService = $this->createMock(DatesService::class);
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
-
     }
 
     private function buildMapper(): CommentMapper
     {
-        return new CommentMapper($this->getDatesService());
+        return new CommentMapper($this->getDatesService(true));
     }
 
     public function testMapDataToFormsWithNotCommentObject(): void
@@ -74,7 +78,7 @@ class CommentMapperTest extends TestCase
     public function testMapDataToFormsWithCommentObject(): void
     {
         $comment = new Comment(
-            post: $post = $this->createMock(Post::class),
+            post: $post = $this->createStub(Post::class),
             author: 'author',
             remoteIp: 'ip',
             title: 'title',
@@ -135,7 +139,7 @@ class CommentMapperTest extends TestCase
     public function testMapFormsToDataWithCommentObjectNotModerated(): void
     {
         $comment = new Comment(
-            post: $post = $this->createMock(Post::class),
+            post: $post = $this->createStub(Post::class),
             author: 'author',
             remoteIp: 'ip',
             title: 'title',
@@ -160,7 +164,7 @@ class CommentMapperTest extends TestCase
         ];
 
         foreach ($keysList as $key => $value) {
-            $form = $this->createMock(FormInterface::class);
+            $form = $this->createStub(FormInterface::class);
             $form->method('getName')->willReturn($key);
             $form->method('getData')->willReturn($value);
 
@@ -192,7 +196,7 @@ class CommentMapperTest extends TestCase
     public function testMapFormsToDataWithCommentObjectModerated(): void
     {
         $comment = new Comment(
-            post: $post = $this->createMock(Post::class),
+            post: $post = $this->createStub(Post::class),
             author: 'author',
             remoteIp: 'ip',
             title: 'title',
@@ -217,7 +221,7 @@ class CommentMapperTest extends TestCase
         ];
 
         foreach ($keysList as $key => $value) {
-            $form = $this->createMock(FormInterface::class);
+            $form = $this->createStub(FormInterface::class);
             $form->method('getName')->willReturn($key);
             $form->method('getData')->willReturn($value);
 
@@ -257,7 +261,7 @@ class CommentMapperTest extends TestCase
     public function testMapFormsToDataWithCommentObjectAlreadyModerated(): void
     {
         $comment = new Comment(
-            post: $post = $this->createMock(Post::class),
+            post: $post = $this->createStub(Post::class),
             author: 'author',
             remoteIp: 'ip',
             title: 'title',
@@ -282,7 +286,7 @@ class CommentMapperTest extends TestCase
         ];
 
         foreach ($keysList as $key => $value) {
-            $form = $this->createMock(FormInterface::class);
+            $form = $this->createStub(FormInterface::class);
             $form->method('getName')->willReturn($key);
             $form->method('getData')->willReturn($value);
 

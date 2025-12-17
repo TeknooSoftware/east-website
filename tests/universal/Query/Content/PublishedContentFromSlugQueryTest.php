@@ -56,7 +56,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
     public function testFetch(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -72,7 +72,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
     public function testFetchFailing(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -92,7 +92,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
     public function testFetchNotPublishable(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -112,7 +112,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
     public function testFetchNotPublished(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -122,7 +122,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $object = $this->createMock(Content::class);
+                $object = $this->createStub(Content::class);
                 $object->method('getPublishedAt')->willReturn(
                     null
                 );
@@ -136,7 +136,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
     public function testFetchPublished(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -148,7 +148,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
         $repository->expects($this->once())
             ->method('findOneBy')
             ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $content = $this->createMock(Content::class);
+                $content = $this->createStub(Content::class);
                 $content->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
                 $promise->success($content);
 

@@ -46,12 +46,12 @@ class TypeRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new TypeRepository($this->getDoctrineObjectRepositoryMock());
+        return new TypeRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 
     public function testWithNonSupportedRepository(): void
     {
         $this->expectException(\TypeError::class);
-        new TypeRepository($this->createMock(ObjectRepository::class));
+        new TypeRepository($this->createStub(ObjectRepository::class));
     }
 }

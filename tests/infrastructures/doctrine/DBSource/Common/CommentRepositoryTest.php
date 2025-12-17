@@ -45,6 +45,6 @@ class CommentRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new CommentRepository($this->getDoctrineObjectRepositoryMock());
+        return new CommentRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 }

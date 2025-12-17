@@ -47,7 +47,7 @@ class PrepareCriteriaFromPostTest extends TestCase
 
     public function testInvoke(): void
     {
-        $post = $this->createMock(Post::class);
+        $post = $this->createStub(Post::class);
 
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->never())->method('error');

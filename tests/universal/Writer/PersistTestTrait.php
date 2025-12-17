@@ -25,6 +25,8 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Writer;
 
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
@@ -37,35 +39,31 @@ use Teknoo\East\Common\Contracts\Writer\WriterInterface;
  */
 trait PersistTestTrait
 {
-    /**
-     * @var ManagerInterface
-     */
-    private $manager;
+    private (ManagerInterface&Stub)|(ManagerInterface&MockObject)|null $manager = null;
 
-    /**
-     * @var DatesService
-     */
-    private $datesService;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    /**
-     * @return \PHPUnit\Framework\MockObject\MockObject|ManagerInterface
-     */
-    public function getObjectManager(): ManagerInterface
+    public function getObjectManager(bool $stub = false): (ManagerInterface&Stub)|(ManagerInterface&MockObject)
     {
         if (!$this->manager instanceof ManagerInterface) {
-            $this->manager = $this->createMock(ManagerInterface::class);
+            if ($stub) {
+                $this->manager = $this->createStub(ManagerInterface::class);
+            } else {
+                $this->manager = $this->createMock(ManagerInterface::class);
+            }
         }
 
         return $this->manager;
     }
 
-    /**
-     * @return DatesService|\PHPUnit\Framework\MockObject\MockObject
-     */
-    public function getDatesServiceMock(): DatesService
+    public function getDatesServiceMock(bool $stub = false): (DatesService&Stub)|(DatesService&MockObject)
     {
         if (!$this->datesService instanceof DatesService) {
-            $this->datesService = $this->createMock(DatesService::class);
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
@@ -119,14 +117,13 @@ trait PersistTestTrait
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
-            $this->getDatesServiceMock()
-                ->expects($this->any())
+            $this->getDatesServiceMock(true)
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter) use ($date) {
                         $setter($date);
 
-                        return $this->getDatesServiceMock();
+                        return $this->getDatesServiceMock(true);
                     }
                 );
         } else {
@@ -163,15 +160,14 @@ trait PersistTestTrait
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
-            $this->getDatesServiceMock()
-                ->expects($this->any())
+            $this->getDatesServiceMock(true)
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
                         $setter($date);
                         self::assertTrue($preferRealDate);
 
-                        return $this->getDatesServiceMock();
+                        return $this->getDatesServiceMock(true);
                     }
                 );
         } else {
@@ -211,15 +207,14 @@ trait PersistTestTrait
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
-            $this->getDatesServiceMock()
-                ->expects($this->any())
+            $this->getDatesServiceMock(true)
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
                         $setter($date);
                         self::assertTrue($preferRealDate);
 
-                        return $this->getDatesServiceMock();
+                        return $this->getDatesServiceMock(true);
                     }
                 );
         } else {
@@ -256,15 +251,14 @@ trait PersistTestTrait
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
-            $this->getDatesServiceMock()
-                ->expects($this->any())
+            $this->getDatesServiceMock(true)
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
                         $setter($date);
                         self::assertFalse($preferRealDate);
 
-                        return $this->getDatesServiceMock();
+                        return $this->getDatesServiceMock(true);
                     }
                 );
         } else {
@@ -304,15 +298,14 @@ trait PersistTestTrait
         $date = new \DateTime('2017-01-01');
 
         if ($object instanceof TimestampableInterface) {
-            $this->getDatesServiceMock()
-                ->expects($this->any())
+            $this->getDatesServiceMock(true)
                 ->method('passMeTheDate')
                 ->willReturnCallback(
                     function ($setter, $preferRealDate) use ($date) {
                         $setter($date);
                         self::assertTrue($preferRealDate);
 
-                        return $this->getDatesServiceMock();
+                        return $this->getDatesServiceMock(true);
                     }
                 );
         } else {

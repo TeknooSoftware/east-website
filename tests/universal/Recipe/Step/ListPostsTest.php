@@ -25,10 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Step;
 
+use ArrayObject;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
@@ -44,23 +47,31 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 #[CoversClass(ListPosts::class)]
 class ListPostsTest extends TestCase
 {
-    private (PostLoader&MockObject)|null $postLoader = null;
+    private (PostLoader&Stub)|(PostLoader&MockObject)|null $postLoader = null;
 
-    private (DatesService&MockObject)|null $datesService = null;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    private function getPostLoader(): PostLoader&MockObject
+    private function getPostLoader(bool $stub = false): (PostLoader&Stub)|(PostLoader&MockObject)
     {
         if (!$this->postLoader instanceof PostLoader) {
-            $this->postLoader = $this->createMock(PostLoader::class);
+            if ($stub) {
+                $this->postLoader = $this->createStub(PostLoader::class);
+            } else {
+                $this->postLoader = $this->createMock(PostLoader::class);
+            }
         }
 
         return $this->postLoader;
     }
 
-    private function getDatesService(): DatesService&MockObject
+    private function getDatesService(bool $stub = false): (DatesService&Stub)|(DatesService&MockObject)
     {
         if (!$this->datesService instanceof DatesService) {
-            $this->datesService = $this->createMock(DatesService::class);
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
@@ -69,8 +80,8 @@ class ListPostsTest extends TestCase
     private function buildStep(): ListPosts
     {
         return new ListPosts(
-            $this->getPostLoader(),
-            $this->getDatesService(),
+            $this->getPostLoader(true),
+            $this->getDatesService(true),
         );
     }
 
@@ -80,21 +91,21 @@ class ListPostsTest extends TestCase
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');
 
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
+                function (callable $callable): DatesService&Stub {
                     $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
                 }
             );
 
-        $this->getpostLoader()
+        $this->getpostLoader(true)
             ->method('query')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryCollectionInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success(new \ArrayObject([]));
+                function (QueryCollectionInterface $query, PromiseInterface $promise): PostLoader&Stub {
+                    $promise->success(new ArrayObject([]));
 
                     return $this->getPostLoader();
                 }
@@ -104,7 +115,7 @@ class ListPostsTest extends TestCase
             $manager,
             0,
             1,
-            $this->createMock(ParametersBag::class),
+            $this->createStub(ParametersBag::class),
         ));
     }
 
@@ -114,21 +125,21 @@ class ListPostsTest extends TestCase
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');
 
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
+                function (callable $callable): DatesService&Stub {
                     $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
                 }
             );
 
-        $this->getpostLoader()
+        $this->getpostLoader(true)
             ->method('query')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryCollectionInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success(new \ArrayObject([]));
+                function (QueryCollectionInterface $query, PromiseInterface $promise): PostLoader&Stub {
+                    $promise->success(new ArrayObject([]));
 
                     return $this->getPostLoader();
                 }
@@ -138,8 +149,8 @@ class ListPostsTest extends TestCase
             $manager,
             0,
             1,
-            $this->createMock(ParametersBag::class),
-            $this->createMock(Tag::class),
+            $this->createStub(ParametersBag::class),
+            $this->createStub(Tag::class),
         ));
     }
 }

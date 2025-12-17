@@ -46,12 +46,12 @@ class CommentRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new CommentRepository($this->getDoctrineObjectRepositoryMock());
+        return new CommentRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 
     public function testWithNonSupportedRepository(): void
     {
         $this->expectException(\TypeError::class);
-        new CommentRepository($this->createMock(ObjectRepository::class));
+        new CommentRepository($this->createStub(ObjectRepository::class));
     }
 }
