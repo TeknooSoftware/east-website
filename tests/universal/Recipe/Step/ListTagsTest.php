@@ -25,10 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Step;
 
+use ArrayObject;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
@@ -44,34 +47,46 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 #[CoversClass(ListTags::class)]
 class ListTagsTest extends TestCase
 {
-    private (TagLoader&MockObject)|null $tagLoader = null;
+    private (TagLoader&Stub)|(TagLoader&MockObject)|null $tagLoader = null;
 
-    private (PostRepositoryInterface&MockObject)|null $postRepository = null;
+    private (PostRepositoryInterface&Stub)|(PostRepositoryInterface&MockObject)|null $postRepository = null;
 
-    private (DatesService&MockObject)|null $datesService = null;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    private function getTagLoader(): TagLoader&MockObject
+    private function getTagLoader(bool $stub = false): (TagLoader&Stub)|(TagLoader&MockObject)
     {
         if (!$this->tagLoader instanceof TagLoader) {
-            $this->tagLoader = $this->createMock(TagLoader::class);
+            if ($stub) {
+                $this->tagLoader = $this->createStub(TagLoader::class);
+            } else {
+                $this->tagLoader = $this->createMock(TagLoader::class);
+            }
         }
 
         return $this->tagLoader;
     }
 
-    private function getPostRepository(): PostRepositoryInterface&MockObject
+    private function getPostRepository(bool $stub = false): (PostRepositoryInterface&Stub)|(PostRepositoryInterface&MockObject)
     {
         if (!$this->postRepository instanceof PostRepositoryInterface) {
-            $this->postRepository = $this->createMock(PostRepositoryInterface::class);
+            if ($stub) {
+                $this->postRepository = $this->createStub(PostRepositoryInterface::class);
+            } else {
+                $this->postRepository = $this->createMock(PostRepositoryInterface::class);
+            }
         }
 
         return $this->postRepository;
     }
 
-    private function getDatesService(): DatesService&MockObject
+    private function getDatesService(bool $stub = false): (DatesService&Stub)|(DatesService&MockObject)
     {
         if (!$this->datesService instanceof DatesService) {
-            $this->datesService = $this->createMock(DatesService::class);
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
@@ -80,18 +95,18 @@ class ListTagsTest extends TestCase
     private function buildStep(): ListTags
     {
         return new ListTags(
-            $this->getTagLoader(),
-            $this->getPostRepository(),
-            $this->getDatesService(),
+            $this->getTagLoader(true),
+            $this->getPostRepository(true),
+            $this->getDatesService(true),
         );
     }
 
     public function testInvokeWithoutTag(): void
     {
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
+                function (callable $callable): DatesService&Stub {
                     $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
@@ -102,11 +117,11 @@ class ListTagsTest extends TestCase
         $manager->expects($this->never())->method('error');
         $manager->expects($this->once())->method('updateWorkPlan');
 
-        $this->gettagLoader()
+        $this->gettagLoader(true)
             ->method('query')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryCollectionInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\TagLoader&\PHPUnit\Framework\MockObject\MockObject {
-                    $promise->success(new \ArrayObject([]));
+                function (QueryCollectionInterface $query, PromiseInterface $promise): TagLoader&Stub {
+                    $promise->success(new ArrayObject([]));
 
                     return $this->getTagLoader();
                 }
@@ -114,7 +129,7 @@ class ListTagsTest extends TestCase
 
         $this->assertInstanceOf(ListTags::class, $this->buildStep()(
             $manager,
-            $this->createMock(ParametersBag::class),
+            $this->createStub(ParametersBag::class),
         ));
     }
 }

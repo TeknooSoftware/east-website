@@ -47,7 +47,7 @@ class TagType extends AbstractType
      * @param FormBuilderInterface<Type> $builder
      * @param array<string, mixed> $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options): self
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add(
             child: 'name',
@@ -73,18 +73,14 @@ class TagType extends AbstractType
                 ],
             ],
         );
-
-        return $this;
     }
 
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'data_class' => Tag::class,
         ]);
-
-        return $this;
     }
 }

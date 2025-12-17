@@ -53,7 +53,7 @@ class PostTest extends ContentTest
     public function testSetComments(): void
     {
         $this->assertInstanceOf(Post::class, $this->buildObject()->setComments([
-            $this->createMock(Comment::class),
+            $this->createStub(Comment::class),
         ]));
     }
 }

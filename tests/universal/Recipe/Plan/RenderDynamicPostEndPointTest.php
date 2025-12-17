@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Plan;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
@@ -46,71 +47,72 @@ class RenderDynamicPostEndPointTest extends TestCase
 {
     use EditablePlanTestTrait;
 
-    private ?RecipeInterface $recipe = null;
+    private (RecipeInterface&Stub)|(RecipeInterface&MockObject)|null $recipe = null;
 
-    private ?LoadPost $loadPost = null;
+    private (LoadPost&Stub)|(LoadPost&MockObject)|null $loadPost = null;
 
-    private ?ListTags $listTags = null;
+    private (ListTags&Stub)|(ListTags&MockObject)|null $listTags = null;
 
     private ?Render $render = null;
 
-    private ?RenderError $renderError = null;
+    private (RenderError&Stub)|(RenderError&MockObject)|null $renderError = null;
 
-    /**
-     * @return RecipeInterface|MockObject
-     */
-    public function getRecipe(): RecipeInterface
+    public function getRecipe(bool $stub = false): (RecipeInterface&Stub)|(RecipeInterface&MockObject)
     {
-        if (null === $this->recipe) {
-            $this->recipe = $this->createMock(RecipeInterface::class);
+        if (!$this->recipe instanceof RecipeInterface) {
+            if ($stub) {
+                $this->recipe = $this->createStub(RecipeInterface::class);
+            } else {
+                $this->recipe = $this->createMock(RecipeInterface::class);
+            }
         }
 
         return $this->recipe;
     }
 
-    /**
-     * @return LoadPost|MockObject
-     */
-    public function getLoadPost(): LoadPost
+    public function getLoadPost(bool $stub = false): (LoadPost&Stub)|(LoadPost&MockObject)
     {
-        if (null === $this->loadPost) {
-            $this->loadPost = $this->createMock(LoadPost::class);
+        if (!$this->loadPost instanceof LoadPost) {
+            if ($stub) {
+                $this->loadPost = $this->createStub(LoadPost::class);
+            } else {
+                $this->loadPost = $this->createMock(LoadPost::class);
+            }
         }
 
         return $this->loadPost;
     }
 
-    /**
-     * @return ListTags|MockObject
-     */
-    public function getListTags(): ListTags
+    public function getListTags(bool $stub = false): (ListTags&Stub)|(ListTags&MockObject)
     {
-        if (null === $this->listTags) {
-            $this->listTags = $this->createMock(ListTags::class);
+        if (!$this->listTags instanceof ListTags) {
+            if ($stub) {
+                $this->listTags = $this->createStub(ListTags::class);
+            } else {
+                $this->listTags = $this->createMock(ListTags::class);
+            }
         }
 
         return $this->listTags;
     }
 
-    /**
-     * @return Render|MockObject
-     */
     public function getRender(): Render
     {
         if (null === $this->renderError) {
-            $this->render = $this->createMock(Render::class);
+            $this->render = $this->createStub(Render::class);
         }
 
         return $this->render;
     }
 
-    /**
-     * @return RenderError|MockObject
-     */
-    public function getRenderError(): RenderError
+    public function getRenderError(bool $stub = false): (RenderError&Stub)|(RenderError&MockObject)
     {
-        if (null === $this->renderError) {
-            $this->renderError = $this->createMock(RenderError::class);
+        if (!$this->renderError instanceof RenderError) {
+            if ($stub) {
+                $this->renderError = $this->createStub(RenderError::class);
+            } else {
+                $this->renderError = $this->createMock(RenderError::class);
+            }
         }
 
         return $this->renderError;
@@ -119,12 +121,12 @@ class RenderDynamicPostEndPointTest extends TestCase
     public function buildPlan(): RenderDynamicPostEndPoint
     {
         return new RenderDynamicPostEndPoint(
-            $this->getRecipe(),
-            $this->getLoadPost(),
-            $this->getListTags(),
-            $this->createMock(LoadTranslationsInterface::class),
-            $this->getRender(),
-            $this->getRenderError()
+            $this->getRecipe(true),
+            $this->getLoadPost(true),
+            $this->getListTags(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
         );
     }
 }

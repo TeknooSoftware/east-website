@@ -25,9 +25,13 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Query\Post;
 
+use DateTime;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use stdClass;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -56,7 +60,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
     public function testFetch(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -72,7 +76,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
     public function testFetchFailing(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -81,8 +85,8 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $promise->fail(new \RuntimeException());
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): MockObject {
+                $promise->fail(new RuntimeException());
 
                 return $repository;
             });
@@ -92,7 +96,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
     public function testFetchNotPublishable(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -101,8 +105,8 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $promise->success(new \stdClass());
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): MockObject {
+                $promise->success(new stdClass());
 
                 return $repository;
             });
@@ -112,7 +116,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
     public function testFetchNotPublished(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -121,8 +125,8 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $object = $this->createMock(Post::class);
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): MockObject {
+                $object = $this->createStub(Post::class);
                 $object->method('getPublishedAt')->willReturn(
                     null
                 );
@@ -136,7 +140,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
     public function testFetchPublished(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -147,9 +151,9 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
-                $post = $this->createMock(Post::class);
-                $post->method('getPublishedAt')->willReturn(new \DateTime('2018-07-01'));
+            ->willReturnCallback(function ($criteria, PromiseInterface $promise) use ($repository): MockObject {
+                $post = $this->createStub(Post::class);
+                $post->method('getPublishedAt')->willReturn(new DateTime('2018-07-01'));
                 $promise->success($post);
 
                 return $repository;

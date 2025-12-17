@@ -54,7 +54,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartSanitizedPartsKeyFound(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
@@ -81,7 +81,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartSanitizedPartsKeyNotFound(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(new ReadOnlyArray(['foo' => 'bar']));
@@ -108,7 +108,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartNotSanitizedPartsKeyFoundWithContext(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(null);
@@ -139,7 +139,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartNotSanitizedWithoutSanitizer(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(null);
@@ -166,7 +166,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartNotSanitizedPartsKeyFoundWithoutContext(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(null);
@@ -196,7 +196,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartNotSanitizedPartsKeyNotFoundWithContext(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(null);
@@ -227,7 +227,7 @@ class ExtendedSanitizedContentTest extends TestCase
 
     public function testGetPartNotSanitizedPartsKeyNotFoundWithoutContext(): void
     {
-        $content = $this->createMock(Content::class);
+        $content = $this->createStub(Content::class);
         $content
             ->method('getSanitizedParts')
             ->willReturn(null);

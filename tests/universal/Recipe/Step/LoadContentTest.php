@@ -25,9 +25,15 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Recipe\Step;
 
+use DateTimeImmutable;
+use DomainException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use stdClass;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
@@ -36,6 +42,7 @@ use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
+use TypeError;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -44,23 +51,31 @@ use Teknoo\East\Website\Recipe\Step\LoadContent;
 #[CoversClass(LoadContent::class)]
 class LoadContentTest extends TestCase
 {
-    private ?ContentLoader $contentLoader = null;
+    private (ContentLoader&Stub)|(ContentLoader&MockObject)|null $contentLoader = null;
 
-    private ?DatesService $datesService = null;
+    private (DatesService&Stub)|(DatesService&MockObject)|null $datesService = null;
 
-    private function getContentLoader(): ContentLoader&MockObject
+    private function getContentLoader(bool $stub = false): (ContentLoader&Stub)|(ContentLoader&MockObject)
     {
         if (!$this->contentLoader instanceof ContentLoader) {
-            $this->contentLoader = $this->createMock(ContentLoader::class);
+            if ($stub) {
+                $this->contentLoader = $this->createStub(ContentLoader::class);
+            } else {
+                $this->contentLoader = $this->createMock(ContentLoader::class);
+            }
         }
 
         return $this->contentLoader;
     }
 
-    private function getDatesService(): DatesService&MockObject
+    private function getDatesService(bool $stub = false): (DatesService&Stub)|(DatesService&MockObject)
     {
         if (!$this->datesService instanceof DatesService) {
-            $this->datesService = $this->createMock(DatesService::class);
+            if ($stub) {
+                $this->datesService = $this->createStub(DatesService::class);
+            } else {
+                $this->datesService = $this->createMock(DatesService::class);
+            }
         }
 
         return $this->datesService;
@@ -69,28 +84,28 @@ class LoadContentTest extends TestCase
     public function buildStep(): LoadContent
     {
         return new LoadContent(
-            $this->getContentLoader(),
-            $this->getDatesService(),
+            $this->getContentLoader(true),
+            $this->getDatesService(true),
         );
     }
 
     public function testInvokeBadSlug(): void
     {
-        $this->expectException(\TypeError::class);
+        $this->expectException(TypeError::class);
 
         $this->buildStep()(
-            new \stdClass(),
-            $this->createMock(ManagerInterface::class)
+            new stdClass(),
+            $this->createStub(ManagerInterface::class)
         );
     }
 
     public function testInvokeBadManager(): void
     {
-        $this->expectException(\TypeError::class);
+        $this->expectException(TypeError::class);
 
         $this->buildStep()(
             'slug',
-            new \stdClass()
+            new stdClass()
         );
     }
 
@@ -107,20 +122,20 @@ class LoadContentTest extends TestCase
             'template' => 'foo',
         ]);
 
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
-                    $callable(new \DateTimeImmutable('2025-03-24'));
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
                 }
             );
 
-        $this->getContentLoader()
+        $this->getContentLoader(true)
             ->method('fetch')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryElementInterface $query, PromiseInterface $promise) use ($content): \Teknoo\East\Website\Loader\ContentLoader&\PHPUnit\Framework\MockObject\MockObject {
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($content): ContentLoader&Stub {
                     $promise->success($content);
 
                     return $this->getContentLoader();
@@ -143,24 +158,24 @@ class LoadContentTest extends TestCase
 
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->once())->method('error')->with(
-            new \RuntimeException('Content type is not available')
+            new RuntimeException('Content type is not available')
         );
         $manager->expects($this->never())->method('updateWorkPlan');
 
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
-                    $callable(new \DateTimeImmutable('2025-03-24'));
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
                 }
             );
 
-        $this->getContentLoader()
+        $this->getContentLoader(true)
             ->method('fetch')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryElementInterface $query, PromiseInterface $promise) use ($content): \Teknoo\East\Website\Loader\ContentLoader&\PHPUnit\Framework\MockObject\MockObject {
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($content): ContentLoader&Stub {
                     $promise->success($content);
 
                     return $this->getContentLoader();
@@ -170,7 +185,7 @@ class LoadContentTest extends TestCase
         $this->assertInstanceOf(LoadContent::class, $this->buildStep()(
             'foo',
             $manager,
-            $this->createMock(ParametersBag::class),
+            $this->createStub(ParametersBag::class),
         ));
     }
 
@@ -178,25 +193,25 @@ class LoadContentTest extends TestCase
     {
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->once())->method('error')->with(
-            new \DomainException('foo', 404, new \DomainException('foo'))
+            new DomainException('foo', 404, new DomainException('foo'))
         );
         $manager->expects($this->never())->method('updateWorkPlan');
 
-        $this->getDatesService()
+        $this->getDatesService(true)
             ->method('passMeTheDate')
             ->willReturnCallback(
-                function (callable $callable): \Teknoo\East\Foundation\Time\DatesService&\PHPUnit\Framework\MockObject\MockObject {
-                    $callable(new \DateTimeImmutable('2025-03-24'));
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
 
                     return $this->getDatesService();
                 }
             );
 
-        $this->getContentLoader()
+        $this->getContentLoader(true)
             ->method('fetch')
             ->willReturnCallback(
-                function (\Teknoo\East\Common\Contracts\Query\QueryElementInterface $query, PromiseInterface $promise): \Teknoo\East\Website\Loader\ContentLoader&\PHPUnit\Framework\MockObject\MockObject {
-                    $promise->fail(new \DomainException('foo'));
+                function (QueryElementInterface $query, PromiseInterface $promise): ContentLoader&Stub {
+                    $promise->fail(new DomainException('foo'));
 
                     return $this->getContentLoader();
                 }
@@ -205,7 +220,7 @@ class LoadContentTest extends TestCase
         $this->assertInstanceOf(LoadContent::class, $this->buildStep()(
             'foo',
             $manager,
-            $this->createMock(ParametersBag::class),
+            $this->createStub(ParametersBag::class),
         ));
     }
 }

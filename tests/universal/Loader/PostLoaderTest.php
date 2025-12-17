@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Loader;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -43,12 +44,16 @@ class PostLoaderTest extends TestCase
 {
     use LoaderTestTrait;
 
-    private (RepositoryInterface&MockObject)|null $repository = null;
+    private (RepositoryInterface&Stub)|(RepositoryInterface&MockObject)|null $repository = null;
 
-    public function getRepositoryMock(): RepositoryInterface&MockObject
+    public function getRepositoryMock(bool $stub = false): (RepositoryInterface&Stub)|(RepositoryInterface&MockObject)
     {
         if (!$this->repository instanceof RepositoryInterface) {
-            $this->repository = $this->createMock(PostRepositoryInterface::class);
+            if ($stub) {
+                $this->repository = $this->createStub(PostRepositoryInterface::class);
+            } else {
+                $this->repository = $this->createMock(PostRepositoryInterface::class);
+            }
         }
 
         return $this->repository;
@@ -56,7 +61,7 @@ class PostLoaderTest extends TestCase
 
     public function buildLoader(): LoaderInterface
     {
-        $repository = $this->getRepositoryMock();
+        $repository = $this->getRepositoryMock(true);
         return new PostLoader($repository);
     }
 

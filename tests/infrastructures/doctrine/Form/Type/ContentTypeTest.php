@@ -43,6 +43,7 @@ use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Doctrine\Form\Type\ContentType;
+use function Symfony\Component\Translation\t;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -58,11 +59,11 @@ class ContentTypeTest extends TestCase
 
     public function testBuildForm(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
         $builder
             ->method('addEventListener')
-            ->willReturnCallback(function (string $name, callable $callable) use ($builder): MockObject {
-                $form = $this->createMock(FormInterface::class);
+            ->willReturnCallback(function (string $name, callable $callable) use ($builder): FormBuilderInterface {
+                $form = $this->createStub(FormInterface::class);
                 $content = new Content();
                 $type = new Type();
                 $type->setBlocks([
@@ -84,7 +85,7 @@ class ContentTypeTest extends TestCase
         $builder
             ->method('add')
             ->willReturnCallback(
-                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): MockObject {
+                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): FormBuilderInterface {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
                         $qBuilder->expects($this->once())
@@ -109,16 +110,17 @@ class ContentTypeTest extends TestCase
                 }
             );
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, ['doctrine_type' => ChoiceType::class]));
+        $this->buildForm()->buildForm($builder, ['doctrine_type' => ChoiceType::class]);
+        $this->assertTrue(true);
     }
 
     public function testBuildFormWithPublishedContent(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
         $builder
             ->method('addEventListener')
-            ->willReturnCallback(function (string $name, callable $callable) use ($builder): MockObject {
-                $form = $this->createMock(FormInterface::class);
+            ->willReturnCallback(function (string $name, callable $callable) use ($builder): FormBuilderInterface {
+                $form = $this->createStub(FormInterface::class);
                 $content = new Content();
                 $type = new Type();
                 $type->setBlocks([
@@ -139,7 +141,7 @@ class ContentTypeTest extends TestCase
         $builder
             ->method('add')
             ->willReturnCallback(
-                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): MockObject {
+                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): FormBuilderInterface {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
                         $qBuilder->expects($this->once())
@@ -164,16 +166,17 @@ class ContentTypeTest extends TestCase
                 }
             );
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, ['doctrine_type' => ChoiceType::class]));
+        $this->buildForm()->buildForm($builder, ['doctrine_type' => ChoiceType::class]);
+        $this->assertTrue(true);
     }
 
     public function testBuildFormSubmittedData(): void
     {
-        $builder = $this->createMock(FormBuilderInterface::class);
+        $builder = $this->createStub(FormBuilderInterface::class);
         $builder
             ->method('addEventListener')
-            ->willReturnCallback(function (string $name, callable $callable) use ($builder): MockObject {
-                $form = $this->createMock(FormInterface::class);
+            ->willReturnCallback(function (string $name, callable $callable) use ($builder): FormBuilderInterface {
+                $form = $this->createStub(FormInterface::class);
                 $content = new Content();
                 $type = new Type();
                 $type->setBlocks([new Block('foo', BlockType::Text), new Block('foo2', BlockType::Text)]);
@@ -196,7 +199,7 @@ class ContentTypeTest extends TestCase
         $builder
             ->method('add')
             ->willReturnCallback(
-                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): MockObject {
+                function (string|FormBuilderInterface $child, ?string $type, array $options = []) use ($builder): FormBuilderInterface {
                     if (DocumentType::class == $type && isset($options['query_builder'])) {
                         $qBuilder = $this->createMock(Builder::class);
                         $qBuilder->expects($this->once())
@@ -221,13 +224,15 @@ class ContentTypeTest extends TestCase
                 }
             );
 
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->buildForm($builder, ['doctrine_type' => DocumentType::class]));
+        $this->buildForm()->buildForm($builder, ['doctrine_type' => DocumentType::class]);
+        $this->assertTrue(true);
     }
 
     public function testConfigureOptions(): void
     {
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->configureOptions(
-            $this->createMock(OptionsResolver::class)
-        ));
+        $this->buildForm()->configureOptions(
+            $this->createStub(OptionsResolver::class)
+        );
+        $this->assertTrue(true);
     }
 }

@@ -45,6 +45,6 @@ class ItemRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new ItemRepository($this->getDoctrineObjectRepositoryMock());
+        return new ItemRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 }

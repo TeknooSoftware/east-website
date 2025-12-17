@@ -58,13 +58,14 @@ class LoadPostFromRequestTest extends TestCase
 
     public function testInvoke(): void
     {
-        $post = $this->createMock(Post::class);
+        $post = $this->createStub(Post::class);
 
         $this->getPostLoader()
+            ->expects($this->once())
             ->method('load')
             ->with('foo')
             ->willReturnCallback(
-                function ($id, $promise) use ($post): (\Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject)|null {
+                function ($id, $promise) use ($post): (PostLoader&MockObject)|null {
                     $promise->success($post);
 
                     return $this->getPostLoader();
@@ -93,13 +94,12 @@ class LoadPostFromRequestTest extends TestCase
 
     public function testInvokeNotFound(): void
     {
-        $post = $this->createMock(Post::class);
-
         $this->getPostLoader()
+            ->expects($this->once())
             ->method('load')
             ->with('foo')
             ->willReturnCallback(
-                function ($id, $promise) use ($post): (\Teknoo\East\Website\Loader\PostLoader&\PHPUnit\Framework\MockObject\MockObject)|null {
+                function ($id, $promise): (PostLoader&MockObject)|null {
                     $promise->fail(new \DomainException('Post not found', 404));
 
                     return $this->getPostLoader();

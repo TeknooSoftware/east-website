@@ -54,7 +54,7 @@ class ModerateCommentType extends AbstractType
      * @param FormBuilderInterface<Comment> $builder
      * @param array<string, mixed> $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options): self
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('author', TextType::class, ['required' => true, 'disabled' => true]);
         $builder->add('remoteIp', TextType::class, ['required' => true, 'disabled' => true]);
@@ -67,18 +67,14 @@ class ModerateCommentType extends AbstractType
         $builder->add('moderatedContent', TextareaType::class, ['required' => false]);
 
         $builder->setDataMapper($this->commentMapper);
-
-        return $this;
     }
 
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'data_class' => Comment::class,
         ]);
-
-        return $this;
     }
 }

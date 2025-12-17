@@ -41,14 +41,12 @@ use Teknoo\East\Website\Doctrine\Object\Post;
 class PostType extends ContentType
 {
     #[\Override]
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'data_class' => Post::class,
         ]);
-
-        return $this;
     }
 }

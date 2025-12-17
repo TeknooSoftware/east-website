@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Middleware;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
 use Teknoo\East\Website\Service\MenuGenerator;
@@ -39,12 +40,16 @@ use Teknoo\East\Common\View\ParametersBag;
 #[CoversClass(MenuMiddleware::class)]
 class MenuMiddlewareTest extends TestCase
 {
-    private (MenuGenerator&MockObject)|null $menuGenerator = null;
+    private (MenuGenerator&Stub)|(MenuGenerator&MockObject)|null $menuGenerator = null;
 
-    public function getMenuGenerator(): MenuGenerator&MockObject
+    public function getMenuGenerator(bool $stub = false): (MenuGenerator&Stub)|(MenuGenerator&MockObject)
     {
         if (!$this->menuGenerator instanceof MenuGenerator) {
-            $this->menuGenerator = $this->createMock(MenuGenerator::class);
+            if ($stub) {
+                $this->menuGenerator = $this->createStub(MenuGenerator::class);
+            } else {
+                $this->menuGenerator = $this->createMock(MenuGenerator::class);
+            }
         }
 
         return $this->menuGenerator;
@@ -52,12 +57,12 @@ class MenuMiddlewareTest extends TestCase
 
     public function buildMiddleware(): MenuMiddleware
     {
-        return new MenuMiddleware($this->getMenuGenerator());
+        return new MenuMiddleware($this->getMenuGenerator(true));
     }
 
     public function testExecute(): void
     {
-        $bag = $this->createMock(ParametersBag::class);
+        $bag = $this->createStub(ParametersBag::class);
 
         $this->assertInstanceOf(MenuMiddleware::class, $this->buildMiddleware()->execute($bag));
     }

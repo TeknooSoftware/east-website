@@ -68,7 +68,7 @@ class NewCommentType extends AbstractType implements FormManagerAwareInterface
      * @param FormBuilderInterface<Comment> $builder
      * @param array<string, mixed> $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options): self
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if (
             !isset($options['comment_class'])
@@ -139,11 +139,9 @@ class NewCommentType extends AbstractType implements FormManagerAwareInterface
                 );
             }
         );
-
-        return $this;
     }
 
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
@@ -154,7 +152,5 @@ class NewCommentType extends AbstractType implements FormManagerAwareInterface
         $resolver->setRequired(['comment_class', 'manager']);
         $resolver->setAllowedTypes('comment_class', 'string');
         $resolver->setAllowedTypes('manager', ManagerInterface::class);
-
-        return $this;
     }
 }

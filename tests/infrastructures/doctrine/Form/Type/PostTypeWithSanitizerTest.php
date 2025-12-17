@@ -40,7 +40,7 @@ class PostTypeWithSanitizerTest extends ContentTypeWithSanitizerTest
     public function buildForm(): PostType
     {
         return new PostType(
-            $this->createMock(HtmlSanitizerInterface::class),
+            $this->createStub(HtmlSanitizerInterface::class),
             'body',
             'foo',
         );

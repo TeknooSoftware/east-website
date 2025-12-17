@@ -55,7 +55,7 @@ class ItemType extends AbstractType
      * @param FormBuilderInterface<Item> $builder
      * @param array<string, string> $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options): self
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, ['required' => true]);
         $builder->add('location', TextType::class, ['required' => true]);
@@ -76,6 +76,7 @@ class ItemType extends AbstractType
                 }
             ]
         );
+
         $builder->add(
             'content',
             $options['doctrine_type'],
@@ -93,17 +94,16 @@ class ItemType extends AbstractType
                 }
             ]
         );
+
         $builder->add('slug', TextType::class, ['required' => false]);
         $builder->add('slug', TextType::class, ['required' => false]);
         $builder->add('hidden', CheckboxType::class, ['required' => false]);
         $builder->add('position', IntegerType::class, ['required' => false]);
 
         $this->addTranslatableLocaleFieldHidden($builder);
-
-        return $this;
     }
 
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
@@ -113,7 +113,5 @@ class ItemType extends AbstractType
 
         $resolver->setRequired(['doctrine_type']);
         $resolver->setAllowedTypes('doctrine_type', 'string');
-
-        return $this;
     }
 }

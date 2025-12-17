@@ -42,7 +42,7 @@ class TagWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new TagWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new TagWriter($this->getObjectManager(true), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
     public function getObject(): \Teknoo\East\Website\Object\Tag

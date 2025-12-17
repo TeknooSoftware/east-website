@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Recipe\Step;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Loader\TagLoader;
@@ -39,12 +40,16 @@ use Teknoo\East\Website\Recipe\Step\ExtractTag;
 #[CoversClass(ExtractTag::class)]
 class ExtractTagTest extends TestCase
 {
-    private (TagLoader&MockObject)|null $tagLoader = null;
+    private (TagLoader&Stub)|(TagLoader&MockObject)|null $tagLoader = null;
 
-    private function getTagLoader(): (TagLoader&MockObject)|null
+    private function getTagLoader(bool $stub = false): (TagLoader&Stub)|(TagLoader&MockObject)
     {
-        if (null === $this->tagLoader) {
-            $this->tagLoader = $this->createMock(TagLoader::class);
+        if (!$this->tagLoader instanceof TagLoader) {
+            if ($stub) {
+                $this->tagLoader = $this->createStub(TagLoader::class);
+            } else {
+                $this->tagLoader = $this->createMock(TagLoader::class);
+            }
         }
 
         return $this->tagLoader;
@@ -52,13 +57,13 @@ class ExtractTagTest extends TestCase
 
     private function getStep(): ExtractTag
     {
-        return new ExtractTag($this->getTagLoader());
+        return new ExtractTag($this->getTagLoader(true));
     }
 
     public function testInvoke(): void
     {
         $this->assertInstanceOf(ExtractTag::class, $this->getStep()(
-            $this->createMock(ManagerInterface::class),
+            $this->createStub(ManagerInterface::class),
             'foo',
         ));
     }

@@ -47,8 +47,9 @@ class BlockTypeTest extends TestCase
 
     public function testConfigureOptions(): void
     {
-        $this->assertInstanceOf(AbstractType::class, $this->buildForm()->configureOptions(
-            $this->createMock(OptionsResolver::class)
-        ));
+        $this->buildForm()->configureOptions(
+            $this->createStub(OptionsResolver::class)
+        );
+        $this->assertTrue(true);
     }
 }

@@ -42,7 +42,7 @@ class PostWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new PostWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new PostWriter($this->getObjectManager(true), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
     public function getObject(): \Teknoo\East\Website\Object\Post

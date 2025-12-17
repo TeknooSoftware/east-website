@@ -46,7 +46,7 @@ class TypeType extends AbstractType
      * @param FormBuilderInterface<Type> $builder
      * @param array<string, mixed> $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options): self
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, ['required' => true]);
         $builder->add('template', TextType::class, ['required' => true]);
@@ -57,18 +57,14 @@ class TypeType extends AbstractType
             'allow_delete' => true,
             'delete_empty' => true,
         ]);
-
-        return $this;
     }
 
-    public function configureOptions(OptionsResolver $resolver): self
+    public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'data_class' => Type::class,
         ]);
-
-        return $this;
     }
 }

@@ -28,6 +28,7 @@ namespace Teknoo\Tests\East\Website\Query\Tag;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\Query\Expr\In;
@@ -50,10 +51,14 @@ class PublishedTagQueryTest extends TestCase
 
     private (PostRepositoryInterface&MockObject)|null $postRepository = null;
 
-    private function getPostRepository(): PostRepositoryInterface&MockObject
+    private function getPostRepository(bool $stub = false): (PostRepositoryInterface&Stub)|(PostRepositoryInterface&MockObject)
     {
         if (!$this->postRepository instanceof PostRepositoryInterface) {
-            $this->postRepository = $this->createMock(PostRepositoryInterface::class);
+            if ($stub) {
+                $this->postRepository = $this->createStub(PostRepositoryInterface::class);
+            } else {
+                $this->postRepository = $this->createMock(PostRepositoryInterface::class);
+            }
         }
 
         return $this->postRepository;
@@ -65,14 +70,14 @@ class PublishedTagQueryTest extends TestCase
     public function buildQuery(): QueryCollectionInterface
     {
         return new PublishedTagQuery(
-            $this->getPostRepository(),
+            $this->getPostRepository(true),
             new DateTimeImmutable('2025-03-24')
         );
     }
 
     public function testExecute(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 
@@ -108,7 +113,7 @@ class PublishedTagQueryTest extends TestCase
 
     public function testExecuteWithNoTags(): void
     {
-        $loader = $this->createMock(LoaderInterface::class);
+        $loader = $this->createStub(LoaderInterface::class);
         $repository = $this->createMock(RepositoryInterface::class);
         $promise = $this->createMock(PromiseInterface::class);
 

@@ -42,10 +42,10 @@ class TypeWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new TypeWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new TypeWriter($this->getObjectManager(), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
-    public function getObject(): \Teknoo\East\Website\Object\Type
+    public function getObject(): Type
     {
         return new Type();
     }

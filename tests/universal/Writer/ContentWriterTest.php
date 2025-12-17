@@ -42,7 +42,7 @@ class ContentWriterTest extends TestCase
 
     public function buildWriter(bool $preferRealDateOnUpdate = false): WriterInterface
     {
-        return new ContentWriter($this->getObjectManager(), $this->getDatesServiceMock(), $preferRealDateOnUpdate);
+        return new ContentWriter($this->getObjectManager(true), $this->getDatesServiceMock(true), $preferRealDateOnUpdate);
     }
 
     public function getObject(): \Teknoo\East\Website\Object\Content

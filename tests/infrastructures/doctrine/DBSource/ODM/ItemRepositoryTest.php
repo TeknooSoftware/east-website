@@ -46,12 +46,12 @@ class ItemRepositoryTest extends TestCase
      */
     public function buildRepository(): RepositoryInterface
     {
-        return new ItemRepository($this->getDoctrineObjectRepositoryMock());
+        return new ItemRepository($this->getDoctrineObjectRepositoryMock(true));
     }
 
     public function testWithNonSupportedRepository(): void
     {
         $this->expectException(\TypeError::class);
-        new ItemRepository($this->createMock(ObjectRepository::class));
+        new ItemRepository($this->createStub(ObjectRepository::class));
     }
 }
