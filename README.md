@@ -60,15 +60,15 @@ Example with Symfony
 
     //In routes/website.yaml
     admin_website:
-        resource: '@TeknooEastWebsiteBundle/Resources/config/admin_routing.yaml'
+        resource: '@TeknooEastWebsiteBundle/config/admin_routing.yaml'
         prefix: '/admin'
 
     admin_common:
-        resource: '@TeknooEastCommonBundle/Resources/config/admin_routing.yaml'
+        resource: '@TeknooEastCommonBundle/config/admin_routing.yaml'
         prefix: '/admin'
     
     website:
-        resource: '@TeknooEastWebsiteBundle/Resources/config/routing.yaml'
+        resource: '@TeknooEastWebsiteBundle/config/routing.yaml'
 
 Support this project
 ---------------------
