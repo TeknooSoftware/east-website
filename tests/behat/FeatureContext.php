@@ -285,14 +285,14 @@ class FeatureContext implements Context
                 $thisDir = __DIR__;
                 $rootDir = dirname(__DIR__, 2);
                 if ($routes instanceof RoutingConfigurator) {
-                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yaml', 'glob')
+                    $routes->import($rootDir . '/infrastructures/symfony/config/admin_*.yaml', 'glob')
                         ->prefix('/admin');
                     $routes->import($thisDir . '/config/routes/*.yaml', 'glob');
-                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yaml', 'glob');
+                    $routes->import($rootDir . '/infrastructures/symfony/config/r*.yaml', 'glob');
                 } else {
-                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/admin_*.yaml', '/admin', 'glob');
+                    $routes->import($rootDir . '/infrastructures/symfony/config/admin_*.yaml', '/admin', 'glob');
                     $routes->import($thisDir . '/config/routes/*.yaml', '/', 'glob');
-                    $routes->import($rootDir . '/infrastructures/symfony/Resources/config/r*.yaml', '/', 'glob');
+                    $routes->import($rootDir . '/infrastructures/symfony/config/r*.yaml', '/', 'glob');
                 }
             }
 

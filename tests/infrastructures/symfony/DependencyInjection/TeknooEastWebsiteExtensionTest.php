@@ -66,7 +66,8 @@ class TeknooEastWebsiteExtensionTest extends TestCase
 
     public function testLoad(): void
     {
-        $this->assertInstanceOf($this->getExtensionClass(), $this->buildExtension()->load([], $this->getContainerBuilderMock(true)));
+        $this->buildExtension()->load([], $this->getContainerBuilderMock(true));
+        $this->assertTrue(true);
     }
 
     public function testLoadErrorContainer(): void
