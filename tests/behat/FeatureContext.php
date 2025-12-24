@@ -932,6 +932,7 @@ class FeatureContext implements Context
                         'states',
                         'statesAliasesList',
                         'updatedAt',
+                        'currentReflectionClass',
                     ])) {
                         continue;
                     }
