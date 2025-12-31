@@ -29,6 +29,7 @@ use Doctrine\ODM\MongoDB\Query\Builder;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -172,7 +173,7 @@ class ContentType extends AbstractType
 
     /**
      * @param FormBuilderInterface<Content> $builder
-     * @param array<string, string> $options
+     * @param array<string, class-string<FormType>> $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
