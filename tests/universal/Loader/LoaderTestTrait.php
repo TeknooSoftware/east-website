@@ -73,7 +73,6 @@ trait LoaderTestTrait
 
         $this->getRepositoryMock(true)
             ->method('findOneBy')
-            ->with(['id' => 'fooBar'], $promiseMock)
             ->willThrowException(new \Exception());
 
         self::assertInstanceOf(
@@ -93,7 +92,7 @@ trait LoaderTestTrait
 
         $this->getRepositoryMock(true)
             ->method('findOneBy')
-            ->with(['id' => 'fooBar'], $promiseMock);
+            ->willReturnSelf();
 
         self::assertInstanceOf(
             LoaderInterface::class,

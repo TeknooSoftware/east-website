@@ -124,7 +124,8 @@ class MenuGeneratorTest extends TestCase
 
     public function testExtractWithoutTop(): void
     {
-        $this->getItemLoader(true)
+        $this->getItemLoader()
+            ->expects($this->atLeastOnce())
             ->method('query')
             ->with(new TopItemByLocationQuery(['foo', 'location1']))
             ->willReturnCallback(function ($value, PromiseInterface $promise): \Teknoo\East\Website\Loader\ItemLoader {
