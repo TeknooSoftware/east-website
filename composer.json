@@ -102,7 +102,7 @@
         "symfony/security-bundle": "^6.4.24||^7.4||^8",
         "symfony/string": "^6.4.24||^7.4||^8",
         "symfony/translation": "^6.4.24||^7.4||^8",
-        "symfony/translation-contracts": "^3",
+        "symfony/translation-contracts": "^3.6.1",
         "symfony/validator": "^6.4.24||^7.4||^8",
         "symfony/yaml": "^6.4.24||^7.4||^8",
         "symfony/var-dumper": "^6.4.24||^7.4||^8",
