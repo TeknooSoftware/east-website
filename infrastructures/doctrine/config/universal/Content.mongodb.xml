@@ -6,7 +6,9 @@
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Teknoo\East\Website\Object\Content" collection="contents" inheritance-type="COLLECTION_PER_CLASS">
-        <id type="string" strategy="UUID"/>
+        <id type="string" strategy="CUSTOM">
+            <generator-option name="class" value="Teknoo\East\Common\Doctrine\IdGenerator\UuidV7Generator"/>
+        </id>
         <field field-name="title" type="string" nullable="false"/>
         <field field-name="subtitle" type="string"/>
         <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>

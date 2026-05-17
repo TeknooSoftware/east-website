@@ -6,7 +6,9 @@
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Teknoo\East\Website\Object\Tag" collection="tags">
-        <id type="string" strategy="UUID"/>
+        <id type="string" strategy="CUSTOM">
+            <generator-option name="class" value="Teknoo\East\Common\Doctrine\IdGenerator\UuidV7Generator"/>
+        </id>
         <field field-name="name" type="string" nullable="false"/>
         <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>
         <field field-name="isHighlighted" name="is_highlighted" type="bool" nullable="true" index="true"/>

@@ -6,7 +6,9 @@
                                             http://doctrine-project.org/schemas/odm/doctrine-mongo-mapping.xsd">
 
     <document name="Teknoo\East\Website\Object\Comment" collection="comments" inheritance-type="COLLECTION_PER_CLASS">
-        <id type="string" strategy="UUID"/>
+        <id type="string" strategy="CUSTOM">
+            <generator-option name="class" value="Teknoo\East\Common\Doctrine\IdGenerator\UuidV7Generator"/>
+        </id>
         <field field-name="author" type="string" nullable="false"/>
         <field field-name="remoteIp" name="remote_ip" type="string" nullable="false"/>
         <field field-name="title" type="string" nullable="false"/>

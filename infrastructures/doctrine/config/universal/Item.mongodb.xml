@@ -8,7 +8,9 @@
     <document name="Teknoo\East\Website\Object\Item"
               collection="items"
               inheritance-type="COLLECTION_PER_CLASS">
-        <id type="string" strategy="UUID"/>
+        <id type="string" strategy="CUSTOM">
+            <generator-option name="class" value="Teknoo\East\Common\Doctrine\IdGenerator\UuidV7Generator"/>
+        </id>
         <field field-name="name" type="string" nullable="false"/>
         <field field-name="slug" type="string" index="true" unique="true" nullable="false"/>
         <field field-name="location" type="string" index="true" nullable="false"/>
