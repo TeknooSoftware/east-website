@@ -25,4 +25,7 @@ parameters:
         -
             message: '#[a-zA-Z0-9\\_]+::cook\(\) expects \(callable\(\): mixed\)|[a-zA-Z0-9\\_]+#'
             path: src/di.php
+        -
+            message: '#will always#'
+            path: infrastructures/doctrine/Form/Type/ContentType.php
 
