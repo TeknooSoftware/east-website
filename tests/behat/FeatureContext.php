@@ -914,6 +914,7 @@ class FeatureContext implements Context
                         'activesStates',
                         'calledMethodCache',
                         'callerStatedClassesStack',
+                        'callersStack',
                         'classesByStates',
                         'compiledAssertions',
                         'createdAt',
