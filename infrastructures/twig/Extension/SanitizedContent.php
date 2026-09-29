@@ -32,9 +32,7 @@ use Twig\TwigFilter;
 
 /**
  * Twig filter to fetch an element in a content's part, prior into the sanitized content, else take it from not
- * sanitized content and sanitize it. If the element is not present, a default value can be defined.
- * The method `getParts()` returns all parts of a content, sanitized, with the salt passed as argument or the salt
- * defined in the constructor (used by the normalizer of the public JSON API).
+ * sanitized content and sanitize it. If the element is not present, a default value can be defined
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -45,7 +43,6 @@ class SanitizedContent extends AbstractExtension
 {
     public function __construct(
         private readonly ?object $sanitizer = null,
-        private readonly ?string $salt = null,
     ) {
     }
 
@@ -84,34 +81,7 @@ class SanitizedContent extends AbstractExtension
             return $sanitizedPart[$partName] ?? $default;
         }
 
-        return $this->sanitize($content->getParts()[$partName] ?? $default, $sanitizeContext);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function getParts(
-        Content $content,
-        ?string $salt = null,
-        string $sanitizeContext = '',
-    ): array {
-        $salt ??= $this->salt;
-
-        if (null !== $salt && null !== ($sanitizedParts = $content->getSanitizedParts($salt))) {
-            return $sanitizedParts->toArray();
-        }
-
-        $parts = [];
-        foreach ($content->getParts()->toArray() as $name => $value) {
-            $parts[$name] = $this->sanitize($value, $sanitizeContext);
-        }
-
-        return $parts;
-    }
-
-    private function sanitize(string $value, string $sanitizeContext): string
-    {
-        $value = $this->hook($value);
+        $value = $this->hook($content->getParts()[$partName] ?? $default);
         if (!$this->sanitizer instanceof HtmlSanitizerInterface) {
             return $value;
         }
