@@ -134,7 +134,7 @@
         "doctrine/persistence": "<3.0"
     },
     "archive": {
-        "exclude": ["features", "tests", "vendor", ".idea"]
+        "exclude": ["features", "tests", "tools", "vendor", ".idea"]
     },
     "extra": {
         "thanks": {

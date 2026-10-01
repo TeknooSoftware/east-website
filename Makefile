@@ -55,6 +55,26 @@ test:
 
 .PHONY: test
 
+### Tools
+# The CLI client of the remote API lives in tools/ with its own dependencies, it is not part of the library, see
+# tools/README.md. Its targets are not run by `make qa` and `make test`.
+tools-depend:
+	${MAKE} -C tools depend
+
+tools-qa:
+	${MAKE} -C tools qa
+
+tools-qa-offline:
+	${MAKE} -C tools qa-offline
+
+tools-test:
+	${MAKE} -C tools test
+
+tools-phar:
+	${MAKE} -C tools phar
+
+.PHONY: tools-depend tools-qa tools-qa-offline tools-test tools-phar
+
 ### Cleaning
 clean:
 	rm -rf vendor

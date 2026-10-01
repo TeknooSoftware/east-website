@@ -18,3 +18,8 @@ composer.lock
 /tests/var/logs/*
 /.phpunit.cache/
 /graphify-out/
+/tools/vendor/
+/tools/build/
+/tools/.phpunit.cache/
+/tools/dist/*.phar
+!/tools/composer.lock

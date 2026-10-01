@@ -137,6 +137,14 @@ comments are never exported). JSON templates are in `@TeknooEastWebsite/api/` an
 Applications must protect `^/api/v1/admin` with a stateless authentication (like a JWT), never with a session cookie.
 Applications should also rate-limit the public comment endpoint.
 
+### CLI client
+
+A command line client of this API lives in [`tools/`](tools/README.md): a Symfony Console application, distributed as
+a phar (`make tools-phar`), exposing every function of the API grouped by domain (`website:type:create`,
+`website:post:list`, `website:front:post:get`...). It logs in with a username and an API key to get a JWT, prints JSON
+on stdout and errors on stderr with stable exit codes, so it can be used by scripts and AI agents. See
+[`tools/README.md`](tools/README.md).
+
 Support this project
 ---------------------
 This project is free and will remain free. It is fully supported by commercial activities of SASU Teknoo Software 

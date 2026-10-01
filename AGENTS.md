@@ -38,6 +38,13 @@ The library is structured around a modular architecture where functionality is d
 - **PHPStan** (Static analysis)
 - **Behat / PHPUnit** (Testing)
 
+## CLI client of the remote API (`tools/`)
+`tools/` is a standalone Symfony Console application (own `composer.json`, own dependencies, not part of the library and excluded from its archives) which exposes every function of the remote JSON API, grouped by domain (`website:<domain>:<action>`, e.g. `website:type:create`). It logs in with a username (`<keyName>:<email>`) and an API key to get a JWT, prints JSON on stdout, JSON errors on stderr, and uses stable exit codes (0 ok, 1 server/network, 2 usage/validation, 3 auth, 4 not found), so it can be used by agents. Usage guide: `tools/README.md`.
+- `src/`: code (namespace `Teknoo\East\Website\Tools`), the commands are generated from `src/Resource/Registry.php`.
+- `tests/`: PHPUnit suites `unit`, `e2e` (real HTTP client and a fake API) and `phar`.
+- `dist/`: `east-website.phar`, built by `make tools-phar` (not versioned).
+- `make tools-depend`, `make tools-qa`, `make tools-test`, `make tools-phar` (not run by `make qa` and `make test`).
+
 ## Development & Quality Assurance
 The project uses a `Makefile` to manage development tasks.
 
