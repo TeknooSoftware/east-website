@@ -29,9 +29,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Loader\TagLoader;
+use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Recipe\Step\ExtractTag;
+use Teknoo\Recipe\Promise\PromiseInterface;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -66,5 +70,36 @@ class ExtractTagTest extends TestCase
             $this->createStub(ManagerInterface::class),
             'foo',
         ));
+    }
+
+    public function testInvokeWithBag(): void
+    {
+        $tag = new Tag();
+
+        $this->getTagLoader(true)
+            ->method('fetch')
+            ->willReturnCallback(
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($tag): TagLoader&Stub {
+                    $promise->success($tag);
+
+                    return $this->getTagLoader();
+                }
+            );
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->once())
+            ->method('updateWorkPlan')
+            ->with([Tag::class => $tag, 'tag' => $tag])
+            ->willReturnSelf();
+
+        $bag = new ParametersBag();
+
+        $this->assertInstanceOf(ExtractTag::class, $this->getStep()(
+            $manager,
+            'foo',
+            $bag,
+        ));
+
+        $this->assertEquals(['tag' => $tag], $bag->transform());
     }
 }

@@ -56,6 +56,7 @@ use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder;
 use Symfony\Component\HttpFoundation\Request as SfRequest;
@@ -67,6 +68,7 @@ use Teknoo\East\CommonBundle\Object\PasswordAuthenticatedUser;
 use Teknoo\East\CommonBundle\TeknooEastCommonBundle;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\GetStreamFromMediaInterface;
+use Teknoo\East\Common\Doctrine\Writer\ODM\MediaWriter as OdmMediaWriter;
 use Teknoo\East\Common\Loader\MediaLoader;
 use Teknoo\East\Common\Object\Media as BaseMedia;
 use Teknoo\East\Common\Object\Media;
@@ -113,6 +115,8 @@ use function array_pop;
 use function array_reverse;
 use function bin2hex;
 use function current;
+use function define;
+use function defined;
 use function dirname;
 use function error_reporting;
 use function explode;
@@ -129,16 +133,22 @@ use function str_replace;
 use function strlen;
 use function trim;
 
-use const E_USER_NOTICE;
-
 /**
  * Defines application features from the specific context.
  */
 class FeatureContext implements Context
 {
+    use ApiTrait;
+
     public ?Container $container = null;
 
     private ?BaseKernel $symfonyKernel = null;
+
+    /*
+     * In API mode, the Symfony kernel uses the real Twig engine (with templates shipped by bundles) and the real
+     * Symfony Serializer, instead of the twig mock
+     */
+    private bool $apiMode = false;
 
     private ?RouterInterface $router = null;
 
@@ -192,6 +202,11 @@ class FeatureContext implements Context
     public function prepareScenario(): void
     {
         error_reporting(E_ALL);
+
+        //Common Doctrine repositories, used with the in-memory object manager, can not hydrate references
+        if (!defined('TEKNOO_EAST_IN_TEST_MODE')) {
+            define('TEKNOO_EAST_IN_TEST_MODE', true);
+        }
     }
 
     #[Given('I have DI initialized')]
@@ -233,15 +248,31 @@ class FeatureContext implements Context
     #[Given('I have DI With Symfony initialized')]
     public function iHaveDiWithSymfonyInitialized(): void
     {
+        $this->symfonyKernel = $this->buildSymfonyKernel(false);
+    }
+
+    #[Given('I have DI With Symfony initialized for API')]
+    public function iHaveDiWithSymfonyInitializedForApi(): void
+    {
+        $this->symfonyKernel = $this->buildSymfonyKernel(true);
+    }
+
+    private function buildSymfonyKernel(bool $apiMode): BaseKernel
+    {
         $this->locale = 'en';
-        $this->symfonyKernel = new class ($this, 'test') extends BaseKernel {
+        $this->apiMode = $apiMode;
+
+        return new class ($this, 'test', $apiMode) extends BaseKernel {
             use MicroKernelTrait;
 
             private FeatureContext $context;
 
-            public function __construct(FeatureContext $context, string $environment)
+            private bool $apiMode;
+
+            public function __construct(FeatureContext $context, string $environment, bool $apiMode)
             {
                 $this->context = $context;
+                $this->apiMode = $apiMode;
 
                 parent::__construct($environment, false);
             }
@@ -269,12 +300,22 @@ class FeatureContext implements Context
                 yield new TeknooEastWebsiteBundle();
                 yield new DIBridgeBundle();
                 yield new SecurityBundle();
+
+                if ($this->apiMode) {
+                    yield new TwigBundle();
+                }
             }
 
             protected function configureContainer(SfContainerBuilder $container, LoaderInterface $loader)
             {
                 $loader->load(__DIR__.'/config/packages/*.yaml', 'glob');
                 $loader->load(__DIR__.'/config/services.yaml');
+
+                if ($this->apiMode) {
+                    $loader->load(__DIR__.'/config/api/*.yaml', 'glob');
+                } else {
+                    $loader->load(__DIR__.'/config/html/*.yaml', 'glob');
+                }
 
                 $container->setParameter('container.autowiring.strict_mode', true);
                 $container->setParameter('container.dumper.inline_class_loader', true);
@@ -284,13 +325,25 @@ class FeatureContext implements Context
             {
                 $thisDir = __DIR__;
                 $rootDir = dirname(__DIR__, 2);
+                //API routes are imported before `r*.yaml` files, because of the catch-all route `/{slug}`, and in all
+                //modes, because the router's cache is shared between kernels
                 if ($routes instanceof RoutingConfigurator) {
                     $routes->import($rootDir . '/infrastructures/symfony/config/admin_*.yaml', 'glob')
                         ->prefix('/admin');
+                    $routes->import($rootDir . '/infrastructures/symfony/config/api_admin_*.yaml', 'glob')
+                        ->prefix('/api/v1/admin');
+                    $routes->import($rootDir . '/infrastructures/symfony/config/api_routing*.yaml', 'glob')
+                        ->prefix('/api/v1');
                     $routes->import($thisDir . '/config/routes/*.yaml', 'glob');
                     $routes->import($rootDir . '/infrastructures/symfony/config/r*.yaml', 'glob');
                 } else {
                     $routes->import($rootDir . '/infrastructures/symfony/config/admin_*.yaml', '/admin', 'glob');
+                    $routes->import(
+                        $rootDir . '/infrastructures/symfony/config/api_admin_*.yaml',
+                        '/api/v1/admin',
+                        'glob',
+                    );
+                    $routes->import($rootDir . '/infrastructures/symfony/config/api_routing*.yaml', '/api/v1', 'glob');
                     $routes->import($thisDir . '/config/routes/*.yaml', '/', 'glob');
                     $routes->import($rootDir . '/infrastructures/symfony/config/r*.yaml', '/', 'glob');
                 }
@@ -857,8 +910,6 @@ class FeatureContext implements Context
             $this->container->get(RenderDynamicPostEndPoint::class),
             $this->container
         );
-
-        error_reporting(E_ALL & ~E_USER_NOTICE);
     }
 
     #[Given('a Endpoint able to render and serve list of posts.')]
@@ -868,8 +919,6 @@ class FeatureContext implements Context
             $this->container->get(ListAllPostsEndPoint::class),
             $this->container
         );
-
-        error_reporting(E_ALL & ~E_USER_NOTICE);
 
         $this->templateToCall = 'Acme:MyBundle:list.html.twig';
         $this->templateContent = 'list: {posts}';
@@ -934,6 +983,9 @@ class FeatureContext implements Context
                         'statesAliasesList',
                         'updatedAt',
                         'currentReflectionClass',
+                        'groupsConfigurations',
+                        'exportConfigurations',
+                        'exportMappings',
                     ])) {
                         continue;
                     }
@@ -1089,12 +1141,18 @@ class FeatureContext implements Context
         $container = $this->symfonyKernel->getContainer();
 
         $container->set(ObjectManager::class, $this->buildObjectManager());
-        $container->set('twig', $this->twig);
 
-        $container->set(
-            EngineInterface::class,
-            new Engine($this->twig)
-        );
+        if (!$this->apiMode) {
+            $container->set('twig', $this->twig);
+
+            $container->set(
+                EngineInterface::class,
+                new Engine($this->twig)
+            );
+        } elseif (!$container->initialized(OdmMediaWriter::class)) {
+            //The ODM Media writer requires a GridFS repository, not available with the in-memory object manager
+            $container->set(OdmMediaWriter::class, new FakeMediaWriter($this));
+        }
 
         $container->get(DatesService::class)->setCurrentDate($this->getCurrentDate());
 

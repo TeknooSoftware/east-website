@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use DateTimeInterface;
 use Stringable;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
@@ -33,10 +34,14 @@ use Teknoo\East\Common\Contracts\Object\SluggableInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
 use Teknoo\East\Common\Object\ObjectTrait;
 use Teknoo\East\Common\Service\FindSlugService;
+use Teknoo\East\Foundation\Normalizer\Object\AutoTrait;
+use Teknoo\East\Foundation\Normalizer\Object\ClassGroup;
+use Teknoo\East\Foundation\Normalizer\Object\Normalize;
+use Teknoo\East\Foundation\Normalizer\Object\NormalizableInterface;
 
 /**
  * Class to define persisted tags of posts or contents. A ttag is defined by a name and a slug and can be used to
- * classify  posts or content and list them. A tag can be highlighted
+ * classify  posts or content and list them. A tag can be highlighted. Tags are normalizable.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -45,19 +50,34 @@ use Teknoo\East\Common\Service\FindSlugService;
  *
  * @implements SluggableInterface<IdentifiedObjectInterface>
  */
+#[ClassGroup('default', 'public', 'api', 'crud', 'digest')]
 class Tag implements
     IdentifiedObjectInterface,
     DeletableInterface,
     TimestampableInterface,
     SluggableInterface,
-    Stringable
+    Stringable,
+    NormalizableInterface
 {
     use ObjectTrait;
+    use AutoTrait;
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
+    protected ?string $id = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $createdAt = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $updatedAt = null;
+
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
     private string $name = '';
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
     protected ?string $slug = null;
 
+    #[Normalize(['public', 'api', 'crud'])]
     private bool $isHighlighted = false;
 
     public function getName(): string

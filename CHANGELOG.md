@@ -1,5 +1,37 @@
 # Teknoo Software - Website - Change Log
 
+## [11.3.0] - 2026-10-01
+### Stable Release
+
+#### Docs
+- README: new section "JSON API" (routes to import, requirements, responses format, normalization groups, security
+  warning about the admin API).
+
+#### Security
+- The public JSON API never exports authors' emails, templates, raw parts, remote IPs of comments or deleted comments.
+  Parts are sanitized, like in HTML pages.
+- Requires `teknoo/east-foundation` 9.2.4: values of normalized objects matching a PHP function name (like `max` or
+  `print_r`) are no longer executed.
+
+#### Fixes
+- `make test`: tests run in a separate process failed when Xdebug was not enabled in the PHP configuration.
+
+#### Evolutions
+- JSON API routes, reusing the same endpoints as HTML routes (`api: 'json'`):
+  - admin: `api_admin_routing.yaml` and `api_admin_routing_blog.yaml` (items, contents, posts, comments, types, tags,
+    users and media).
+  - public: `api_routing.yaml`, `api_routing_blog.yaml` and `api_routing_blog_comment.yaml` (contents, posts, lists of
+    posts and comments).
+- JSON templates in `@TeknooEastWebsite/api/`.
+- `Content`, `Post`, `Item`, `Tag`, `Type` and `Comment` implement `NormalizableInterface` (groups `default`, `api`,
+  `crud`, `digest`, `public` and `public_comments`).
+- `LoadContent` and `LoadPost` keep the template of the route in API mode.
+- `ListPosts` adds the current page, and `ExtractTag` the tag, to view parameters.
+- New normalizer `SanitizedContentNormalizer`: contents normalized for the public API include their sanitized parts.
+- Behat tests of the JSON API.
+- Requires `teknoo/east-common` 4.6.
+- New optional dependencies: `symfony/serializer` and `symfony/twig-bundle` 7.3+.
+
 ## [11.2.0] - 2026-05-17
 ### Stable Release
 - Use new `Teknoo\East\Common\Doctrine\IdGenerator\UuidV7Generator` (`infrastructures/doctrine/IdGenerator/`),

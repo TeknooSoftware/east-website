@@ -29,6 +29,11 @@ use DateTimeInterface;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
+use Teknoo\East\Foundation\Normalizer\EastNormalizerInterface;
+use Teknoo\East\Foundation\Normalizer\Object\AutoTrait;
+use Teknoo\East\Foundation\Normalizer\Object\ClassGroup;
+use Teknoo\East\Foundation\Normalizer\Object\Normalize;
+use Teknoo\East\Foundation\Normalizer\Object\NormalizableInterface;
 use Teknoo\East\Website\Object\Comment\Moderated;
 use Teknoo\East\Website\Object\Comment\Published;
 use Teknoo\States\Attributes\Assertion\Property;
@@ -39,10 +44,14 @@ use Teknoo\States\Automated\AutomatedInterface;
 use Teknoo\States\Automated\AutomatedTrait;
 use Teknoo\States\Proxy\ProxyTrait;
 
+use function in_array;
+
 /**
  * Comment represent a comment posted by a visitor on a Post. A Comment has a post date, an author, title and content.
  * But a Comment can be moderated. Original values can not be replaced, only moderated value. Original value still
  * present in the object, but are not publicly accessible according to the Comment's state (Published or Moderated)
+ * Comments are normalizable. With the group `public`, only public values (moderated or not) are exported, without the
+ * remote IP.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -53,34 +62,57 @@ use Teknoo\States\Proxy\ProxyTrait;
 #[StateClass(Moderated::class)]
 #[Property(Published::class, ['moderatedAt', IsNotInstanceOf::class, DateTimeInterface::class])]
 #[Property(Moderated::class, ['moderatedAt', IsInstanceOf::class, DateTimeInterface::class])]
+#[ClassGroup('default', 'api', 'crud', 'digest')]
 class Comment implements
     IdentifiedObjectInterface,
     AutomatedInterface,
     DeletableInterface,
-    TimestampableInterface
+    TimestampableInterface,
+    NormalizableInterface
 {
     use PublishableTrait;
     use AutomatedTrait;
     use ProxyTrait;
+    use AutoTrait {
+        exportToMeData as private exportToMeDataFromAttributes;
+    }
+
+    #[Normalize(['default', 'api', 'crud', 'digest'])]
+    protected ?string $id = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $createdAt = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $updatedAt = null;
 
     protected Post $post;
 
+    #[Normalize(['crud'])]
     protected ?string $moderatedContent = null;
 
+    #[Normalize(['crud'])]
     protected ?string $moderatedTitle = null;
 
+    #[Normalize(['crud'])]
     protected ?string $moderatedAuthor = null;
 
+    #[Normalize(['api', 'crud'])]
     protected ?DateTimeInterface $moderatedAt = null;
 
+    #[Normalize(['api', 'crud'])]
     protected DateTimeInterface $postAt;
 
+    #[Normalize(['crud'])]
     protected string $content;
 
+    #[Normalize(['api', 'crud', 'digest'])]
     protected string $title;
 
+    #[Normalize(['crud'])]
     protected string $remoteIp;
 
+    #[Normalize(['api', 'crud'])]
     protected string $author;
 
     public function __construct(
@@ -158,6 +190,32 @@ class Comment implements
     public function getModeratedContent(): ?string
     {
         return $this->moderatedContent;
+    }
+
+    /**
+     * @param array<string, string[]> $context
+     */
+    public function exportToMeData(
+        EastNormalizerInterface $normalizer,
+        array $context = [],
+    ): NormalizableInterface {
+        if (!in_array('public', (array) ($context['groups'] ?? []), true)) {
+            return $this->exportToMeDataFromAttributes($normalizer, $context);
+        }
+
+        $normalizer->injectData(
+            [
+                '@class' => self::class,
+                'id' => $this->getId(),
+                'author' => $this->getPublicAuthor(),
+                'title' => $this->getPublicTitle(),
+                'content' => $this->getPublicContent(),
+                'postAt' => $this->getPostAt(),
+                'moderated' => $this->isModerated(),
+            ]
+        );
+
+        return $this;
     }
 
     public function moderate(DateTimeInterface $date, string $author, string $title, string $content): self

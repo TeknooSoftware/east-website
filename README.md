@@ -70,6 +70,73 @@ Example with Symfony
     website:
         resource: '@TeknooEastWebsiteBundle/config/routing.yaml'
 
+JSON API
+--------
+
+East Website ships routes for a JSON API. They reuse the same endpoints as the HTML routes, only the parameters
+change (`api: 'json'`, JSON templates, HTTP methods). The admin API covers items, contents, posts, comments, types,
+tags, users and media. The public API covers contents, posts, lists of posts, and posting comments.
+
+Requirements: `symfony/serializer` (with `framework.serializer.enabled: true`), `symfony/twig-bundle` 7.3+, and the
+`EastFoundationBundle` (which registers the East normalizer). Like in Space, the CSRF protection must be enabled for the
+application's forms (`framework.csrf_protection`): East Common disables it on forms of API routes.
+
+    //In routes/website_api.yaml, API routes must be imported BEFORE `routing.yaml` (its route `/{slug}` catches
+    //all paths)
+    api_admin_website:
+        resource: '@TeknooEastWebsiteBundle/config/api_admin_routing.yaml'
+        prefix: '/api/v1/admin'
+
+    api_admin_website_blog:
+        resource: '@TeknooEastWebsiteBundle/config/api_admin_routing_blog.yaml'
+        prefix: '/api/v1/admin'
+
+    api_website:
+        resource: '@TeknooEastWebsiteBundle/config/api_routing.yaml'
+        prefix: '/api/v1'
+
+    api_website_blog:
+        resource: '@TeknooEastWebsiteBundle/config/api_routing_blog.yaml'
+        prefix: '/api/v1'
+
+    api_website_blog_comment:
+        resource: '@TeknooEastWebsiteBundle/config/api_routing_blog_comment.yaml'
+        prefix: '/api/v1'
+
+Admin routes follow the pattern (for `item`, `content`, `post`, `type`, `tag`, `user` and `media`):
+
+* `POST|PUT /<element>/new`: creates an element, the client is redirected to the element.
+* `GET|POST|PUT /<element>/{id}`: returns or updates an element (media can only be read).
+* `GET /<element>s` (`/media` for media): lists elements, with the query parameters `page`, `order` and
+  `direction`.
+* `POST|DELETE /<element>/{id}/delete`: deletes an element, the deleted element is returned.
+* Comments of posts: `GET /post/{postId}/comments`, `GET|POST|PUT /post/{postId}/comment/{id}` (moderation) and
+  `POST|DELETE /post/{postId}/comment/{id}/delete`.
+
+Public routes are `GET /content/{slug}` (the home page is `/content/default`), `GET /post/{slug}`, `GET /posts`,
+`GET /posts/by/{tag}` and `POST|PUT /post/{slug}/comment`.
+
+Bodies can be sent as JSON (with the header `Content-Type: application/json`, without the form's name, and only sent
+fields are updated) or urlencoded/multipart (fields under the form's name, like `tag[name]`). Media are uploaded with a
+multipart body. The key `publish` in a body publishes a content or a post.
+
+Responses use the envelope `{"meta": {...}, "data": ...}`:
+
+* an element: `meta` contains its `id` and its class,
+* a list: `meta` contains `totalPages`, `page` and `count`,
+* invalid forms: status 400, `{"meta": {"errors": true}, "data": {".field": "message"}}` when the root form has errors
+  (including errors bubbled from its fields), else the element is returned with the status 400 (like in Space),
+* errors: `{"meta": {"error": true}, "data": {"code": 404, "message": "..."}}`.
+
+Objects are normalized according to groups: `api` (admin lists), `crud` (admin elements), `digest` (deleted
+elements) and `public` (public API: parts are sanitized, and the author's email, the template and the remote IP of
+comments are never exported). JSON templates are in `@TeknooEastWebsite/api/` and can be overridden in
+`templates/bundles/TeknooEastWebsiteBundle/api/`.
+
+**Security warning**: the admin API is shipped without authentication and CSRF protection is disabled in API mode.
+Applications must protect `^/api/v1/admin` with a stateless authentication (like a JWT), never with a session cookie.
+Applications should also rate-limit the public comment endpoint.
+
 Support this project
 ---------------------
 This project is free and will remain free. It is fully supported by commercial activities of SASU Teknoo Software 

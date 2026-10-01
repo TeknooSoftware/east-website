@@ -1,0 +1,3 @@
+parameters:
+  # Salt used by fixtures to sanitize parts of contents
+  teknoo.east.website.sanitize.salt: 'fooBar'

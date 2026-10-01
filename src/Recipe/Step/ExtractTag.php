@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Recipe\Step;
 
+use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Object\Tag;
@@ -35,6 +36,7 @@ use Throwable;
 
 /**
  * Step to load, from the slug a tag thanks to the `TagLoader` and inject it into the Workplan under the key Tag::class
+ * and `tag`, and into the view's variables under the key `tag`.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -48,14 +50,18 @@ class ExtractTag
     ) {
     }
 
-    public function __invoke(ManagerInterface $manager, string $tag): self
+    public function __invoke(ManagerInterface $manager, string $tag, ?ParametersBag $bag = null): self
     {
         /** @var Promise<Tag, mixed, mixed> $promise */
         $promise = new Promise(
-            fn (Tag $tag): ChefInterface => $manager->updateWorkPlan([
-                Tag::class => $tag,
-                'tag' => $tag,
-            ]),
+            static function (Tag $tag) use ($manager, $bag): ChefInterface {
+                $bag?->set('tag', $tag);
+
+                return $manager->updateWorkPlan([
+                    Tag::class => $tag,
+                    'tag' => $tag,
+                ]);
+            },
             fn (Throwable $throwable): ChefInterface => $manager->error($throwable),
         );
 

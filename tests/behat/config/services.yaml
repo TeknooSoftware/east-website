@@ -27,10 +27,6 @@ services:
   teknoo.east.common.endpoint.media.stream.factory:
     class: 'Laminas\Diactoros\StreamFactory'
 
-  twig:
-    synthetic: true
-    public: true
-
   Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorageFactory: ~
 
   Teknoo\Tests\East\Website\Behat\GetTokenStorageService:

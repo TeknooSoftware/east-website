@@ -27,7 +27,7 @@ date_default_timezone_set('UTC');
 
 error_reporting(E_ALL);
 
-ini_set('memory_limit', '128M');
+ini_set('memory_limit', '192M');
 
 include __DIR__ . '/fakeQuery.php';
 include __DIR__ . '/fakeUOW.php';

@@ -1,0 +1,3 @@
+{# @TeknooEastWebsite/api/Post/item.json.twig #}
+{# Parts are sanitized by the normalizer, like in HTML pages #}
+{{ post|east_api_object_serialization({'groups': ['public', 'public_comments']}) }}

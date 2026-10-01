@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use DateTimeInterface;
 use Stringable;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
@@ -36,6 +37,10 @@ use Teknoo\East\Translation\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Object\Item\Available;
 use Teknoo\East\Website\Object\Item\Hidden;
 use Teknoo\East\Common\Service\FindSlugService;
+use Teknoo\East\Foundation\Normalizer\Object\AutoTrait;
+use Teknoo\East\Foundation\Normalizer\Object\ClassGroup;
+use Teknoo\East\Foundation\Normalizer\Object\Normalize;
+use Teknoo\East\Foundation\Normalizer\Object\NormalizableInterface;
 use Teknoo\States\Attributes\Assertion\Property;
 use Teknoo\States\Attributes\StateClass;
 use Teknoo\States\Automated\Assertion\Property\IsEqual;
@@ -47,6 +52,8 @@ use Teknoo\States\Proxy\ProxyTrait;
  * Stated class representing a menu item in the website. They can be linked to a Content instance and is a child of
  * another menu item instance.
  * Object of this class can be translated.
+ * Object of this class are normalizable, only the id, the title and the slug of the linked content, and only the id
+ * and the name of the parent are exported.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -59,6 +66,7 @@ use Teknoo\States\Proxy\ProxyTrait;
 #[StateClass(Available::class)]
 #[Property(Hidden::class, ['hidden', IsEqual::class, true])]
 #[Property(Available::class, ['hidden', IsEqual::class, false])]
+#[ClassGroup('default', 'api', 'crud', 'digest')]
 class Item implements
     IdentifiedObjectInterface,
     TranslatableInterface,
@@ -66,24 +74,42 @@ class Item implements
     DeletableInterface,
     TimestampableInterface,
     SluggableInterface,
-    Stringable
+    Stringable,
+    NormalizableInterface
 {
     use AutomatedTrait;
     use ObjectTrait;
     use ProxyTrait;
+    use AutoTrait;
 
+    #[Normalize(['default', 'api', 'crud', 'digest'])]
+    protected ?string $id = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $createdAt = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $updatedAt = null;
+
+    #[Normalize(['default', 'api', 'crud', 'digest'])]
     protected string $name = '';
 
+    #[Normalize(['api', 'crud', 'digest'])]
     protected ?string $slug = null;
 
+    #[Normalize(['api', 'crud'], loader: 'exportContent')]
     protected ?Content $content = null;
 
+    #[Normalize(['api', 'crud'])]
     protected ?int $position = null;
 
+    #[Normalize(['api', 'crud'])]
     protected string $location = '';
 
+    #[Normalize(['api', 'crud'])]
     protected bool $hidden = false;
 
+    #[Normalize(['api', 'crud'], loader: 'exportParent')]
     protected ?Item $parent = null;
 
     /**
@@ -92,6 +118,41 @@ class Item implements
     protected iterable $children = [];
 
     protected ?string $localeField = null;
+
+    /*
+     * Loaders are cached by the AutoTrait for all instances, they must only use the instance passed as argument
+     */
+
+    /**
+     * @return array{id: string, title: string, slug: string|null}|null
+     */
+    protected static function exportContent(self $item): ?array
+    {
+        if (null === $item->content) {
+            return null;
+        }
+
+        return [
+            'id' => $item->content->getId(),
+            'title' => $item->content->getTitle(),
+            'slug' => $item->content->getSlug(),
+        ];
+    }
+
+    /**
+     * @return array{id: string, name: string}|null
+     */
+    protected static function exportParent(self $item): ?array
+    {
+        if (null === $item->parent) {
+            return null;
+        }
+
+        return [
+            'id' => $item->parent->getId(),
+            'name' => $item->parent->getName(),
+        ];
+    }
 
     public function __construct()
     {

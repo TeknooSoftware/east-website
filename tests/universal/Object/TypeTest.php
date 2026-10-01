@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\Tests\East\Website\Object\Traits\ExportTestTrait;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
@@ -39,6 +40,7 @@ use Teknoo\East\Website\Object\Type;
 #[CoversClass(Type::class)]
 class TypeTest extends TestCase
 {
+    use ExportTestTrait;
     use ObjectTestTrait;
 
     public function buildObject(): Type
@@ -108,5 +110,36 @@ class TypeTest extends TestCase
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setBlocks(new \stdClass());
+    }
+
+    public function testExportToMeData(): void
+    {
+        $type = (new Type())
+            ->setName('Page')
+            ->setTemplate('page.html.twig')
+            ->setBlocks([new Block('body', BlockType::Text), new Block('image', BlockType::Image)]);
+        $type->setId('t1');
+
+        $this->assertEquals(
+            [
+                '@class' => Type::class,
+                'id' => 't1',
+                'name' => 'Page',
+                'blocks' => [
+                    ['name' => 'body', 'type' => 'text'],
+                    ['name' => 'image', 'type' => 'image'],
+                ],
+            ],
+            $this->exportData($type, ['public']),
+        );
+
+        $crud = $this->exportData($type, ['crud']);
+        $this->assertEquals(Type::class, $crud['@class']);
+        $this->assertEquals('page.html.twig', $crud['template']);
+
+        $this->assertEquals(
+            ['@class' => Type::class, 'id' => 't1', 'name' => 'Page'],
+            $this->exportData($type, ['api']),
+        );
     }
 }

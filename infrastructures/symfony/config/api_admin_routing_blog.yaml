@@ -1,0 +1,94 @@
+# post
+_teknoo_website_api_admin_post_new:
+    path: '/post/new'
+    methods:  ['POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.new'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        formClass: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        formOptions: { "doctrine_type": "%teknoo.east.common.form_type.doctrine.class%"}
+        isTranslatable: true
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        objectClass: 'Teknoo\East\Website\Doctrine\Object\Post'
+        route: '_teknoo_website_api_admin_post_edit'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/api/AdminPost/item.json.twig'
+        writer: '@Teknoo\East\Website\Writer\PostWriter'
+
+_teknoo_website_api_admin_post_edit:
+    path: '/post/{id}'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.edit'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        formClass: 'Teknoo\East\Website\Doctrine\Form\Type\PostType'
+        formOptions: { "doctrine_type": "%teknoo.east.common.form_type.doctrine.class%"}
+        isTranslatable: true
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/api/AdminPost/item.json.twig'
+        writer: '@Teknoo\East\Website\Writer\PostWriter'
+
+_teknoo_website_api_admin_post_list:
+    path: '/posts'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.list'
+        api: 'json'
+        defaultOrderDirection: 'ASC'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        itemsPerPage: 20
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        template: '@@TeknooEastWebsite/api/AdminPost/list.json.twig'
+
+_teknoo_website_api_admin_post_delete:
+    path: '/post/{id}/delete'
+    methods:  ['POST', 'DELETE']
+    defaults:
+        _controller: 'teknoo.east.common.endpoint.crud.delete'
+        api: 'json'
+        deleter: '@teknoo.east.website.deleting.post'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        loader: '@Teknoo\East\Website\Loader\PostLoader'
+        objectViewKey: 'objectInstance'
+        template: '@@TeknooEastWebsite/api/AdminPost/deleted.json.twig'
+
+# comment
+_teknoo_website_api_admin_post_comment_list:
+    path: '/post/{postId}/comments'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.list'
+        api: 'json'
+        defaultOrderDirection: 'ASC'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        itemsPerPage: 20
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        template: '@@TeknooEastWebsite/api/AdminComment/list.json.twig'
+
+_teknoo_website_api_admin_post_comment_moderate:
+    path: '/post/{postId}/comment/{id}'
+    methods:  ['GET', 'POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.moderate'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        formClass: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        slugField: 'slug'
+        template: '@@TeknooEastWebsite/api/AdminComment/item.json.twig'
+        writer: '@Teknoo\East\Website\Writer\CommentWriter'
+
+_teknoo_website_api_admin_post_comment_delete:
+    path: '/post/{postId}/comment/{id}/delete'
+    methods:  ['POST', 'DELETE']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.comment.delete'
+        api: 'json'
+        deleter: '@teknoo.east.website.deleting.comment'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        loader: '@Teknoo\East\Website\Loader\CommentLoader'
+        objectViewKey: 'objectInstance'
+        template: '@@TeknooEastWebsite/api/AdminComment/deleted.json.twig'
