@@ -119,6 +119,56 @@ class ListPostsTest extends TestCase
         ));
     }
 
+    public function testInvokeInjectPaginationIntoTheBag(): void
+    {
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan')->with(
+            [
+                'postsCollection' => $posts = new ArrayObject([1, 2, 3]),
+                'pageCount' => 2,
+            ]
+        );
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getpostLoader(true)
+            ->method('query')
+            ->willReturnCallback(
+                function (QueryCollectionInterface $query, PromiseInterface $promise) use ($posts): PostLoader&Stub {
+                    $promise->success($posts);
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        $bag = new ParametersBag();
+
+        $this->assertInstanceOf(ListPosts::class, $this->buildStep()(
+            $manager,
+            2,
+            2,
+            $bag,
+        ));
+
+        $this->assertEquals(
+            [
+                'postsCollection' => $posts,
+                'page' => 2,
+                'pageCount' => 2,
+            ],
+            $bag->transform(),
+        );
+    }
+
     public function testInvokeWithTag(): void
     {
         $manager = $this->createMock(ManagerInterface::class);

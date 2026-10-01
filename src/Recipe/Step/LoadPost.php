@@ -27,6 +27,7 @@ namespace Teknoo\East\Website\Recipe\Step;
 
 use DateTimeInterface;
 use DomainException;
+use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use SensitiveParameter;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -43,6 +44,7 @@ use Throwable;
  * Similar to LoadContent, step recipe to load a published Post instance (published before the current date), from its
  * slug, thank to the Post's loader and put it into the workplan at Post::class key, and `objectInstance`.
  * The template file to use with the fetched content is also injected to the template.
+ * In API mode (route with the `api` attribute), the template defined by the route is kept.
  *  The content is also inject to view's variables through of the Bag, under the keys `content` and `post`.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
@@ -62,7 +64,11 @@ class LoadPost
         string $slug,
         ManagerInterface $manager,
         ParametersBag $bag,
+        ?ServerRequestInterface $request = null,
     ): self {
+        //To avoid argument injection from HTTP request, the api flag is read only from request's attributes
+        $isApi = !empty($request?->getAttribute('api'));
+
         $error = static function (#[SensitiveParameter] Throwable $error) use ($manager): void {
             if ($error instanceof DomainException) {
                 $error = new DomainException($error->getMessage(), 404, $error);
@@ -73,7 +79,7 @@ class LoadPost
 
         /** @var Promise<Post, mixed, mixed> $fetchPromise */
         $fetchPromise = new Promise(
-            static function (Post $post) use ($manager, $error, $bag): void {
+            static function (Post $post) use ($manager, $error, $bag, $isApi): void {
                 $type = $post->getType();
                 if (null === $type) {
                     $error(new RuntimeException('Post type is not available'));
@@ -81,11 +87,16 @@ class LoadPost
                     return;
                 }
 
-                $manager->updateWorkPlan([
+                $workPlan = [
                     Post::class => $post,
                     'objectInstance' => $post,
-                    'template' => $type->getTemplate(),
-                ]);
+                ];
+
+                if (!$isApi) {
+                    $workPlan['template'] = $type->getTemplate();
+                }
+
+                $manager->updateWorkPlan($workPlan);
 
                 $bag->set('content', $post);
                 $bag->set('post', $post);

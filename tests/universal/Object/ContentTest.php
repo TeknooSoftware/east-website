@@ -26,6 +26,9 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use DateTimeImmutable;
+use Teknoo\East\Website\Object\Tag;
+use Teknoo\Tests\East\Website\Object\Traits\ExportTestTrait;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
@@ -50,6 +53,7 @@ use function json_encode;
 #[CoversClass(Content::class)]
 class ContentTest extends TestCase
 {
+    use ExportTestTrait;
     use PublishableTestTrait;
 
     public function buildObject(): Content
@@ -349,5 +353,85 @@ class ContentTest extends TestCase
     {
         $this->expectException(Throwable::class);
         $this->buildObject()->setLocaleField(new stdClass());
+    }
+
+    private function buildExportableContent(): Content
+    {
+        $author = (new User())->setFirstName('Max')->setLastName('Doe')->setEmail('max@teknoo.software');
+        $author->setId('u1');
+
+        $tag = (new Tag())->setName('PHP')->setSlug('php');
+        $tag->setId('t1');
+
+        $content = (new Content())
+            ->setAuthor($author)
+            ->setTitle('Title')
+            ->setSubtitle('Subtitle')
+            ->setSlug('title')
+            ->setDescription('Description')
+            ->setParts(['body' => '<b>Hello</b>'])
+            ->setTags(new \ArrayIterator([$tag]));
+        $content->setId('c1');
+        $content->setPublishedAt(new DateTimeImmutable('2025-03-19'));
+
+        return $content;
+    }
+
+    public function testExportToMeDataInDigestGroup(): void
+    {
+        $this->assertEquals(
+            [
+                '@class' => Content::class,
+                'id' => 'c1',
+                'title' => 'Title',
+                'slug' => 'title',
+            ],
+            $this->exportData($this->buildExportableContent(), ['digest']),
+        );
+    }
+
+    public function testExportToMeDataInPublicGroup(): void
+    {
+        $data = $this->exportData($this->buildExportableContent(), ['public']);
+
+        $this->assertEquals(Content::class, $data['@class']);
+        $this->assertArrayNotHasKey('parts', $data);
+        $this->assertArrayNotHasKey('createdAt', $data);
+        $this->assertEquals(['id' => 'u1', 'name' => 'Max Doe'], $data['author']);
+        $this->assertEquals('Description', $data['description']);
+        $this->assertCount(1, $data['tags']);
+        $this->assertInstanceOf(Tag::class, $data['tags'][0]);
+        $this->assertEquals(new DateTimeImmutable('2025-03-19'), $data['publishedAt']);
+    }
+
+    public function testExportToMeDataInCrudGroup(): void
+    {
+        $data = $this->exportData($this->buildExportableContent(), ['crud']);
+
+        $this->assertEquals(Content::class, $data['@class']);
+        $this->assertEquals(['body' => '<b>Hello</b>'], $data['parts']);
+        $this->assertArrayHasKey('createdAt', $data);
+    }
+
+    public function testExportToMeDataWithoutAuthor(): void
+    {
+        $content = (new Content())->setTitle('Title');
+
+        $this->assertNull($this->exportData($content, ['api'])['author']);
+    }
+
+    public function testExportToMeDataWithSeveralInstances(): void
+    {
+        $first = $this->buildExportableContent();
+        $second = (new Content())->setTitle('Second')->setParts(['body' => 'Other']);
+        $second->setId('c2');
+
+        $this->exportData($first, ['crud']);
+        $data = $this->exportData($second, ['crud']);
+
+        $this->assertEquals('c2', $data['id']);
+        $this->assertEquals(['body' => 'Other'], $data['parts']);
+        $this->assertNull($data['author']);
+        $this->assertEquals([], $data['tags']);
     }
 }

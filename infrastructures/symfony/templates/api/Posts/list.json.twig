@@ -1,0 +1,2 @@
+{# @TeknooEastWebsite/api/Posts/list.json.twig #}
+{{ postsCollection|east_api_collection_serialization(page, pageCount, {'groups': ['public']}, 'json', tag is defined ? {'tag': tag} : {}) }}

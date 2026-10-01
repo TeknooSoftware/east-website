@@ -1,0 +1,28 @@
+_teknoo_website_api_post:
+    path: '/post/{slug}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.post'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        template: '@@TeknooEastWebsite/api/Post/item.json.twig'
+
+_teknoo_website_api_list_posts:
+    path: '/posts'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        itemsPerPage: 10
+        template: '@@TeknooEastWebsite/api/Posts/list.json.twig'
+
+_teknoo_website_api_list_posts_tag:
+    path: '/posts/by/{tag}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.posts_of_tag'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        itemsPerPage: 10
+        template: '@@TeknooEastWebsite/api/Posts/list.json.twig'

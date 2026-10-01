@@ -31,6 +31,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use stdClass;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
@@ -150,6 +151,76 @@ class LoadContentTest extends TestCase
             $manager,
             $bag,
         ));
+    }
+
+    private function runTestForInvokeFoundWithRequest(?string $api, array $expectedWorkPlan, Content $content): void
+    {
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan')->with($expectedWorkPlan);
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getContentLoader(true)
+            ->method('fetch')
+            ->willReturnCallback(
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($content): ContentLoader&Stub {
+                    $promise->success($content);
+
+                    return $this->getContentLoader();
+                }
+            );
+
+        $request = $this->createStub(ServerRequestInterface::class);
+        $request->method('getAttribute')->willReturnCallback(
+            fn (string $name): ?string => 'api' === $name ? $api : null,
+        );
+
+        $this->assertInstanceOf(LoadContent::class, $this->buildStep()(
+            'foo',
+            $manager,
+            $this->createStub(ParametersBag::class),
+            $request,
+        ));
+    }
+
+    public function testInvokeFoundWithTypeInApiMode(): void
+    {
+        $type = (new Type())->setTemplate('foo');
+        $content = (new Content())->setType($type);
+
+        $this->runTestForInvokeFoundWithRequest(
+            'json',
+            [
+                Content::class => $content,
+                'objectInstance' => $content,
+            ],
+            $content,
+        );
+    }
+
+    public function testInvokeFoundWithTypeWithRequestNotInApiMode(): void
+    {
+        $type = (new Type())->setTemplate('foo');
+        $content = (new Content())->setType($type);
+
+        $this->runTestForInvokeFoundWithRequest(
+            null,
+            [
+                Content::class => $content,
+                'objectInstance' => $content,
+                'template' => 'foo',
+            ],
+            $content,
+        );
     }
 
     public function testInvokeFoundWithNoType(): void

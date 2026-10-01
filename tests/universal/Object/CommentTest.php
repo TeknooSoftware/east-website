@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Object;
 
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\Tests\East\Website\Object\Traits\ExportTestTrait;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Object\Comment;
 use Teknoo\East\Website\Object\Comment\Moderated;
@@ -43,6 +44,7 @@ use Teknoo\Tests\East\Website\Object\Traits\PopulateObjectTrait;
 #[CoversClass(Published::class)]
 class CommentTest extends TestCase
 {
+    use ExportTestTrait;
     use PopulateObjectTrait;
 
     public function buildObject(): Comment
@@ -184,5 +186,62 @@ class CommentTest extends TestCase
         $this->assertEquals('moderatedTitle', $this->buildModerateObject()->getPublicTitle());
 
         $this->assertEquals('moderatedAuthor', $this->buildModerateObject()->getPublicAuthor());
+    }
+
+    public function testExportToMeDataInCrudGroup(): void
+    {
+        $comment = $this->buildObject();
+        $comment->setId('c1');
+
+        $data = $this->exportData($comment, ['crud']);
+        $this->assertEquals(Comment::class, $data['@class']);
+        $this->assertEquals('c1', $data['id']);
+        $this->assertEquals('authorName', $data['author']);
+        $this->assertEquals('127.0.0.1', $data['remoteIp']);
+        $this->assertArrayNotHasKey('post', $data);
+
+        $this->assertEquals(
+            ['@class' => Comment::class, 'id' => 'c1', 'title' => 'commentTitle'],
+            $this->exportData($comment, ['digest']),
+        );
+    }
+
+    public function testExportToMeDataInPublicGroup(): void
+    {
+        $comment = $this->buildObject();
+        $comment->setId('c1');
+
+        $this->assertEquals(
+            [
+                '@class' => Comment::class,
+                'id' => 'c1',
+                'author' => 'authorName',
+                'title' => 'commentTitle',
+                'content' => 'commentContent',
+                'postAt' => new DateTimeImmutable('2025-03-19 01:02:03'),
+                'moderated' => false,
+            ],
+            $this->exportData($comment, ['public']),
+        );
+    }
+
+    public function testExportToMeDataInPublicGroupWhenModerated(): void
+    {
+        $comment = $this->buildObject();
+        $comment->setId('c1');
+        $comment->moderate(new DateTimeImmutable('2025-03-20'), 'Moderator', 'Moderated', 'Removed');
+
+        $this->assertEquals(
+            [
+                '@class' => Comment::class,
+                'id' => 'c1',
+                'author' => 'Moderator',
+                'title' => 'Moderated',
+                'content' => 'Removed',
+                'postAt' => new DateTimeImmutable('2025-03-19 01:02:03'),
+                'moderated' => true,
+            ],
+            $this->exportData($comment, ['public']),
+        );
     }
 }

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\Tests\East\Website\Object;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use Teknoo\East\Website\Object\Comment;
 use Teknoo\East\Website\Object\Post;
@@ -55,5 +56,33 @@ class PostTest extends ContentTest
         $this->assertInstanceOf(Post::class, $this->buildObject()->setComments([
             $this->createStub(Comment::class),
         ]));
+    }
+
+    public function testExportToMeDataInDigestGroup(): void
+    {
+        $post = (new Post())->setTitle('Title')->setSlug('title');
+        $post->setId('p1');
+
+        $this->assertEquals(
+            [
+                '@class' => Post::class,
+                'id' => 'p1',
+                'title' => 'Title',
+                'slug' => 'title',
+            ],
+            $this->exportData($post, ['digest']),
+        );
+    }
+
+    public function testExportToMeDataWithPublicCommentsWithoutDeletedComments(): void
+    {
+        $post = new Post();
+        $comment1 = new Comment($post, 'Max', '127.0.0.1', 'Hello', 'Content', new DateTimeImmutable('2025-03-19'));
+        $comment2 = new Comment($post, 'Bob', '127.0.0.1', 'Deleted', 'Content', new DateTimeImmutable('2025-03-19'));
+        $comment2->setDeletedAt(new DateTimeImmutable('2025-03-20'));
+        $post->setComments([$comment1, $comment2]);
+
+        $this->assertEquals([$comment1], $this->exportData($post, ['public', 'public_comments'])['comments']);
+        $this->assertArrayNotHasKey('comments', $this->exportData($post, ['public']));
     }
 }

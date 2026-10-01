@@ -1,0 +1,3 @@
+{# @TeknooEastWebsite/api/Comment/item.json.twig #}
+{# Rendered only when the comment is not valid, else the client is redirected to the post #}
+{{ post|east_api_object_with_form_serialization(formView, {'groups': ['public']}) }}

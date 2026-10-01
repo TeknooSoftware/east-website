@@ -151,6 +151,17 @@ services:
         tags:
             - { name: "twig.extension" }
 
+    #Normalizer for the public JSON API, to normalize contents with sanitized parts (before the East Normalizer)
+    Teknoo\East\WebsiteBundle\Normalizer\SanitizedContentNormalizer:
+        class: 'Teknoo\East\WebsiteBundle\Normalizer\SanitizedContentNormalizer'
+        arguments:
+            - '@Teknoo\East\FoundationBundle\Normalizer\EastNormalizer'
+            - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
+            - '%teknoo.east.website.sanitize.salt%'
+            - '%teknoo.east.website.sanitize.default_context%'
+        tags:
+            - { name: 'serializer.normalizer', priority: 110 }
+
     Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper:
         class: 'Teknoo\East\WebsiteBundle\Form\DataMapper\CommentMapper'
         arguments:

@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\Tests\East\Website\Object\Traits\ExportTestTrait;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\Service\FindSlugService;
@@ -40,6 +41,7 @@ use Throwable;
 #[CoversClass(Tag::class)]
 class TagTest extends TestCase
 {
+    use ExportTestTrait;
     use PopulateObjectTrait;
 
     protected function buildObject(): Tag
@@ -117,5 +119,21 @@ class TagTest extends TestCase
     {
         $this->expectException(Throwable::class);
         $this->buildObject()->setSlug(new stdClass());
+    }
+
+    public function testExportToMeData(): void
+    {
+        $tag = (new Tag())->setName('Time')->setSlug('time')->setIsHighlighted(true);
+        $tag->setId('t1');
+
+        $this->assertEquals(
+            ['@class' => Tag::class, 'id' => 't1', 'name' => 'Time', 'slug' => 'time', 'isHighlighted' => true],
+            $this->exportData($tag, ['public']),
+        );
+
+        $this->assertEquals(
+            ['@class' => Tag::class, 'id' => 't1', 'name' => 'Time', 'slug' => 'time'],
+            $this->exportData($tag, ['digest']),
+        );
     }
 }

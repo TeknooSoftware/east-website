@@ -1,0 +1,8 @@
+_teknoo_website_api_content:
+    path: '/content/{slug}'
+    methods:  ['GET']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.content'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        template: '@@TeknooEastWebsite/api/Content/item.json.twig'

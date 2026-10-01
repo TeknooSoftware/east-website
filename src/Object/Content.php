@@ -39,6 +39,10 @@ use Teknoo\East\Translation\Contracts\Object\TranslatableInterface;
 use Teknoo\East\Website\Object\Content\Draft;
 use Teknoo\East\Website\Object\Content\Published;
 use Teknoo\East\Common\Service\FindSlugService;
+use Teknoo\East\Foundation\Normalizer\Object\AutoTrait;
+use Teknoo\East\Foundation\Normalizer\Object\ClassGroup;
+use Teknoo\East\Foundation\Normalizer\Object\Normalize;
+use Teknoo\East\Foundation\Normalizer\Object\NormalizableInterface;
 use Teknoo\East\Website\Object\DTO\ReadOnlyArray;
 use Teknoo\States\Attributes\Assertion\Property;
 use Teknoo\States\Attributes\StateClass;
@@ -58,6 +62,8 @@ use const JSON_THROW_ON_ERROR;
  * Stated class representing a dynamic content in the website. The content has a `Type` with several blocks.
  * Block's values are stored in object of this class in `parts`.
  * Object of this class can be translated.
+ * Object of this class are normalizable, with groups `default`, `digest`, `api` and `crud` for administration, and
+ * `public` for public API (without author's email, template, raw parts and creation date).
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -70,6 +76,7 @@ use const JSON_THROW_ON_ERROR;
 #[StateClass(Published::class)]
 #[Property(Draft::class, ['publishedAt', IsNotInstanceOf::class, DateTimeInterface::class])]
 #[Property(Published::class, ['publishedAt', IsInstanceOf::class, DateTimeInterface::class])]
+#[ClassGroup('default', 'public', 'api', 'crud', 'digest')]
 class Content implements
     IdentifiedObjectInterface,
     TranslatableInterface,
@@ -78,24 +85,44 @@ class Content implements
     PublishableInterface,
     TimestampableInterface,
     SluggableInterface,
-    Stringable
+    Stringable,
+    NormalizableInterface
 {
     use PublishableTrait;
     use AutomatedTrait;
     use ProxyTrait;
+    use AutoTrait;
 
     protected const HASH_ALGO_FOR_SANITIZED = 'sha256';
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
+    protected ?string $id = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $createdAt = null;
+
+    #[Normalize(['public', 'api', 'crud'])]
+    protected ?DateTimeInterface $updatedAt = null;
+
+    #[Normalize(['public', 'api', 'crud'])]
+    protected ?DateTimeInterface $publishedAt = null;
+
+    #[Normalize(['public', 'api', 'crud'], loader: 'exportAuthor')]
     protected ?User $author = null;
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
     protected string $title = '';
 
+    #[Normalize(['public', 'api', 'crud'])]
     protected string $subtitle = '';
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
     protected ?string $slug = null;
 
+    #[Normalize(['public', 'crud'])]
     protected ?string $description = null;
 
+    #[Normalize(['crud'], loader: 'exportParts')]
     protected string $parts = '{}';
 
     protected ?ReadOnlyArray $decodedParts = null;
@@ -106,11 +133,13 @@ class Content implements
 
     protected string $sanitizedHash = '';
 
+    #[Normalize(['public', 'api', 'crud'])]
     protected ?Type $type = null;
 
     /**
      * @var iterable<Tag>
      */
+    #[Normalize(['public', 'api', 'crud'], loader: 'exportTags')]
     protected iterable $tags = [];
 
     protected ?string $localeField = null;
@@ -122,6 +151,48 @@ class Content implements
     {
         $this->initializeStateProxy();
         $this->updateStates();
+    }
+
+    /*
+     * Loaders are cached by the AutoTrait for all instances, they must only use the instance passed as argument
+     */
+
+    /**
+     * Only the id and the name of the author are exported, never its email
+     *
+     * @return array{id: string, name: string}|null
+     */
+    protected static function exportAuthor(self $content): ?array
+    {
+        if (null === $content->author) {
+            return null;
+        }
+
+        return [
+            'id' => $content->author->getId(),
+            'name' => (string) $content->author,
+        ];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    protected static function exportParts(self $content): array
+    {
+        return $content->getParts()->toArray();
+    }
+
+    /**
+     * @return list<Tag>
+     */
+    protected static function exportTags(self $content): array
+    {
+        $tags = [];
+        foreach ($content->tags as $tag) {
+            $tags[] = $tag;
+        }
+
+        return $tags;
     }
 
     public function getAuthor(): ?User

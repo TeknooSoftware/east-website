@@ -25,11 +25,16 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use DateTimeInterface;
 use Stringable;
 use Teknoo\East\Common\Contracts\Object\DeletableInterface;
 use Teknoo\East\Common\Contracts\Object\IdentifiedObjectInterface;
 use Teknoo\East\Common\Contracts\Object\TimestampableInterface;
 use Teknoo\East\Common\Object\ObjectTrait;
+use Teknoo\East\Foundation\Normalizer\Object\AutoTrait;
+use Teknoo\East\Foundation\Normalizer\Object\ClassGroup;
+use Teknoo\East\Foundation\Normalizer\Object\Normalize;
+use Teknoo\East\Foundation\Normalizer\Object\NormalizableInterface;
 
 use function array_keys;
 use function array_map;
@@ -37,25 +42,63 @@ use function array_values;
 
 /**
  * Class to define persisted types of dynamics contents and parts of this pages. A type is defined by a name, a template
- * to use to render the dynamic content and a list of Block instance to define each part
+ * to use to render the dynamic content and a list of Block instance to define each part.
+ * Types are normalizable, the template is only exported in the group `crud`.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class Type implements IdentifiedObjectInterface, DeletableInterface, TimestampableInterface, Stringable
+#[ClassGroup('default', 'public', 'api', 'crud', 'digest')]
+class Type implements
+    IdentifiedObjectInterface,
+    DeletableInterface,
+    TimestampableInterface,
+    Stringable,
+    NormalizableInterface
 {
     use ObjectTrait;
+    use AutoTrait;
 
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
+    protected ?string $id = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $createdAt = null;
+
+    #[Normalize(['crud'])]
+    protected ?DateTimeInterface $updatedAt = null;
+
+    #[Normalize(['default', 'public', 'api', 'crud', 'digest'])]
     private string $name = '';
 
+    #[Normalize(['crud'])]
     private string $template = '';
 
     /**
      * @var array<string, string>
      */
+    #[Normalize(['public', 'crud'], loader: 'exportBlocks')]
     private array $blocks = [];
+
+    /**
+     * Loaders are cached by the AutoTrait for all instances, they must only use the instance passed as argument
+     *
+     * @return list<array{name: string, type: string}>
+     */
+    protected static function exportBlocks(self $type): array
+    {
+        $blocks = [];
+        foreach ($type->blocks as $name => $blockType) {
+            $blocks[] = [
+                'name' => (string) $name,
+                'type' => $blockType,
+            ];
+        }
+
+        return $blocks;
+    }
 
     public function getName(): string
     {

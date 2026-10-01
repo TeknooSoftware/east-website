@@ -45,7 +45,8 @@ use function ceil;
 /**
  * Step to list all published post at the current date returned by the `DatesService`. If a Tag instance is passed, the
  * list of posts will be filtered on it. A pagination is also available, item per page and the page can be defined via
- * `$itemsPerPage` and `page`.
+ * `$itemsPerPage` and `page`. The collection, the current page and the count of pages are injected into the view's
+ * variables, under the keys `postsCollection`, `page` and `pageCount`.
  * This step use the `PostLoader` and the query `PublishedPostsListQuery` or `PublishedPostsListInTagQuery` if a Tag
  * instance is passed.
  *
@@ -75,7 +76,7 @@ class ListPosts
 
         /** @var Promise<iterable<Post>, mixed, mixed> $promise */
         $promise = new Promise(
-            static function (iterable $posts) use ($itemsPerPage, $manager, $bag): void {
+            static function (iterable $posts) use ($itemsPerPage, $page, $manager, $bag): void {
                 $pageCount = 1;
                 if ($posts instanceof Countable) {
                     $pageCount = (int) ceil($posts->count() / $itemsPerPage);
@@ -89,6 +90,7 @@ class ListPosts
                 );
 
                 $bag->set('postsCollection', $posts);
+                $bag->set('page', $page);
                 $bag->set('pageCount', $pageCount);
             },
             static fn (Throwable $throwable): ChefInterface => $manager->error($throwable),

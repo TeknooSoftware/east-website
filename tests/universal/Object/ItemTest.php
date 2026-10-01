@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\Tests\East\Website\Object;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use Teknoo\Tests\East\Website\Object\Traits\ExportTestTrait;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
@@ -40,6 +41,7 @@ use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
 #[CoversClass(Item::class)]
 class ItemTest extends TestCase
 {
+    use ExportTestTrait;
     use ObjectTestTrait;
 
     public function buildObject(): Item
@@ -267,5 +269,45 @@ class ItemTest extends TestCase
     {
         $this->expectException(\Throwable::class);
         $this->buildObject()->setChildren(new \stdClass());
+    }
+
+    public function testExportToMeData(): void
+    {
+        $content = (new Content())->setTitle('About')->setSlug('about');
+        $content->setId('c1');
+
+        $parent = (new Item())->setName('Top');
+        $parent->setId('i1');
+
+        $item = (new Item())
+            ->setName('Menu')
+            ->setSlug('menu')
+            ->setLocation('top')
+            ->setPosition(2)
+            ->setContent($content)
+            ->setParent($parent);
+        $item->setId('i2');
+
+        $data = $this->exportData($item, ['api']);
+        $this->assertEquals(
+            [
+                '@class' => Item::class,
+                'id' => 'i2',
+                'name' => 'Menu',
+                'slug' => 'menu',
+                'content' => ['id' => 'c1', 'title' => 'About', 'slug' => 'about'],
+                'position' => 2,
+                'location' => 'top',
+                'hidden' => false,
+                'parent' => ['id' => 'i1', 'name' => 'Top'],
+            ],
+            $data,
+        );
+
+        $this->assertEquals([], $this->exportData($item, ['public']));
+
+        $data = $this->exportData($parent, ['api']);
+        $this->assertNull($data['content']);
+        $this->assertNull($data['parent']);
     }
 }

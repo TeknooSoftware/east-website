@@ -1,0 +1,14 @@
+_teknoo_website_api_post_comment:
+    path: '/post/{slug}/comment'
+    methods:  ['POST', 'PUT']
+    defaults:
+        _controller: 'teknoo.east.website.endpoint.post.comment'
+        api: 'json'
+        errorTemplate: '@@TeknooEastCommon/Error/default.json.twig'
+        objectClass: '%teknoo.east.website.dto.comment.class%'
+        formClass: "%teknoo.east.website.form.new_comment.type.class%"
+        formOptions:
+            comment_class: '%teknoo.east.website.persisted.comment.class%'
+        route: '_teknoo_website_api_post'
+        template: '@@TeknooEastWebsite/api/Comment/item.json.twig'
+        writer: '@Teknoo\East\Website\Writer\CommentWriter'
