@@ -159,7 +159,8 @@ trait CliScenariosTrait
     public function testMediaIsUploadedAsAMultipartRequest(): void
     {
         $this->login();
-        $file = $this->temp->write('picture.png', 'not really a png');
+        // The signature of a PNG, the server keeps the type of the file sent by the client
+        $file = $this->temp->write('picture.png', "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR");
 
         [$code, , $stderr] = $this->cli->run(['website:media:create', '--file=' . $file, '--name=Picture', '--alternative=Alt']);
 
@@ -169,6 +170,7 @@ trait CliScenariosTrait
         self::assertSame(['name' => 'Picture', 'alternative' => 'Alt'], $upload['post']['media']);
         self::assertSame(['image' => 'picture.png'], $upload['files']['name']);
         self::assertSame(['image' => 16], $upload['files']['size']);
+        self::assertSame(['image' => 'image/png'], $upload['files']['type']);
     }
 
     public function testFrontCommentIsNotFollowed(): void

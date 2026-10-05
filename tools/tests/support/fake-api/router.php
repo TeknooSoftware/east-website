@@ -52,7 +52,11 @@ if (is_string($log) && '' !== $log) {
                 'contentType' => $contentType,
                 'body' => $body,
                 'post' => $_POST,
-                'files' => ['name' => $_FILES['media']['name'] ?? null, 'size' => $_FILES['media']['size'] ?? null],
+                'files' => [
+                    'name' => $_FILES['media']['name'] ?? null,
+                    'size' => $_FILES['media']['size'] ?? null,
+                    'type' => $_FILES['media']['type'] ?? null,
+                ],
             ]
         ) . "\n",
         FILE_APPEND

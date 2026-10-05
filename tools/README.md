@@ -80,7 +80,7 @@ The session (`{baseUrl, username, token, expiresAt}`, never the API key) is stor
 | Domain | Commands | Notes |
 |---|---|---|
 | `tag`, `type`, `content`, `post`, `item`, `user` | `website:<domain>:list`, `get <id>`, `create`, `update <id>`, `delete <id>` | |
-| `media` | `website:media:list`, `get <id>`, `create --file=...`, `delete <id>` | A media can not be updated |
+| `media` | `website:media:list`, `get <id>`, `create --file=...`, `delete <id>` | A media can not be updated. The type of the file is detected from its content |
 | `comment` | `website:comment:list <post-id>`, `get <post-id> <id>`, `update <post-id> <id>`, `delete <post-id> <id>` | `update` moderates a comment of a post |
 | `front` (public API) | `website:front:content:get [slug]`, `post:get <slug>`, `post:list`, `post:list-by-tag <tag-slug>`, `comment:create <post-slug>` | Published objects only; the JWT is sent when available |
 | `auth` | `website:auth:login`, `renew`, `status`, `logout` | `status` is offline and shows no secret |

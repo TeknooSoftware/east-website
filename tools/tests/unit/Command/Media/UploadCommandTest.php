@@ -51,7 +51,8 @@ use function trim;
 #[CoversClass(UploadCommand::class)]
 class UploadCommandTest extends TestCase
 {
-    private const string FILE_CONTENT = "PNG-CONTENT-\x00\x01\x02-END";
+    // Starts with the signature of a PNG, enough to detect its type from its content
+    private const string FILE_CONTENT = "\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR-CONTENT-\x00\x01\x02-END";
 
     private ?TempDir $temp = null;
 
@@ -61,11 +62,11 @@ class UploadCommandTest extends TestCase
         $this->temp = null;
     }
 
-    private function file(): string
+    private function file(string $content = self::FILE_CONTENT): string
     {
         $this->temp = new TempDir();
 
-        return $this->temp->write('logo.png', self::FILE_CONTENT);
+        return $this->temp->write('logo.png', $content);
     }
 
     private function harness(): ApiHarness
@@ -149,7 +150,10 @@ class UploadCommandTest extends TestCase
         self::assertIsString($upload['body']);
         self::assertStringContainsString("name=\"media[name]\"\r\n\r\nLogo", $upload['body']);
         self::assertStringContainsString("name=\"media[alternative]\"\r\n\r\nAlt text", $upload['body']);
-        self::assertStringContainsString('name="media[image]"; filename="logo.png"', $upload['body']);
+        self::assertStringContainsString(
+            "name=\"media[image]\"; filename=\"logo.png\"\r\nContent-Type: image/png\r\n",
+            $upload['body'],
+        );
         self::assertStringContainsString(self::FILE_CONTENT, $upload['body']);
 
         self::assertSame('GET', $captured[1]['method']);
@@ -182,6 +186,22 @@ class UploadCommandTest extends TestCase
         self::assertSame(0, $code);
         self::assertIsString($captured[0]['body']);
         self::assertStringContainsString("name=\"media[alternative]\"\r\n\r\n\r\n", $captured[0]['body']);
+    }
+
+    public function testTheTypeOfTheFileIsDetectedFromItsContentNotFromItsName(): void
+    {
+        $file = $this->file('not really a png');
+        $captured = [];
+        $tester = $this->capturingApplication($captured);
+
+        $code = $tester->run(['command' => 'website:media:create', '--file' => $file]);
+
+        self::assertSame(0, $code);
+        self::assertIsString($captured[0]['body']);
+        self::assertStringContainsString(
+            "filename=\"logo.png\"\r\nContent-Type: text/plain\r\n",
+            $captured[0]['body'],
+        );
     }
 
     public function testTheUploadIsRecordedAsAMultipartRequestByTheHarness(): void

@@ -38,8 +38,9 @@ use Teknoo\East\Website\Tools\Runtime;
 use function basename;
 
 /**
- * Uploads a file as a media (multipart request, the only way to create a media). A media can not be updated:
- * delete it and create it again.
+ * Uploads a file as a media (multipart request, the only way to create a media). The HTTP client detects the type of
+ * the file from its content with symfony/mime, and the server stores it as the type of the media (sent back when the
+ * media is served). A media can not be updated: delete it and create it again.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
