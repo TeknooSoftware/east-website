@@ -1,5 +1,16 @@
 # Teknoo Software - Website - Change Log
 
+## [11.4.0] - Pending release
+### Stable Release
+
+#### Evolutions
+- Experimental CLI client (`tools/api-client/`): interactive mode `--format=tui` for humans, built on `symfony/tui`
+  (tables for the lists, forms to read, create and update the objects). The JSON output stays the default, see
+  [its README](tools/api-client/README.md#interactive-mode---formattui).
+
+#### Fixes
+- CLI client: `--data` with a numeric key no longer fails on contents and posts.
+
 ## [11.3.0] - 2026-10-01
 ### Stable Release
 
@@ -35,8 +46,7 @@
   with `make tools-phar`, not part of the library package): every function of the API grouped by domain (`website:type:create`,
   `website:post:list`, `website:front:post:get`...), configured by `website:auth:login` (username and API key) which
   writes `./east-website.json` read by the other commands, JSON output and stable exit codes, to be used by scripts and
-  AI agents. For humans, `--format=table` prints tables and `--format=tui` opens an interactive terminal interface
-  (Symfony TUI component): tables for the lists, forms to read, create and update the objects.
+  AI agents.
 
 ## [11.2.0] - 2026-05-17
 ### Stable Release
