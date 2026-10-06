@@ -49,6 +49,7 @@ class OutputFormatTest extends TestCase
     {
         self::assertSame(OutputFormat::Json, OutputFormat::fromOption('json'));
         self::assertSame(OutputFormat::Table, OutputFormat::fromOption('table'));
+        self::assertSame(OutputFormat::Tui, OutputFormat::fromOption('tui'));
     }
 
     public function testUnknownFormatIsAUsageError(): void
@@ -58,7 +59,7 @@ class OutputFormatTest extends TestCase
             self::fail('An exception was expected');
         } catch (ApiException $error) {
             self::assertSame(ErrorKind::Usage, $error->kind);
-            self::assertSame('The format "yaml" is not supported, use one of: json, table', $error->getMessage());
+            self::assertSame('The format "yaml" is not supported, use one of: json, table, tui', $error->getMessage());
         }
     }
 }

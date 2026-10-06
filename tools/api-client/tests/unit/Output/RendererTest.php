@@ -176,6 +176,79 @@ class RendererTest extends TestCase
         self::assertSame("{\"data\":[{\"id\":\"a\"}]}\n", $text);
     }
 
+    /**
+     * @return iterable<string, array{array<mixed>}>
+     */
+    public static function documentsWhichAreTables(): iterable
+    {
+        yield 'a list' => [[
+            'meta' => ['page' => 2, 'totalPages' => 3, 'count' => 41],
+            'data' => [
+                ['id' => 'a', 'name' => 'First', 'tags' => ['x', 'y'], 'hidden' => true, 'parent' => null],
+                ['id' => 'b', 'name' => '<info>Second</info>', 'tags' => [], 'hidden' => false, 'parent' => 'a'],
+            ],
+        ]];
+        yield 'a list without meta' => [['data' => [['id' => 'a'], 'scalar']]];
+        yield 'an object' => [[
+            'meta' => ['id' => 'a'],
+            'data' => ['id' => 'a', 'name' => 'First', 'parts' => ['intro' => 'x'], 'hidden' => false, 'parent' => null],
+        ]];
+    }
+
+    /**
+     * The interactive format has a screen only for some commands, the others print the table.
+     *
+     * @param array<mixed> $document
+     */
+    #[DataProvider('documentsWhichAreTables')]
+    public function testTheInteractiveFormatRendersExactlyTheTable(array $document): void
+    {
+        $table = $this->render($document, OutputFormat::Table);
+
+        self::assertStringContainsString('+--', $table);
+        self::assertStringNotContainsString('"data"', $table);
+        self::assertSame($table, $this->render($document, OutputFormat::Tui));
+        self::assertSame($table, $this->render($document, OutputFormat::Tui, true));
+        self::assertSame(
+            $this->render($document, OutputFormat::Table, false, true),
+            $this->render($document, OutputFormat::Tui, false, true),
+        );
+    }
+
+    /**
+     * @param array<mixed> $document
+     */
+    #[DataProvider('documentsWhichAreNotTables')]
+    public function testJsonIsUsedWhenTheDocumentCanNotBeDisplayedByTheInteractiveFormat(array $document): void
+    {
+        self::assertSame(Json::encode($document) . "\n", $this->render($document, OutputFormat::Tui, true));
+        self::assertSame(
+            $this->render($document, OutputFormat::Table),
+            $this->render($document, OutputFormat::Tui),
+        );
+        self::assertSame(
+            $this->render($document, OutputFormat::Json),
+            $this->render($document, OutputFormat::Tui),
+        );
+    }
+
+    /**
+     * @param array<mixed> $document
+     */
+    #[DataProvider('documentsWhichAreTables')]
+    public function testJsonOutputIsUnchangedByTheOtherFormats(array $document): void
+    {
+        $compact = $this->render($document, OutputFormat::Json, true);
+        $pretty = $this->render($document, OutputFormat::Json);
+
+        self::assertSame(Json::encode($document) . "\n", $compact);
+        self::assertSame(Json::encode($document, true) . "\n", $pretty);
+        self::assertSame($document, Json::decode($compact));
+        self::assertSame($document, Json::decode($pretty));
+        self::assertStringNotContainsString('+--', $pretty);
+        self::assertNotSame($pretty, $this->render($document, OutputFormat::Tui));
+    }
+
     public function testErrorsAreRenderedAsACompactJsonDocument(): void
     {
         $output = new BufferedOutput();

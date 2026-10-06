@@ -30,7 +30,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Http\ApiException;
-use Teknoo\East\Website\Tools\Http\ApiRequest;
 use Teknoo\East\Website\Tools\Input\InputReader;
 use Teknoo\East\Website\Tools\Resource\Operation;
 
@@ -96,10 +95,18 @@ class ListCommand extends ResourceCommand
             $query['direction'] = $direction;
         }
 
-        $path = $connection->endpoints->admin($this->definition->listPath, $this->params($input));
-        $request = ApiRequest::get($path, $query);
+        $params = $this->params($input);
+        $request = $this->runtime->gateway->listRequest($connection, $this->definition, $params, $query);
         if ($this->isDryRun($input)) {
             $this->dryRun($input, $output, $connection, [$request]);
+
+            return;
+        }
+
+        if ($this->isTui($input)) {
+            $this->assertTui($input);
+            $first = $this->runtime->client->call($connection, $request);
+            $this->runtime->tui->browse($connection, $this->definition, $params, $query, $first);
 
             return;
         }

@@ -35,7 +35,10 @@ use Teknoo\East\Website\Tools\Http\Transport;
 use Teknoo\East\Website\Tools\Output\Renderer;
 use Teknoo\East\Website\Tools\Output\Warnings;
 use Teknoo\East\Website\Tools\Resource\Registry;
+use Teknoo\East\Website\Tools\Resource\ResourceGateway;
 use Teknoo\East\Website\Tools\Runtime;
+use Teknoo\East\Website\Tools\Tui\Driver\TerminalDriver;
+use Teknoo\East\Website\Tools\Tui\TuiLauncher;
 use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
 
 /**
@@ -58,7 +61,20 @@ class RuntimeTest extends TestCase
         $renderer = new Renderer();
         $registry = new Registry();
 
-        $runtime = new Runtime($client, $authenticator, $connections, $renderer, $warnings, $registry, $clock);
+        $gateway = new ResourceGateway($client);
+        $tui = new TuiLauncher(new TerminalDriver(), $gateway, $registry);
+
+        $runtime = new Runtime(
+            $client,
+            $authenticator,
+            $connections,
+            $renderer,
+            $warnings,
+            $registry,
+            $clock,
+            $gateway,
+            $tui,
+        );
 
         self::assertSame($client, $runtime->client);
         self::assertSame($authenticator, $runtime->authenticator);
@@ -67,5 +83,7 @@ class RuntimeTest extends TestCase
         self::assertSame($warnings, $runtime->warnings);
         self::assertSame($registry, $runtime->registry);
         self::assertSame($clock, $runtime->clock);
+        self::assertSame($gateway, $runtime->gateway);
+        self::assertSame($tui, $runtime->tui);
     }
 }

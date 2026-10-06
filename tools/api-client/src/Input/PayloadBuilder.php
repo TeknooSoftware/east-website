@@ -34,16 +34,20 @@ use Teknoo\East\Website\Tools\Resource\FieldDefinition;
 use Teknoo\East\Website\Tools\Resource\FieldKind;
 use Teknoo\East\Website\Tools\Resource\ResourceDefinition;
 
-use function array_filter;
-use function array_values;
 use function count;
 use function explode;
+use function filter_var;
 use function implode;
 use function in_array;
+use function is_array;
+use function is_int;
+use function is_string;
 use function sprintf;
 use function str_starts_with;
 use function strrpos;
 use function substr;
+
+use const FILTER_VALIDATE_INT;
 
 /**
  * Builds the body of a creation or of an update from the raw JSON (--data) and from the typed options. Only the
@@ -88,6 +92,8 @@ class PayloadBuilder
         $publish = false;
 
         foreach (DataSource::read($input) as $key => $value) {
+            // The numeric keys of a JSON object are integers for PHP
+            $key = (string) $key;
             if ($definition->hasParts && str_starts_with($key, 'block_')) {
                 $parts[substr($key, 6)] = $value;
             } elseif ($definition->hasParts && 'publish' === $key) {
@@ -122,6 +128,55 @@ class PayloadBuilder
     }
 
     /**
+     * Types a raw value like the API expects it, whatever its source (an option of the command line or a field of
+     * the interactive form).
+     *
+     * @param string|bool|int|array<mixed>|null $raw
+     * @throws ApiException when the value is not valid for the field
+     */
+    public function cast(FieldDefinition $field, string|bool|int|array|null $raw): mixed
+    {
+        if ($field->kind->isList()) {
+            $values = [];
+            foreach (is_array($raw) ? $raw : [] as $value) {
+                if (is_string($value) && '' !== $value) {
+                    $values[] = $value;
+                }
+            }
+
+            return $this->listValue($field, $values);
+        }
+
+        if (is_array($raw)) {
+            throw ApiException::usage(sprintf('The option --%s expects a single value', $field->optionName()));
+        }
+
+        switch ($field->kind) {
+            case FieldKind::Bool:
+                return true === $raw;
+            case FieldKind::Int:
+                if (is_int($raw)) {
+                    return $raw;
+                }
+
+                $int = filter_var($raw, FILTER_VALIDATE_INT);
+                if (false === $int) {
+                    throw ApiException::usage(sprintf(
+                        'The option --%s expects an integer, "%s" given',
+                        $field->optionName(),
+                        (string) $raw,
+                    ));
+                }
+
+                return $int;
+            case FieldKind::Id:
+                return null === $raw || '' === $raw ? null : (string) $raw;
+            default:
+                return (string) $raw;
+        }
+    }
+
+    /**
      * @return array{value: mixed}|null null when the option was not provided, the value can be null (JSON null)
      */
     private function value(FieldDefinition $field, InputInterface $input): ?array
@@ -130,33 +185,15 @@ class PayloadBuilder
 
         if ($field->kind->isList()) {
             $values = InputReader::list($input, $option);
-            if ([] === $values) {
-                return null;
-            }
 
-            $values = array_values(array_filter($values, static fn (string $value): bool => '' !== $value));
-
-            return ['value' => $this->listValue($field, $values)];
+            return [] === $values ? null : ['value' => $this->cast($field, $values)];
         }
 
-        switch ($field->kind) {
-            case FieldKind::Bool:
-                $bool = InputReader::bool($input, $option);
+        $raw = FieldKind::Bool === $field->kind
+            ? InputReader::bool($input, $option)
+            : InputReader::string($input, $option);
 
-                return null === $bool ? null : ['value' => $bool];
-            case FieldKind::Int:
-                $int = InputReader::int($input, $option);
-
-                return null === $int ? null : ['value' => $int];
-            case FieldKind::Id:
-                $id = InputReader::string($input, $option);
-
-                return null === $id ? null : ['value' => '' === $id ? null : $id];
-            default:
-                $string = InputReader::string($input, $option);
-
-                return null === $string ? null : ['value' => $string];
-        }
+        return null === $raw ? null : ['value' => $this->cast($field, $raw)];
     }
 
     /**

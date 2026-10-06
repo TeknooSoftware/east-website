@@ -31,6 +31,8 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Tools\Command\Resource\GetCommand;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
+use Teknoo\Tests\East\Website\Tools\Support\Keys;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 
 /**
  * Tests of the get of an object of the resources of the admin API
@@ -154,5 +156,71 @@ class GetCommandTest extends TestCase
         self::assertSame('GET', $request['method']);
         self::assertSame('https://site.test/api/v1/admin/post/post-9/comment/cmt-2', $request['url']);
         self::assertSame('Bearer ***', $request['headers']['Authorization']);
+    }
+
+    public function testTheTuiFormatOpensTheObjectReadOnly(): void
+    {
+        $driver = new ScriptedDriver([Keys::DOWN, 'q']);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('GET /api/v1/admin/content/c1', 200, [
+            'meta' => ['id' => 'c1'],
+            'data' => ['id' => 'c1', 'title' => 'Home', 'slug' => 'home'],
+        ]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:content:get', 'c1', '--format=tui', '--locale=fr'],
+            [],
+            true,
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stdout);
+        self::assertSame('', $stderr);
+        self::assertStringStartsWith('content · Home', $driver->screens[0]);
+        self::assertStringContainsString('> title  Home', $driver->screens[1]);
+        self::assertCount(1, $harness->requests);
+        self::assertSame('locale=fr', $harness->requests[0]['query']);
+    }
+
+    public function testTheTuiFormatNeedsATerminalAndSendsNothingWithoutIt(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:get', 't1', '--format=tui'], [], true);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('usage', AbstractCommandTest::decode($stderr)['data']['kind']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testAnObjectNotFoundNeverOpensTheTuiFormat(): void
+    {
+        $driver = new ScriptedDriver([]);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('GET /api/v1/admin/tag/t1', 404, ['meta' => ['error' => true], 'data' => ['message' => 'Gone']]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:get', 't1', '--format=tui'], [], true);
+
+        self::assertSame(4, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('Gone', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testADryRunNeverOpensTheTuiFormat(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:tag:get', 't1', '--format=tui', '--dry-run']);
+
+        self::assertSame(0, $code);
+        self::assertTrue(AbstractCommandTest::decode($stdout)['dryRun']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
     }
 }

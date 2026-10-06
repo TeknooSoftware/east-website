@@ -35,7 +35,9 @@ use Teknoo\East\Website\Tools\Application;
 use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Http\Json;
 use Teknoo\East\Website\Tools\Version;
+use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
 use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 
 use function array_map;
@@ -430,5 +432,30 @@ class ApplicationTest extends TestCase
         self::assertSame('GET', $this->requests[0]['method']);
         self::assertSame('https://site.test/api/v1/admin/tags', $this->requests[0]['url']);
         self::assertContains('Authorization: Bearer jwt', $this->requests[0]['headers']);
+    }
+
+    public function testTheTerminalOfTheInteractiveModeCanBeInjected(): void
+    {
+        $driver = new ScriptedDriver(['q']);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('GET /api/v1/admin/tags', 200, ['meta' => ['page' => 1], 'data' => [['id' => 't1']]]);
+
+        [$code] = $harness->run(['website:tag:list', '--format=tui'], ['interactive' => true]);
+
+        self::assertSame(0, $code);
+        self::assertSame(1, $driver->runs);
+    }
+
+    public function testTheTuiFormatIsAValueOfTheFormatOfEveryCommandAndNotANewOption(): void
+    {
+        foreach ($this->application()->all() as $name => $command) {
+            if (!str_starts_with($name, 'website:')) {
+                continue;
+            }
+
+            $definition = $command->getDefinition();
+            self::assertStringContainsString('tui', $definition->getOption('format')->getDescription(), $name);
+            self::assertFalse($definition->hasOption('tui'), $name);
+        }
     }
 }

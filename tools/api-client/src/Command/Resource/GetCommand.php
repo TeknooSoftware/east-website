@@ -28,7 +28,6 @@ namespace Teknoo\East\Website\Tools\Command\Resource;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teknoo\East\Website\Tools\Config\Connection;
-use Teknoo\East\Website\Tools\Http\ApiRequest;
 use Teknoo\East\Website\Tools\Resource\Operation;
 
 use function sprintf;
@@ -62,13 +61,20 @@ class GetCommand extends ResourceCommand
 
     protected function perform(InputInterface $input, OutputInterface $output, Connection $connection): void
     {
-        $request = ApiRequest::get(
-            $connection->endpoints->admin($this->definition->itemPath(), $this->params($input)),
-            $this->localeQuery($input),
-        );
+        $params = $this->params($input);
+        $query = $this->localeQuery($input);
+        $request = $this->runtime->gateway->getRequest($connection, $this->definition, $params, $query);
 
         if ($this->isDryRun($input)) {
             $this->dryRun($input, $output, $connection, [$request]);
+
+            return;
+        }
+
+        if ($this->isTui($input)) {
+            $this->assertTui($input);
+            $document = $this->runtime->client->call($connection, $request);
+            $this->runtime->tui->view($connection, $this->definition, $params, $query, $document);
 
             return;
         }

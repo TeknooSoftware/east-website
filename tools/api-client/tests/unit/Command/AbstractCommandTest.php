@@ -37,6 +37,7 @@ use Teknoo\East\Website\Tools\Application;
 use Teknoo\East\Website\Tools\Command\AbstractCommand;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
 use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 
 use function array_keys;
 use function array_shift;
@@ -472,5 +473,80 @@ class AbstractCommandTest extends TestCase
         self::assertCount(1, $error['data']['warnings']);
         self::assertStringStartsWith('The configuration file', $error['data']['warnings'][0]);
         self::assertStringNotContainsString('warning:', $stderr);
+    }
+
+    public function testTheTuiFormatOfACommandWithoutScreenPrintsTheTable(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('DELETE /api/v1/admin/tag/tag-1/delete', 200, [
+            'meta' => ['deleted' => 'success'],
+            'data' => ['id' => 'tag-1', 'name' => 'Tag'],
+        ]);
+
+        [$code, $stdout, $stderr] = self::execute($harness, ['website:tag:delete', 'tag-1', '--yes', '--format=tui']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertStringContainsString('| field | value |', $stdout);
+        self::assertStringContainsString('| name  | Tag   |', $stdout);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testTheTuiFormatIsRefusedWithoutInteractionBeforeAnyRequest(): void
+    {
+        $driver = new ScriptedDriver([]);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = self::execute($harness, ['website:tag:list', '--format=tui']);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame(
+            'The format "tui" is interactive, it can not be used with --no-interaction',
+            self::decode($stderr)['data']['message'],
+        );
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testTheTuiFormatIsRefusedWithoutATerminalBeforeAnyRequest(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = self::execute($harness, ['website:tag:list', '--format=tui'], [], true);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertStringContainsString('needs an interactive terminal', self::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testTheTuiFormatOpensTheScreenOfTheCommandOnATerminal(): void
+    {
+        $driver = new ScriptedDriver(['q']);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('GET /api/v1/admin/tags', 200, self::TAGS);
+
+        [$code, $stdout, $stderr] = self::execute($harness, ['website:tag:list', '--format=tui'], [], true);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stdout);
+        self::assertSame('', $stderr);
+        self::assertSame(1, $driver->runs);
+        self::assertStringContainsString('> tag-1', $driver->screen());
+    }
+
+    public function testADryRunOfTheTuiFormatPrintsTheRequestsAsJson(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = self::execute($harness, ['website:tag:list', '--format=tui', '--dry-run']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertTrue(self::decode($stdout)['dryRun']);
+        self::assertSame(0, $driver->runs);
     }
 }

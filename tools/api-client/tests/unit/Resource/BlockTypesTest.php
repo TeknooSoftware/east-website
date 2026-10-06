@@ -63,6 +63,41 @@ class BlockTypesTest extends TestCase
         self::assertNull(BlockTypes::index('Text'));
     }
 
+    public function testKindIsTheReverseOfIndex(): void
+    {
+        self::assertSame('textarea', BlockTypes::kind('0'));
+        self::assertSame('raw', BlockTypes::kind('1'));
+        self::assertSame('text', BlockTypes::kind('2'));
+        self::assertSame('numeric', BlockTypes::kind('3'));
+        self::assertSame('image', BlockTypes::kind('4'));
+    }
+
+    public function testKindOfAnUnknownIndex(): void
+    {
+        self::assertNull(BlockTypes::kind('5'));
+        self::assertNull(BlockTypes::kind('-1'));
+        self::assertNull(BlockTypes::kind(''));
+        self::assertNull(BlockTypes::kind('00'));
+        self::assertNull(BlockTypes::kind(' 0'));
+        self::assertNull(BlockTypes::kind('textarea'));
+    }
+
+    public function testEveryKindIsFoundBackFromItsIndex(): void
+    {
+        self::assertNotSame([], BlockTypes::kinds());
+
+        foreach (BlockTypes::kinds() as $kind) {
+            $index = BlockTypes::index($kind);
+            self::assertNotNull($index, $kind);
+            self::assertSame($kind, BlockTypes::kind($index), $kind);
+        }
+
+        foreach (BlockTypes::INDEXES as $kind => $index) {
+            self::assertSame($kind, BlockTypes::kind($index));
+            self::assertSame($index, BlockTypes::index((string) BlockTypes::kind($index)));
+        }
+    }
+
     /**
      * The API expects the index of the choice of the Symfony form BlockType, the order of the PHP enum BlockType
      * (textarea, raw, numeric, text, image) is different: this guard fails if the form changes.

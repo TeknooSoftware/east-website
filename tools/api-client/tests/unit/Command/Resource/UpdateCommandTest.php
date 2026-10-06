@@ -31,6 +31,8 @@ use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Tools\Command\Resource\UpdateCommand;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
+use Teknoo\Tests\East\Website\Tools\Support\Keys;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 
 
 /**
@@ -349,5 +351,80 @@ class UpdateCommandTest extends TestCase
         self::assertSame(2, $code);
         self::assertSame([], $harness->requests);
         self::assertSame('usage', AbstractCommandTest::decode($stderr)['data']['kind']);
+    }
+
+    public function testTheTuiFormatOpensAFormFilledWithTheObjectAndTheOptions(): void
+    {
+        $driver = new ScriptedDriver([Keys::TAB, ...Keys::text('-8'), Keys::CTRL_S, Keys::CTRL_C]);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $tag = ['id' => 't1', 'name' => 'PHP', 'slug' => 'php', 'isHighlighted' => false];
+        $harness->respond('GET /api/v1/admin/tag/t1', 200, ['meta' => ['id' => 't1'], 'data' => $tag])
+            ->respond('PUT /api/v1/admin/tag/t1', 200, ['meta' => ['id' => 't1'], 'data' => ['name' => 'PHP 8', 'slug' => 'php-8'] + $tag]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:update', 't1', '--format=tui', '--name=PHP 8'],
+            [],
+            true,
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stdout);
+        self::assertSame('', $stderr);
+        self::assertStringStartsWith('tag · edit PHP', $driver->screens[0]);
+        self::assertStringContainsString('> name           PHP 8', $driver->screens[0]);
+        self::assertSame(['GET', 'PUT'], array_column($harness->requests, 'method'));
+        self::assertSame(['name' => 'PHP 8', 'slug' => 'php-8'], AbstractCommandTest::body($harness, 1));
+        self::assertStringContainsString('The tag was saved', $driver->screen());
+    }
+
+    public function testTheTuiFormatNeedsATerminalAndSendsNothingWithoutIt(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:update', 't1', '--format=tui', '--name=PHP 8'],
+            [],
+            true,
+        );
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('usage', AbstractCommandTest::decode($stderr)['data']['kind']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testAnObjectNotFoundNeverOpensTheFormOfTheTuiFormat(): void
+    {
+        $driver = new ScriptedDriver([]);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('GET /api/v1/admin/tag/t1', 404, ['meta' => ['error' => true], 'data' => ['message' => 'Gone']]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:update', 't1', '--format=tui'], [], true);
+
+        self::assertSame(4, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('Gone', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame(0, $driver->runs);
+        self::assertCount(1, $harness->requests);
+    }
+
+    public function testADryRunNeverOpensTheTuiFormat(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:update', 't1', '--format=tui', '--name=PHP 8', '--dry-run'],
+        );
+
+        self::assertSame(0, $code);
+        self::assertTrue(AbstractCommandTest::decode($stdout)['dryRun']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
     }
 }

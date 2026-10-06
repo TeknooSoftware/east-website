@@ -58,14 +58,18 @@ use Teknoo\East\Website\Tools\Output\Renderer;
 use Teknoo\East\Website\Tools\Output\Warnings;
 use Teknoo\East\Website\Tools\Resource\Operation;
 use Teknoo\East\Website\Tools\Resource\Registry;
+use Teknoo\East\Website\Tools\Resource\ResourceGateway;
+use Teknoo\East\Website\Tools\Tui\Driver\DriverInterface;
+use Teknoo\East\Website\Tools\Tui\Driver\TerminalDriver;
+use Teknoo\East\Website\Tools\Tui\TuiLauncher;
 
 use function getcwd;
 
 /**
  * Console application of the East Website CLI: a client of the remote JSON API, usable by humans and by agents.
  * The connection is configured only by the login, in a JSON file (./east-website.json by default) read by the
- * other commands. The HTTP client, the clock and the working directory are injectable, to test the whole
- * application without any network.
+ * other commands. The HTTP client, the clock, the working directory and the driver of the terminal of the
+ * interactive mode are injectable, to test the whole application without any network nor terminal.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -78,25 +82,33 @@ class Application extends BaseApplication
 
     /**
      * @param string|null $workingDirectory directory of the default configuration file, the current one by default
+     * @param DriverInterface|null $driver terminal of the interactive mode (--format=tui), the real one by default
      */
     public static function create(
         ?HttpClientInterface $http = null,
         ?ClockInterface $clock = null,
         ?string $workingDirectory = null,
+        ?DriverInterface $driver = null,
     ): self {
         $clock ??= new SystemClock();
         $warnings = new Warnings();
         $transport = new Transport($http ?? HttpClient::create());
         $authenticator = new Authenticator($transport, $clock, $warnings);
 
+        $client = new ApiClient($transport, $authenticator);
+        $gateway = new ResourceGateway($client);
+        $registry = new Registry();
+
         $runtime = new Runtime(
-            client: new ApiClient($transport, $authenticator),
+            client: $client,
             authenticator: $authenticator,
             connections: new ConnectionFactory($workingDirectory ?? (string) getcwd()),
             renderer: new Renderer(),
             warnings: $warnings,
-            registry: new Registry(),
+            registry: $registry,
             clock: $clock,
+            gateway: $gateway,
+            tui: new TuiLauncher($driver ?? new TerminalDriver(), $gateway, $registry),
         );
 
         $application = new self(Version::NAME, Version::VERSION);

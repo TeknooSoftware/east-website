@@ -43,6 +43,8 @@ class FieldDefinition
 {
     /**
      * @param list<string> $choices accepted values, empty when free
+     * @param string|null $target name of the resource referenced by an id, to choose it in the interactive mode
+     * @param bool $multiline true when the text is edited on several lines in the interactive mode
      */
     public function __construct(
         public readonly string $name,
@@ -50,6 +52,8 @@ class FieldDefinition
         public readonly string $description,
         private readonly ?string $option = null,
         public readonly array $choices = [],
+        public readonly ?string $target = null,
+        public readonly bool $multiline = false,
     ) {
     }
 

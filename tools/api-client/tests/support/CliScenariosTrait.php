@@ -334,4 +334,78 @@ trait CliScenariosTrait
         self::assertContains('website:front:post:list-by-tag', $names);
         self::assertGreaterThan(40, count($names));
     }
+
+    public function testTheTuiFormatIsRefusedWithoutATerminalBeforeAnyRequest(): void
+    {
+        $this->login();
+
+        [$code, $stdout, $stderr] = $this->cli->run(['website:tag:list', '--format=tui']);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('usage', json_decode($stderr, true)['data']['kind']);
+        self::assertSame([], $this->requestsTo('GET', '/api/v1/admin/tags'));
+    }
+
+    public function testTheTuiFormatOfACommandWithoutScreenPrintsATable(): void
+    {
+        $this->login();
+
+        [$code, $stdout, $stderr] = $this->cli->run(['website:auth:status', '--format=tui']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertStringContainsString('| field', $stdout);
+        self::assertStringContainsString($this->server->url, $stdout);
+    }
+
+    public function testADryRunOfTheTuiFormatPrintsJson(): void
+    {
+        $this->login();
+
+        [$code, $stdout] = $this->cli->run(['website:tag:list', '--format=tui', '--dry-run', '--compact']);
+
+        self::assertSame(0, $code);
+        self::assertTrue(json_decode($stdout, true)['dryRun']);
+        self::assertSame([], $this->requestsTo('GET', '/api/v1/admin/tags'));
+    }
+
+    public function testTheTuiFormatRunsInATerminal(): void
+    {
+        if (!Cli::hasTerminal()) {
+            self::markTestSkipped('The commands "script" and "timeout" are needed to run the CLI in a pseudo terminal');
+        }
+
+        $this->login();
+
+        // The table of the tags, then "q" quits
+        [$code, $display] = $this->cli->runInTerminal(
+            ['website:tag:list', '--format=tui'],
+            [['page 1/1', 'q']],
+        );
+
+        self::assertSame(0, $code, $display);
+        self::assertStringContainsString('tag · list', $display);
+        self::assertStringContainsString('tag-1', $display);
+        self::assertCount(1, $this->requestsTo('GET', '/api/v1/admin/tags'));
+    }
+
+    public function testTheTuiFormatEditsAnObjectInATerminal(): void
+    {
+        if (!Cli::hasTerminal()) {
+            self::markTestSkipped('The commands "script" and "timeout" are needed to run the CLI in a pseudo terminal');
+        }
+
+        $this->login();
+
+        // The form of a new tag: its name is typed, Ctrl+S saves it, Ctrl+C quits
+        [$code, $display] = $this->cli->runInTerminal(
+            ['website:tag:create', '--format=tui'],
+            [['tag · new', "Hello\x13"], ['The tag was created', "\x03"]],
+        );
+
+        self::assertSame(0, $code, $display);
+        self::assertStringContainsString('tag · new', $display);
+        self::assertStringContainsString('The tag was created', $display);
+        self::assertSame('{"name":"Hello"}', $this->requestsTo('POST', '/api/v1/admin/tag/new')[0]['body']);
+    }
 }

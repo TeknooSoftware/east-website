@@ -32,6 +32,8 @@ use Teknoo\East\Website\Tools\Command\Resource\CreateCommand;
 use Teknoo\East\Website\Tools\Command\Resource\WriteCommand;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
+use Teknoo\Tests\East\Website\Tools\Support\Keys;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 
 use function file_put_contents;
 
@@ -628,5 +630,68 @@ class CreateCommandTest extends TestCase
         self::assertSame('', $stdout);
         self::assertSame(['.blocks.0.type' => 'This value is not valid.'], AbstractCommandTest::decode($stderr)['data']['fields']);
         self::assertCount(1, $harness->requests);
+    }
+
+    public function testTheTuiFormatOpensAFormFilledWithTheOptionsAndCreatesTheObject(): void
+    {
+        $driver = new ScriptedDriver([Keys::TAB, ...Keys::text('twig'), Keys::F2, Keys::CTRL_C]);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+        $harness->respond('POST /api/v1/admin/tag/new', 302, [], ['Location' => '/api/v1/admin/tag/t9'])
+            ->respond('GET /api/v1/admin/tag/t9', 200, [
+                'meta' => ['id' => 't9'],
+                'data' => ['id' => 't9', 'name' => 'Twig', 'slug' => 'twig', 'isHighlighted' => false],
+            ]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:create', '--format=tui', '--name=Twig'],
+            [],
+            true,
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stdout);
+        self::assertSame('', $stderr);
+        self::assertStringStartsWith('tag · new', $driver->screens[0]);
+        self::assertStringContainsString('> name           Twig', $driver->screens[0]);
+        self::assertSame(['POST', 'GET'], array_column($harness->requests, 'method'));
+        self::assertSame(['name' => 'Twig', 'slug' => 'twig'], AbstractCommandTest::body($harness, 0));
+        self::assertStringStartsWith('tag · edit Twig', $driver->screen());
+        self::assertStringContainsString('The tag was created', $driver->screen());
+    }
+
+    public function testTheTuiFormatNeedsATerminalAndSendsNothingWithoutIt(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:create', '--format=tui', '--name=Twig'],
+            [],
+            true,
+        );
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('usage', AbstractCommandTest::decode($stderr)['data']['kind']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testADryRunNeverOpensTheTuiFormat(): void
+    {
+        $driver = new ScriptedDriver([], false);
+        $harness = new ApiHarness(['token' => 'jwt'], driver: $driver);
+
+        [$code, $stdout] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:create', '--format=tui', '--name=Twig', '--dry-run'],
+        );
+
+        self::assertSame(0, $code);
+        self::assertTrue(AbstractCommandTest::decode($stdout)['dryRun']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
     }
 }

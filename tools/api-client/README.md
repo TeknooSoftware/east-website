@@ -10,11 +10,15 @@ Command line client of the remote JSON API of East Website (see the section *JSO
 [main README](../../README.md)), built with the Symfony Console. It exposes every function of the API, grouped by
 domain (`website:<domain>:<action>`), and it is designed to be used by **scripts and AI agents** as well as by humans:
 
-* the result is always **one JSON document on stdout** (the envelope of the API is passed through unchanged),
+* by default, the result is always **one JSON document on stdout** (the envelope of the API is passed through
+  unchanged),
 * the failures are **one JSON document on stderr** with a stable **exit code**,
-* nothing depends on a terminal (no colors, no prompt, except the API key at the login and a confirmation before a
-  deletion, only on an interactive tty),
-* secrets are never accepted as a command line value, and never printed.
+* with this default format, nothing depends on a terminal (no colors, no prompt, except the API key at the login and a
+  confirmation before a deletion, only on an interactive tty),
+* secrets are never accepted as a command line value, and never printed,
+* for humans, `--format=table` prints tables and `--format=tui` opens an
+  [interactive interface](#interactive-mode---formattui) in the terminal: tables for the lists, forms to read, create
+  and update the objects.
 
 It is a standalone application, with its own dependencies: it is not part of the library, and it is excluded from its
 archives.
@@ -155,8 +159,60 @@ duplicate.
 * `--dry-run` prints the HTTP requests that would be sent (the bearer is masked) and sends nothing.
 * `delete` asks a confirmation only on an interactive terminal; `-y`/`--yes` or `-n` skip it, so an agent is never
   blocked. On the server, a deletion is a soft deletion.
-* `--format=table` prints a table instead of JSON (for humans), `--compact` prints the JSON on one line.
+* `--format=table` prints a table instead of JSON (for humans), `--format=tui` opens the
+  [interactive mode](#interactive-mode---formattui), `--compact` prints the JSON on one line.
 * The output is never altered by the formatter of the Console: the HTML content of the website is printed as is.
+
+## Interactive mode (`--format=tui`)
+
+For humans, the commands of the admin API have an interactive interface in the terminal, built with the Symfony
+[TUI component](https://symfony.com/doc/current/tui/index.html). The JSON output stays the default, and it is not
+changed by this mode.
+
+```bash
+east-website website:content:list --format=tui                  # the table of the contents, page by page
+east-website website:content:get <id> --format=tui              # an object, read only
+east-website website:content:update <id> --format=tui --title=T # its form, filled with the object and the options
+east-website website:content:create --format=tui                # an empty form
+```
+
+Each of these commands is an entry point: from the table, the objects are opened, edited, created and deleted without
+leaving the interface.
+
+| Screen                       | Keys                                                                                 |
+|------------------------------|--------------------------------------------------------------------------------------|
+| Everywhere                   | `Ctrl+C` quit                                                                         |
+| Table                        | `↑`/`↓` (or `k`/`j`), `PgUp`/`PgDn`, `Home`/`End` move · `Enter` view · `e` edit · `n` new · `d` delete (confirmed) · `←`/`→` previous / next page · `r` reload · `Esc` back · `q` quit |
+| Table, to choose a relation  | `Enter` choose · `Space` check (several objects) · `Backspace` none · `Esc` cancel   |
+| Object, read only            | `↑`/`↓` move · `e` edit · `d` delete · `Esc` back · `q` quit                         |
+| Form                         | `Tab`/`Shift+Tab` next / previous field · `Enter` next field, new line in a text on several lines, or choose the objects of a relation · `Space` check · `Ctrl+S` or `F2` save · `Esc` back (twice to discard the changes) |
+| Confirmation                 | `y` yes · `n`, `Enter`, `Esc` no                                                     |
+
+* **Forms.** Like the options of the commands, an update sends only the changed fields. The values given as options
+  on the command line fill the form and are always sent (as they were given, while they are not changed in the form).
+  The validation errors of the API are displayed under their fields: fix them and save again. After a creation, the
+  form goes on as an update of the created object.
+* **Relations** (author, type, tags, parent item, linked content) are chosen in the table of their resource.
+* **Blocks of a content.** The form has an editor by block of the type of the content, they are loaded when the type
+  is chosen, and sent with a second request when the API needs it. If this second request fails, the form goes on as an
+  update of the object, to not create it twice.
+* **Other commands.** `delete`, `website:auth:*`, `website:schema`, `website:media:create` and `website:front:*` have no
+  screen: with `--format=tui` they print the same table as `--format=table`. `--dry-run` never opens the interface, it
+  prints the requests as JSON.
+* **A terminal is required** on the standard input and on the standard output. Without it (a pipe, a redirection,
+  `--no-interaction`), the command fails with a usage error (exit code `2`) before any request.
+* **Errors.** The command sends its first request before opening the interface: its failure follows the usual contract
+  (a JSON document on stderr, the exit codes below). The later errors are displayed in the interface, and leaving it is
+  a success (exit code `0`).
+
+Limits of this mode:
+
+* The requests are synchronous: the interface is frozen until the response (or the timeout) of a request, and the
+  keys typed meanwhile, `Ctrl+C` included, are handled after.
+* It needs a Unix terminal with `stty` (Windows is not supported), and `ext-pcntl` to follow the resizing of the
+  terminal.
+* Some terminals and multiplexers keep `Ctrl+S` for themselves (flow control): use `F2` to save.
+* The TUI component is experimental in Symfony 8.1, its version is pinned to this minor version (`~8.1.0`).
 
 ## Output and exit codes
 
@@ -203,8 +259,14 @@ make tools-phar        # builds tools/api-client/dist/east-website.phar, then ru
   `MockHttpClient`), `e2e` (a real PHP process, the real HTTP client and a fake API served by the PHP built-in server)
   and `phar` (the same scenarios on the built phar, which must not embed any development dependency).
 * The commands are generated from the catalogue `src/Resource/Registry.php`. To support a new resource or a new
-  field of the API, describe it there: the commands, the options, `website:schema` and the tests of the catalogue
-  follow.
+  field of the API, describe it there: the commands, the options, `website:schema`, the screens of the interactive mode
+  and the tests of the catalogue follow. For the interactive mode, a field can name the resource it references
+  (`target`, to choose it in a table) and be edited on several lines (`multiline`); a resource has the columns of its
+  table (`listColumns`) and the field naming its objects (`labelField`).
+* `src/Tui` is the interactive mode: the TUI component has no table and no form, they are the widgets of
+  `src/Tui/Widget`. It is tested without any terminal, on the virtual terminal of the component
+  (`tests/support/TuiHarness.php` for a widget or a screen, `tests/support/ScriptedDriver.php` for a whole command with
+  a script of keys), and in a real pseudo terminal by the end to end tests when `script` (util-linux) is available.
 * `BlockTypes::INDEXES` must follow the order of the choices of `BlockType` (the Symfony form of the bundle): a test
   compares them.
 * The phar is built with Box, downloaded and verified by `tools/api-client/Makefile` (Box can not be a dependency of

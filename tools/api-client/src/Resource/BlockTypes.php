@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Tools\Resource;
 
 use function array_keys;
+use function array_search;
 
 /**
  * Types of blocks of a Type. The API expects the index of the choice of the Symfony form (BlockType), not the
@@ -57,5 +58,15 @@ class BlockTypes
     public static function index(string $kind): ?string
     {
         return self::INDEXES[$kind] ?? null;
+    }
+
+    /**
+     * Kind of an index, the reverse of index().
+     */
+    public static function kind(string $index): ?string
+    {
+        $kind = array_search($index, self::INDEXES, true);
+
+        return false !== $kind ? $kind : null;
     }
 }

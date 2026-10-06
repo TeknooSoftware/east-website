@@ -35,7 +35,8 @@
   with `make tools-phar`, not part of the library package): every function of the API grouped by domain (`website:type:create`,
   `website:post:list`, `website:front:post:get`...), configured by `website:auth:login` (username and API key) which
   writes `./east-website.json` read by the other commands, JSON output and stable exit codes, to be used by scripts and
-  AI agents.
+  AI agents. For humans, `--format=table` prints tables and `--format=tui` opens an interactive terminal interface
+  (Symfony TUI component): tables for the lists, forms to read, create and update the objects.
 
 ## [11.2.0] - 2026-05-17
 ### Stable Release

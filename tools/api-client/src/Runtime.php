@@ -32,6 +32,8 @@ use Teknoo\East\Website\Tools\Http\ApiClient;
 use Teknoo\East\Website\Tools\Output\Renderer;
 use Teknoo\East\Website\Tools\Output\Warnings;
 use Teknoo\East\Website\Tools\Resource\Registry;
+use Teknoo\East\Website\Tools\Resource\ResourceGateway;
+use Teknoo\East\Website\Tools\Tui\TuiLauncher;
 
 /**
  * Services shared by all the commands of the CLI.
@@ -51,6 +53,8 @@ class Runtime
         public readonly Warnings $warnings,
         public readonly Registry $registry,
         public readonly ClockInterface $clock,
+        public readonly ResourceGateway $gateway,
+        public readonly TuiLauncher $tui,
     ) {
     }
 }

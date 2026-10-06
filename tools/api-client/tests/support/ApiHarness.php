@@ -33,6 +33,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 use Teknoo\East\Website\Tools\Application;
 use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Http\Json;
+use Teknoo\East\Website\Tools\Tui\Driver\DriverInterface;
 
 use function array_keys;
 use function array_shift;
@@ -89,9 +90,13 @@ class ApiHarness
      * all, like before any login).
      *
      * @param array<string, mixed>|null $config
+     * @param DriverInterface|null $driver terminal of the interactive mode, a scripted one to run it
      */
-    public function __construct(?array $config = [], public readonly FixedClock $clock = new FixedClock())
-    {
+    public function __construct(
+        ?array $config = [],
+        public readonly FixedClock $clock = new FixedClock(),
+        ?DriverInterface $driver = null,
+    ) {
         $this->temp = new TempDir();
         $http = new MockHttpClient($this->handle(...), self::URL);
 
@@ -99,7 +104,7 @@ class ApiHarness
             $this->writeConfig($config);
         }
 
-        $application = Application::create($http, $this->clock, $this->temp->path());
+        $application = Application::create($http, $this->clock, $this->temp->path(), $driver);
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
         $this->application = $application;

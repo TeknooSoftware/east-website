@@ -26,8 +26,6 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Tools\Command\Resource;
 
 use Teknoo\East\Website\Tools\Config\Connection;
-use Teknoo\East\Website\Tools\Http\ApiRequest;
-use Teknoo\East\Website\Tools\Http\ApiResponse;
 use Teknoo\East\Website\Tools\Input\Payload;
 use Teknoo\East\Website\Tools\Resource\Operation;
 
@@ -58,23 +56,14 @@ class UpdateCommand extends WriteCommand
         return false;
     }
 
-    protected function firstRequest(
-        Connection $connection,
-        array $params,
-        array $query,
-        Payload $payload,
-        bool $twoSteps,
-    ): ApiRequest {
-        return ApiRequest::json(
-            'PUT',
-            $connection->endpoints->admin($this->definition->itemPath(), $params),
-            $twoSteps ? $payload->first() : $payload->body(),
-            $query,
-        );
-    }
-
-    protected function sendFirst(Connection $connection, ApiRequest $request): ApiResponse
+    protected function openForm(Connection $connection, array $params, array $query, Payload $payload): void
     {
-        return $this->runtime->client->call($connection, $request);
+        // The form is filled with the current object: without it nothing is opened, the failure is the usual one
+        $document = $this->runtime->client->call(
+            $connection,
+            $this->runtime->gateway->getRequest($connection, $this->definition, $params, $query),
+        );
+
+        $this->runtime->tui->edit($connection, $this->definition, $params, $query, $document, $payload);
     }
 }

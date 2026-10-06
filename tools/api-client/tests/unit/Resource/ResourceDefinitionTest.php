@@ -83,6 +83,44 @@ class ResourceDefinitionTest extends TestCase
         self::assertSame([], $definition->parents);
         self::assertFalse($definition->translatable);
         self::assertFalse($definition->hasParts);
+        self::assertSame([], $definition->listColumns);
+        self::assertSame('name', $definition->labelField);
+    }
+
+    public function testDefaultsOfTheInteractiveModeWithTheOtherArguments(): void
+    {
+        $definition = $this->definition();
+
+        self::assertSame([], $definition->listColumns);
+        self::assertSame('name', $definition->labelField);
+    }
+
+    public function testListColumnsAndLabelField(): void
+    {
+        $definition = new ResourceDefinition(
+            name: 'content',
+            label: 'content',
+            basePath: 'content',
+            listPath: 'contents',
+            fields: [new FieldDefinition('title', FieldKind::String, 'Title')],
+            operations: [Operation::List],
+            listColumns: ['id', 'title', 'publishedAt'],
+            labelField: 'title',
+        );
+
+        self::assertSame(['id', 'title', 'publishedAt'], $definition->listColumns);
+        self::assertSame('title', $definition->labelField);
+        self::assertSame([], $definition->parents);
+        self::assertFalse($definition->translatable);
+        self::assertFalse($definition->hasParts);
+    }
+
+    public function testListColumnsAndLabelFieldAreTheLastArguments(): void
+    {
+        $definition = new ResourceDefinition('media', 'media', 'media', 'media', [], [], [], false, false, ['id', 'name'], 'id');
+
+        self::assertSame(['id', 'name'], $definition->listColumns);
+        self::assertSame('id', $definition->labelField);
     }
 
     public function testOperationsAreTheLastSegmentOfTheCommandNames(): void

@@ -27,6 +27,7 @@ namespace Teknoo\Tests\East\Website\Tools\Resource;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Website\Tools\Resource\FieldKind;
 use Teknoo\East\Website\Tools\Resource\FrontArgument;
 use Teknoo\East\Website\Tools\Resource\FrontEndpoint;
 use Teknoo\East\Website\Tools\Resource\Operation;
@@ -171,6 +172,126 @@ class RegistryTest extends TestCase
 
         self::assertNotNull($roles);
         self::assertSame(['ROLE_USER', 'ROLE_ADMIN'], $roles->choices);
+    }
+
+    public function testEveryTargetIsAResourceWhichCanBeListedWithoutParent(): void
+    {
+        $registry = new Registry();
+        $targets = 0;
+
+        foreach ($registry->resources() as $resource) {
+            foreach ($resource->fields as $field) {
+                if (null === $field->target) {
+                    continue;
+                }
+
+                ++$targets;
+                $where = $resource->name . '.' . $field->name . ' -> ' . $field->target;
+                $target = $registry->resource($field->target);
+
+                self::assertInstanceOf(ResourceDefinition::class, $target, $where);
+                self::assertSame([], $target->parents, $where);
+                self::assertTrue($target->supports(Operation::List), $where);
+                self::assertContains($field->kind, [FieldKind::Id, FieldKind::IdList], $where);
+            }
+        }
+
+        self::assertSame(8, $targets);
+    }
+
+    public function testTargetsOfTheRelations(): void
+    {
+        $targets = [];
+        foreach ((new Registry())->resources() as $resource) {
+            foreach ($resource->fields as $field) {
+                if (null !== $field->target) {
+                    $targets[$resource->name][$field->name] = $field->target;
+                }
+            }
+        }
+
+        self::assertSame(
+            [
+                'content' => ['author' => 'user', 'type' => 'type', 'tags' => 'tag'],
+                'post' => ['author' => 'user', 'type' => 'type', 'tags' => 'tag'],
+                'item' => ['parent' => 'item', 'content' => 'content'],
+            ],
+            $targets,
+        );
+    }
+
+    public function testKindsOfTheRelations(): void
+    {
+        $kinds = [];
+        foreach (['content', 'post', 'item'] as $name) {
+            foreach ($this->resource($name)->fields as $field) {
+                if (null !== $field->target) {
+                    $kinds[$name][$field->name] = $field->kind;
+                }
+            }
+        }
+
+        self::assertSame(
+            [
+                'content' => ['author' => FieldKind::Id, 'type' => FieldKind::Id, 'tags' => FieldKind::IdList],
+                'post' => ['author' => FieldKind::Id, 'type' => FieldKind::Id, 'tags' => FieldKind::IdList],
+                'item' => ['parent' => FieldKind::Id, 'content' => FieldKind::Id],
+            ],
+            $kinds,
+        );
+    }
+
+    public function testFieldsEditedOnSeveralLines(): void
+    {
+        $multiline = [];
+        $fields = 0;
+        foreach ((new Registry())->resources() as $resource) {
+            foreach ($resource->fields as $field) {
+                ++$fields;
+                if ($field->multiline) {
+                    $multiline[] = $resource->name . '.' . $field->name;
+                    self::assertSame(FieldKind::String, $field->kind, $resource->name . '.' . $field->name);
+                }
+            }
+        }
+
+        self::assertSame(['content.description', 'post.description', 'comment.moderatedContent'], $multiline);
+        self::assertGreaterThan(3, $fields);
+    }
+
+    public function testLabelFields(): void
+    {
+        $labels = [];
+        foreach ((new Registry())->resources() as $resource) {
+            $labels[$resource->name] = $resource->labelField;
+        }
+
+        self::assertSame(
+            [
+                'tag' => 'name',
+                'type' => 'name',
+                'content' => 'title',
+                'post' => 'title',
+                'item' => 'name',
+                'user' => 'email',
+                'media' => 'name',
+                'comment' => 'title',
+            ],
+            $labels,
+        );
+    }
+
+    public function testListColumns(): void
+    {
+        $columns = ['id', 'title', 'slug', 'type', 'author', 'tags', 'publishedAt'];
+
+        self::assertSame($columns, $this->resource('content')->listColumns);
+        self::assertSame($columns, $this->resource('post')->listColumns);
+        self::assertSame(['id', 'name', 'length'], $this->resource('media')->listColumns);
+
+        foreach (['tag', 'type', 'item', 'user', 'comment'] as $name) {
+            self::assertSame([], $this->resource($name)->listColumns, $name);
+        }
     }
 
     public function testFrontEndpoints(): void

@@ -35,6 +35,7 @@ use Teknoo\East\Website\Tools\Http\ApiException;
 use Teknoo\East\Website\Tools\Http\ErrorKind;
 use Teknoo\East\Website\Tools\Input\Payload;
 use Teknoo\East\Website\Tools\Input\PayloadBuilder;
+use Teknoo\East\Website\Tools\Resource\FieldDefinition;
 use Teknoo\East\Website\Tools\Resource\Registry;
 use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 
@@ -369,5 +370,81 @@ class PayloadBuilderTest extends TestCase
         $payload = $this->build('comment', ['--moderated-author' => 'A', '--moderated-content' => 'C']);
 
         self::assertSame(['moderatedAuthor' => 'A', 'moderatedContent' => 'C'], $payload->fields);
+    }
+
+    private function field(string $resource, string $name): FieldDefinition
+    {
+        foreach ((new Registry())->resource($resource)->fields ?? [] as $field) {
+            if ($field->name === $name) {
+                return $field;
+            }
+        }
+
+        throw new LogicException('Unknown field ' . $resource . '.' . $name);
+    }
+
+    public function testCastTypesAValueWhateverItsSource(): void
+    {
+        $builder = new PayloadBuilder();
+
+        self::assertSame('Title', $builder->cast($this->field('content', 'title'), 'Title'));
+        self::assertSame('', $builder->cast($this->field('content', 'title'), null));
+        self::assertTrue($builder->cast($this->field('tag', 'isHighlighted'), true));
+        self::assertFalse($builder->cast($this->field('tag', 'isHighlighted'), false));
+        self::assertFalse($builder->cast($this->field('tag', 'isHighlighted'), null));
+        self::assertSame(3, $builder->cast($this->field('item', 'position'), '3'));
+        self::assertSame(4, $builder->cast($this->field('item', 'position'), 4));
+        self::assertSame('u1', $builder->cast($this->field('content', 'author'), 'u1'));
+        self::assertNull($builder->cast($this->field('content', 'author'), ''));
+        self::assertNull($builder->cast($this->field('content', 'author'), null));
+        self::assertSame(['t1', 't2'], $builder->cast($this->field('content', 'tags'), ['t1', '', 't2', 3]));
+        self::assertSame([], $builder->cast($this->field('content', 'tags'), null));
+        self::assertSame(['ROLE_ADMIN'], $builder->cast($this->field('user', 'roles'), ['ROLE_ADMIN']));
+        self::assertSame(
+            [['name' => 'intro', 'type' => '0'], ['name' => 'a:b', 'type' => '3']],
+            $builder->cast($this->field('type', 'blocks'), ['intro:textarea', 'a:b:numeric']),
+        );
+    }
+
+    /**
+     * @return iterable<string, array{string, string, string|bool|int|array<mixed>|null, string}>
+     */
+    public static function invalidRawValues(): iterable
+    {
+        yield 'integer' => ['item', 'position', 'abc', 'The option --position expects an integer, "abc" given'];
+        yield 'empty integer' => ['item', 'position', '', 'The option --position expects an integer, "" given'];
+        yield 'list for a scalar' => ['tag', 'name', ['a'], 'The option --name expects a single value'];
+        yield 'choice' => ['user', 'roles', ['ROLE_GOD'], 'The option --role expects one of ROLE_USER, ROLE_ADMIN'];
+        yield 'block' => ['type', 'blocks', ['intro'], 'The option --block expects <name>:<kind> with kind in'];
+    }
+
+    /**
+     * @param string|bool|int|array<mixed>|null $raw
+     */
+    #[DataProvider('invalidRawValues')]
+    public function testCastRejectsAnInvalidValue(
+        string $resource,
+        string $name,
+        string|bool|int|array|null $raw,
+        string $message,
+    ): void {
+        try {
+            (new PayloadBuilder())->cast($this->field($resource, $name), $raw);
+            self::fail('An exception was expected');
+        } catch (ApiException $error) {
+            self::assertSame(ErrorKind::Usage, $error->kind);
+            self::assertStringContainsString($message, $error->getMessage());
+        }
+    }
+
+    public function testTheNumericKeysOfTheRawJsonAreAccepted(): void
+    {
+        // PHP casts the numeric keys of a JSON object to integers
+        $payload = $this->build('content', ['--data' => '{"12":"x","title":"T","block_7":"seven"}']);
+
+        self::assertSame([12 => 'x', 'title' => 'T'], $payload->fields);
+        self::assertSame([7 => 'seven'], $payload->parts);
+
+        self::assertSame([12 => 'x'], $this->build('tag', ['--data' => '{"12":"x"}'])->fields);
     }
 }

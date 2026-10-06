@@ -31,7 +31,8 @@ use function implode;
 use function sprintf;
 
 /**
- * Output format of the commands: JSON is the default and the only one used by agents, the table is for humans.
+ * Output format of the commands: JSON is the default and the only one used by agents, the table and the
+ * interactive terminal interface (tui) are for humans.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -42,6 +43,7 @@ enum OutputFormat: string
 {
     case Json = 'json';
     case Table = 'table';
+    case Tui = 'tui';
 
     public static function fromOption(?string $value): self
     {

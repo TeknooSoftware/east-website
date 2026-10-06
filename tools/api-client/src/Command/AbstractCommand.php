@@ -43,7 +43,7 @@ use function array_map;
 /**
  * Base of all the commands of the CLI. The result is a JSON document on stdout, the failure a JSON document on
  * stderr with a stable exit code (0 ok, 1 server or transport, 2 usage or validation, 3 authentication, 4 not
- * found).
+ * found). The formats for humans (table, tui) change only the display of the result.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -65,7 +65,7 @@ abstract class AbstractCommand extends Command
             'format',
             null,
             InputOption::VALUE_REQUIRED,
-            'Output format: json (default, machine readable) or table',
+            'Output format: json (default, machine readable), table or tui (interactive, needs a terminal)',
             OutputFormat::Json->value,
         );
         $this->addOption('compact', null, InputOption::VALUE_NONE, 'Print the JSON document on a single line');
@@ -131,6 +131,29 @@ abstract class AbstractCommand extends Command
             OutputFormat::fromOption(InputReader::string($input, 'format')),
             InputReader::flag($input, 'compact'),
         );
+    }
+
+    /**
+     * True when the command must open its interactive screen. A dry run never does: it only prints the requests.
+     */
+    protected function isTui(InputInterface $input): bool
+    {
+        return OutputFormat::Tui === OutputFormat::fromOption(InputReader::string($input, 'format'))
+            && !$this->isDryRun($input);
+    }
+
+    /**
+     * To call before the first request of an interactive screen: nothing is sent when the screen can not be opened.
+     *
+     * @throws ApiException
+     */
+    protected function assertTui(InputInterface $input): void
+    {
+        if (!$input->isInteractive()) {
+            throw ApiException::usage('The format "tui" is interactive, it can not be used with --no-interaction');
+        }
+
+        $this->runtime->tui->assertInteractive();
     }
 
     protected function isDryRun(InputInterface $input): bool

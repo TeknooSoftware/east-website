@@ -31,7 +31,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Teknoo\East\Website\Tools\Config\Connection;
-use Teknoo\East\Website\Tools\Http\ApiRequest;
 use Teknoo\East\Website\Tools\Input\InputReader;
 use Teknoo\East\Website\Tools\Resource\Operation;
 
@@ -76,7 +75,7 @@ class DeleteCommand extends ResourceCommand
     protected function perform(InputInterface $input, OutputInterface $output, Connection $connection): void
     {
         $params = $this->params($input);
-        $request = ApiRequest::delete($connection->endpoints->admin($this->definition->deletePath(), $params));
+        $request = $this->runtime->gateway->deleteRequest($connection, $this->definition, $params);
         if ($this->isDryRun($input)) {
             $this->dryRun($input, $output, $connection, [$request]);
 

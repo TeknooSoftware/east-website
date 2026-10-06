@@ -27,15 +27,26 @@ namespace Teknoo\Tests\East\Website\Tools\Support;
 
 use RuntimeException;
 
+use function array_map;
 use function array_merge;
+use function escapeshellarg;
+use function explode;
 use function fclose;
+use function feof;
+use function fread;
 use function fwrite;
 use function getenv;
+use function implode;
+use function is_executable;
 use function is_resource;
+use function microtime;
 use function proc_close;
 use function proc_open;
+use function str_contains;
 use function stream_get_contents;
+use function stream_select;
 
+use const PATH_SEPARATOR;
 use const PHP_BINARY;
 
 /**
@@ -85,5 +96,99 @@ class Cli
         fclose($pipes[2]);
 
         return [proc_close($process), $stdout, $stderr];
+    }
+
+    /**
+     * True when the CLI can be run in a pseudo terminal: script (util-linux) and timeout are needed.
+     */
+    public static function hasTerminal(): bool
+    {
+        return self::isExecutable('script') && self::isExecutable('timeout');
+    }
+
+    /**
+     * Runs the CLI in a pseudo terminal, so its standard input and output are a terminal like in a shell. Each
+     * step waits for a text on the terminal, then types its keys: the keys can not be typed before the interface is
+     * displayed, the terminal is not yet in raw mode (Ctrl+C would kill the process). The run is stopped after the
+     * timeout: a scenario which does not quit can not block the tests.
+     *
+     * @param list<string> $arguments
+     * @param list<array{string, string}> $steps the text to wait for, then the keys to type
+     * @return array{int, string} exit code, and everything displayed on the terminal
+     */
+    public function runInTerminal(array $arguments, array $steps, int $timeout = 30): array
+    {
+        $command = implode(' ', array_map(escapeshellarg(...), [PHP_BINARY, $this->binary, ...$arguments]));
+
+        $process = proc_open(
+            ['timeout', (string) $timeout, 'script', '-qec', $command, '/dev/null'],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w']],
+            $pipes,
+            $this->workingDirectory,
+            [
+                'PATH' => (string) getenv('PATH'),
+                'XDEBUG_MODE' => 'off',
+                'TERM' => 'xterm',
+            ],
+        );
+
+        if (!is_resource($process)) {
+            throw new RuntimeException('The CLI can not be started in a terminal');
+        }
+
+        $display = '';
+        $deadline = microtime(true) + $timeout;
+        $read = static function () use ($pipes, &$display, $deadline): bool {
+            $streams = [$pipes[1]];
+            $write = null;
+            $except = null;
+            if (microtime(true) > $deadline || false === stream_select($streams, $write, $except, 1)) {
+                return false;
+            }
+
+            if ([] === $streams) {
+                return true;
+            }
+
+            $chunk = fread($pipes[1], 8192);
+            if (false === $chunk || ('' === $chunk && feof($pipes[1]))) {
+                return false;
+            }
+
+            $display .= $chunk;
+
+            return true;
+        };
+
+        foreach ($steps as [$expected, $keys]) {
+            while (!str_contains($display, $expected)) {
+                if (!$read()) {
+                    break 2;
+                }
+            }
+
+            fwrite($pipes[0], $keys);
+        }
+
+        // Until the process exits and closes the terminal
+        while ($read()) {
+            continue;
+        }
+
+        fclose($pipes[0]);
+        fclose($pipes[1]);
+
+        return [proc_close($process), $display];
+    }
+
+    private static function isExecutable(string $name): bool
+    {
+        foreach (explode(PATH_SEPARATOR, (string) getenv('PATH')) as $directory) {
+            if ('' !== $directory && is_executable($directory . '/' . $name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

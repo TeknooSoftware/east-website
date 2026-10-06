@@ -142,4 +142,60 @@ class FieldDefinitionTest extends TestCase
         self::assertSame(['ROLE_USER', 'ROLE_ADMIN'], $field->choices);
         self::assertSame([], (new FieldDefinition('name', FieldKind::String, 'Name'))->choices);
     }
+
+    public function testAFieldHasNoTargetAndIsOnASingleLineByDefault(): void
+    {
+        $field = new FieldDefinition('name', FieldKind::String, 'Name');
+
+        self::assertNull($field->target);
+        self::assertFalse($field->multiline);
+
+        $id = new FieldDefinition('parent', FieldKind::Id, 'Id of the parent', 'parent-id', ['a', 'b']);
+
+        self::assertNull($id->target);
+        self::assertFalse($id->multiline);
+    }
+
+    public function testTargetOfAnId(): void
+    {
+        $field = new FieldDefinition('author', FieldKind::Id, 'Id of the author (a user)', target: 'user');
+
+        self::assertSame('user', $field->target);
+        self::assertFalse($field->multiline);
+        self::assertSame('author', $field->optionName());
+        self::assertSame([], $field->choices);
+
+        $list = new FieldDefinition('tags', FieldKind::IdList, 'Id of a tag', 'tag', [], 'tag');
+
+        self::assertSame('tag', $list->target);
+        self::assertSame('tag', $list->optionName());
+        self::assertSame('tags', $list->name);
+    }
+
+    public function testMultilineText(): void
+    {
+        $field = new FieldDefinition('description', FieldKind::String, 'Description', multiline: true);
+
+        self::assertTrue($field->multiline);
+        self::assertNull($field->target);
+        self::assertSame('description', $field->optionName());
+
+        $positional = new FieldDefinition('description', FieldKind::String, 'Description', null, [], null, true);
+
+        self::assertTrue($positional->multiline);
+        self::assertNull($positional->target);
+    }
+
+    public function testTheTargetAndTheLinesDoNotChangeTheConsoleOption(): void
+    {
+        $plain = (new FieldDefinition('author', FieldKind::Id, 'Id of the author'))->inputOption();
+        $targeted = (new FieldDefinition('author', FieldKind::Id, 'Id of the author', target: 'user', multiline: true))
+            ->inputOption();
+
+        self::assertSame($plain->getName(), $targeted->getName());
+        self::assertSame($plain->getDescription(), $targeted->getDescription());
+        self::assertSame($plain->isValueRequired(), $targeted->isValueRequired());
+        self::assertSame($plain->isArray(), $targeted->isArray());
+        self::assertSame($plain->getDefault(), $targeted->getDefault());
+    }
 }

@@ -29,9 +29,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Http\ApiException;
-use Teknoo\East\Website\Tools\Http\ApiRequest;
-use Teknoo\East\Website\Tools\Http\ApiResponse;
-use Teknoo\East\Website\Tools\Http\ErrorKind;
 use Teknoo\East\Website\Tools\Input\Payload;
 use Teknoo\East\Website\Tools\Input\PayloadBuilder;
 use Teknoo\East\Website\Tools\Resource\ResourceDefinition;
@@ -66,71 +63,45 @@ abstract class WriteCommand extends ResourceCommand
         $this->addDryRunOption();
     }
 
-    /**
-     * @param array<string, string> $params
-     * @param array<string, scalar> $query
-     */
-    abstract protected function firstRequest(
-        Connection $connection,
-        array $params,
-        array $query,
-        Payload $payload,
-        bool $twoSteps,
-    ): ApiRequest;
-
     abstract protected function isCreation(): bool;
 
-    abstract protected function sendFirst(Connection $connection, ApiRequest $request): ApiResponse;
+    /**
+     * Opens the form of the interactive mode, filled with the values given on the command line.
+     *
+     * @param array<string, string> $params
+     * @param array<string, scalar> $query
+     * @throws ApiException
+     */
+    abstract protected function openForm(Connection $connection, array $params, array $query, Payload $payload): void;
 
     protected function perform(InputInterface $input, OutputInterface $output, Connection $connection): void
     {
         $payload = $this->builder->build($this->definition, $input);
         $params = $this->params($input);
         $query = $this->localeQuery($input);
-        $twoSteps = $payload->needsTwoSteps($this->isCreation());
 
-        $first = $this->firstRequest($connection, $params, $query, $payload, $twoSteps);
-        if (!$twoSteps) {
-            if ($this->isDryRun($input)) {
-                $this->dryRun($input, $output, $connection, [$first]);
-
-                return;
-            }
-
-            $this->emit($input, $output, $this->sendFirst($connection, $first));
+        if ($this->isTui($input)) {
+            $this->assertTui($input);
+            $this->openForm($connection, $params, $query, $payload);
 
             return;
         }
 
-        $second = fn (string $id): ApiRequest => ApiRequest::json(
-            'PUT',
-            $connection->endpoints->admin($this->definition->itemPath(), $params + ['id' => $id]),
-            $payload->second(),
+        $plan = $this->runtime->gateway->plan(
+            $connection,
+            $this->definition,
+            $params,
             $query,
+            $payload,
+            $this->isCreation(),
         );
 
         if ($this->isDryRun($input)) {
-            $this->dryRun($input, $output, $connection, [$first, $second(self::PLACEHOLDER_ID)]);
+            $this->dryRun($input, $output, $connection, $plan->requests(self::PLACEHOLDER_ID));
 
             return;
         }
 
-        $response = $this->sendFirst($connection, $first);
-        $id = $params['id'] ?? $response->id();
-        if (null === $id) {
-            throw new ApiException(
-                'The first request succeeded but the id of the object is unknown: the blocks have not been sent',
-                ErrorKind::Server,
-                $response->status,
-            );
-        }
-
-        try {
-            $response = $this->runtime->client->call($connection, $second($id));
-        } catch (ApiException $error) {
-            throw $error->withExtra(['partial' => ['id' => $id, 'failedStep' => 2, 'appliedStep' => 1]]);
-        }
-
-        $this->emit($input, $output, $response);
+        $this->emit($input, $output, $this->runtime->gateway->write($connection, $plan));
     }
 }

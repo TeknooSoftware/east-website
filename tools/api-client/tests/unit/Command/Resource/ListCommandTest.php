@@ -32,6 +32,8 @@ use Teknoo\East\Website\Tools\Command\Resource\ListCommand;
 use Teknoo\East\Website\Tools\Command\Resource\ResourceCommand;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
+use Teknoo\Tests\East\Website\Tools\Support\Keys;
+use Teknoo\Tests\East\Website\Tools\Support\ScriptedDriver;
 
 /**
  * Tests of the list of the objects of the resources of the admin API
@@ -241,5 +243,90 @@ class ListCommandTest extends TestCase
         self::assertSame('', $stdout);
         self::assertStringContainsString('website:auth:login', AbstractCommandTest::decode($stderr)['data']['message']);
         self::assertSame([], $harness->requests);
+    }
+
+    /**
+     * @param list<string> $keys
+     * @return array{ApiHarness, ScriptedDriver}
+     */
+    private function tui(array $keys, bool $terminal = true): array
+    {
+        $driver = new ScriptedDriver($keys, $terminal);
+
+        return [new ApiHarness(['token' => 'jwt'], driver: $driver), $driver];
+    }
+
+    public function testTheTuiFormatOpensTheTableOfTheListAndLoadsTheOtherPages(): void
+    {
+        [$harness, $driver] = $this->tui([Keys::RIGHT, 'q']);
+        $harness->respond('GET /api/v1/admin/tags', 200, self::PAGE)
+            ->respond('GET /api/v1/admin/tags', 200, ['meta' => ['totalPages' => 3, 'page' => 3, 'count' => 42], 'data' => []]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:tag:list', '--format=tui', '--order=name'],
+            [],
+            true,
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stdout);
+        self::assertSame('', $stderr);
+        self::assertSame(1, $driver->runs);
+        self::assertStringStartsWith('tag · list', $driver->screens[0]);
+        self::assertStringContainsString('> x-1', $driver->screens[0]);
+        self::assertStringContainsString('page 2/3 · 42 item(s)', $driver->screens[0]);
+        self::assertStringContainsString('page 3/3 · 42 item(s)', $driver->screens[1]);
+        self::assertSame(['order=name', 'page=3&order=name'], array_column($harness->requests, 'query'));
+    }
+
+    public function testTheTuiFormatOfTheListOfANestedResourceKeepsItsParent(): void
+    {
+        [$harness, $driver] = $this->tui([Keys::CTRL_C]);
+        $harness->respond('GET /api/v1/admin/post/post-9/comments', 200, self::PAGE);
+
+        [$code] = AbstractCommandTest::execute($harness, ['website:comment:list', 'post-9', '--format=tui'], [], true);
+
+        self::assertSame(0, $code);
+        self::assertStringStartsWith('comment of a blog post · list', $driver->screens[0]);
+    }
+
+    public function testTheTuiFormatNeedsATerminalAndSendsNothingWithoutIt(): void
+    {
+        [$harness, $driver] = $this->tui([], false);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:list', '--format=tui'], [], true);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('usage', AbstractCommandTest::decode($stderr)['data']['kind']);
+        self::assertStringContainsString('needs an interactive terminal', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testAFailureOfTheFirstRequestOfTheTuiFormatFollowsTheUsualContract(): void
+    {
+        [$harness, $driver] = $this->tui([]);
+        $harness->respond('GET /api/v1/admin/tags', 404, ['meta' => ['error' => true], 'data' => ['message' => 'No list']]);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:list', '--format=tui'], [], true);
+
+        self::assertSame(4, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('No list', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame(0, $driver->runs);
+    }
+
+    public function testADryRunNeverOpensTheTuiFormat(): void
+    {
+        [$harness, $driver] = $this->tui([], false);
+
+        [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:tag:list', '--format=tui', '--dry-run']);
+
+        self::assertSame(0, $code);
+        self::assertTrue(AbstractCommandTest::decode($stdout)['dryRun']);
+        self::assertSame([], $harness->requests);
+        self::assertSame(0, $driver->runs);
     }
 }

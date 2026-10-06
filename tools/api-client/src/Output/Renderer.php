@@ -54,7 +54,8 @@ class Renderer
      */
     public function render(OutputInterface $output, array $document, OutputFormat $format, bool $compact = false): void
     {
-        if (OutputFormat::Table === $format && $this->table($output, $document)) {
+        // The interactive format has a screen only for some commands: the others print the table
+        if (OutputFormat::Json !== $format && $this->table($output, $document)) {
             return;
         }
 

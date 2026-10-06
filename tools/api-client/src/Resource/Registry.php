@@ -38,6 +38,8 @@ use function implode;
  */
 class Registry
 {
+    private const array CONTENT_COLUMNS = ['id', 'title', 'slug', 'type', 'author', 'tags', 'publishedAt'];
+
     /**
      * @return list<ResourceDefinition>
      */
@@ -85,6 +87,8 @@ class Registry
                 operations: $all,
                 translatable: true,
                 hasParts: true,
+                listColumns: self::CONTENT_COLUMNS,
+                labelField: 'title',
             ),
             new ResourceDefinition(
                 name: 'post',
@@ -95,6 +99,8 @@ class Registry
                 operations: $all,
                 translatable: true,
                 hasParts: true,
+                listColumns: self::CONTENT_COLUMNS,
+                labelField: 'title',
             ),
             new ResourceDefinition(
                 name: 'item',
@@ -104,8 +110,18 @@ class Registry
                 fields: [
                     new FieldDefinition('name', FieldKind::String, 'Name of the item'),
                     new FieldDefinition('location', FieldKind::String, 'Location (menu) of the item'),
-                    new FieldDefinition('parent', FieldKind::Id, 'Id of the parent item, empty for none'),
-                    new FieldDefinition('content', FieldKind::Id, 'Id of the linked content, empty for none'),
+                    new FieldDefinition(
+                        'parent',
+                        FieldKind::Id,
+                        'Id of the parent item, empty for none',
+                        target: 'item',
+                    ),
+                    new FieldDefinition(
+                        'content',
+                        FieldKind::Id,
+                        'Id of the linked content, empty for none',
+                        target: 'content',
+                    ),
                     new FieldDefinition('slug', FieldKind::String, 'Slug of the item'),
                     new FieldDefinition('hidden', FieldKind::Bool, 'Hide the item (--no-hidden to show it)'),
                     new FieldDefinition('position', FieldKind::Int, 'Position of the item in its menu'),
@@ -133,6 +149,7 @@ class Registry
                     new FieldDefinition('active', FieldKind::Bool, 'Activate the user (--no-active to disable it)'),
                 ],
                 operations: $all,
+                labelField: 'email',
             ),
             new ResourceDefinition(
                 name: 'media',
@@ -141,6 +158,7 @@ class Registry
                 listPath: 'media',
                 fields: [],
                 operations: [Operation::List, Operation::Get, Operation::Delete],
+                listColumns: ['id', 'name', 'length'],
             ),
             new ResourceDefinition(
                 name: 'comment',
@@ -150,10 +168,11 @@ class Registry
                 fields: [
                     new FieldDefinition('moderatedAuthor', FieldKind::String, 'Moderated author'),
                     new FieldDefinition('moderatedTitle', FieldKind::String, 'Moderated title'),
-                    new FieldDefinition('moderatedContent', FieldKind::String, 'Moderated content'),
+                    new FieldDefinition('moderatedContent', FieldKind::String, 'Moderated content', multiline: true),
                 ],
                 operations: [Operation::List, Operation::Get, Operation::Update, Operation::Delete],
                 parents: ['post-id'],
+                labelField: 'title',
             ),
         ];
     }
@@ -204,13 +223,13 @@ class Registry
     private function contentFields(): array
     {
         return [
-            new FieldDefinition('author', FieldKind::Id, 'Id of the author (a user)'),
-            new FieldDefinition('type', FieldKind::Id, 'Id of the type of content'),
-            new FieldDefinition('tags', FieldKind::IdList, 'Id of a tag', 'tag'),
+            new FieldDefinition('author', FieldKind::Id, 'Id of the author (a user)', target: 'user'),
+            new FieldDefinition('type', FieldKind::Id, 'Id of the type of content', target: 'type'),
+            new FieldDefinition('tags', FieldKind::IdList, 'Id of a tag', 'tag', target: 'tag'),
             new FieldDefinition('title', FieldKind::String, 'Title'),
             new FieldDefinition('subtitle', FieldKind::String, 'Subtitle'),
             new FieldDefinition('slug', FieldKind::String, 'Slug, generated from the title when empty'),
-            new FieldDefinition('description', FieldKind::String, 'Description'),
+            new FieldDefinition('description', FieldKind::String, 'Description', multiline: true),
             new FieldDefinition('localeField', FieldKind::String, 'Locale of the submitted translation'),
         ];
     }

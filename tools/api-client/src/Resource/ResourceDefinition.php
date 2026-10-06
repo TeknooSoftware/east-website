@@ -42,6 +42,9 @@ class ResourceDefinition
      * @param list<string> $parents names of the arguments identifying the parent of the resource, used in the paths
      * @param list<FieldDefinition> $fields
      * @param list<Operation> $operations
+     * @param list<string> $listColumns columns of the table of the interactive mode, the keys of the first row
+     *                                  when empty
+     * @param string $labelField field naming an object for a human, in the interactive mode
      */
     public function __construct(
         public readonly string $name,
@@ -53,6 +56,8 @@ class ResourceDefinition
         public readonly array $parents = [],
         public readonly bool $translatable = false,
         public readonly bool $hasParts = false,
+        public readonly array $listColumns = [],
+        public readonly string $labelField = 'name',
     ) {
     }
 
