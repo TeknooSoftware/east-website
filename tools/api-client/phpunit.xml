@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         backupGlobals="false"
+         backupStaticProperties="false"
+         bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
+         colors="true"
+         displayDetailsOnAllIssues="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         failOnDeprecation="true"
+         failOnNotice="true"
+         failOnPhpunitDeprecation="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         processIsolation="false"
+         stopOnFailure="false"
+  >
+  <coverage/>
+  <testsuites>
+    <!-- Default suite, run by make test (testsuite option unit) -->
+    <testsuite name="unit">
+      <directory suffix="Test.php">tests/unit</directory>
+    </testsuite>
+    <!-- Runs bin/east-website with the real HTTP client against a fake API started with the PHP built-in server -->
+    <testsuite name="e2e">
+      <directory suffix="Test.php">tests/e2e</directory>
+    </testsuite>
+    <!-- Needs the phar built by make phar, run by make phar-test (testsuite option phar) -->
+    <testsuite name="phar">
+      <directory suffix="Test.php">tests/phar</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory>src</directory>
+    </include>
+  </source>
+</phpunit>

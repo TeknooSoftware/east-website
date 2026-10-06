@@ -38,6 +38,13 @@ The library is structured around a modular architecture where functionality is d
 - **PHPStan** (Static analysis)
 - **Behat / PHPUnit** (Testing)
 
+## CLI client of the remote API (`tools/api-client/`, experimental)
+`tools/api-client/` is an experimental standalone Symfony Console application (own `composer.json`, own dependencies, not part of the library and excluded from its archives) which exposes every function of the remote JSON API, grouped by domain (`website:<domain>:<action>`, e.g. `website:type:create`). It is configured only by `website:auth:login` (URL, username `<keyName>:<email>`, API key, options), which gets a JWT and writes `./east-website.json` (0600, API key included, `--config=<file>` for another file); all the other commands read this file and nothing else (no environment variable; no file, no JWT), and `website:auth:logout` deletes it. It prints JSON on stdout, JSON errors on stderr, and uses stable exit codes (0 ok, 1 server/network, 2 usage/validation, 3 auth, 4 not found), so it can be used by agents. For humans only, `--format=table` prints tables and `--format=tui` opens an interactive interface built on `symfony/tui` (tables for the lists, forms for get/create/update); it needs a terminal on stdin and stdout and fails with exit code 2 without it, so agents keep the default JSON format. Usage guide: `tools/api-client/README.md`.
+- `src/`: code (namespace `Teknoo\East\Website\Tools`), the commands are generated from `src/Resource/Registry.php`; `src/Tui/` is the interactive mode (its own table and form widgets, screens, navigation).
+- `tests/`: PHPUnit suites `unit`, `e2e` (real HTTP client and a fake API) and `phar`; the interactive mode is tested on a virtual terminal (`tests/support/TuiHarness.php`, `tests/support/ScriptedDriver.php`).
+- `dist/`: `east-website.phar`, built by `make tools-phar` (not versioned).
+- `make tools-depend`, `make tools-qa`, `make tools-test`, `make tools-phar` (not run by `make qa` and `make test`).
+
 ## Development & Quality Assurance
 The project uses a `Makefile` to manage development tasks.
 
