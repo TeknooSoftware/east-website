@@ -27,13 +27,14 @@ namespace Teknoo\East\Website\Tools\Command\Auth;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Teknoo\East\Website\Tools\Auth\SessionFile;
 use Teknoo\East\Website\Tools\Command\AbstractCommand;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Runtime;
 
 /**
- * Forgets the stored session. The API has no logout endpoint, so the JWT stays valid until its expiration.
+ * Deletes the configuration file written by the login: the next commands have no JWT anymore. The API has no logout
+ * endpoint, so the JWT stays valid on the server until its expiration.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -51,18 +52,19 @@ class LogoutCommand extends AbstractCommand
     {
         parent::configure();
 
-        $this->setDescription('Delete the stored session (the JWT stays valid on the server until its expiration)');
+        $this->setDescription(
+            'Delete the configuration file of the CLI (the JWT stays valid on the server until its expiration)'
+        );
     }
 
     protected function perform(InputInterface $input, OutputInterface $output, Connection $connection): void
     {
-        $path = $connection->useSession ? $connection->sessionPath : null;
-        $deleted = null !== $path && (new SessionFile($path))->delete();
+        $deleted = (new ConfigFile($connection->configFile))->delete();
 
         $this->emit(
             $input,
             $output,
-            ['meta' => ['error' => false], 'data' => ['sessionFile' => $path, 'deleted' => $deleted]],
+            ['meta' => ['error' => false], 'data' => ['configFile' => $connection->configFile, 'deleted' => $deleted]],
         );
     }
 }

@@ -54,7 +54,7 @@ class RuntimeTest extends TestCase
         $transport = new Transport(new MockHttpClient());
         $authenticator = new Authenticator($transport, $clock, $warnings);
         $client = new ApiClient($transport, $authenticator);
-        $connections = new ConnectionFactory([]);
+        $connections = new ConnectionFactory('/work/dir');
         $renderer = new Renderer();
         $registry = new Registry();
 

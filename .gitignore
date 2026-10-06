@@ -23,3 +23,5 @@ composer.lock
 /tools/.phpunit.cache/
 /tools/dist/*.phar
 !/tools/composer.lock
+# Configuration file of the CLI client (tools/), written by website:auth:login, it contains an API key
+east-website.json

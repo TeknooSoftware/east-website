@@ -29,11 +29,15 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Teknoo\East\Website\Tools\Config\Credentials;
 
+use function ob_get_clean;
+use function ob_start;
 use function print_r;
+use function var_dump;
 use function var_export;
 
 /**
- * Tests of the credentials: a login is possible only with a username and an API key, and the secrets are never dumped
+ * Tests of the credentials of the configuration file: a login is possible only with a username and an API key, the
+ * JWT is reused while it is valid, and the secrets are never dumped
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -41,6 +45,8 @@ use function var_export;
 #[CoversClass(Credentials::class)]
 class CredentialsTest extends TestCase
 {
+    private const int NOW = 1_800_000_000;
+
     public function testEmptyCredentials(): void
     {
         $credentials = new Credentials();
@@ -48,7 +54,21 @@ class CredentialsTest extends TestCase
         self::assertNull($credentials->username);
         self::assertNull($credentials->apiKey());
         self::assertNull($credentials->token);
+        self::assertNull($credentials->expiresAt);
         self::assertFalse($credentials->canLogin());
+        self::assertFalse($credentials->hasToken());
+        self::assertFalse($credentials->isValidAt(self::NOW));
+        self::assertNull($credentials->expirationDate());
+    }
+
+    public function testProperties(): void
+    {
+        $credentials = new Credentials('key:me@site.test', 'secret', 'jwt', 1_800_003_600);
+
+        self::assertSame('key:me@site.test', $credentials->username);
+        self::assertSame('secret', $credentials->apiKey());
+        self::assertSame('jwt', $credentials->token);
+        self::assertSame(1_800_003_600, $credentials->expiresAt);
     }
 
     public function testCanLoginWithAUsernameAndAnApiKey(): void
@@ -69,22 +89,65 @@ class CredentialsTest extends TestCase
         self::assertFalse((new Credentials(token: 'jwt'))->canLogin());
     }
 
-    public function testWithUsernameKeepsTheOtherSecrets(): void
+    public function testHasToken(): void
     {
-        $credentials = new Credentials('old', 'secret', 'jwt');
+        self::assertTrue((new Credentials(token: 'jwt'))->hasToken());
+        self::assertFalse((new Credentials(token: ''))->hasToken());
+        self::assertFalse((new Credentials('key:me@site.test', 'secret'))->hasToken());
+    }
 
-        $copy = $credentials->withUsername('key:new@site.test');
+    public function testWithTokenKeepsTheAccountAndReplacesTheJwt(): void
+    {
+        $credentials = new Credentials('key:me@site.test', 'secret', 'old-jwt', 1_700_000_000);
+
+        $copy = $credentials->withToken('new-jwt', 1_800_003_600);
 
         self::assertNotSame($credentials, $copy);
-        self::assertSame('key:new@site.test', $copy->username);
+        self::assertSame('key:me@site.test', $copy->username);
         self::assertSame('secret', $copy->apiKey());
-        self::assertSame('jwt', $copy->token);
-        self::assertSame('old', $credentials->username);
+        self::assertSame('new-jwt', $copy->token);
+        self::assertSame(1_800_003_600, $copy->expiresAt);
+        self::assertSame('old-jwt', $credentials->token);
+        self::assertSame(1_700_000_000, $credentials->expiresAt);
+    }
+
+    public function testWithTokenWithoutExpiration(): void
+    {
+        $copy = (new Credentials('key:me@site.test', 'secret', 'old-jwt', 1_700_000_000))->withToken('new-jwt', null);
+
+        self::assertNull($copy->expiresAt);
+        self::assertTrue($copy->isValidAt(self::NOW));
+    }
+
+    public function testValidityKeepsALeewayOf30Seconds(): void
+    {
+        self::assertSame(30, Credentials::LEEWAY);
+        self::assertTrue((new Credentials(token: 'jwt', expiresAt: self::NOW + 31))->isValidAt(self::NOW));
+        self::assertFalse((new Credentials(token: 'jwt', expiresAt: self::NOW + 30))->isValidAt(self::NOW));
+        self::assertFalse((new Credentials(token: 'jwt', expiresAt: self::NOW + 1))->isValidAt(self::NOW));
+        self::assertFalse((new Credentials(token: 'jwt', expiresAt: self::NOW - 1))->isValidAt(self::NOW));
+    }
+
+    public function testJwtWithoutExpirationIsValid(): void
+    {
+        self::assertTrue((new Credentials(token: 'jwt'))->isValidAt(self::NOW));
+    }
+
+    public function testNoJwtIsNeverValid(): void
+    {
+        self::assertFalse((new Credentials('key:me@site.test', 'secret', null, self::NOW + 3600))->isValidAt(self::NOW));
+        self::assertFalse((new Credentials(token: '', expiresAt: self::NOW + 3600))->isValidAt(self::NOW));
+    }
+
+    public function testExpirationDate(): void
+    {
+        self::assertSame('2027-01-15T08:00:00+00:00', (new Credentials(expiresAt: 1_800_000_000))->expirationDate());
+        self::assertNull((new Credentials(token: 'jwt'))->expirationDate());
     }
 
     public function testDebugInfoHidesTheSecrets(): void
     {
-        $credentials = new Credentials('key:me@site.test', 'super-secret-key', 'super-secret-jwt');
+        $credentials = new Credentials('key:me@site.test', 'super-secret-key', 'super-secret-jwt', 1_800_003_600);
 
         ob_start();
         var_dump($credentials);
@@ -100,16 +163,16 @@ class CredentialsTest extends TestCase
     public function testDebugInfoWithoutSecrets(): void
     {
         self::assertSame(
-            ['username' => null, 'apiKey' => null, 'token' => null],
+            ['username' => null, 'apiKey' => null, 'token' => null, 'expiresAt' => null],
             (new Credentials())->__debugInfo(),
         );
     }
 
     public function testExportedValueDoesNotLeakTheApiKeyInDebugInfo(): void
     {
-        $info = (new Credentials('a:b', 'secret', 'jwt'))->__debugInfo();
+        $info = (new Credentials('a:b', 'secret', 'jwt', 1_800_003_600))->__debugInfo();
 
         self::assertStringNotContainsString('secret', var_export($info, true));
-        self::assertSame(['username' => 'a:b', 'apiKey' => '***', 'token' => '***'], $info);
+        self::assertSame(['username' => 'a:b', 'apiKey' => '***', 'token' => '***', 'expiresAt' => 1_800_003_600], $info);
     }
 }

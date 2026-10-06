@@ -65,6 +65,7 @@ class CommentCommand extends AbstractCommand
         $this->addOption('author', null, InputOption::VALUE_REQUIRED, 'Author of the comment (required)');
         $this->addOption('title', null, InputOption::VALUE_REQUIRED, 'Title of the comment (required)');
         $this->addOption('content', null, InputOption::VALUE_REQUIRED, 'Content of the comment (required)');
+        $this->addOption('anonymous', null, InputOption::VALUE_NONE, 'Do not send the JWT');
         $this->addDryRunOption();
     }
 

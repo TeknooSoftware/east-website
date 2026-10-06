@@ -50,7 +50,7 @@ class ListCommandTest extends TestCase
 
     private function harness(): ApiHarness
     {
-        return new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']);
+        return new ApiHarness(['token' => 'jwt']);
     }
 
     /**
@@ -206,9 +206,9 @@ class ListCommandTest extends TestCase
         );
     }
 
-    public function testDryRunDoesNotNeedCredentialsNorAServer(): void
+    public function testDryRunDoesNotNeedAConfigurationFileNorAServer(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_URL' => '']);
+        $harness = new ApiHarness(null);
 
         [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:tag:list', '--dry-run']);
 
@@ -220,14 +220,26 @@ class ListCommandTest extends TestCase
         );
     }
 
-    public function testCustomAdminPrefixFromTheEnvironment(): void
+    public function testCustomAdminPrefixFromTheConfigurationFile(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt', 'EAST_WEBSITE_ADMIN_PREFIX' => 'cms/admin/']);
+        $harness = new ApiHarness(['token' => 'jwt', 'adminPrefix' => 'cms/admin/']);
         $harness->respond('GET /cms/admin/tags', 200, self::PAGE);
 
         [$code] = AbstractCommandTest::execute($harness, ['website:tag:list']);
 
         self::assertSame(0, $code);
         self::assertSame('/cms/admin/tags', $harness->requests[0]['path']);
+    }
+
+    public function testWithoutConfigurationFileNothingIsSent(): void
+    {
+        $harness = new ApiHarness(null);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:list']);
+
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertStringContainsString('website:auth:login', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
     }
 }

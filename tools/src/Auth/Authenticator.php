@@ -27,7 +27,9 @@ namespace Teknoo\East\Website\Tools\Auth;
 
 use Psr\Clock\ClockInterface;
 use RuntimeException;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Config\Connection;
+use Teknoo\East\Website\Tools\Config\Credentials;
 use Teknoo\East\Website\Tools\Http\ApiException;
 use Teknoo\East\Website\Tools\Http\ApiRequest;
 use Teknoo\East\Website\Tools\Http\ErrorKind;
@@ -38,9 +40,9 @@ use function is_array;
 use function is_string;
 
 /**
- * Provides the JWT to use, in this order: a JWT given explicitly, a valid stored session, a new login with the
- * username and the API key. The stored session is reused to avoid a login on each call, because hosts can
- * throttle the login.
+ * Provides the JWT of the configuration file written by the login. When it is expired, or rejected by the server,
+ * the CLI logs in again with the username and the API key of this file, and stores the new JWT in it. The JWT is
+ * reused between the calls, because hosts can throttle the login.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -52,7 +54,10 @@ class Authenticator
     public const string USERNAME_HINT = "The username must be '<keyName>:<email>' (the name of the API key, a colon, "
         . "then the email of its owner) and the secret must be the API key itself";
 
-    private bool $loggedIn = false;
+    /**
+     * Credentials obtained by the last login of this process, used by the next requests of the same command.
+     */
+    private ?Credentials $renewed = null;
 
     public function __construct(
         private readonly Transport $transport,
@@ -63,63 +68,53 @@ class Authenticator
 
     public function bearer(Connection $connection): ?string
     {
-        if ($connection->anonymous) {
+        if ($connection->anonymous || !$connection->configured) {
             return null;
         }
 
-        $credentials = $connection->credentials;
-        if (null !== $credentials->token && '' !== $credentials->token) {
-            return $credentials->token;
+        $now = $this->clock->now()->getTimestamp();
+        foreach ([$this->renewed, $connection->credentials] as $credentials) {
+            if (null !== $credentials && $credentials->isValidAt($now)) {
+                return $credentials->token;
+            }
         }
 
-        $session = $this->stored($connection);
-        if (null !== $session && $session->isValidAt($this->clock->now()->getTimestamp())) {
-            return $session->token;
-        }
-
-        if ($credentials->canLogin()) {
-            return $this->login($connection)->token;
+        if ($connection->credentials->canLogin()) {
+            return $this->relogin($connection)->credentials->token;
         }
 
         return null;
     }
 
-    public function stored(Connection $connection): ?Session
-    {
-        if (!$connection->useSession || null === $connection->sessionPath) {
-            return null;
-        }
-
-        $session = (new SessionFile($connection->sessionPath))->read();
-        if (null === $session || !$session->matches($connection->baseUrl, $connection->credentials->username)) {
-            return null;
-        }
-
-        return $session;
-    }
-
     /**
-     * A new login is allowed after a 401 only once by process, and only when the JWT was not given explicitly.
+     * A new login is allowed after a 401 only once by process, and only with the API key of the configuration.
      */
     public function canRelogin(Connection $connection): bool
     {
-        $credentials = $connection->credentials;
-
-        $explicit = null !== $credentials->token && '' !== $credentials->token;
-
-        return !$this->loggedIn && !$explicit && $credentials->canLogin();
+        return null === $this->renewed && $connection->configured && $connection->credentials->canLogin();
     }
 
-    public function login(Connection $connection): Session
+    /**
+     * Logs in again with the credentials of the configuration file, and stores the new JWT in this file.
+     */
+    public function relogin(Connection $connection): Connection
+    {
+        $connection = $this->login($connection);
+        $this->persist($connection);
+
+        return $connection;
+    }
+
+    /**
+     * Logs in with the username and the API key of the connection, and returns the connection with the new JWT.
+     */
+    public function login(Connection $connection): Connection
     {
         $credentials = $connection->credentials;
         $username = $credentials->username;
         $apiKey = $credentials->apiKey();
         if (!$credentials->canLogin() || null === $username || null === $apiKey) {
-            throw ApiException::usage(
-                'A username and its API key are required to login: use --username (or EAST_WEBSITE_USERNAME) and '
-                . 'the API key with --api-key-file (or EAST_WEBSITE_API_KEY). ' . self::USERNAME_HINT
-            );
+            throw ApiException::usage('A username and its API key are required to login. ' . self::USERNAME_HINT);
         }
 
         $response = $this->transport->send(
@@ -147,30 +142,19 @@ class Authenticator
             throw new ApiException('The login response does not contain a token', ErrorKind::Server, $response->status);
         }
 
-        $session = new Session($connection->baseUrl, $username, $token, Jwt::expiresAt($token));
-        $this->loggedIn = true;
-        $this->persist($connection, $session);
+        $this->renewed = $credentials->withToken($token, Jwt::expiresAt($token));
 
-        return $session;
+        return $connection->withCredentials($this->renewed);
     }
 
-    public function persist(Connection $connection, Session $session): void
+    /**
+     * Stores the new JWT of an automatic login: when the configuration file can not be written, the command goes
+     * on, with a warning.
+     */
+    public function persist(Connection $connection): void
     {
-        if (!$connection->useSession) {
-            return;
-        }
-
-        if (null === $connection->sessionPath) {
-            $this->warnings->add(
-                'The session can not be stored, neither HOME nor XDG_STATE_HOME is defined: '
-                . 'use --session-file or EAST_WEBSITE_SESSION_FILE'
-            );
-
-            return;
-        }
-
         try {
-            (new SessionFile($connection->sessionPath))->write($session);
+            (new ConfigFile($connection->configFile))->write($connection);
         } catch (RuntimeException $error) {
             $this->warnings->add($error->getMessage());
         }

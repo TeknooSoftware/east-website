@@ -41,8 +41,10 @@ use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
 use function array_keys;
 use function array_shift;
 use function array_slice;
+use function chmod;
 use function explode;
 use function is_array;
+use function is_writable;
 use function json_decode;
 use function ltrim;
 use function str_contains;
@@ -134,7 +136,24 @@ class AbstractCommandTest extends TestCase
 
     private function harness(): ApiHarness
     {
-        return new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']);
+        return new ApiHarness(['token' => 'jwt']);
+    }
+
+    /**
+     * A configuration file without valid JWT, in a directory where it can be read but not written again: the new
+     * JWT of the automatic login can not be stored.
+     */
+    private function lockedConfiguration(ApiHarness $harness): string
+    {
+        $harness->writeConfig(['username' => 'key:me@site.test', 'apiKey' => 'secret'], 'locked/site.json');
+        $directory = $harness->temp()->path('locked');
+        chmod($directory, 0500);
+        if (is_writable($directory)) {
+            chmod($directory, 0700);
+            self::markTestSkipped('The directory stays writable (running as root or without POSIX permissions)');
+        }
+
+        return $directory;
     }
 
     public function testSuccessPrintsAPrettyJsonDocumentOnStdoutAndNothingOnStderr(): void
@@ -240,7 +259,22 @@ class AbstractCommandTest extends TestCase
         self::assertSame('auth', self::decode($stderr)['data']['kind']);
     }
 
-    public function testMissingCredentialsAreExitCode3WithoutAnyRequest(): void
+    public function testMissingConfigurationFileIsExitCode3WithoutAnyRequest(): void
+    {
+        $harness = new ApiHarness(null);
+
+        [$code, $stdout, $stderr] = $this->execute($harness, ['website:tag:list']);
+
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertSame([], $harness->requests);
+        $error = self::decode($stderr)['data'];
+        self::assertStringContainsString($harness->configPath(), $error['message']);
+        self::assertStringContainsString('website:auth:login', $error['message']);
+        self::assertStringContainsString('<keyName>:<email>', $error['hint']);
+    }
+
+    public function testAConfigurationFileWithoutJwtNorApiKeyIsExitCode3WithoutAnyRequest(): void
     {
         $harness = new ApiHarness();
 
@@ -249,7 +283,19 @@ class AbstractCommandTest extends TestCase
         self::assertSame(3, $code);
         self::assertSame('', $stdout);
         self::assertSame([], $harness->requests);
-        self::assertStringContainsString('<keyName>:<email>', self::decode($stderr)['data']['hint']);
+        self::assertStringContainsString('no valid JWT', self::decode($stderr)['data']['message']);
+    }
+
+    public function testTheConfigurationFileCanBeChosen(): void
+    {
+        $harness = new ApiHarness(null);
+        $harness->writeConfig(['token' => 'other-jwt'], 'site.json');
+        $harness->respond('GET /api/v1/admin/tags', 200, self::TAGS);
+
+        [$code, , $stderr] = $this->execute($harness, ['website:tag:list', '--config=site.json']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('Bearer other-jwt', $harness->requests[0]['headers']['authorization']);
     }
 
     public function testServerErrorIsExitCode1(): void
@@ -282,11 +328,8 @@ class AbstractCommandTest extends TestCase
     public function testAnUnreachableServerIsExitCode1(): void
     {
         $http = new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['error' => 'Connection refused']));
-        $application = Application::create($http, [
-            'EAST_WEBSITE_URL' => ApiHarness::URL,
-            'EAST_WEBSITE_TOKEN' => 'jwt',
-            'EAST_WEBSITE_SESSION_FILE' => '',
-        ], new FixedClock());
+        $harness = $this->harness();
+        $application = Application::create($http, new FixedClock(), $harness->temp()->path());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
         $tester = new ApplicationTester($application);
@@ -384,34 +427,36 @@ class AbstractCommandTest extends TestCase
 
     public function testWarningsAreWrittenOnStderrAndDoNotPolluteStdout(): void
     {
-        $harness = new ApiHarness([
-            'EAST_WEBSITE_SESSION_FILE' => '',
-            'EAST_WEBSITE_USERNAME' => 'key:me@site.test',
-            'EAST_WEBSITE_API_KEY' => 'secret',
-        ]);
+        $harness = new ApiHarness(null);
+        $directory = $this->lockedConfiguration($harness);
         $harness
             ->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => ['token' => ApiHarness::jwt(1_800_003_600)]])
             ->respond('GET /api/v1/admin/tags', 200, self::TAGS);
 
-        [$code, $stdout, $stderr] = $this->execute($harness, ['website:tag:list']);
+        try {
+            [$code, $stdout, $stderr] = $this->execute($harness, ['website:tag:list', '--config=locked/site.json']);
+        } finally {
+            chmod($directory, 0700);
+        }
 
         self::assertSame(0, $code);
         self::assertSame(self::TAGS, self::decode($stdout));
-        self::assertStringStartsWith('warning: The session can not be stored', $stderr);
+        self::assertStringStartsWith('warning: The configuration file "' . $directory . '/site.json" can not be written', $stderr);
     }
 
     public function testWarningsAreIncludedInTheErrorDocumentWhenTheCommandFails(): void
     {
-        $harness = new ApiHarness([
-            'EAST_WEBSITE_SESSION_FILE' => '',
-            'EAST_WEBSITE_USERNAME' => 'key:me@site.test',
-            'EAST_WEBSITE_API_KEY' => 'secret',
-        ]);
+        $harness = new ApiHarness(null);
+        $directory = $this->lockedConfiguration($harness);
         $harness
             ->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => ['token' => ApiHarness::jwt(1_800_003_600)]])
             ->respond('GET /api/v1/admin/tags', 500, ['meta' => ['error' => true], 'data' => ['code' => 500, 'message' => 'Boom']]);
 
-        [$code, $stdout, $stderr] = $this->execute($harness, ['website:tag:list']);
+        try {
+            [$code, $stdout, $stderr] = $this->execute($harness, ['website:tag:list', '--config=locked/site.json']);
+        } finally {
+            chmod($directory, 0700);
+        }
 
         self::assertSame(1, $code);
         self::assertSame('', $stdout);
@@ -419,7 +464,7 @@ class AbstractCommandTest extends TestCase
         $error = self::decode($stderr);
         self::assertSame('Boom', $error['data']['message']);
         self::assertCount(1, $error['data']['warnings']);
-        self::assertStringStartsWith('The session can not be stored', $error['data']['warnings'][0]);
+        self::assertStringStartsWith('The configuration file', $error['data']['warnings'][0]);
         self::assertStringNotContainsString('warning:', $stderr);
     }
 }

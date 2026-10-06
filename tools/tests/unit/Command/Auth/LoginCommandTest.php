@@ -30,21 +30,31 @@ use DateTimeInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
+use ReflectionProperty;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Teknoo\East\Website\Tools\Auth\Authenticator;
+use Teknoo\East\Website\Tools\Command\AbstractCommand;
 use Teknoo\East\Website\Tools\Command\Auth\LoginCommand;
+use Teknoo\East\Website\Tools\Runtime;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
-use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 
+use function defined;
 use function file_get_contents;
-use function file_put_contents;
 use function fileperms;
-use function is_file;
-use function json_decode;
+use function fopen;
+use function json_encode;
+use function stream_isatty;
 
 use const PHP_OS_FAMILY;
+use const STDIN;
 
 /**
- * Tests of the login with a username and an API key: JWT stored in a private session file, never printed by default
+ * Tests of the login with a username and an API key: it is the only command configuring the connection, it writes
+ * the private configuration file read by the other commands, and never prints the API key nor, by default, the JWT
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -54,28 +64,105 @@ class LoginCommandTest extends TestCase
 {
     private const int EXPIRATION = 1_800_003_600;
 
-    private ?TempDir $temp = null;
+    /**
+     * Configuration file of a previous login, with settings different from the defaults.
+     */
+    private const array STORED = [
+        'username' => 'key:me@site.test',
+        'apiKey' => 'stored-key',
+        'token' => 'stored-token',
+        'expiresAt' => 1_800_000_100,
+        'insecure' => true,
+        'allowHttp' => false,
+        'timeout' => 12,
+        'apiPrefix' => '/cms/api',
+        'adminPrefix' => '/cms/admin',
+        'loginPath' => '/cms/login',
+        'usernameField' => 'login',
+        'tokenField' => 'secret',
+    ];
 
-    protected function tearDown(): void
+    private const array LOGIN = ['website:auth:login', '--url=https://site.test', '--username=key:me@site.test'];
+
+    /**
+     * @param array<string, mixed>|null $config
+     */
+    private function harness(?array $config = null, string $route = 'POST /api/v1/login'): ApiHarness
     {
-        $this->temp?->remove();
-        $this->temp = null;
+        return (new ApiHarness($config))
+            ->respond($route, 200, ['meta' => ['error' => false], 'data' => ['token' => ApiHarness::jwt(self::EXPIRATION)]]);
     }
 
-    private function harness(array $env = []): ApiHarness
+    /**
+     * @param list<string> $options
+     * @param list<string> $inputs
+     * @return array{int, string, string}
+     */
+    private function login(ApiHarness $harness, array $options = [], array $inputs = ['secret']): array
     {
-        return (new ApiHarness($env + ['EAST_WEBSITE_API_KEY' => 'secret']))
-            ->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => ['token' => ApiHarness::jwt(self::EXPIRATION)]]);
+        return AbstractCommandTest::execute($harness, [...self::LOGIN, '--api-key-file=-', ...$options], $inputs);
     }
 
-    public function testLoginPostsTheCredentialsAndStoresThePrivateSession(): void
+    /**
+     * Replaces the login command by one which considers (or not) that stdin is a terminal.
+     */
+    private function onTerminal(ApiHarness $harness, bool $terminal): void
+    {
+        $application = $harness->application();
+        $runtime = (new ReflectionProperty(AbstractCommand::class, 'runtime'))
+            ->getValue($application->find('website:auth:login'));
+        self::assertInstanceOf(Runtime::class, $runtime);
+
+        $application->addCommand(new class ($runtime, $terminal) extends LoginCommand {
+            public function __construct(Runtime $runtime, private readonly bool $terminal)
+            {
+                parent::__construct($runtime);
+            }
+
+            protected function isTerminal(): bool
+            {
+                return $this->terminal;
+            }
+        });
+    }
+
+    /**
+     * Content of the configuration file written by a login, in the order of its fields.
+     *
+     * @param array<string, mixed> $changes
+     * @return array<string, mixed>
+     */
+    private static function merge(array $changes): array
+    {
+        $written = [
+            'version' => 1,
+            'url' => 'https://site.test',
+            'username' => 'key:me@site.test',
+            'apiKey' => 'secret',
+            'token' => ApiHarness::jwt(self::EXPIRATION),
+            'expiresAt' => self::EXPIRATION,
+            'insecure' => false,
+            'allowHttp' => false,
+            'timeout' => 30,
+            'apiPrefix' => '/api/v1',
+            'adminPrefix' => '/api/v1/admin',
+            'loginPath' => '/api/v1/login',
+            'usernameField' => 'username',
+            'tokenField' => 'token',
+        ];
+
+        foreach ($changes as $field => $value) {
+            $written[$field] = $value;
+        }
+
+        return $written;
+    }
+
+    public function testLoginPostsTheCredentialsAndWritesThePrivateConfigurationFile(): void
     {
         $harness = $this->harness();
 
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--compact'],
-        );
+        [$code, $stdout, $stderr] = $this->login($harness, ['--compact']);
 
         self::assertSame(0, $code, $stderr);
         self::assertSame('', $stderr);
@@ -88,15 +175,15 @@ class LoginCommandTest extends TestCase
         self::assertArrayNotHasKey('authorization', $request['headers']);
         self::assertSame('{"username":"key:me@site.test","token":"secret"}', $request['body']);
 
-        $sessionFile = $harness->temp()->path('session.json');
+        $configFile = $harness->configPath();
         self::assertSame(
             [
                 'meta' => ['error' => false],
                 'data' => [
-                    'baseUrl' => 'https://site.test',
+                    'configFile' => $configFile,
+                    'url' => 'https://site.test',
                     'username' => 'key:me@site.test',
                     'expiresAt' => (new DateTimeImmutable('@' . self::EXPIRATION))->format(DateTimeInterface::ATOM),
-                    'sessionFile' => $sessionFile,
                 ],
             ],
             AbstractCommandTest::decode($stdout),
@@ -104,59 +191,48 @@ class LoginCommandTest extends TestCase
         self::assertStringNotContainsString(ApiHarness::jwt(self::EXPIRATION), $stdout);
         self::assertStringNotContainsString('secret', $stdout);
 
-        self::assertFileExists($sessionFile);
+        self::assertFileExists($configFile);
         if ('Windows' !== PHP_OS_FAMILY) {
-            self::assertSame(0600, fileperms($sessionFile) & 0777);
+            self::assertSame(0600, fileperms($configFile) & 0777);
         }
 
-        self::assertSame(
-            [
-                'version' => 1,
-                'baseUrl' => 'https://site.test',
-                'username' => 'key:me@site.test',
-                'token' => ApiHarness::jwt(self::EXPIRATION),
-                'expiresAt' => self::EXPIRATION,
-            ],
-            json_decode((string) file_get_contents($sessionFile), true),
-        );
-        self::assertStringNotContainsString('secret', (string) file_get_contents($sessionFile));
+        self::assertSame(self::merge([]), $harness->config());
     }
 
-    public function testPrintTokenAddsTheJwtToTheResult(): void
+    public function testPrintTokenAddsTheJwtToTheResultButNeverTheApiKey(): void
     {
         $harness = $this->harness();
 
-        [$code, $stdout] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--print-token', '--compact'],
-        );
+        [$code, $stdout] = $this->login($harness, ['--print-token', '--compact']);
 
         self::assertSame(0, $code);
         self::assertSame(ApiHarness::jwt(self::EXPIRATION), AbstractCommandTest::decode($stdout)['data']['token']);
+        self::assertStringNotContainsString('secret', $stdout);
     }
 
     public function testTheUsernameIsComposedFromTheKeyNameAndTheEmail(): void
     {
         $harness = $this->harness();
 
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+        [$code, , $stderr] = AbstractCommandTest::execute(
             $harness,
-            ['website:auth:login', '--key-name=key', '--email=me@site.test', '--compact'],
+            ['website:auth:login', '--url=https://site.test', '--key-name=key', '--email=me@site.test', '--api-key-file=-'],
+            ['secret'],
         );
 
         self::assertSame(0, $code, $stderr);
-        self::assertSame('{"username":"key:me@site.test","token":"secret"}', $harness->requests[0]['body']);
-        self::assertSame('key:me@site.test', AbstractCommandTest::decode($stdout)['data']['username']);
+        self::assertSame(['username' => 'key:me@site.test', 'token' => 'secret'], AbstractCommandTest::body($harness, 0));
+        self::assertSame('key:me@site.test', $harness->config()['username'] ?? null);
     }
 
     public function testTheKeyNameAndTheEmailOverrideTheUsername(): void
     {
-        $harness = $this->harness(['EAST_WEBSITE_USERNAME' => 'old:old@site.test']);
+        $harness = $this->harness();
 
-        [$code] = AbstractCommandTest::execute($harness, ['website:auth:login', '--key-name=key', '--email=me@site.test']);
+        [$code] = $this->login($harness, ['--key-name=other', '--email=other@site.test']);
 
         self::assertSame(0, $code);
-        self::assertSame('{"username":"key:me@site.test","token":"secret"}', $harness->requests[0]['body']);
+        self::assertSame('other:other@site.test', AbstractCommandTest::body($harness, 0)['username']);
     }
 
     /**
@@ -173,301 +249,436 @@ class LoginCommandTest extends TestCase
     {
         $harness = $this->harness();
 
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', $option]);
+        [$code, $stdout, $stderr] = $this->login($harness, [$option]);
 
         self::assertSame(2, $code);
         self::assertSame('', $stdout);
-        self::assertSame([], $harness->requests);
         self::assertSame(
             'The options --key-name and --email must be used together',
             AbstractCommandTest::decode($stderr)['data']['message'],
         );
-    }
-
-    public function testTheUsernameComesFromTheEnvironment(): void
-    {
-        $harness = $this->harness(['EAST_WEBSITE_USERNAME' => 'env:env@site.test']);
-
-        [$code] = AbstractCommandTest::execute($harness, ['website:auth:login']);
-
-        self::assertSame(0, $code);
-        self::assertSame('{"username":"env:env@site.test","token":"secret"}', $harness->requests[0]['body']);
-    }
-
-    public function testTheUsernameOptionWinsOverTheEnvironment(): void
-    {
-        $harness = $this->harness(['EAST_WEBSITE_USERNAME' => 'env:env@site.test']);
-
-        [$code] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=opt:opt@site.test']);
-
-        self::assertSame(0, $code);
-        self::assertSame('{"username":"opt:opt@site.test","token":"secret"}', $harness->requests[0]['body']);
+        self::assertSame([], $harness->requests);
+        self::assertNull($harness->config());
     }
 
     public function testTheApiKeyIsReadFromAFileAndTrimmed(): void
     {
-        $this->temp = new TempDir();
-        $file = $this->temp->write('apikey.txt', "from-file\n");
-        $harness = $this->harness(['EAST_WEBSITE_API_KEY' => 'from-env']);
+        $harness = $this->harness();
+        $file = $harness->temp()->write('api-key.txt', "  file-secret \n");
 
-        [$code, , $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=' . $file],
-        );
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, [...self::LOGIN, '--api-key-file=' . $file]);
 
         self::assertSame(0, $code, $stderr);
-        self::assertSame('{"username":"key:me@site.test","token":"from-file"}', $harness->requests[0]['body']);
-    }
-
-    public function testTheApiKeyIsReadFromStdin(): void
-    {
-        $harness = $this->harness(['EAST_WEBSITE_API_KEY' => '']);
-
-        [$code, , $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=-'],
-            ['from-stdin'],
-        );
-
-        self::assertSame(0, $code, $stderr);
-        self::assertSame('{"username":"key:me@site.test","token":"from-stdin"}', $harness->requests[0]['body']);
+        self::assertSame('file-secret', AbstractCommandTest::body($harness, 0)['token']);
+        self::assertSame('file-secret', $harness->config()['apiKey'] ?? null);
     }
 
     public function testAnUnreadableApiKeyFileIsAUsageError(): void
     {
         $harness = $this->harness();
+        $file = $harness->temp()->path('missing.txt');
 
-        [$code, , $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=/not/here.txt'],
-        );
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, [...self::LOGIN, '--api-key-file=' . $file]);
 
         self::assertSame(2, $code);
-        self::assertSame([], $harness->requests);
         self::assertSame(
-            'The file "/not/here.txt" does not exist or is not readable',
+            'The file "' . $file . '" does not exist or is not readable',
             AbstractCommandTest::decode($stderr)['data']['message'],
         );
-    }
-
-    public function testAnEmptyApiKeyFileIsAMissingApiKey(): void
-    {
-        $this->temp = new TempDir();
-        $file = $this->temp->write('apikey.txt', "  \n");
-        $harness = $this->harness(['EAST_WEBSITE_API_KEY' => '']);
-
-        [$code] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=' . $file],
-        );
-
-        self::assertSame(2, $code);
         self::assertSame([], $harness->requests);
     }
 
-    /**
-     * @return iterable<string, array{array<string, string>, list<string>}>
-     */
-    public static function missingCredentials(): iterable
+    public function testAnEmptyApiKeyIsAUsageError(): void
     {
-        yield 'no api key' => [['EAST_WEBSITE_API_KEY' => ''], ['--username=key:me@site.test']];
-        yield 'no username' => [['EAST_WEBSITE_API_KEY' => 'hidden-key-123'], []];
-        yield 'nothing' => [['EAST_WEBSITE_API_KEY' => ''], []];
+        $harness = $this->harness();
+
+        [$code, , $stderr] = $this->login($harness, [], ['   ']);
+
+        self::assertSame(2, $code);
+        self::assertSame(
+            'The API key is empty. ' . Authenticator::USERNAME_HINT,
+            AbstractCommandTest::decode($stderr)['data']['message'],
+        );
+        self::assertSame([], $harness->requests);
+        self::assertNull($harness->config());
     }
 
-    /**
-     * @param array<string, string> $env
-     * @param list<string> $options
-     */
-    #[DataProvider('missingCredentials')]
-    public function testMissingCredentialsAreAUsageErrorWithTheHintAboutTheUsernameFormat(array $env, array $options): void
+    public function testWithoutApiKeyANonInteractiveLoginIsAUsageErrorWithoutAnyRequest(): void
     {
-        $harness = $this->harness($env);
+        $harness = $this->harness();
 
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', ...$options]);
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, self::LOGIN);
 
         self::assertSame(2, $code);
         self::assertSame('', $stdout);
+        $error = AbstractCommandTest::decode($stderr)['data'];
+        self::assertSame('usage', $error['kind']);
+        self::assertStringContainsString('--api-key-file=-', $error['message']);
         self::assertSame([], $harness->requests);
-        $message = AbstractCommandTest::decode($stderr)['data']['message'];
-        self::assertStringContainsString('A username and its API key are required to login', $message);
-        self::assertStringContainsString("'<keyName>:<email>'", $message);
-        self::assertStringNotContainsString('hidden-key-123', $stderr);
+        self::assertNull($harness->config());
     }
 
-    public function testInvalidCredentialsAreExitCode3WithAHintAndNoSession(): void
+    public function testWithoutTerminalTheApiKeyIsNotAsked(): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_API_KEY' => 'wrong-secret']))->respond(
+        $harness = $this->harness();
+        $this->onTerminal($harness, false);
+
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, self::LOGIN, ['typed-key'], true);
+
+        self::assertSame(2, $code);
+        self::assertStringContainsString('--api-key-file=-', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertStringNotContainsString('API key: ', $stderr);
+        self::assertSame([], $harness->requests);
+    }
+
+    public function testOnATerminalTheApiKeyIsAskedWithoutBeingDisplayed(): void
+    {
+        QuestionHelper::disableStty();
+        $harness = $this->harness();
+        $this->onTerminal($harness, true);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, [...self::LOGIN, '--compact'], [' typed-key '], true);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertStringContainsString('API key: ', $stderr, 'The question is written on stderr');
+        self::assertStringNotContainsString('typed-key', $stderr);
+        self::assertStringNotContainsString('typed-key', $stdout);
+        self::assertSame('key:me@site.test', AbstractCommandTest::decode($stdout)['data']['username']);
+        self::assertSame(['username' => 'key:me@site.test', 'token' => 'typed-key'], AbstractCommandTest::body($harness, 0));
+        self::assertSame('typed-key', $harness->config()['apiKey'] ?? null);
+    }
+
+    public function testAnEmptyAnswerOnATerminalIsAUsageError(): void
+    {
+        QuestionHelper::disableStty();
+        $harness = $this->harness();
+        $this->onTerminal($harness, true);
+
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, self::LOGIN, [''], true);
+
+        self::assertSame(2, $code);
+        self::assertStringContainsString(
+            'The API key is empty. ' . Authenticator::USERNAME_HINT,
+            $stderr,
+        );
+        self::assertSame([], $harness->requests);
+    }
+
+    public function testAQuestionWithoutAnswerIsAUsageError(): void
+    {
+        QuestionHelper::disableStty();
+        $harness = $this->harness();
+        $this->onTerminal($harness, true);
+
+        $stream = fopen('php://memory', 'r+');
+        self::assertIsResource($stream);
+        $input = new ArrayInput(['command' => 'website:auth:login', '--url' => 'https://site.test', '--username' => 'key:me@site.test']);
+        $input->setStream($stream);
+        $input->setInteractive(true);
+        $output = new BufferedOutput();
+
+        $code = $harness->application()->run($input, $output);
+
+        self::assertSame(2, $code);
+        $display = $output->fetch();
+        self::assertStringContainsString('The API key can not be typed without being displayed on this terminal', $display);
+        self::assertSame([], $harness->requests);
+    }
+
+    public function testTheTerminalIsTheStandardInput(): void
+    {
+        $harness = $this->harness();
+        $command = $harness->application()->find('website:auth:login');
+
+        self::assertSame(
+            defined('STDIN') && stream_isatty(STDIN),
+            (new ReflectionMethod(LoginCommand::class, 'isTerminal'))->invoke($command),
+        );
+    }
+
+    public function testInvalidCredentialsAreExitCode3WithAHintAndNothingIsWritten(): void
+    {
+        $harness = (new ApiHarness(null))->respond(
             'POST /api/v1/login',
             401,
             ['meta' => ['error' => true], 'data' => ['code' => 401, 'message' => 'Invalid credentials.']],
-            ['WWW-Authenticate' => 'Bearer'],
         );
 
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=me@site.test']);
+        [$code, $stdout, $stderr] = $this->login($harness, [], ['hidden-key-123']);
 
         self::assertSame(3, $code);
         self::assertSame('', $stdout);
         $error = AbstractCommandTest::decode($stderr)['data'];
         self::assertSame('auth', $error['kind']);
-        self::assertSame(401, $error['code']);
         self::assertSame('Invalid credentials.', $error['message']);
-        self::assertStringContainsString("'<keyName>:<email>'", $error['hint']);
-        self::assertStringNotContainsString('wrong-secret', $stderr);
-        self::assertFileDoesNotExist($harness->temp()->path('session.json'));
+        self::assertSame(Authenticator::USERNAME_HINT, $error['hint']);
+        self::assertStringNotContainsString('hidden-key-123', $stderr);
+        self::assertNull($harness->config());
+    }
+
+    public function testAFailedLoginKeepsTheExistingConfigurationFile(): void
+    {
+        $harness = (new ApiHarness(self::STORED))->respond(
+            'POST /cms/login',
+            401,
+            ['meta' => ['error' => true], 'data' => ['code' => 401, 'message' => 'Invalid credentials.']],
+        );
+        $before = file_get_contents($harness->configPath());
+
+        [$code] = $this->login($harness, [], ['wrong-key']);
+
+        self::assertSame(3, $code);
+        self::assertSame($before, file_get_contents($harness->configPath()));
     }
 
     public function testAServerErrorOfTheLoginIsExitCode1(): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_API_KEY' => 'secret']))->respond(
+        $harness = (new ApiHarness(null))->respond(
             'POST /api/v1/login',
             500,
             ['meta' => ['error' => true], 'data' => ['code' => 500, 'message' => 'Boom']],
         );
 
-        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
+        [$code, , $stderr] = $this->login($harness);
 
         self::assertSame(1, $code);
+        self::assertSame('server', AbstractCommandTest::decode($stderr)['data']['kind']);
         self::assertArrayNotHasKey('hint', AbstractCommandTest::decode($stderr)['data']);
+        self::assertNull($harness->config());
     }
 
     public function testALoginResponseWithoutTokenIsAServerError(): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_API_KEY' => 'secret']))
-            ->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => ['other' => 'x']]);
+        $harness = (new ApiHarness(null))->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => []]);
 
-        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
+        [$code, , $stderr] = $this->login($harness);
 
         self::assertSame(1, $code);
         self::assertSame('The login response does not contain a token', AbstractCommandTest::decode($stderr)['data']['message']);
-        self::assertFileDoesNotExist($harness->temp()->path('session.json'));
+        self::assertNull($harness->config());
     }
 
-    public function testNoSessionIsWrittenWithTheNoSessionOption(): void
+    public function testTheConfigurationFileCanBeChosenWithARelativePath(): void
     {
         $harness = $this->harness();
 
-        [$code, $stdout] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--no-session', '--compact'],
-        );
-
-        self::assertSame(0, $code);
-        self::assertNull(AbstractCommandTest::decode($stdout)['data']['sessionFile']);
-        self::assertFileDoesNotExist($harness->temp()->path('session.json'));
-    }
-
-    public function testTheSessionFileCanBeChosenWithAnOption(): void
-    {
-        $this->temp = new TempDir();
-        $path = $this->temp->path('custom/dir/session.json');
-        $harness = $this->harness();
-
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--session-file=' . $path, '--compact'],
-        );
+        [$code, $stdout, $stderr] = $this->login($harness, ['--config=sites/other.json', '--compact']);
 
         self::assertSame(0, $code, $stderr);
-        self::assertSame($path, AbstractCommandTest::decode($stdout)['data']['sessionFile']);
-        self::assertTrue(is_file($path));
-        self::assertFileDoesNotExist($harness->temp()->path('session.json'));
+        $path = $harness->temp()->path('sites/other.json');
+        self::assertSame($path, AbstractCommandTest::decode($stdout)['data']['configFile']);
+        self::assertSame(self::merge([]), $harness->config('sites/other.json'));
+        self::assertNull($harness->config());
     }
 
-    public function testAWarningIsWrittenWhenNoSessionPathCanBeDetermined(): void
-    {
-        $harness = $this->harness(['EAST_WEBSITE_SESSION_FILE' => '']);
-
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--compact'],
-        );
-
-        self::assertSame(0, $code);
-        self::assertNull(AbstractCommandTest::decode($stdout)['data']['sessionFile']);
-        self::assertStringStartsWith('warning: The session can not be stored', $stderr);
-        self::assertStringNotContainsString('{', $stderr);
-    }
-
-    public function testAWarningIsWrittenWhenTheSessionCanNotBeWritten(): void
-    {
-        $this->temp = new TempDir();
-        $blocker = $this->temp->write('blocker', 'a file, not a directory');
-        $harness = $this->harness(['EAST_WEBSITE_SESSION_FILE' => $blocker . '/sub/session.json']);
-
-        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--compact'],
-        );
-
-        self::assertSame(0, $code);
-        self::assertSame(ApiHarness::URL, AbstractCommandTest::decode($stdout)['data']['baseUrl']);
-        self::assertStringStartsWith('warning: The session file "' . $blocker . '/sub/session.json" can not be written', $stderr);
-    }
-
-    public function testLoginIgnoresAStoredSessionAndReplacesIt(): void
+    public function testTheConfigurationFileCanBeChosenWithAnAbsolutePath(): void
     {
         $harness = $this->harness();
-        $session = $harness->temp()->path('session.json');
-        file_put_contents($session, '{"version":1,"baseUrl":"https://site.test","username":"key:me@site.test","token":"stale","expiresAt":1800003600}');
+        $path = $harness->temp()->path('absolute.json');
 
-        [$code] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
+        [$code, $stdout] = $this->login($harness, ['--config=' . $path, '--compact']);
 
         self::assertSame(0, $code);
+        self::assertSame($path, AbstractCommandTest::decode($stdout)['data']['configFile']);
+        self::assertFileExists($path);
+    }
+
+    public function testAConfigurationFileWhichCanNotBeWrittenIsAUsageError(): void
+    {
+        $harness = $this->harness();
+        $harness->temp()->write('blocker', 'a file');
+
+        [$code, $stdout, $stderr] = $this->login($harness, ['--config=blocker/east-website.json'], ['hidden-key-123']);
+
+        self::assertSame(2, $code);
+        self::assertSame('', $stdout);
+        $error = AbstractCommandTest::decode($stderr)['data'];
+        self::assertSame('usage', $error['kind']);
+        self::assertStringStartsWith(
+            'The configuration file "' . $harness->temp()->path('blocker/east-website.json') . '" can not be written',
+            $error['message'],
+        );
+        self::assertStringNotContainsString('hidden-key-123', $stderr);
+    }
+
+    public function testRunAgainWithoutOptionsTheLoginReusesTheStoredConfiguration(): void
+    {
+        $harness = $this->harness(self::STORED, 'POST /cms/login');
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--compact']);
+
+        self::assertSame(0, $code, $stderr);
         self::assertCount(1, $harness->requests);
-        self::assertStringContainsString(ApiHarness::jwt(self::EXPIRATION), (string) file_get_contents($session));
-        self::assertStringNotContainsString('stale', (string) file_get_contents($session));
+        self::assertSame('https://site.test/cms/login', $harness->requests[0]['url']);
+        self::assertSame(['login' => 'key:me@site.test', 'secret' => 'stored-key'], AbstractCommandTest::body($harness, 0));
+        self::assertSame('https://site.test', AbstractCommandTest::decode($stdout)['data']['url']);
+        self::assertSame(
+            self::merge([
+                'apiKey' => 'stored-key',
+                'insecure' => true,
+                'timeout' => 12,
+                'apiPrefix' => '/cms/api',
+                'adminPrefix' => '/cms/admin',
+                'loginPath' => '/cms/login',
+                'usernameField' => 'login',
+                'tokenField' => 'secret',
+            ]),
+            $harness->config(),
+        );
     }
 
-    public function testCustomLoginPathAndFieldNamesComeFromTheEnvironment(): void
+    public function testTheOptionsOverrideTheStoredConfiguration(): void
     {
-        $harness = (new ApiHarness([
-            'EAST_WEBSITE_API_KEY' => 'secret',
-            'EAST_WEBSITE_LOGIN_PATH' => '/auth/login_check',
-            'EAST_WEBSITE_LOGIN_USERNAME_FIELD' => 'user',
-            'EAST_WEBSITE_LOGIN_SECRET_FIELD' => 'key',
-        ]))->respond('POST /auth/login_check', 200, ['meta' => ['error' => false], 'data' => ['token' => ApiHarness::jwt(self::EXPIRATION)]]);
+        $harness = $this->harness(self::STORED, 'POST /v2/login');
 
-        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            [
+                'website:auth:login',
+                '--no-insecure',
+                '--allow-http',
+                '--timeout=5',
+                '--api-prefix=v2/',
+                '--admin-prefix=/v2/admin',
+                '--login-path=/v2/login',
+                '--login-username-field=user',
+                '--login-secret-field=key',
+            ],
+        );
 
         self::assertSame(0, $code, $stderr);
-        self::assertSame('/auth/login_check', $harness->requests[0]['path']);
-        self::assertSame('{"user":"key:me@site.test","key":"secret"}', $harness->requests[0]['body']);
+        self::assertSame('https://site.test/v2/login', $harness->requests[0]['url']);
+        self::assertSame(['user' => 'key:me@site.test', 'key' => 'stored-key'], AbstractCommandTest::body($harness, 0));
+        self::assertSame(
+            self::merge([
+                'apiKey' => 'stored-key',
+                'insecure' => false,
+                'allowHttp' => true,
+                'timeout' => 5,
+                'apiPrefix' => '/v2',
+                'adminPrefix' => '/v2/admin',
+                'loginPath' => '/v2/login',
+                'usernameField' => 'user',
+                'tokenField' => 'key',
+            ]),
+            $harness->config(),
+        );
     }
 
-    public function testTheUrlOptionOverridesTheEnvironmentAndTheTrailingSlashIsIgnored(): void
+    public function testTheInsecureOptionIsStored(): void
+    {
+        $harness = $this->harness();
+
+        [$code] = $this->login($harness, ['--insecure']);
+
+        self::assertSame(0, $code);
+        self::assertTrue($harness->config()['insecure'] ?? null);
+    }
+
+    public function testAnotherUsernameOnTheSameServerNeedsItsOwnApiKey(): void
+    {
+        $harness = $this->harness(self::STORED, 'POST /cms/login');
+
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=other:x@site.test']);
+
+        self::assertSame(2, $code);
+        self::assertStringContainsString('--api-key-file=-', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
+
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:auth:login', '--username=other:x@site.test', '--api-key-file=-'],
+            ['other-key'],
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame(['login' => 'other:x@site.test', 'secret' => 'other-key'], AbstractCommandTest::body($harness, 0));
+        self::assertSame(
+            self::merge([
+                'username' => 'other:x@site.test',
+                'apiKey' => 'other-key',
+                'insecure' => true,
+                'timeout' => 12,
+                'apiPrefix' => '/cms/api',
+                'adminPrefix' => '/cms/admin',
+                'loginPath' => '/cms/login',
+                'usernameField' => 'login',
+                'tokenField' => 'secret',
+            ]),
+            $harness->config(),
+        );
+    }
+
+    public function testAnotherServerReusesNeitherTheSettingsNorTheUsernameNorTheApiKey(): void
+    {
+        $harness = $this->harness(self::STORED);
+
+        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--url=https://other.test']);
+
+        self::assertSame(2, $code);
+        self::assertSame(
+            'The option --username (or --key-name with --email) is required. ' . Authenticator::USERNAME_HINT,
+            AbstractCommandTest::decode($stderr)['data']['message'],
+        );
+
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:auth:login', '--url=https://other.test', '--username=key:me@site.test'],
+        );
+
+        self::assertSame(2, $code);
+        self::assertStringContainsString('--api-key-file=-', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests, 'The stored API key is never sent to another server');
+
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:auth:login', '--url=https://other.test', '--username=key:me@site.test', '--api-key-file=-'],
+            ['secret'],
+        );
+
+        self::assertSame(0, $code, $stderr);
+        self::assertSame('https://other.test/api/v1/login', $harness->requests[0]['url']);
+        self::assertSame(['username' => 'key:me@site.test', 'token' => 'secret'], AbstractCommandTest::body($harness, 0));
+        self::assertSame(self::merge(['url' => 'https://other.test']), $harness->config());
+        self::assertStringNotContainsString('stored-key', (string) json_encode($harness->requests));
+    }
+
+    public function testTheTrailingSlashOfTheUrlIsIgnored(): void
     {
         $harness = $this->harness();
 
         [$code, $stdout] = AbstractCommandTest::execute(
             $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--url=https://other.test/', '--compact'],
+            ['website:auth:login', '--url=https://site.test/', '--username=key:me@site.test', '--api-key-file=-', '--compact'],
+            ['secret'],
         );
 
         self::assertSame(0, $code);
-        self::assertSame('https://other.test/api/v1/login', $harness->requests[0]['url']);
-        self::assertSame('https://other.test', AbstractCommandTest::decode($stdout)['data']['baseUrl']);
+        self::assertSame('https://site.test', AbstractCommandTest::decode($stdout)['data']['url']);
+        self::assertSame('https://site.test/api/v1/login', $harness->requests[0]['url']);
+        self::assertSame('https://site.test', $harness->config()['url'] ?? null);
     }
 
     public function testPlainHttpToARemoteHostIsRefusedUnlessAllowed(): void
     {
-        $refused = $this->harness();
-        $allowed = $this->harness();
+        $harness = $this->harness();
+        $options = ['website:auth:login', '--url=http://site.test', '--username=key:me@site.test', '--api-key-file=-'];
 
-        [$refusedCode, , $stderr] = AbstractCommandTest::execute(
-            $refused,
-            ['website:auth:login', '--username=key:me@site.test', '--url=http://remote.test'],
-        );
-        [$allowedCode] = AbstractCommandTest::execute(
-            $allowed,
-            ['website:auth:login', '--username=key:me@site.test', '--url=http://remote.test', '--allow-http'],
-        );
+        [$refusedCode, , $stderr] = AbstractCommandTest::execute($harness, $options, ['secret']);
 
         self::assertSame(2, $refusedCode);
-        self::assertSame([], $refused->requests);
-        self::assertStringContainsString('Refusing to send credentials over plain http', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame(
+            'Refusing to send credentials over plain http to a remote host, use https or the --allow-http option',
+            AbstractCommandTest::decode($stderr)['data']['message'],
+        );
+        self::assertSame([], $harness->requests);
+        self::assertNull($harness->config());
+
+        [$allowedCode] = AbstractCommandTest::execute($harness, [...$options, '--allow-http'], ['secret']);
+
         self::assertSame(0, $allowedCode);
-        self::assertSame('http://remote.test/api/v1/login', $allowed->requests[0]['url']);
+        self::assertSame('http://site.test/api/v1/login', $harness->requests[0]['url']);
+        self::assertTrue($harness->config()['allowHttp'] ?? null);
     }
 
     public function testPlainHttpToALoopbackHostIsAllowed(): void
@@ -476,11 +687,13 @@ class LoginCommandTest extends TestCase
 
         [$code] = AbstractCommandTest::execute(
             $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--url=http://127.0.0.1:8080'],
+            ['website:auth:login', '--url=http://localhost:8080', '--username=key:me@site.test', '--api-key-file=-'],
+            ['secret'],
         );
 
         self::assertSame(0, $code);
-        self::assertSame('http://127.0.0.1:8080/api/v1/login', $harness->requests[0]['url']);
+        self::assertSame('http://localhost:8080/api/v1/login', $harness->requests[0]['url']);
+        self::assertFalse($harness->config()['allowHttp'] ?? null);
     }
 
     /**
@@ -498,74 +711,96 @@ class LoginCommandTest extends TestCase
     {
         $harness = $this->harness();
 
-        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test', $option]);
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=-', $option],
+            ['secret'],
+        );
 
         self::assertSame(2, $code);
-        self::assertSame([], $harness->requests);
         self::assertSame($message, AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
+        self::assertNull($harness->config());
     }
 
     public function testAMissingBaseUrlIsAUsageError(): void
-    {
-        $harness = $this->harness(['EAST_WEBSITE_URL' => '']);
-
-        [$code, , $stderr] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
-
-        self::assertSame(2, $code);
-        self::assertSame([], $harness->requests);
-        self::assertStringContainsString('No base URL configured', AbstractCommandTest::decode($stderr)['data']['message']);
-    }
-
-    /**
-     * @return iterable<string, array{string}>
-     */
-    public static function invalidTimeouts(): iterable
-    {
-        yield 'text' => ['abc'];
-        yield 'zero' => ['0'];
-        yield 'negative' => ['-5'];
-    }
-
-    #[DataProvider('invalidTimeouts')]
-    public function testAnInvalidTimeoutIsAUsageError(string $timeout): void
     {
         $harness = $this->harness();
 
         [$code, , $stderr] = AbstractCommandTest::execute(
             $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--timeout=' . $timeout],
+            ['website:auth:login', '--username=key:me@site.test', '--api-key-file=-'],
+            ['secret'],
         );
 
         self::assertSame(2, $code);
-        self::assertSame([], $harness->requests);
         self::assertSame(
-            'The timeout must be a positive number of seconds, "' . $timeout . '" given',
+            'The option --url is required, like --url=https://example.com',
             AbstractCommandTest::decode($stderr)['data']['message'],
         );
+        self::assertSame([], $harness->requests);
     }
 
-    public function testAValidTimeoutFromTheEnvironmentIsAccepted(): void
+    public function testAMissingUsernameIsAUsageErrorWithTheHint(): void
     {
-        $harness = $this->harness(['EAST_WEBSITE_TIMEOUT' => '5']);
+        $harness = $this->harness();
 
-        [$code] = AbstractCommandTest::execute($harness, ['website:auth:login', '--username=key:me@site.test']);
+        [$code, , $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:auth:login', '--url=https://site.test', '--api-key-file=-'],
+            ['secret'],
+        );
+
+        self::assertSame(2, $code);
+        self::assertSame(
+            'The option --username (or --key-name with --email) is required. ' . Authenticator::USERNAME_HINT,
+            AbstractCommandTest::decode($stderr)['data']['message'],
+        );
+        self::assertSame([], $harness->requests);
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function invalidTimeouts(): iterable
+    {
+        yield 'text' => ['abc', 'The option --timeout expects an integer, "abc" given'];
+        yield 'zero' => ['0', 'The timeout must be a positive number of seconds, "0" given'];
+        yield 'negative' => ['-5', 'The timeout must be a positive number of seconds, "-5" given'];
+    }
+
+    #[DataProvider('invalidTimeouts')]
+    public function testAnInvalidTimeoutIsAUsageError(string $timeout, string $message): void
+    {
+        $harness = $this->harness();
+
+        [$code, , $stderr] = $this->login($harness, ['--timeout=' . $timeout]);
+
+        self::assertSame(2, $code);
+        self::assertSame($message, AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
+    }
+
+    public function testAValidTimeoutIsStored(): void
+    {
+        $harness = $this->harness();
+
+        [$code] = $this->login($harness, ['--timeout=7']);
 
         self::assertSame(0, $code);
+        self::assertSame(7, $harness->config()['timeout'] ?? null);
     }
 
     public function testTheTableFormatDisplaysTheResultWithoutAnySecret(): void
     {
         $harness = $this->harness();
 
-        [$code, $stdout] = AbstractCommandTest::execute(
-            $harness,
-            ['website:auth:login', '--username=key:me@site.test', '--format=table'],
-        );
+        [$code, $stdout] = $this->login($harness, ['--format=table']);
 
         self::assertSame(0, $code);
-        self::assertStringContainsString('| username', $stdout);
         self::assertStringContainsString('key:me@site.test', $stdout);
-        self::assertStringNotContainsString('secret', $stdout);
+        self::assertStringContainsString($harness->configPath(), $stdout);
         self::assertStringNotContainsString(ApiHarness::jwt(self::EXPIRATION), $stdout);
+        self::assertStringNotContainsString('secret', $stdout);
     }
 }

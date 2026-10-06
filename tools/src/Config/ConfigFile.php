@@ -23,10 +23,11 @@
 
 declare(strict_types=1);
 
-namespace Teknoo\East\Website\Tools\Auth;
+namespace Teknoo\East\Website\Tools\Config;
 
 use ErrorException;
 use RuntimeException;
+use Teknoo\East\Website\Tools\Http\Endpoints;
 use Teknoo\East\Website\Tools\Http\Json;
 use Throwable;
 
@@ -42,6 +43,7 @@ use function is_readable;
 use function is_string;
 use function is_writable;
 use function mkdir;
+use function preg_match;
 use function rename;
 use function restore_error_handler;
 use function rtrim;
@@ -53,18 +55,19 @@ use function unlink;
 use const PHP_OS_FAMILY;
 
 /**
- * Storage of the last session in a private file (0600), written atomically and read tolerantly: any problem when
- * reading is the same as "no session". It lives in the state directory of the user, because a JWT is a state, not
- * a configuration.
+ * Configuration file of the CLI, written by the login (website:auth:login) and read by all the other commands: the
+ * base URL, the options of the connection, the username with its API key and the last JWT. Without this file, there
+ * is no JWT. It contains the API key, so it is private (0600) and written atomically; a missing or an invalid file
+ * is read as "not configured".
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class SessionFile
+class ConfigFile
 {
-    public const string ENV_PATH = 'EAST_WEBSITE_SESSION_FILE';
+    public const string DEFAULT_NAME = 'east-website.json';
 
     private const int VERSION = 1;
 
@@ -74,30 +77,25 @@ class SessionFile
     }
 
     /**
-     * @param array<string, string> $env
+     * The file given by the option --config, else the default file of the working directory. A relative path is
+     * relative to the working directory.
      */
-    public static function defaultPath(array $env): ?string
+    public static function resolve(string $workingDirectory, ?string $path): self
     {
-        $explicit = $env[self::ENV_PATH] ?? '';
-        if ('' !== $explicit) {
-            return $explicit;
+        if (null === $path || '' === $path) {
+            $path = self::DEFAULT_NAME;
         }
 
-        $state = $env['XDG_STATE_HOME'] ?? '';
-        if ('' === $state && 'Windows' === PHP_OS_FAMILY) {
-            $state = $env['LOCALAPPDATA'] ?? '';
+        if (!self::isAbsolute($path)) {
+            $path = rtrim($workingDirectory, '/\\') . '/' . $path;
         }
 
-        if ('' === $state) {
-            $home = $env['HOME'] ?? $env['USERPROFILE'] ?? '';
-            if ('' === $home) {
-                return null;
-            }
+        return new self($path);
+    }
 
-            $state = rtrim($home, '/\\') . '/.local/state';
-        }
-
-        return rtrim($state, '/\\') . '/east-website-cli/session.json';
+    private static function isAbsolute(string $path): bool
+    {
+        return '/' === $path[0] || '\\' === $path[0] || 1 === preg_match('#^[a-zA-Z]:[/\\\\]#', $path);
     }
 
     public function path(): string
@@ -105,7 +103,7 @@ class SessionFile
         return $this->path;
     }
 
-    public function read(): ?Session
+    public function read(): ?Connection
     {
         if (!is_file($this->path) || !is_readable($this->path)) {
             return null;
@@ -117,30 +115,72 @@ class SessionFile
             return null;
         }
 
-        $baseUrl = $data['baseUrl'] ?? null;
-        $username = $data['username'] ?? null;
-        $token = $data['token'] ?? null;
-        $expiresAt = $data['expiresAt'] ?? null;
-        if (!is_string($baseUrl) || !is_string($username) || !is_string($token) || '' === $token) {
+        $url = $data['url'] ?? null;
+        if (!is_string($url) || '' === $url) {
             return null;
         }
 
-        return new Session($baseUrl, $username, $token, is_int($expiresAt) ? $expiresAt : null);
+        $timeout = $data['timeout'] ?? null;
+
+        return new Connection(
+            baseUrl: $url,
+            endpoints: new Endpoints(
+                self::string($data, 'apiPrefix') ?? Endpoints::DEFAULT_API_PREFIX,
+                self::string($data, 'adminPrefix') ?? Endpoints::DEFAULT_ADMIN_PREFIX,
+                self::string($data, 'loginPath') ?? Endpoints::DEFAULT_LOGIN_PATH,
+            ),
+            credentials: new Credentials(
+                self::string($data, 'username'),
+                self::string($data, 'apiKey'),
+                self::string($data, 'token'),
+                is_int($data['expiresAt'] ?? null) ? $data['expiresAt'] : null,
+            ),
+            configFile: $this->path,
+            configured: true,
+            insecure: true === ($data['insecure'] ?? false),
+            allowHttp: true === ($data['allowHttp'] ?? false),
+            timeout: is_int($timeout) && $timeout > 0 ? $timeout : Connection::DEFAULT_TIMEOUT,
+            usernameField: self::string($data, 'usernameField') ?? 'username',
+            tokenField: self::string($data, 'tokenField') ?? 'token',
+        );
     }
 
     /**
-     * @throws RuntimeException when the session can not be stored
+     * @param array<mixed> $data
      */
-    public function write(Session $session): void
+    private static function string(array $data, string $key): ?string
+    {
+        $value = $data[$key] ?? null;
+
+        return is_string($value) && '' !== $value ? $value : null;
+    }
+
+    /**
+     * @throws RuntimeException when the file can not be written
+     */
+    public function write(Connection $connection): void
     {
         $directory = dirname($this->path);
-        $json = Json::encode([
-            'version' => self::VERSION,
-            'baseUrl' => $session->baseUrl,
-            'username' => $session->username,
-            'token' => $session->token,
-            'expiresAt' => $session->expiresAt,
-        ]);
+        $credentials = $connection->credentials;
+        $json = Json::encode(
+            [
+                'version' => self::VERSION,
+                'url' => $connection->baseUrl,
+                'username' => $credentials->username,
+                'apiKey' => $credentials->apiKey(),
+                'token' => $credentials->token,
+                'expiresAt' => $credentials->expiresAt,
+                'insecure' => $connection->insecure,
+                'allowHttp' => $connection->allowHttp,
+                'timeout' => $connection->timeout,
+                'apiPrefix' => $connection->endpoints->apiPrefix(),
+                'adminPrefix' => $connection->endpoints->adminPrefix(),
+                'loginPath' => $connection->endpoints->login(),
+                'usernameField' => $connection->usernameField,
+                'tokenField' => $connection->tokenField,
+            ],
+            true,
+        );
 
         self::guard(
             function () use ($directory, $json): void {
@@ -152,7 +192,7 @@ class SessionFile
                     throw new ErrorException(sprintf('The directory "%s" is not writable', $directory));
                 }
 
-                $temporary = tempnam($directory, 'session');
+                $temporary = tempnam($directory, 'east-website');
                 if (false === $temporary) {
                     throw new ErrorException(sprintf('A temporary file can not be created in "%s"', $directory));
                 }
@@ -162,7 +202,7 @@ class SessionFile
                         chmod($temporary, 0600);
                     }
 
-                    if (false === file_put_contents($temporary, $json)) {
+                    if (false === file_put_contents($temporary, $json . "\n")) {
                         throw new ErrorException('The content can not be written');
                     }
 
@@ -177,7 +217,7 @@ class SessionFile
                     throw $error;
                 }
             },
-            sprintf('The session file "%s" can not be written', $this->path),
+            sprintf('The configuration file "%s" can not be written', $this->path),
         );
     }
 

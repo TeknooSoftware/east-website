@@ -55,32 +55,37 @@ class ConnectionTest extends TestCase
     {
         $connection = new Connection('https://site.test', new Endpoints(), new Credentials());
 
-        self::assertTrue($connection->useSession);
-        self::assertNull($connection->sessionPath);
+        self::assertSame('', $connection->configFile);
+        self::assertFalse($connection->configured);
         self::assertFalse($connection->insecure);
         self::assertFalse($connection->allowHttp);
         self::assertFalse($connection->anonymous);
-        self::assertSame(30, $connection->timeout);
+        self::assertSame(30, Connection::DEFAULT_TIMEOUT);
+        self::assertSame(Connection::DEFAULT_TIMEOUT, $connection->timeout);
         self::assertSame('username', $connection->usernameField);
         self::assertSame('token', $connection->tokenField);
     }
 
-    public function testWithCredentialsKeepsTheOtherSettings(): void
+    private function complete(bool $anonymous): Connection
     {
-        $endpoints = new Endpoints('/api/v2');
-        $connection = new Connection(
+        return new Connection(
             'https://site.test',
-            $endpoints,
-            new Credentials('old'),
-            false,
-            '/tmp/session.json',
+            new Endpoints('/api/v2'),
+            new Credentials('old', 'secret', 'jwt', 1_800_003_600),
+            '/tmp/east-website.json',
             true,
             true,
             true,
+            $anonymous,
             12,
             'login',
             'secret',
         );
+    }
+
+    public function testWithCredentialsKeepsTheOtherSettings(): void
+    {
+        $connection = $this->complete(true);
 
         $copy = $connection->withCredentials(new Credentials('new'));
 
@@ -88,12 +93,33 @@ class ConnectionTest extends TestCase
         self::assertSame('new', $copy->credentials->username);
         self::assertSame('old', $connection->credentials->username);
         self::assertSame('https://site.test', $copy->baseUrl);
-        self::assertSame($endpoints, $copy->endpoints);
-        self::assertFalse($copy->useSession);
-        self::assertSame('/tmp/session.json', $copy->sessionPath);
+        self::assertSame($connection->endpoints, $copy->endpoints);
+        self::assertSame('/tmp/east-website.json', $copy->configFile);
+        self::assertTrue($copy->configured);
         self::assertTrue($copy->insecure);
         self::assertTrue($copy->allowHttp);
         self::assertTrue($copy->anonymous);
+        self::assertSame(12, $copy->timeout);
+        self::assertSame('login', $copy->usernameField);
+        self::assertSame('secret', $copy->tokenField);
+    }
+
+    public function testAsAnonymousKeepsTheConfiguration(): void
+    {
+        $connection = $this->complete(false);
+
+        $copy = $connection->asAnonymous();
+
+        self::assertNotSame($connection, $copy);
+        self::assertTrue($copy->anonymous);
+        self::assertFalse($connection->anonymous);
+        self::assertSame('https://site.test', $copy->baseUrl);
+        self::assertSame($connection->endpoints, $copy->endpoints);
+        self::assertSame($connection->credentials, $copy->credentials);
+        self::assertSame('/tmp/east-website.json', $copy->configFile);
+        self::assertTrue($copy->configured);
+        self::assertTrue($copy->insecure);
+        self::assertTrue($copy->allowHttp);
         self::assertSame(12, $copy->timeout);
         self::assertSame('login', $copy->usernameField);
         self::assertSame('secret', $copy->tokenField);
@@ -177,7 +203,7 @@ class ConnectionTest extends TestCase
             self::fail('An exception was expected');
         } catch (ApiException $error) {
             self::assertSame(ErrorKind::Usage, $error->kind);
-            self::assertStringContainsString('EAST_WEBSITE_URL', $error->getMessage());
+            self::assertStringContainsString('login first with website:auth:login --url=', $error->getMessage());
         }
     }
 

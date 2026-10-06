@@ -7,7 +7,8 @@ domain (`website:<domain>:<action>`), and it is designed to be used by **scripts
 
 * the result is always **one JSON document on stdout** (the envelope of the API is passed through unchanged),
 * the failures are **one JSON document on stderr** with a stable **exit code**,
-* nothing depends on a terminal (no colors, no prompt, except a confirmation before a deletion on an interactive tty),
+* nothing depends on a terminal (no colors, no prompt, except the API key at the login and a confirmation before a
+  deletion, only on an interactive tty),
 * secrets are never accepted as a command line value, and never printed.
 
 It is a standalone application, with its own dependencies: it is not part of the library, and it is excluded from its
@@ -28,62 +29,74 @@ dependencies are installed, from `composer.lock`. It is not versioned: build it 
 
 ## Connect to the API
 
-The prefixes of the routes and the login route are defined by the application hosting East Website (East Website
-ships no authentication): the defaults are the ones of the documentation of the library and of East Common.
-
-| Environment variable | Option | Meaning |
-|---|---|---|
-| `EAST_WEBSITE_URL` | `--url` | Base URL of the website, like `https://example.com` (plain `http` is refused for a remote host, unless `--allow-http`) |
-| `EAST_WEBSITE_USERNAME` | `--username` | Login: **`<keyName>:<email>`** (the name of the API key, a colon, the email of its owner) |
-| `EAST_WEBSITE_API_KEY` | `--api-key-file` | The API key. No option takes the value itself, because it leaks in the list of processes and in transcripts. `--api-key-file=-` reads stdin |
-| `EAST_WEBSITE_TOKEN` | `--token-file` | A JWT to use as is, without login |
-| `EAST_WEBSITE_SESSION_FILE` | `--session-file`, `--no-session` | File storing the JWT between two calls |
-| `EAST_WEBSITE_TIMEOUT` | `--timeout` | Timeout of a request, in seconds (30 by default) |
-| `EAST_WEBSITE_API_PREFIX` | | Prefix of the public routes, `/api/v1` by default |
-| `EAST_WEBSITE_ADMIN_PREFIX` | | Prefix of the admin routes, `/api/v1/admin` by default |
-| `EAST_WEBSITE_LOGIN_PATH` | | Login route, `/api/v1/login` by default |
-| `EAST_WEBSITE_LOGIN_USERNAME_FIELD`, `EAST_WEBSITE_LOGIN_SECRET_FIELD` | | Fields of the login body, `username` and `token` by default |
-
-Other global options: `--anonymous` (send no JWT), `--insecure` (do not verify the TLS certificate), `--allow-http`.
-An option always wins over the environment variable.
-
-### Login
+The connection is configured by **one command**, `website:auth:login`: it logs in with the username and the API key,
+gets a JWT, and writes the configuration file **`./east-website.json`** (in the current directory). All the other
+commands read this file, and nothing else: no environment variable, no connection option. **Without this file, there
+is no JWT**, and the commands fail with the exit code `3`.
 
 ```bash
-export EAST_WEBSITE_URL=https://example.com
-export EAST_WEBSITE_USERNAME='my-key:me@example.com'
-export EAST_WEBSITE_API_KEY='...'          # or: --api-key-file=/path/to/file
-
-php east-website.phar website:auth:login    # JWT stored in the session file, printed only with --print-token
-php east-website.phar website:tag:list      # the next commands reuse it
+php east-website.phar website:auth:login --url=https://example.com --username='my-key:me@example.com'
+API key:                                    # asked without being displayed
+php east-website.phar website:tag:list      # reads ./east-website.json
+php east-website.phar website:auth:logout   # deletes ./east-website.json
 ```
 
-`website:auth:login` also accepts `--key-name=my-key --email=me@example.com` to compose the username.
+The username is **`<keyName>:<email>`** (the name of the API key, a colon, the email of its owner), or
+`--key-name=my-key --email=me@example.com`. The API key is never accepted as an option value (it leaks in the list of
+processes, the shell history and the transcripts of agents): it is asked on a terminal without being displayed, or
+read from a file with `--api-key-file=/path/to/file`, or from stdin with `--api-key-file=-` (for scripts and agents):
 
-The JWT is resolved in this order: `EAST_WEBSITE_TOKEN` / `--token-file`, then the stored session (when still valid),
-then a new login with the username and the API key. A request rejected with a `401` is replayed once after a new login
-(only when the JWT was not given explicitly). With the environment variables above, an agent does not need any explicit
-login: the first command logs in and stores the session, the next ones reuse it.
+```bash
+printf '%s' "$KEY" | php east-website.phar website:auth:login --url=https://example.com \
+    --username='my-key:me@example.com' --api-key-file=-
+```
 
-The session (`{baseUrl, username, token, expiresAt}`, never the API key) is stored with the mode `0600`, atomically, in
-`$EAST_WEBSITE_SESSION_FILE`, else `$XDG_STATE_HOME/east-website-cli/session.json` (`~/.local/state/...`). Without
-`HOME` or `XDG_STATE_HOME`, there is no session: a warning is written on stderr and the commands still work.
-`--no-session` disables it. There is no refresh token: `website:auth:renew` (`--days=N` or
-`--expiration-date=YYYY-MM-DD`) gets a new JWT from the current one, and the lifetime is capped by the server
-(1 day by default). There is no logout on the server: `website:auth:logout` only forgets the local session.
+Options of `website:auth:login`, stored in the file:
+
+| Option                                               | Meaning                                                                                     |
+|------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `--url`                                              | Base URL of the website, like `https://example.com` (required for the first login)          |
+| `--username`, or `--key-name` with `--email`         | Login: `<keyName>:<email>`                                                                  |
+| `--api-key-file`                                     | File containing the API key, `-` for stdin (else the key is asked on a terminal)            |
+| `--insecure` / `--no-insecure`                       | Do not verify the TLS certificate (a local server with a self-signed certificate)           |
+| `--allow-http` / `--no-allow-http`                   | Allow plain `http` to a remote host (refused by default, always allowed for `localhost`)    |
+| `--timeout`                                          | Timeout of a request, in seconds (30 by default)                                            |
+| `--api-prefix`, `--admin-prefix`                     | Prefixes of the public and of the admin routes, `/api/v1` and `/api/v1/admin` by default    |
+| `--login-path`                                       | Login route, `/api/v1/login` by default                                                     |
+| `--login-username-field`, `--login-secret-field`     | Fields of the body of the login, `username` and `token` by default                          |
+| `--print-token`                                      | Print the JWT in the result (it is never printed by default)                                |
+
+The prefixes, the login route and its fields are defined by the application hosting East Website (East Website ships
+no authentication): the defaults are the ones of the documentation of the library and of East Common.
+
+The file (`url`, `username`, `apiKey`, `token`, `expiresAt` and the options above) is written with the mode `0600`,
+atomically. **It contains the API key: do not commit it** (add `east-website.json` to your `.gitignore`). The API key
+lets the CLI log in again by itself when the JWT expires, or when the server rejects it (once by command), and the new
+JWT is written in the file.
+
+* `--config=<file>` (on every command) uses another file than `./east-website.json`, to work with several websites
+  or accounts. A relative path is relative to the current directory.
+* Run again, `website:auth:login` reuses the settings of the existing file for the same URL, and its API key for the
+  same URL and the same username (the API key is never sent to another server or for another user): a new login is
+  just `website:auth:login`.
+* `website:auth:status` displays the file and the state of the JWT, offline and without any secret.
+* `website:auth:renew` (`--days=N` or `--expiration-date=YYYY-MM-DD`) gets a new JWT from the current one and writes
+  it in the file. The lifetime is capped by the server.
+* `website:auth:logout` deletes the file. There is no logout on the server: the JWT stays valid until its expiration.
+* `--dry-run` and `website:schema` work without the file (they send nothing).
 
 ## Commands
 
 `list --format=json` and `help <command> --format=json` (built-in) describe all the commands and their options.
 `website:schema [resource]` describes the resources of the API: fields, enumerations, paths.
 
-| Domain | Commands | Notes |
-|---|---|---|
-| `tag`, `type`, `content`, `post`, `item`, `user` | `website:<domain>:list`, `get <id>`, `create`, `update <id>`, `delete <id>` | |
-| `media` | `website:media:list`, `get <id>`, `create --file=...`, `delete <id>` | A media can not be updated. The type of the file is detected from its content |
-| `comment` | `website:comment:list <post-id>`, `get <post-id> <id>`, `update <post-id> <id>`, `delete <post-id> <id>` | `update` moderates a comment of a post |
-| `front` (public API) | `website:front:content:get [slug]`, `post:get <slug>`, `post:list`, `post:list-by-tag <tag-slug>`, `comment:create <post-slug>` | Published objects only; the JWT is sent when available |
-| `auth` | `website:auth:login`, `renew`, `status`, `logout` | `status` is offline and shows no secret |
+| Domain                                           | Commands                                                                                                                        | Notes                                                                         |
+|--------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| `tag`, `type`, `content`, `post`, `item`, `user` | `website:<domain>:list`, `get <id>`, `create`, `update <id>`, `delete <id>`                                                     |                                                                               |
+| `media`                                          | `website:media:list`, `get <id>`, `create --file=...`, `delete <id>`                                                            | A media can not be updated. The type of the file is detected from its content |
+| `comment`                                        | `website:comment:list <post-id>`, `get <post-id> <id>`, `update <post-id> <id>`, `delete <post-id> <id>`                        | `update` moderates a comment of a post                                        |
+| `front` (public API)                             | `website:front:content:get [slug]`, `post:get <slug>`, `post:list`, `post:list-by-tag <tag-slug>`, `comment:create <post-slug>` | Published objects only; the JWT is sent, unless `--anonymous`                 |
+| `auth`                                           | `website:auth:login`, `renew`, `status`, `logout`                                                                               | `login` writes `./east-website.json`, `logout` deletes it                     |
 
 ### Fields
 
@@ -142,23 +155,35 @@ duplicate.
 
 ## Output and exit codes
 
-| Exit code | Meaning |
-|---|---|
-| `0` | Success |
-| `1` | Server error (5xx, unexpected answer) or network failure |
-| `2` | Usage error or validation error of the server (400) |
-| `3` | Authentication error (missing credentials, 401, 403) |
-| `4` | Not found (404) |
+| Exit code | Meaning                                                  |
+|-----------|----------------------------------------------------------|
+| `0`       | Success                                                  |
+| `1`       | Server error (5xx, unexpected answer) or network failure |
+| `2`       | Usage error or validation error of the server (400)      |
+| `3`       | Authentication error (no configuration file, 401, 403)   |
+| `4`       | Not found (404)                                          |
 
 A failure is written on stderr, like an error of the API, with its kind and, for a validation error, the fields in
 error (keys are the paths of the form):
 
 ```json
-{"meta": {"error": true}, "data": {"code": 400, "kind": "validation", "message": "Validation failed", "fields": {".blocks.0.type": "This value is not valid."}}}
+{
+    "meta": {
+        "error": true
+    },
+    "data": {
+        "code": 400,
+        "kind": "validation",
+        "message": "Validation failed",
+        "fields": {
+            ".blocks.0.type": "This value is not valid."
+        }
+    }
+}
 ```
 
-Non fatal problems (a session that can not be stored) are written on stderr as `warning: ...` lines after a successful
-command. When the command fails, stderr stays a single JSON document, and the warnings are in its `data.warnings`.
+Non fatal problems (a new JWT that can not be written in the configuration file) are written on stderr as
+`warning: ...` lines after a successful command. When the command fails, stderr stays a single JSON document, and the warnings are in its `data.warnings`.
 
 ## Development
 

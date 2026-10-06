@@ -43,7 +43,7 @@ class GetCommandTest extends TestCase
 {
     private function harness(): ApiHarness
     {
-        return new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']);
+        return new ApiHarness(['token' => 'jwt']);
     }
 
     /**

@@ -41,8 +41,8 @@ use function strtolower;
 use const PHP_QUERY_RFC3986;
 
 /**
- * Immutable description of the remote API to reach: base URL, endpoints, credentials, session storage and
- * transport options.
+ * Immutable description of the remote API to reach: base URL, endpoints, credentials and transport options. It is
+ * stored in the configuration file by the login, and read from it by all the other commands.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -53,16 +53,22 @@ class Connection
 {
     private const array LOOPBACK_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]'];
 
+    public const int DEFAULT_TIMEOUT = 30;
+
+    /**
+     * @param string $configFile path of the configuration file of this connection
+     * @param bool $configured true when the connection was read from its configuration file
+     */
     public function __construct(
         public readonly string $baseUrl,
         public readonly Endpoints $endpoints,
         public readonly Credentials $credentials,
-        public readonly bool $useSession = true,
-        public readonly ?string $sessionPath = null,
+        public readonly string $configFile = '',
+        public readonly bool $configured = false,
         public readonly bool $insecure = false,
         public readonly bool $allowHttp = false,
         public readonly bool $anonymous = false,
-        public readonly int $timeout = 30,
+        public readonly int $timeout = self::DEFAULT_TIMEOUT,
         public readonly string $usernameField = 'username',
         public readonly string $tokenField = 'token',
     ) {
@@ -74,11 +80,31 @@ class Connection
             $this->baseUrl,
             $this->endpoints,
             $credentials,
-            $this->useSession,
-            $this->sessionPath,
+            $this->configFile,
+            $this->configured,
             $this->insecure,
             $this->allowHttp,
             $this->anonymous,
+            $this->timeout,
+            $this->usernameField,
+            $this->tokenField,
+        );
+    }
+
+    /**
+     * Sends no JWT (option --anonymous of the commands of the public API), without changing the configuration.
+     */
+    public function asAnonymous(): self
+    {
+        return new self(
+            $this->baseUrl,
+            $this->endpoints,
+            $this->credentials,
+            $this->configFile,
+            $this->configured,
+            $this->insecure,
+            $this->allowHttp,
+            true,
             $this->timeout,
             $this->usernameField,
             $this->tokenField,
@@ -92,7 +118,7 @@ class Connection
     {
         if ('' === $this->baseUrl) {
             throw ApiException::usage(
-                'No base URL configured, use the --url option or the EAST_WEBSITE_URL environment variable'
+                'No base URL configured, login first with website:auth:login --url=<base url>'
             );
         }
 

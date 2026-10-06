@@ -235,7 +235,7 @@ class SchemaCommandTest extends TestCase
 
     public function testThePathsFollowTheConfiguredPrefix(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_ADMIN_PREFIX' => '/cms/api']);
+        $harness = new ApiHarness(['adminPrefix' => '/cms/api']);
 
         $paths = $this->schema($harness, 'tag')['data']['resources']['tag']['paths'];
 
@@ -243,13 +243,15 @@ class SchemaCommandTest extends TestCase
         self::assertSame('/cms/api/tag/{id}', $paths['item']);
     }
 
-    public function testNeitherCredentialsNorBaseUrlAreNeeded(): void
+    public function testNoConfigurationFileIsNeeded(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_URL' => '', 'EAST_WEBSITE_SESSION_FILE' => '']);
+        $harness = new ApiHarness(null);
 
         $document = $this->schema($harness, 'tag');
 
         self::assertFalse($document['meta']['error']);
+        self::assertSame('/api/v1/admin/tags', $document['data']['resources']['tag']['paths']['list']);
+        self::assertSame([], $harness->requests);
     }
 
     public function testAnUnknownResourceIsAUsageError(): void

@@ -58,7 +58,7 @@ class ApiRequestTest extends TestCase
 
     private function connection(string $baseUrl = 'https://site.test'): Connection
     {
-        return new Connection($baseUrl, new Endpoints(), new Credentials(), useSession: false);
+        return new Connection($baseUrl, new Endpoints(), new Credentials(), configured: '' !== $baseUrl);
     }
 
     public function testGet(): void

@@ -31,10 +31,10 @@ use Teknoo\East\Website\Tools\Command\Auth\LogoutCommand;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
 
-use function file_put_contents;
+use function mkdir;
 
 /**
- * Tests of the logout: only the local session is deleted, the API has no logout endpoint
+ * Tests of the logout: the configuration file written by the login is deleted, the next commands have no JWT anymore
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -42,84 +42,93 @@ use function file_put_contents;
 #[CoversClass(LogoutCommand::class)]
 class LogoutCommandTest extends TestCase
 {
-    private const string SESSION = '{"version":1,"baseUrl":"https://site.test","username":"key:me@site.test","token":"jwt","expiresAt":1800003600}';
+    private const array CONFIG = [
+        'username' => 'key:me@site.test',
+        'apiKey' => 'api-key-value',
+        'token' => 'config-secret-token',
+        'expiresAt' => 1_800_003_600,
+    ];
 
-    public function testTheSessionFileIsDeleted(): void
+    public function testTheConfigurationFileIsDeleted(): void
     {
-        $harness = new ApiHarness();
-        $path = $harness->temp()->path('session.json');
-        file_put_contents($path, self::SESSION);
+        $harness = new ApiHarness(self::CONFIG);
 
         [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--compact']);
 
         self::assertSame(0, $code, $stderr);
+        self::assertSame('', $stderr);
         self::assertSame(
-            ['meta' => ['error' => false], 'data' => ['sessionFile' => $path, 'deleted' => true]],
+            ['meta' => ['error' => false], 'data' => ['configFile' => $harness->configPath(), 'deleted' => true]],
             AbstractCommandTest::decode($stdout),
         );
-        self::assertFileDoesNotExist($path);
+        self::assertFileDoesNotExist($harness->configPath());
+        self::assertSame([], $harness->requests, 'There is no logout endpoint on the server');
+        self::assertStringNotContainsString('config-secret-token', $stdout);
+        self::assertStringNotContainsString('api-key-value', $stdout);
+    }
+
+    public function testAfterTheLogoutTheCommandsHaveNoJwt(): void
+    {
+        $harness = new ApiHarness(self::CONFIG);
+
+        AbstractCommandTest::execute($harness, ['website:auth:logout']);
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:tag:list']);
+
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertStringContainsString('website:auth:login', AbstractCommandTest::decode($stderr)['data']['message']);
         self::assertSame([], $harness->requests);
     }
 
     public function testNothingToDelete(): void
     {
-        $harness = new ApiHarness();
+        $harness = new ApiHarness(null);
 
         [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--compact']);
 
         self::assertSame(0, $code);
         self::assertSame(
-            ['meta' => ['error' => false], 'data' => ['sessionFile' => $harness->temp()->path('session.json'), 'deleted' => false]],
+            ['meta' => ['error' => false], 'data' => ['configFile' => $harness->configPath(), 'deleted' => false]],
             AbstractCommandTest::decode($stdout),
         );
     }
 
-    public function testNoSessionOptionKeepsTheFile(): void
+    public function testADirectoryIsNeverDeleted(): void
     {
-        $harness = new ApiHarness();
-        $path = $harness->temp()->path('session.json');
-        file_put_contents($path, self::SESSION);
-
-        [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--no-session', '--compact']);
-
-        self::assertSame(0, $code);
-        self::assertSame(['sessionFile' => null, 'deleted' => false], AbstractCommandTest::decode($stdout)['data']);
-        self::assertFileExists($path);
-    }
-
-    public function testTheSessionFileOptionOverridesTheEnvironment(): void
-    {
-        $harness = new ApiHarness();
-        $environment = $harness->temp()->path('session.json');
-        $chosen = $harness->temp()->write('chosen/session.json', self::SESSION);
-        file_put_contents($environment, self::SESSION);
-
-        [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--session-file=' . $chosen, '--compact']);
-
-        self::assertSame(0, $code);
-        self::assertSame(['sessionFile' => $chosen, 'deleted' => true], AbstractCommandTest::decode($stdout)['data']);
-        self::assertFileDoesNotExist($chosen);
-        self::assertFileExists($environment);
-    }
-
-    public function testNoSessionPathCanBeDetermined(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_SESSION_FILE' => '']);
+        $harness = new ApiHarness(null);
+        mkdir($harness->configPath(), 0700);
 
         [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--compact']);
 
         self::assertSame(0, $code);
-        self::assertSame(['sessionFile' => null, 'deleted' => false], AbstractCommandTest::decode($stdout)['data']);
+        self::assertFalse(AbstractCommandTest::decode($stdout)['data']['deleted']);
+        self::assertDirectoryExists($harness->configPath());
+    }
+
+    public function testTheConfigurationFileCanBeChosenWithAnOption(): void
+    {
+        $harness = new ApiHarness(self::CONFIG);
+        $harness->writeConfig(self::CONFIG, 'other.json');
+
+        [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--config=other.json', '--compact']);
+
+        self::assertSame(0, $code);
+        self::assertSame(
+            ['configFile' => $harness->configPath('other.json'), 'deleted' => true],
+            AbstractCommandTest::decode($stdout)['data'],
+        );
+        self::assertFileDoesNotExist($harness->configPath('other.json'));
+        self::assertFileExists($harness->configPath(), 'Only the chosen file is deleted');
     }
 
     public function testTheTableFormat(): void
     {
-        $harness = new ApiHarness();
+        $harness = new ApiHarness(self::CONFIG);
 
         [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:logout', '--format=table']);
 
         self::assertSame(0, $code);
-        self::assertStringContainsString('| deleted', $stdout);
-        self::assertStringContainsString('false', $stdout);
+        self::assertStringContainsString('deleted', $stdout);
+        self::assertStringContainsString($harness->configPath(), $stdout);
     }
 }

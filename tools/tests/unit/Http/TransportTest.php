@@ -83,7 +83,7 @@ class TransportTest extends TestCase
             $baseUrl,
             new Endpoints(),
             new Credentials(),
-            useSession: false,
+            configured: true,
             insecure: $insecure,
             timeout: $timeout,
         );

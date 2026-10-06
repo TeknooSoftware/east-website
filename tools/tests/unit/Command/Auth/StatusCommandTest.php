@@ -37,7 +37,7 @@ use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
 use function file_put_contents;
 
 /**
- * Tests of the authentication state: offline, and without any secret
+ * Tests of the display of the configuration file written by the login: offline, and without any secret
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -45,18 +45,16 @@ use function file_put_contents;
 #[CoversClass(StatusCommand::class)]
 class StatusCommandTest extends TestCase
 {
+    private const int NOW = 1_800_000_000;
+
     private const int VALID_EXPIRATION = 1_800_003_600;
 
-    private function session(ApiHarness $harness, int $expiresAt = self::VALID_EXPIRATION, string $baseUrl = 'https://site.test'): string
-    {
-        $path = $harness->temp()->path('session.json');
-        file_put_contents(
-            $path,
-            '{"version":1,"baseUrl":"' . $baseUrl . '","username":"key:me@site.test","token":"session-secret-token","expiresAt":' . $expiresAt . '}',
-        );
-
-        return $path;
-    }
+    private const array CONFIG = [
+        'username' => 'key:me@site.test',
+        'apiKey' => 'api-key-value',
+        'token' => 'config-secret-token',
+        'expiresAt' => self::VALID_EXPIRATION,
+    ];
 
     /**
      * @return array<mixed>
@@ -68,259 +66,159 @@ class StatusCommandTest extends TestCase
         self::assertSame(0, $code, $stderr);
         self::assertSame('', $stderr);
         self::assertSame([], $harness->requests, 'The status must not use the network');
-        self::assertStringNotContainsString('session-secret-token', $stdout);
-        self::assertStringNotContainsString('super-secret-token', $stdout);
+        self::assertStringNotContainsString('config-secret-token', $stdout);
         self::assertStringNotContainsString('api-key-value', $stdout);
 
         return AbstractCommandTest::decode($stdout);
     }
 
-    public function testNothingIsConfigured(): void
+    private static function date(int $timestamp): string
     {
-        $harness = new ApiHarness();
+        return (new DateTimeImmutable('@' . $timestamp))->format(DateTimeInterface::ATOM);
+    }
 
-        $document = $this->statusOf($harness);
+    public function testWithoutConfigurationFileNothingIsConfigured(): void
+    {
+        $harness = new ApiHarness(null);
 
         self::assertSame(
             [
                 'meta' => ['error' => false],
                 'data' => [
-                    'baseUrl' => 'https://site.test',
+                    'configFile' => $harness->configPath(),
+                    'configured' => false,
+                    'url' => null,
                     'username' => null,
-                    'authentication' => 'none',
                     'hasApiKey' => false,
-                    'sessionFile' => $harness->temp()->path('session.json'),
-                    'session' => null,
+                    'insecure' => false,
+                    'expiresAt' => null,
+                    'expired' => null,
                 ],
             ],
-            $document,
+            $this->statusOf($harness),
         );
     }
 
-    public function testAnExplicitTokenIsUsedAsIs(): void
+    public function testAValidJwtOfTheConfigurationFile(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_TOKEN' => 'super-secret-token']);
+        $harness = new ApiHarness(self::CONFIG);
+
+        self::assertSame(
+            [
+                'meta' => ['error' => false],
+                'data' => [
+                    'configFile' => $harness->configPath(),
+                    'configured' => true,
+                    'url' => 'https://site.test',
+                    'username' => 'key:me@site.test',
+                    'hasApiKey' => true,
+                    'insecure' => false,
+                    'expiresAt' => self::date(self::VALID_EXPIRATION),
+                    'expired' => false,
+                ],
+            ],
+            $this->statusOf($harness),
+        );
+    }
+
+    /**
+     * @return iterable<string, array{int, bool}>
+     */
+    public static function expirations(): iterable
+    {
+        yield 'far' => [self::VALID_EXPIRATION, false];
+        yield 'beyond the leeway' => [self::NOW + 31, false];
+        yield 'within the leeway' => [self::NOW + 30, true];
+        yield 'now' => [self::NOW, true];
+        yield 'past' => [self::NOW - 3600, true];
+    }
+
+    #[DataProvider('expirations')]
+    public function testAJwtAboutToExpireIsConsideredExpired(int $expiresAt, bool $expired): void
+    {
+        $harness = new ApiHarness(['expiresAt' => $expiresAt] + self::CONFIG);
 
         $data = $this->statusOf($harness)['data'];
 
-        self::assertSame('token', $data['authentication']);
+        self::assertSame($expired, $data['expired']);
+        self::assertSame(self::date($expiresAt), $data['expiresAt']);
+    }
+
+    public function testAJwtWithoutExpirationIsValid(): void
+    {
+        $harness = new ApiHarness(['username' => 'key:me@site.test', 'token' => 'config-secret-token']);
+
+        $data = $this->statusOf($harness)['data'];
+
+        self::assertNull($data['expiresAt']);
+        self::assertFalse($data['expired']);
         self::assertFalse($data['hasApiKey']);
     }
 
-    public function testAValidSessionIsReused(): void
+    public function testAConfigurationWithoutJwtIsExpired(): void
     {
-        $harness = new ApiHarness();
-        $this->session($harness);
+        $harness = new ApiHarness(['username' => 'key:me@site.test', 'apiKey' => 'api-key-value']);
 
         $data = $this->statusOf($harness)['data'];
 
-        self::assertSame('session', $data['authentication']);
-        self::assertSame('key:me@site.test', $data['username']);
-        self::assertSame(
-            [
-                'expiresAt' => (new DateTimeImmutable('@' . self::VALID_EXPIRATION))->format(DateTimeInterface::ATOM),
-                'expired' => false,
-            ],
-            $data['session'],
-        );
-    }
-
-    public function testASessionAboutToExpireIsConsideredExpired(): void
-    {
-        $harness = new ApiHarness();
-        $this->session($harness, 1_800_000_010);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('none', $data['authentication']);
-        self::assertTrue($data['session']['expired']);
-    }
-
-    public function testAnExpiredSessionGivesALoginWhenTheCredentialsAreAvailable(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_USERNAME' => 'key:me@site.test', 'EAST_WEBSITE_API_KEY' => 'api-key-value']);
-        $this->session($harness, 1_700_000_000);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('login', $data['authentication']);
+        self::assertTrue($data['configured']);
         self::assertTrue($data['hasApiKey']);
-        self::assertTrue($data['session']['expired']);
+        self::assertTrue($data['expired']);
     }
 
-    public function testTheCredentialsGiveALoginOnTheNextCall(): void
+    public function testTheInsecureOptionOfTheConfigurationIsDisplayed(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_USERNAME' => 'key:me@site.test', 'EAST_WEBSITE_API_KEY' => 'api-key-value']);
+        $harness = new ApiHarness(['insecure' => true] + self::CONFIG);
 
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('login', $data['authentication']);
-        self::assertSame('key:me@site.test', $data['username']);
-        self::assertTrue($data['hasApiKey']);
-        self::assertNull($data['session']);
-    }
-
-    public function testAnApiKeyWithoutUsernameIsNotEnoughToLogin(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_API_KEY' => 'api-key-value']);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('none', $data['authentication']);
-        self::assertTrue($data['hasApiKey']);
-    }
-
-    public function testAnonymousOptionWins(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_TOKEN' => 'super-secret-token']);
-        $this->session($harness);
-
-        $data = $this->statusOf($harness, '--anonymous')['data'];
-
-        self::assertSame('anonymous', $data['authentication']);
-    }
-
-    public function testTheBaseUrlIsTakenFromTheSessionWhenNotConfigured(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_URL' => '']);
-        $this->session($harness, baseUrl: 'https://other.test');
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('https://other.test', $data['baseUrl']);
-        self::assertSame('session', $data['authentication']);
-    }
-
-    public function testNoBaseUrlAtAll(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_URL' => '']);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertNull($data['baseUrl']);
-        self::assertSame('none', $data['authentication']);
-    }
-
-    public function testASessionOfAnotherServerIsIgnored(): void
-    {
-        $harness = new ApiHarness();
-        $this->session($harness, baseUrl: 'https://other.test');
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('none', $data['authentication']);
-        self::assertNull($data['session']);
-    }
-
-    public function testASessionOfAnotherUserIsIgnored(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_USERNAME' => 'someone:else@site.test']);
-        $this->session($harness);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertNull($data['session']);
-        self::assertSame('someone:else@site.test', $data['username']);
+        self::assertTrue($this->statusOf($harness)['data']['insecure']);
     }
 
     /**
      * @return iterable<string, array{string}>
      */
-    public static function brokenSessions(): iterable
+    public static function brokenFiles(): iterable
     {
-        yield 'not json' => ['not json at all'];
-        yield 'not an object' => ['"text"'];
-        yield 'unknown version' => ['{"version":2,"baseUrl":"https://site.test","username":"u","token":"t","expiresAt":1}'];
-        yield 'missing token' => ['{"version":1,"baseUrl":"https://site.test","username":"u","expiresAt":1}'];
-        yield 'empty token' => ['{"version":1,"baseUrl":"https://site.test","username":"u","token":"","expiresAt":1}'];
-        yield 'wrong types' => ['{"version":1,"baseUrl":1,"username":[],"token":true}'];
-        yield 'empty file' => [''];
+        yield 'not json' => ['not json'];
+        yield 'other version' => ['{"version":2,"url":"https://site.test","token":"config-secret-token"}'];
+        yield 'no url' => ['{"version":1,"token":"config-secret-token"}'];
     }
 
-    #[DataProvider('brokenSessions')]
-    public function testABrokenSessionFileIsTheSameAsNoSession(string $content): void
+    #[DataProvider('brokenFiles')]
+    public function testABrokenConfigurationFileIsNotConfigured(string $content): void
     {
-        $harness = new ApiHarness();
-        file_put_contents($harness->temp()->path('session.json'), $content);
+        $harness = new ApiHarness(null);
+        file_put_contents($harness->configPath(), $content);
 
         $data = $this->statusOf($harness)['data'];
 
-        self::assertNull($data['session']);
-        self::assertSame('none', $data['authentication']);
+        self::assertFalse($data['configured']);
+        self::assertNull($data['url']);
+        self::assertNull($data['expired']);
     }
 
-    public function testASessionWithoutExpirationIsValid(): void
+    public function testTheConfigurationFileCanBeChosenWithAnOption(): void
     {
-        $harness = new ApiHarness();
-        file_put_contents(
-            $harness->temp()->path('session.json'),
-            '{"version":1,"baseUrl":"https://site.test","username":"key:me@site.test","token":"session-secret-token"}',
-        );
+        $harness = new ApiHarness(null);
+        $harness->writeConfig(['insecure' => true] + self::CONFIG, 'other.json');
 
-        $data = $this->statusOf($harness)['data'];
+        $data = $this->statusOf($harness, '--config=other.json')['data'];
 
-        self::assertSame('session', $data['authentication']);
-        self::assertSame(['expiresAt' => null, 'expired' => false], $data['session']);
-    }
-
-    public function testNoSessionOptionHidesTheSessionFile(): void
-    {
-        $harness = new ApiHarness();
-        $this->session($harness);
-
-        $data = $this->statusOf($harness, '--no-session')['data'];
-
-        self::assertNull($data['sessionFile']);
-        self::assertNull($data['session']);
-        self::assertSame('none', $data['authentication']);
-    }
-
-    public function testTheSessionFileCanBeChosenWithAnOption(): void
-    {
-        $harness = new ApiHarness();
-        $path = $harness->temp()->write('other/session.json', '{"version":1,"baseUrl":"https://site.test","username":"key:me@site.test","token":"session-secret-token","expiresAt":' . self::VALID_EXPIRATION . '}');
-
-        $data = $this->statusOf($harness, '--session-file=' . $path)['data'];
-
-        self::assertSame($path, $data['sessionFile']);
-        self::assertSame('session', $data['authentication']);
-    }
-
-    public function testNoSessionPathCanBeDetermined(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_SESSION_FILE' => '']);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertNull($data['sessionFile']);
-    }
-
-    public function testTheDefaultSessionPathFollowsTheXdgStateDirectory(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_SESSION_FILE' => '', 'XDG_STATE_HOME' => '/var/state/']);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('/var/state/east-website-cli/session.json', $data['sessionFile']);
-    }
-
-    public function testTheDefaultSessionPathFallsBackToTheHomeDirectory(): void
-    {
-        $harness = new ApiHarness(['EAST_WEBSITE_SESSION_FILE' => '', 'HOME' => '/home/jane']);
-
-        $data = $this->statusOf($harness)['data'];
-
-        self::assertSame('/home/jane/.local/state/east-website-cli/session.json', $data['sessionFile']);
+        self::assertSame($harness->configPath('other.json'), $data['configFile']);
+        self::assertTrue($data['configured']);
+        self::assertTrue($data['insecure']);
+        self::assertFalse($this->statusOf($harness)['data']['configured'], 'The default file does not exist');
     }
 
     public function testTheTableFormat(): void
     {
-        $harness = new ApiHarness(['EAST_WEBSITE_TOKEN' => 'super-secret-token']);
+        $harness = new ApiHarness(self::CONFIG);
 
         [$code, $stdout] = AbstractCommandTest::execute($harness, ['website:auth:status', '--format=table']);
 
         self::assertSame(0, $code);
-        self::assertStringContainsString('| authentication | token', $stdout);
-        self::assertStringNotContainsString('super-secret-token', $stdout);
+        self::assertStringContainsString('configured', $stdout);
+        self::assertStringContainsString('key:me@site.test', $stdout);
+        self::assertStringNotContainsString('config-secret-token', $stdout);
+        self::assertStringNotContainsString('api-key-value', $stdout);
     }
 }

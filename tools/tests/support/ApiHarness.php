@@ -31,6 +31,7 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Teknoo\East\Website\Tools\Application;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Http\Json;
 
 use function array_keys;
@@ -39,7 +40,9 @@ use function array_slice;
 use function base64_encode;
 use function count;
 use function explode;
+use function file_get_contents;
 use function is_array;
+use function is_file;
 use function json_encode;
 use function parse_url;
 use function rtrim;
@@ -81,25 +84,51 @@ class ApiHarness
     private readonly Application $application;
 
     /**
-     * @param array<string, string> $env
+     * The application runs in a temporary working directory, with a configuration file written like the login does:
+     * its content is $config, completed by the version and the base URL of the harness (null: no configuration file at
+     * all, like before any login).
+     *
+     * @param array<string, mixed>|null $config
      */
-    public function __construct(array $env = [], public readonly FixedClock $clock = new FixedClock())
+    public function __construct(?array $config = [], public readonly FixedClock $clock = new FixedClock())
     {
         $this->temp = new TempDir();
         $http = new MockHttpClient($this->handle(...), self::URL);
 
-        $application = Application::create(
-            $http,
-            $env + [
-                'EAST_WEBSITE_URL' => self::URL,
-                'EAST_WEBSITE_SESSION_FILE' => $this->temp->path('session.json'),
-            ],
-            $this->clock,
-        );
+        if (null !== $config) {
+            $this->writeConfig($config);
+        }
+
+        $application = Application::create($http, $this->clock, $this->temp->path());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
         $this->application = $application;
         $this->tester = new ApplicationTester($application);
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function writeConfig(array $config, string $file = ConfigFile::DEFAULT_NAME): string
+    {
+        return $this->temp->write($file, Json::encode($config + ['version' => 1, 'url' => self::URL]));
+    }
+
+    /**
+     * Content of the configuration file, null when it does not exist.
+     *
+     * @return array<mixed>|null
+     */
+    public function config(string $file = ConfigFile::DEFAULT_NAME): ?array
+    {
+        $path = $this->configPath($file);
+
+        return is_file($path) ? Json::decode((string) file_get_contents($path)) : null;
+    }
+
+    public function configPath(string $file = ConfigFile::DEFAULT_NAME): string
+    {
+        return $this->temp->path($file);
     }
 
     public function temp(): TempDir

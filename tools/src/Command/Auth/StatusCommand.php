@@ -32,7 +32,8 @@ use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Runtime;
 
 /**
- * Displays how the next commands will authenticate, without any network call and without any secret.
+ * Displays the configuration file written by the login and the state of its JWT, without any network call and
+ * without any secret.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -50,22 +51,13 @@ class StatusCommand extends AbstractCommand
     {
         parent::configure();
 
-        $this->setDescription('Display the current authentication state, offline and without any secret');
+        $this->setDescription('Display the configuration of the CLI and its JWT, offline and without any secret');
     }
 
     protected function perform(InputInterface $input, OutputInterface $output, Connection $connection): void
     {
         $credentials = $connection->credentials;
-        $session = $this->runtime->authenticator->stored($connection);
-        $now = $this->runtime->clock->now()->getTimestamp();
-
-        $source = match (true) {
-            $connection->anonymous => 'anonymous',
-            null !== $credentials->token => 'token',
-            null !== $session && $session->isValidAt($now) => 'session',
-            $credentials->canLogin() => 'login',
-            default => 'none',
-        };
+        $configured = $connection->configured;
 
         $this->emit(
             $input,
@@ -73,15 +65,16 @@ class StatusCommand extends AbstractCommand
             [
                 'meta' => ['error' => false],
                 'data' => [
-                    'baseUrl' => '' !== $connection->baseUrl ? $connection->baseUrl : null,
-                    'username' => $credentials->username ?? $session?->username,
-                    'authentication' => $source,
+                    'configFile' => $connection->configFile,
+                    'configured' => $configured,
+                    'url' => $configured ? $connection->baseUrl : null,
+                    'username' => $credentials->username,
                     'hasApiKey' => null !== $credentials->apiKey(),
-                    'sessionFile' => $connection->useSession ? $connection->sessionPath : null,
-                    'session' => null === $session ? null : [
-                        'expiresAt' => $session->expirationDate(),
-                        'expired' => !$session->isValidAt($now),
-                    ],
+                    'insecure' => $connection->insecure,
+                    'expiresAt' => $credentials->expirationDate(),
+                    'expired' => $configured
+                        ? !$credentials->isValidAt($this->runtime->clock->now()->getTimestamp())
+                        : null,
                 ],
             ],
         );

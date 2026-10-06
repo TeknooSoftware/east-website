@@ -44,7 +44,8 @@ use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
 use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 
 /**
- * Tests of the client of the API: authentication, replay after a 401, and follow of the redirection of a creation
+ * Tests of the client of the API: configuration file required, authentication, replay after a 401, and follow of the
+ * redirection of a creation
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -58,6 +59,21 @@ class ApiClientTest extends TestCase
      * @var list<array{method: string, url: string, auth: string|null}>
      */
     private array $sent = [];
+
+    private ?TempDir $temp = null;
+
+    protected function tearDown(): void
+    {
+        $this->temp?->remove();
+        $this->temp = null;
+    }
+
+    private function configFile(): string
+    {
+        $this->temp ??= new TempDir();
+
+        return $this->temp->path('east-website.json');
+    }
 
     /**
      * @param list<MockResponse> $responses
@@ -84,9 +100,18 @@ class ApiClientTest extends TestCase
         return new ApiClient($transport, new Authenticator($transport, $clock ?? new FixedClock(), new Warnings()));
     }
 
-    private function connection(Credentials $credentials): Connection
+    /**
+     * A connection read from its configuration file, like the commands get it after the login.
+     */
+    private function connection(Credentials $credentials, bool $configured = true): Connection
     {
-        return new Connection(self::URL, new Endpoints(), $credentials, useSession: false);
+        return new Connection(
+            self::URL,
+            new Endpoints(),
+            $credentials,
+            configFile: $this->configFile(),
+            configured: $configured,
+        );
     }
 
     private function json(int $status, string $body, array $headers = []): MockResponse
@@ -94,15 +119,44 @@ class ApiClientTest extends TestCase
         return new MockResponse($body, ['http_code' => $status, 'response_headers' => $headers]);
     }
 
-    public function testCallWithoutCredentialsFailsWithAnAuthError(): void
+    public function testWithoutConfigurationFileNothingIsSentEvenForThePublicApi(): void
+    {
+        $client = $this->client([]);
+
+        foreach ([true, false] as $authRequired) {
+            try {
+                $client->call(
+                    $this->connection(new Credentials(), false),
+                    ApiRequest::get('/api/v1/posts'),
+                    $authRequired,
+                );
+                self::fail('An exception was expected');
+            } catch (ApiException $error) {
+                self::assertSame(ErrorKind::Auth, $error->kind);
+                self::assertSame(3, $error->getCode());
+                self::assertStringContainsString('No configuration file "' . $this->configFile() . '"', $error->getMessage());
+                self::assertStringContainsString('website:auth:login', $error->getMessage());
+                self::assertArrayHasKey('hint', $error->extra);
+            }
+        }
+
+        self::assertSame([], $this->sent);
+    }
+
+    public function testConfigurationWithoutValidJwtNorApiKeyFailsWithAnAuthError(): void
     {
         $client = $this->client([]);
 
         try {
-            $client->call($this->connection(new Credentials()), ApiRequest::get('/api/v1/admin/tags'));
+            $client->call(
+                $this->connection(new Credentials('key:me@site.test', null, 'expired', 1_799_000_000)),
+                ApiRequest::get('/api/v1/admin/tags'),
+            );
             self::fail('An exception was expected');
         } catch (ApiException $error) {
             self::assertSame(ErrorKind::Auth, $error->kind);
+            self::assertStringContainsString('no valid JWT and no API key', $error->getMessage());
+            self::assertStringContainsString('website:auth:login', $error->getMessage());
             self::assertArrayHasKey('hint', $error->extra);
         }
 
@@ -119,65 +173,62 @@ class ApiClientTest extends TestCase
         self::assertNull($this->sent[0]['auth']);
     }
 
-    public function testExplicitTokenIsSentAsBearer(): void
+    public function testTheJwtOfTheConfigurationIsSentAsBearer(): void
     {
         $client = $this->client([$this->json(200, '{"meta":{},"data":[]}')]);
 
         $client->call($this->connection(new Credentials(token: 'jwt-token')), ApiRequest::get('/api/v1/admin/tags'));
 
         self::assertSame('Bearer jwt-token', $this->sent[0]['auth']);
+        self::assertFileDoesNotExist($this->configFile(), 'A valid JWT does not rewrite the configuration file');
     }
 
-    public function testLoginIsDoneOnceWhenOnlyAnApiKeyIsAvailable(): void
+    public function testLoginIsDoneOnceWithTheApiKeyOfTheConfigurationAndTheJwtIsStored(): void
     {
+        $jwt = ApiHarness::jwt(1_800_003_600);
         $client = $this->client([
-            $this->json(200, '{"meta":{"error":false},"data":{"token":"' . ApiHarness::jwt(1_800_003_600) . '"}}'),
+            $this->json(200, '{"meta":{"error":false},"data":{"token":"' . $jwt . '"}}'),
+            $this->json(200, '{"meta":{},"data":[]}'),
             $this->json(200, '{"meta":{},"data":[]}'),
         ]);
+        $connection = $this->connection(new Credentials('key:me@site.test', 'secret'));
 
-        $client->call(
-            $this->connection(new Credentials('key:me@site.test', 'secret')),
-            ApiRequest::get('/api/v1/admin/tags'),
-        );
+        $client->call($connection, ApiRequest::get('/api/v1/admin/tags'));
+        $client->call($connection, ApiRequest::get('/api/v1/admin/tags'));
 
+        self::assertCount(3, $this->sent);
         self::assertSame('POST', $this->sent[0]['method']);
         self::assertSame(self::URL . '/api/v1/login', $this->sent[0]['url']);
         self::assertNull($this->sent[0]['auth']);
-        self::assertSame('Bearer ' . ApiHarness::jwt(1_800_003_600), $this->sent[1]['auth']);
+        self::assertSame('Bearer ' . $jwt, $this->sent[1]['auth']);
+        self::assertSame('Bearer ' . $jwt, $this->sent[2]['auth'], 'The new JWT is reused by the next requests');
+
+        $stored = json_decode((string) file_get_contents($this->configFile()), true);
+        self::assertSame($jwt, $stored['token']);
+        self::assertSame(1_800_003_600, $stored['expiresAt']);
+        self::assertSame('secret', $stored['apiKey']);
     }
 
-    public function test401OfAStoredSessionIsReplayedOnceAfterANewLogin(): void
+    public function test401IsReplayedOnceAfterANewLoginWithTheApiKeyOfTheConfiguration(): void
     {
-        $clock = new FixedClock();
-        $temp = new TempDir();
-        $sessionPath = $temp->write(
-            'session.json',
-            '{"version":1,"baseUrl":"' . self::URL . '","username":"key:me@site.test","token":"stale","expiresAt":1800003600}',
-        );
-
         $fresh = ApiHarness::jwt(1_800_007_200);
         $client = $this->client([
-            $this->json(401, '{"meta":{"error":true},"data":{"code":401,"message":"Expired JWT Token"}}'),
+            $this->json(401, '{"meta":{"error":true},"data":{"code":401,"message":"Invalid JWT Token"}}'),
             $this->json(200, '{"meta":{},"data":{"token":"' . $fresh . '"}}'),
             $this->json(200, '{"meta":{},"data":[]}'),
-        ], $clock);
+        ]);
 
-        $connection = new Connection(
-            self::URL,
-            new Endpoints(),
-            new Credentials('key:me@site.test', 'secret'),
-            sessionPath: $sessionPath,
+        $response = $client->call(
+            $this->connection(new Credentials('key:me@site.test', 'secret', 'revoked', 1_800_003_600)),
+            ApiRequest::get('/api/v1/admin/tags'),
         );
-
-        $response = $client->call($connection, ApiRequest::get('/api/v1/admin/tags'));
 
         self::assertSame(200, $response->status);
         self::assertCount(3, $this->sent);
-        self::assertSame('Bearer stale', $this->sent[0]['auth']);
+        self::assertSame('Bearer revoked', $this->sent[0]['auth']);
         self::assertSame('/api/v1/login', parse_url($this->sent[1]['url'], PHP_URL_PATH));
         self::assertSame('Bearer ' . $fresh, $this->sent[2]['auth']);
-        self::assertStringContainsString($fresh, (string) file_get_contents($sessionPath));
-        $temp->remove();
+        self::assertStringContainsString($fresh, (string) file_get_contents($this->configFile()));
     }
 
     public function test401RightAfterALoginOfThisProcessIsNotReplayed(): void
@@ -200,7 +251,7 @@ class ApiClientTest extends TestCase
         self::assertCount(2, $this->sent);
     }
 
-    public function test401IsNotReplayedWhenTheTokenWasGivenExplicitly(): void
+    public function test401IsNotReplayedWithoutApiKeyInTheConfiguration(): void
     {
         $client = $this->client([
             $this->json(401, '{"meta":{"error":true},"data":{"code":401,"message":"Expired JWT Token"}}'),
@@ -208,7 +259,7 @@ class ApiClientTest extends TestCase
 
         try {
             $client->call(
-                $this->connection(new Credentials('key:me@site.test', 'secret', 'given-token')),
+                $this->connection(new Credentials('key:me@site.test', null, 'revoked')),
                 ApiRequest::get('/api/v1/admin/tags'),
             );
             self::fail('An exception was expected');
@@ -391,13 +442,7 @@ class ApiClientTest extends TestCase
     public function testAnonymousConnectionSendsNoBearerEvenForRequiredAuth(): void
     {
         $client = $this->client([$this->json(200, '{"meta":{},"data":[]}')]);
-        $connection = new Connection(
-            self::URL,
-            new Endpoints(),
-            new Credentials(token: 't'),
-            useSession: false,
-            anonymous: true,
-        );
+        $connection = $this->connection(new Credentials(token: 't'))->asAnonymous();
 
         $client->call($connection, ApiRequest::get('/api/v1/admin/tags'));
 

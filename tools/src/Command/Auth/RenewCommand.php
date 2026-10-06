@@ -26,12 +26,13 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Tools\Command\Auth;
 
 use DateTimeImmutable;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teknoo\East\Website\Tools\Auth\Jwt;
-use Teknoo\East\Website\Tools\Auth\Session;
 use Teknoo\East\Website\Tools\Command\AbstractCommand;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Http\ApiException;
 use Teknoo\East\Website\Tools\Http\ApiRequest;
@@ -45,8 +46,8 @@ use function preg_match;
 use function sprintf;
 
 /**
- * Gets a new JWT from the current one (there is no refresh token). Without expiration date, the server grants its
- * maximum lifetime.
+ * Gets a new JWT from the current one of the configuration file (there is no refresh token), and stores it in this
+ * file. Without expiration date, the server grants its maximum lifetime.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -64,7 +65,7 @@ class RenewCommand extends AbstractCommand
     {
         parent::configure();
 
-        $this->setDescription('Get a new JWT from the current one, and store it');
+        $this->setDescription('Get a new JWT from the current one, and store it in the configuration file');
         $this->addOption('expiration-date', null, InputOption::VALUE_REQUIRED, 'Expiration date, as YYYY-MM-DD');
         $this->addOption('days', null, InputOption::VALUE_REQUIRED, 'Lifetime of the JWT in days, instead of a date');
         $this->addOption('print-token', null, InputOption::VALUE_NONE, 'Print the JWT in the result');
@@ -93,18 +94,21 @@ class RenewCommand extends AbstractCommand
             throw new ApiException('The response does not contain a token', ErrorKind::Server, $response->status);
         }
 
-        $stored = $this->runtime->authenticator->stored($connection);
-        $username = $connection->credentials->username ?? $stored->username ?? '';
-        $session = new Session($connection->baseUrl, $username, $token, Jwt::expiresAt($token));
-        if (!$connection->anonymous) {
-            $this->runtime->authenticator->persist($connection, $session);
+        $connection = $connection->withCredentials(
+            $connection->credentials->withToken($token, Jwt::expiresAt($token)),
+        );
+
+        try {
+            (new ConfigFile($connection->configFile))->write($connection);
+        } catch (RuntimeException $error) {
+            throw new ApiException($error->getMessage(), ErrorKind::Usage, 0, [], [], $error);
         }
 
         $result = [
-            'baseUrl' => $session->baseUrl,
-            'username' => $session->username,
-            'expiresAt' => $session->expirationDate(),
-            'sessionFile' => $connection->useSession ? $connection->sessionPath : null,
+            'configFile' => $connection->configFile,
+            'url' => $connection->baseUrl,
+            'username' => $connection->credentials->username,
+            'expiresAt' => $connection->credentials->expirationDate(),
         ];
 
         if (InputReader::flag($input, 'print-token')) {

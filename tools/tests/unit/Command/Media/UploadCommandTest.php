@@ -33,6 +33,8 @@ use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Teknoo\East\Website\Tools\Application;
 use Teknoo\East\Website\Tools\Command\Media\UploadCommand;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
+use Teknoo\East\Website\Tools\Http\Json;
 use Teknoo\Tests\East\Website\Tools\Command\AbstractCommandTest;
 use Teknoo\Tests\East\Website\Tools\Support\ApiHarness;
 use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
@@ -71,7 +73,7 @@ class UploadCommandTest extends TestCase
 
     private function harness(): ApiHarness
     {
-        return new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']);
+        return new ApiHarness(['token' => 'jwt']);
     }
 
     /**
@@ -113,11 +115,14 @@ class UploadCommandTest extends TestCase
             );
         });
 
-        $application = Application::create($http, [
-            'EAST_WEBSITE_URL' => ApiHarness::URL,
-            'EAST_WEBSITE_TOKEN' => 'jwt',
-            'EAST_WEBSITE_SESSION_FILE' => '',
-        ], new FixedClock());
+        // The configuration file written by the login, in the working directory of the application
+        $this->temp ??= new TempDir();
+        $this->temp->write(
+            ConfigFile::DEFAULT_NAME,
+            Json::encode(['version' => 1, 'url' => ApiHarness::URL, 'token' => 'jwt']),
+        );
+
+        $application = Application::create($http, new FixedClock(), $this->temp->path());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
 

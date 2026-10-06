@@ -32,6 +32,7 @@ use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Teknoo\East\Website\Tools\Application;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Http\Json;
 use Teknoo\East\Website\Tools\Version;
 use Teknoo\Tests\East\Website\Tools\Support\FixedClock;
@@ -39,13 +40,16 @@ use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 
 use function array_map;
 use function array_values;
+use function getcwd;
 use function is_array;
 use function is_string;
+use function putenv;
 use function sort;
 use function str_starts_with;
 
 /**
- * Tests of the application: catalogue of the commands, global options and contract of the usage errors
+ * Tests of the application: catalogue of the commands, global options, configuration only by the file of the login
+ * (never by the environment) and contract of the usage errors
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -69,25 +73,25 @@ class ApplicationTest extends TestCase
     }
 
     /**
-     * @param array<string, string> $env
+     * Application working in a temporary directory, with the configuration file of a login when $token is given.
      */
-    private function application(array $env = [], string $responseBody = '{"meta":{},"data":[]}'): Application
+    private function application(?string $token = null, string $responseBody = '{"meta":{},"data":[]}'): Application
     {
         $this->temp = new TempDir();
+        if (null !== $token) {
+            $this->temp->write(
+                ConfigFile::DEFAULT_NAME,
+                Json::encode(['version' => 1, 'url' => 'https://site.test', 'token' => $token]),
+            );
+        }
+
         $http = new MockHttpClient(function (string $method, string $url, array $options) use ($responseBody): MockResponse {
             $this->requests[] = ['method' => $method, 'url' => $url, 'headers' => $options['headers'] ?? []];
 
             return new MockResponse($responseBody, ['http_code' => 200]);
         });
 
-        $application = Application::create(
-            $http,
-            $env + [
-                'EAST_WEBSITE_URL' => 'https://site.test',
-                'EAST_WEBSITE_SESSION_FILE' => $this->temp->path('session.json'),
-            ],
-            new FixedClock(),
-        );
+        $application = Application::create($http, new FixedClock(), $this->temp->path());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
 
@@ -184,10 +188,26 @@ class ApplicationTest extends TestCase
         self::assertSame(self::expectedCommands(), $this->registeredCommands(Application::create()));
     }
 
-    public function testGlobalOptionsAreAvailableOnEveryCommand(): void
+    public function testTheDefaultConfigurationFileIsInTheCurrentDirectory(): void
+    {
+        $application = Application::create();
+        $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
+
+        [$code, $stdout] = $this->execute($application, ['command' => 'website:auth:status', '--compact' => true]);
+
+        self::assertSame(0, $code);
+        self::assertSame(
+            getcwd() . '/' . ConfigFile::DEFAULT_NAME,
+            Json::decode($stdout)['data']['configFile'] ?? null,
+        );
+    }
+
+    public function testTheOnlyGlobalOptionIsTheConfigurationFile(): void
     {
         $definition = $this->application()->getDefinition();
 
+        self::assertTrue($definition->hasOption('config'));
         foreach ([
             'url',
             'username',
@@ -200,17 +220,77 @@ class ApplicationTest extends TestCase
             'allow-http',
             'timeout',
         ] as $option) {
-            self::assertTrue($definition->hasOption($option), $option);
+            self::assertFalse($definition->hasOption($option), $option);
+        }
+    }
+
+    public function testTheConnectionIsConfiguredOnlyByTheLogin(): void
+    {
+        $application = $this->application();
+        $login = $application->find('website:auth:login');
+        $list = $application->find('website:tag:list');
+        $login->mergeApplicationDefinition();
+        $list->mergeApplicationDefinition();
+
+        foreach (['url', 'username', 'api-key-file', 'insecure', 'allow-http', 'timeout', 'api-prefix', 'admin-prefix', 'login-path'] as $option) {
+            self::assertTrue($login->getDefinition()->hasOption($option), $option);
+            self::assertFalse($list->getDefinition()->hasOption($option), $option);
+        }
+    }
+
+    public function testTheAnonymousOptionIsOnlyOnTheCommandsOfThePublicApi(): void
+    {
+        foreach ($this->application()->all() as $name => $command) {
+            if (str_starts_with($name, 'website:')) {
+                self::assertSame(
+                    str_starts_with($name, 'website:front:'),
+                    $command->getDefinition()->hasOption('anonymous'),
+                    $name,
+                );
+            }
         }
     }
 
     public function testSecretsAreNeverAcceptedAsOptionValues(): void
     {
-        $definition = $this->application()->getDefinition();
+        $application = $this->application();
+        $login = $application->find('website:auth:login');
+        $login->mergeApplicationDefinition();
 
-        self::assertFalse($definition->hasOption('api-key'));
-        self::assertFalse($definition->hasOption('token'));
-        self::assertFalse($definition->hasOption('password'));
+        foreach ([$application->getDefinition(), $login->getDefinition()] as $definition) {
+            self::assertFalse($definition->hasOption('api-key'));
+            self::assertFalse($definition->hasOption('token'));
+            self::assertFalse($definition->hasOption('password'));
+        }
+    }
+
+    public function testTheEnvironmentIsNeverRead(): void
+    {
+        $application = $this->application();
+        putenv('EAST_WEBSITE_URL=https://env.test');
+        putenv('EAST_WEBSITE_TOKEN=env-token');
+        putenv('EAST_WEBSITE_USERNAME=key:env@env.test');
+        putenv('EAST_WEBSITE_API_KEY=env-key');
+
+        try {
+            [$code, , $stderr] = $this->execute($application, ['command' => 'website:tag:list']);
+            [$statusCode, $status] = $this->execute($application, ['command' => 'website:auth:status', '--compact' => true]);
+        } finally {
+            putenv('EAST_WEBSITE_URL');
+            putenv('EAST_WEBSITE_TOKEN');
+            putenv('EAST_WEBSITE_USERNAME');
+            putenv('EAST_WEBSITE_API_KEY');
+        }
+
+        self::assertSame(3, $code);
+        self::assertSame('auth', Json::decode($stderr)['data']['kind'] ?? null);
+        self::assertSame([], $this->requests);
+        self::assertSame(0, $statusCode);
+        $data = Json::decode($status)['data'] ?? [];
+        self::assertFalse($data['configured']);
+        self::assertArrayHasKey('url', $data);
+        self::assertNull($data['url']);
+        self::assertNull($data['username']);
     }
 
     /**
@@ -228,7 +308,7 @@ class ApplicationTest extends TestCase
             $command->mergeApplicationDefinition();
             $definition = $command->getDefinition();
 
-            self::assertTrue($definition->hasOption('url'), $name);
+            self::assertTrue($definition->hasOption('config'), $name);
             self::assertTrue($definition->hasOption('format'), $name);
             self::assertTrue($definition->hasOption('compact'), $name);
             ++$checked;
@@ -266,7 +346,7 @@ class ApplicationTest extends TestCase
         self::assertIsArray($help);
         self::assertSame('website:tag:delete', $help['name']);
         $options = $help['definition']['options'] ?? [];
-        foreach (['yes', 'url', 'format', 'compact', 'dry-run'] as $option) {
+        foreach (['yes', 'config', 'format', 'compact', 'dry-run'] as $option) {
             self::assertArrayHasKey($option, $options);
         }
 
@@ -325,7 +405,7 @@ class ApplicationTest extends TestCase
     public function testAnInvalidFormatIsAUsageErrorBeforeAnyRequest(): void
     {
         [$code, $stdout, $stderr] = $this->execute(
-            $this->application(['EAST_WEBSITE_TOKEN' => 'jwt']),
+            $this->application('jwt'),
             ['command' => 'website:tag:list', '--format' => 'xml'],
         );
 
@@ -338,7 +418,7 @@ class ApplicationTest extends TestCase
     public function testACommandCanBeRunThroughTheApplication(): void
     {
         $application = $this->application(
-            ['EAST_WEBSITE_TOKEN' => 'jwt'],
+            'jwt',
             '{"meta":{"totalPages":1,"page":1,"count":1},"data":[{"id":"tag-1","name":"News"}]}',
         );
 

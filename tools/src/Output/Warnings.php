@@ -28,8 +28,8 @@ namespace Teknoo\East\Website\Tools\Output;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Non fatal problems met during a command (like a session that can not be persisted). They are written on stderr
- * after the command, so stdout stays a single JSON document.
+ * Non fatal problems met during a command (like a new JWT that can not be written in the configuration file). They
+ * are written on stderr after the command, so stdout stays a single JSON document.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)

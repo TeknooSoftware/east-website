@@ -93,6 +93,11 @@ if (!in_array($path, $publicRoutes, true) && !str_starts_with($authorization, 'B
     $respond(401, $error(401, 'JWT Token not found'), ['WWW-Authenticate' => 'Bearer']);
 }
 
+// A JWT revoked on the server, still valid for the client
+if ('Bearer revoked' === $authorization) {
+    $respond(401, $error(401, 'Invalid JWT Token'), ['WWW-Authenticate' => 'Bearer']);
+}
+
 // Only a body sent with the bare media type is read, like the real API
 $json = 'application/json' === $contentType ? (json_decode($body, true) ?? []) : [];
 

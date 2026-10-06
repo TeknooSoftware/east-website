@@ -39,7 +39,8 @@ use function stream_get_contents;
 use const PHP_BINARY;
 
 /**
- * Runs the CLI (the script of the sources or the phar) in a real PHP process.
+ * Runs the CLI (the script of the sources or the phar) in a real PHP process, in a working directory where the login
+ * writes its configuration file, and without any variable of the environment of the tests.
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -48,28 +49,24 @@ class Cli
 {
     public function __construct(
         private readonly string $binary,
-        private readonly string $url,
-        private readonly string $sessionFile,
+        private readonly string $workingDirectory,
     ) {
     }
 
     /**
      * @param list<string> $arguments
-     * @param array<string, string> $env
      * @return array{int, string, string} exit code, stdout, stderr
      */
-    public function run(array $arguments, array $env = [], ?string $stdin = null): array
+    public function run(array $arguments, ?string $stdin = null): array
     {
         $process = proc_open(
             array_merge([PHP_BINARY, $this->binary], $arguments),
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
-            null,
-            $env + [
+            $this->workingDirectory,
+            [
                 'PATH' => (string) getenv('PATH'),
                 'XDEBUG_MODE' => 'off',
-                'EAST_WEBSITE_URL' => $this->url,
-                'EAST_WEBSITE_SESSION_FILE' => $this->sessionFile,
             ],
         );
 

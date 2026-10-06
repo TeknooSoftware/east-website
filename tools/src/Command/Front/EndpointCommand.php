@@ -76,6 +76,7 @@ class EndpointCommand extends AbstractCommand
         }
 
         $this->addOption('locale', null, InputOption::VALUE_REQUIRED, 'Locale of the request (?locale=)');
+        $this->addOption('anonymous', null, InputOption::VALUE_NONE, 'Do not send the JWT');
         $this->addDryRunOption();
     }
 

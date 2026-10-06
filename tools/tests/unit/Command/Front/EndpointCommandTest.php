@@ -61,7 +61,7 @@ class EndpointCommandTest extends TestCase
     #[DataProvider('endpoints')]
     public function testEachPublicEndpoint(array $tokens, string $path): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']))->respond('GET ' . $path, 200, self::DOCUMENT);
+        $harness = (new ApiHarness(['token' => 'jwt']))->respond('GET ' . $path, 200, self::DOCUMENT);
 
         [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, $tokens);
 
@@ -171,7 +171,7 @@ class EndpointCommandTest extends TestCase
 
     public function testTheTokenIsSentWhenAvailable(): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']))->respond('GET /api/v1/content/default', 200, self::DOCUMENT);
+        $harness = (new ApiHarness(['token' => 'jwt']))->respond('GET /api/v1/content/default', 200, self::DOCUMENT);
 
         [$code] = AbstractCommandTest::execute($harness, ['website:front:content:get']);
 
@@ -181,7 +181,7 @@ class EndpointCommandTest extends TestCase
 
     public function testAnonymousOptionOmitsTheToken(): void
     {
-        $harness = (new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']))->respond('GET /api/v1/content/default', 200, self::DOCUMENT);
+        $harness = (new ApiHarness(['token' => 'jwt']))->respond('GET /api/v1/content/default', 200, self::DOCUMENT);
 
         [$code] = AbstractCommandTest::execute($harness, ['website:front:content:get', '--anonymous']);
 
@@ -189,10 +189,10 @@ class EndpointCommandTest extends TestCase
         self::assertArrayNotHasKey('authorization', $harness->requests[0]['headers']);
     }
 
-    public function testTheLoginIsDoneWhenAnApiKeyIsAvailable(): void
+    public function testTheLoginIsDoneWhenTheConfigurationFileHasAnApiKeyWithoutValidJwt(): void
     {
         $jwt = ApiHarness::jwt(1_800_003_600);
-        $harness = (new ApiHarness(['EAST_WEBSITE_USERNAME' => 'key:me@site.test', 'EAST_WEBSITE_API_KEY' => 'secret']))
+        $harness = (new ApiHarness(['username' => 'key:me@site.test', 'apiKey' => 'secret']))
             ->respond('POST /api/v1/login', 200, ['meta' => ['error' => false], 'data' => ['token' => $jwt]])
             ->respond('GET /api/v1/content/default', 200, self::DOCUMENT);
 
@@ -202,6 +202,19 @@ class EndpointCommandTest extends TestCase
         self::assertCount(2, $harness->requests);
         self::assertSame('/api/v1/login', $harness->requests[0]['path']);
         self::assertSame('Bearer ' . $jwt, $harness->requests[1]['headers']['authorization']);
+        self::assertSame($jwt, $harness->config()['token'] ?? null);
+    }
+
+    public function testTheConfigurationFileIsRequired(): void
+    {
+        $harness = new ApiHarness(null);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute($harness, ['website:front:content:get']);
+
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('auth', AbstractCommandTest::decode($stderr)['data']['kind']);
+        self::assertSame([], $harness->requests);
     }
 
     public function testNotFound(): void

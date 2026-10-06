@@ -75,7 +75,7 @@ class CommentCommandTest extends TestCase
     public function testNoCredentialIsNeededButTheTokenIsSentWhenAvailable(): void
     {
         $anonymous = (new ApiHarness())->respond('POST /api/v1/post/p/comment', 302, [], ['Location' => '/api/v1/post/p?id=c1']);
-        $authenticated = (new ApiHarness(['EAST_WEBSITE_TOKEN' => 'jwt']))
+        $authenticated = (new ApiHarness(['token' => 'jwt']))
             ->respond('POST /api/v1/post/p/comment', 302, [], ['Location' => '/api/v1/post/p?id=c1']);
         $tokens = ['website:front:comment:create', 'p', '--author=a', '--title=t', '--content=c'];
 
@@ -86,6 +86,21 @@ class CommentCommandTest extends TestCase
         self::assertSame(0, $authenticatedCode);
         self::assertArrayNotHasKey('authorization', $anonymous->requests[0]['headers']);
         self::assertSame('Bearer jwt', $authenticated->requests[0]['headers']['authorization']);
+    }
+
+    public function testTheConfigurationFileIsRequired(): void
+    {
+        $harness = new ApiHarness(null);
+
+        [$code, $stdout, $stderr] = AbstractCommandTest::execute(
+            $harness,
+            ['website:front:comment:create', 'p', '--author=a', '--title=t', '--content=c'],
+        );
+
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertStringContainsString('website:auth:login', AbstractCommandTest::decode($stderr)['data']['message']);
+        self::assertSame([], $harness->requests);
     }
 
     public function testTheSlugIsUrlEncoded(): void

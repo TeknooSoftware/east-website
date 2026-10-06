@@ -29,9 +29,13 @@ use RuntimeException;
 
 use function count;
 use function decoct;
+use function file_get_contents;
+use function file_put_contents;
 use function fileperms;
 use function json_decode;
+use function json_encode;
 use function str_starts_with;
+use function time;
 
 use const DIRECTORY_SEPARATOR;
 
@@ -62,7 +66,7 @@ trait CliScenariosTrait
             self::markTestSkipped($error->getMessage());
         }
 
-        $this->cli = new Cli($this->binary(), $this->server->url, $this->temp->path('session.json'));
+        $this->cli = new Cli($this->binary(), $this->temp->path());
     }
 
     protected function tearDown(): void
@@ -72,14 +76,39 @@ trait CliScenariosTrait
     }
 
     /**
+     * @param list<string> $options
      * @return array{int, string, string}
      */
-    private function login(): array
+    private function login(array $options = []): array
     {
         return $this->cli->run(
-            ['website:auth:login', '--username=key:me@example.com', '--api-key-file=-'],
-            [],
+            [
+                'website:auth:login',
+                '--url=' . $this->server->url,
+                '--username=key:me@example.com',
+                '--api-key-file=-',
+                ...$options,
+            ],
             'secret',
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function config(string $file = 'east-website.json'): array
+    {
+        return json_decode((string) file_get_contents($this->temp->path($file)), true);
+    }
+
+    /**
+     * @param array<string, mixed> $changes
+     */
+    private function changeConfig(array $changes): void
+    {
+        file_put_contents(
+            $this->temp->path('east-website.json'),
+            (string) json_encode($changes + $this->config()),
         );
     }
 
@@ -94,16 +123,24 @@ trait CliScenariosTrait
         ));
     }
 
-    public function testLoginStoresAPrivateSessionAndIsReusedByTheNextCommands(): void
+    public function testLoginWritesAPrivateConfigurationFileReadByTheNextCommands(): void
     {
         [$code, $stdout, $stderr] = $this->login();
 
         self::assertSame(0, $code, $stderr);
         self::assertStringNotContainsString('sig', $stdout, 'The token must not be printed without --print-token');
-        self::assertFileExists($this->temp->path('session.json'));
+        self::assertStringNotContainsString('secret', $stdout, 'The API key is never printed');
+        self::assertFileExists($this->temp->path('east-website.json'));
         if (DIRECTORY_SEPARATOR === '/') {
-            self::assertSame('600', decoct(fileperms($this->temp->path('session.json')) & 0777));
+            self::assertSame('600', decoct(fileperms($this->temp->path('east-website.json')) & 0777));
         }
+
+        $config = $this->config();
+        self::assertSame($this->server->url, $config['url']);
+        self::assertSame('key:me@example.com', $config['username']);
+        self::assertSame('secret', $config['apiKey']);
+        self::assertStringEndsWith('.sig', $config['token']);
+        self::assertGreaterThan(time(), $config['expiresAt']);
 
         [$code, $stdout] = $this->cli->run(['website:tag:list', '--compact']);
         $document = json_decode($stdout, true);
@@ -111,20 +148,81 @@ trait CliScenariosTrait
         self::assertSame(0, $code);
         self::assertSame('tag-1', $document['data'][0]['id']);
         self::assertCount(1, $this->requestsTo('POST', '/api/v1/login'));
-        self::assertStringStartsWith('Bearer ', $this->requestsTo('GET', '/api/v1/admin/tags')[0]['headers']['authorization']);
+        self::assertSame(
+            'Bearer ' . $config['token'],
+            $this->requestsTo('GET', '/api/v1/admin/tags')[0]['headers']['authorization'],
+        );
     }
 
-    public function testEnvironmentCredentialsLoginAutomaticallyOnce(): void
+    public function testWithoutConfigurationFileThereIsNoJwtAndNoRequest(): void
     {
-        $env = ['EAST_WEBSITE_USERNAME' => 'key:me@example.com', 'EAST_WEBSITE_API_KEY' => 'secret'];
+        [$code, $stdout, $stderr] = $this->cli->run(['website:tag:list']);
+        $error = json_decode($stderr, true)['data'];
 
-        [$code] = $this->cli->run(['website:tag:list', '--compact'], $env);
-        [$codeAgain] = $this->cli->run(['website:tag:list', '--compact'], $env);
+        self::assertSame(3, $code);
+        self::assertSame('', $stdout);
+        self::assertSame('auth', $error['kind']);
+        self::assertStringContainsString('website:auth:login', $error['message']);
+        self::assertSame([], $this->server->requests());
+    }
+
+    public function testLogoutDeletesTheConfigurationFile(): void
+    {
+        $this->login();
+
+        [$code, $stdout] = $this->cli->run(['website:auth:logout', '--compact']);
 
         self::assertSame(0, $code);
-        self::assertSame(0, $codeAgain);
-        self::assertCount(1, $this->requestsTo('POST', '/api/v1/login'));
+        self::assertTrue(json_decode($stdout, true)['data']['deleted']);
+        self::assertFileDoesNotExist($this->temp->path('east-website.json'));
+
+        [$code] = $this->cli->run(['website:tag:list']);
+        self::assertSame(3, $code);
+    }
+
+    public function testAnExpiredJwtLogsInAgainWithTheStoredApiKeyAndUpdatesTheFile(): void
+    {
+        $this->login();
+        $this->changeConfig(['token' => 'expired', 'expiresAt' => time() - 3600]);
+
+        [$code, , $stderr] = $this->cli->run(['website:tag:list', '--compact']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertCount(2, $this->requestsTo('POST', '/api/v1/login'));
+        self::assertNotSame('expired', $this->config()['token']);
+        self::assertGreaterThan(time(), $this->config()['expiresAt']);
+        self::assertSame(
+            'Bearer ' . $this->config()['token'],
+            $this->requestsTo('GET', '/api/v1/admin/tags')[0]['headers']['authorization'],
+        );
+    }
+
+    public function testAJwtRejectedByTheServerIsReplacedOnce(): void
+    {
+        $this->login();
+        $this->changeConfig(['token' => 'revoked', 'expiresAt' => time() + 3600]);
+
+        [$code, , $stderr] = $this->cli->run(['website:tag:list', '--compact']);
+
+        self::assertSame(0, $code, $stderr);
         self::assertCount(2, $this->requestsTo('GET', '/api/v1/admin/tags'));
+        self::assertCount(2, $this->requestsTo('POST', '/api/v1/login'));
+        self::assertNotSame('revoked', $this->config()['token']);
+    }
+
+    public function testAnotherConfigurationFileCanBeChosen(): void
+    {
+        [$code, , $stderr] = $this->login(['--config=site.json']);
+
+        self::assertSame(0, $code, $stderr);
+        self::assertFileExists($this->temp->path('site.json'));
+        self::assertFileDoesNotExist($this->temp->path('east-website.json'));
+
+        [$code] = $this->cli->run(['website:tag:list']);
+        self::assertSame(3, $code);
+
+        [$code] = $this->cli->run(['website:tag:list', '--config=site.json']);
+        self::assertSame(0, $code);
     }
 
     public function testCreationSendsTheExactJsonContentTypeAndFollowsTheRedirection(): void
@@ -186,7 +284,7 @@ trait CliScenariosTrait
         self::assertCount(0, $this->requestsTo('GET', '/api/v1/post/my-post'));
     }
 
-    public function testDryRunSendsNothing(): void
+    public function testDryRunSendsNothingEvenWithoutConfigurationFile(): void
     {
         [$code, $stdout] = $this->cli->run(['website:tag:create', '--name=x', '--dry-run', '--compact']);
 
@@ -198,15 +296,15 @@ trait CliScenariosTrait
     public function testExitCodes(): void
     {
         [$code] = $this->cli->run(['website:tag:list']);
-        self::assertSame(3, $code, 'No credentials');
+        self::assertSame(3, $code, 'No configuration file');
 
         [$code, , $stderr] = $this->cli->run(
-            ['website:auth:login', '--username=key:me@example.com', '--api-key-file=-'],
-            [],
+            ['website:auth:login', '--url=' . $this->server->url, '--username=key:me@example.com', '--api-key-file=-'],
             'wrong',
         );
         self::assertSame(3, $code);
         self::assertSame('auth', json_decode($stderr, true)['data']['kind']);
+        self::assertFileDoesNotExist($this->temp->path('east-website.json'), 'A failed login writes nothing');
 
         $this->login();
         [$code, , $stderr] = $this->cli->run(['website:tag:get', 'missing']);
@@ -219,10 +317,8 @@ trait CliScenariosTrait
         [$code] = $this->cli->run(['website:unknown']);
         self::assertSame(2, $code);
 
-        [$code, , $stderr] = $this->cli->run(
-            ['website:tag:list', '--url=http://127.0.0.1:1', '--timeout=2'],
-            ['EAST_WEBSITE_TOKEN' => 'explicit-token'],
-        );
+        $this->changeConfig(['url' => 'http://127.0.0.1:1', 'timeout' => 2]);
+        [$code, , $stderr] = $this->cli->run(['website:tag:list']);
         self::assertSame(1, $code);
         self::assertSame('transport', json_decode($stderr, true)['data']['kind']);
     }

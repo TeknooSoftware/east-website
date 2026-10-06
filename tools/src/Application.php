@@ -59,12 +59,13 @@ use Teknoo\East\Website\Tools\Output\Warnings;
 use Teknoo\East\Website\Tools\Resource\Operation;
 use Teknoo\East\Website\Tools\Resource\Registry;
 
-use function getenv;
+use function getcwd;
 
 /**
  * Console application of the East Website CLI: a client of the remote JSON API, usable by humans and by agents.
- * The HTTP client, the environment and the clock are injectable, to test the whole application without any
- * network.
+ * The connection is configured only by the login, in a JSON file (./east-website.json by default) read by the
+ * other commands. The HTTP client, the clock and the working directory are injectable, to test the whole
+ * application without any network.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -76,12 +77,12 @@ class Application extends BaseApplication
     private Runtime $runtime;
 
     /**
-     * @param array<string, string>|null $env the environment variables, those of the process by default
+     * @param string|null $workingDirectory directory of the default configuration file, the current one by default
      */
     public static function create(
         ?HttpClientInterface $http = null,
-        ?array $env = null,
         ?ClockInterface $clock = null,
+        ?string $workingDirectory = null,
     ): self {
         $clock ??= new SystemClock();
         $warnings = new Warnings();
@@ -91,7 +92,7 @@ class Application extends BaseApplication
         $runtime = new Runtime(
             client: new ApiClient($transport, $authenticator),
             authenticator: $authenticator,
-            connections: new ConnectionFactory($env ?? self::environment()),
+            connections: new ConnectionFactory($workingDirectory ?? (string) getcwd()),
             renderer: new Renderer(),
             warnings: $warnings,
             registry: new Registry(),
@@ -103,14 +104,6 @@ class Application extends BaseApplication
         $application->registerCommands();
 
         return $application;
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private static function environment(): array
-    {
-        return getenv();
     }
 
     private function registerCommands(): void

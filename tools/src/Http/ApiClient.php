@@ -40,8 +40,9 @@ use const PHP_URL_PATH;
 use const PHP_URL_QUERY;
 
 /**
- * Client of the remote API: authenticates the requests, replays once a request rejected with a 401 after a new
- * login, follows explicitly the redirection of the creations and converts HTTP errors to exceptions.
+ * Client of the remote API: requires the configuration file written by the login, authenticates the requests,
+ * replays once a request rejected with a 401 after a new login, follows explicitly the redirection of the creations
+ * and converts HTTP errors to exceptions.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -61,11 +62,28 @@ class ApiClient
      */
     public function send(Connection $connection, ApiRequest $request, bool $authRequired = true): ApiResponse
     {
+        if (!$connection->configured) {
+            throw new ApiException(
+                sprintf(
+                    'No configuration file "%s": login first with website:auth:login --url=<base url> '
+                    . '--username=<keyName>:<email>',
+                    $connection->configFile,
+                ),
+                ErrorKind::Auth,
+                0,
+                [],
+                ['hint' => Authenticator::USERNAME_HINT],
+            );
+        }
+
         $bearer = $this->authenticator->bearer($connection);
         if (null === $bearer && $authRequired && !$connection->anonymous) {
             throw new ApiException(
-                'No credentials available: login with "website:auth:login", or set EAST_WEBSITE_TOKEN, or '
-                . 'EAST_WEBSITE_USERNAME with EAST_WEBSITE_API_KEY',
+                sprintf(
+                    'The configuration file "%s" has no valid JWT and no API key to login again: '
+                    . 'login again with website:auth:login',
+                    $connection->configFile,
+                ),
                 ErrorKind::Auth,
                 0,
                 [],
@@ -75,7 +93,11 @@ class ApiClient
 
         $response = $this->transport->send($connection, $request, $bearer);
         if (401 === $response->status && null !== $bearer && $this->authenticator->canRelogin($connection)) {
-            $response = $this->transport->send($connection, $request, $this->authenticator->login($connection)->token);
+            $response = $this->transport->send(
+                $connection,
+                $request,
+                $this->authenticator->relogin($connection)->credentials->token,
+            );
         }
 
         return $response;

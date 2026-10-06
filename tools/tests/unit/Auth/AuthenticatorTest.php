@@ -31,8 +31,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 use Teknoo\East\Website\Tools\Auth\Authenticator;
-use Teknoo\East\Website\Tools\Auth\Session;
-use Teknoo\East\Website\Tools\Auth\SessionFile;
+use Teknoo\East\Website\Tools\Config\ConfigFile;
 use Teknoo\East\Website\Tools\Config\Connection;
 use Teknoo\East\Website\Tools\Config\Credentials;
 use Teknoo\East\Website\Tools\Http\ApiException;
@@ -47,7 +46,8 @@ use Teknoo\Tests\East\Website\Tools\Support\TempDir;
 use function array_shift;
 
 /**
- * Tests of the authenticator: a JWT given explicitly, then a valid stored session, then a new login
+ * Tests of the authenticator: the JWT of the configuration file while it is valid, else a new login with the API key
+ * of this file, stored back in it
  *
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
@@ -99,30 +99,39 @@ class AuthenticatorTest extends TestCase
         return new Authenticator(new Transport($http), $this->clock, $this->warnings);
     }
 
+    private function configPath(): string
+    {
+        return $this->temp->path(ConfigFile::DEFAULT_NAME);
+    }
+
     private function connection(
         ?Credentials $credentials = null,
-        bool $useSession = true,
-        ?string $sessionPath = null,
+        bool $configured = true,
         bool $anonymous = false,
         string $usernameField = 'username',
         string $tokenField = 'token',
-        ?string $baseUrl = null,
+        ?string $configFile = null,
     ): Connection {
         return new Connection(
-            $baseUrl ?? self::URL,
+            self::URL,
             new Endpoints(),
             $credentials ?? new Credentials(),
-            $useSession,
-            $sessionPath ?? $this->temp->path('session.json'),
+            $configFile ?? $this->configPath(),
+            $configured,
             anonymous: $anonymous,
             usernameField: $usernameField,
             tokenField: $tokenField,
         );
     }
 
-    private function store(int $expiresAt, string $token = 'stored-jwt', string $baseUrl = self::URL): void
+    private function valid(): int
     {
-        (new SessionFile($this->temp->path('session.json')))->write(new Session($baseUrl, self::USERNAME, $token, $expiresAt));
+        return $this->clock->now()->getTimestamp() + 3600;
+    }
+
+    private function expired(): int
+    {
+        return $this->clock->now()->getTimestamp() - 10;
     }
 
     private function loginResponse(string $jwt): MockResponse
@@ -134,132 +143,146 @@ class AuthenticatorTest extends TestCase
     {
         $authenticator = $this->authenticator();
 
-        self::assertNull($authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret', 'jwt'), anonymous: true)));
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'jwt', $this->valid()), anonymous: true);
+
+        self::assertNull($authenticator->bearer($connection));
         self::assertSame([], $this->sent);
     }
 
-    public function testExplicitTokenWinsOverEverything(): void
+    public function testNotConfiguredConnectionHasNoBearerAndNeverLogsIn(): void
     {
-        $this->store($this->clock->now()->getTimestamp() + 3600);
         $authenticator = $this->authenticator();
 
-        $bearer = $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret', 'given-jwt')));
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'jwt', $this->valid()), configured: false);
 
-        self::assertSame('given-jwt', $bearer);
+        self::assertNull($authenticator->bearer($connection));
         self::assertSame([], $this->sent);
     }
 
-    public function testEmptyExplicitTokenIsIgnored(): void
+    public function testValidJwtOfTheConfigurationIsReused(): void
     {
         $authenticator = $this->authenticator();
 
-        self::assertNull($authenticator->bearer($this->connection(new Credentials(token: ''))));
-    }
-
-    public function testValidStoredSessionIsReused(): void
-    {
-        $this->store($this->clock->now()->getTimestamp() + 3600);
-        $authenticator = $this->authenticator();
-
-        $bearer = $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret')));
+        $bearer = $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret', 'stored-jwt', $this->valid())));
 
         self::assertSame('stored-jwt', $bearer);
         self::assertSame([], $this->sent);
+        self::assertFileDoesNotExist($this->configPath(), 'Nothing is written without a new login');
     }
 
-    public function testStoredSessionIsReusedWithoutAnyCredentials(): void
+    public function testJwtWithoutExpirationIsReused(): void
     {
-        $this->store($this->clock->now()->getTimestamp() + 3600);
-
-        self::assertSame('stored-jwt', $this->authenticator()->bearer($this->connection()));
+        self::assertSame('stored-jwt', $this->authenticator()->bearer($this->connection(new Credentials(token: 'stored-jwt'))));
     }
 
-    public function testStoredSessionIsReusedWhenItHasMoreThanTheLeewayLeft(): void
+    public function testJwtIsReusedWhenItHasMoreThanTheLeewayLeft(): void
     {
-        $this->store($this->clock->now()->getTimestamp() + Session::LEEWAY + 1);
+        $expiresAt = $this->clock->now()->getTimestamp() + Credentials::LEEWAY + 1;
 
-        self::assertSame('stored-jwt', $this->authenticator()->bearer($this->connection()));
+        self::assertSame(
+            'stored-jwt',
+            $this->authenticator()->bearer($this->connection(new Credentials(token: 'stored-jwt', expiresAt: $expiresAt))),
+        );
     }
 
-    public function testStoredSessionWithLessThanTheLeewayLeftIsNotReused(): void
+    public function testJwtWithLessThanTheLeewayLeftIsReplacedByANewLoginStoredInTheConfigurationFile(): void
     {
-        $this->store($this->clock->now()->getTimestamp() + Session::LEEWAY);
-        $fresh = ApiHarness::jwt($this->clock->now()->getTimestamp() + 3600);
+        $expiresAt = $this->clock->now()->getTimestamp() + Credentials::LEEWAY;
+        $fresh = ApiHarness::jwt($this->valid());
         $authenticator = $this->authenticator([$this->loginResponse($fresh)]);
 
-        $bearer = $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret')));
+        $bearer = $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret', 'stored-jwt', $expiresAt)));
 
         self::assertSame($fresh, $bearer);
         self::assertCount(1, $this->sent);
+
+        $stored = (new ConfigFile($this->configPath()))->read();
+        self::assertNotNull($stored);
+        self::assertSame($fresh, $stored->credentials->token);
+        self::assertSame($this->valid(), $stored->credentials->expiresAt);
+        self::assertSame('secret', $stored->credentials->apiKey());
+        self::assertSame([], $this->warnings->all());
     }
 
-    public function testExpiredStoredSessionWithoutCredentialsGivesNoBearer(): void
+    public function testExpiredJwtWithoutApiKeyGivesNoBearer(): void
     {
-        $this->store($this->clock->now()->getTimestamp() - 10);
+        $connection = $this->connection(new Credentials(self::USERNAME, null, 'stored-jwt', $this->expired()));
 
-        self::assertNull($this->authenticator()->bearer($this->connection()));
+        self::assertNull($this->authenticator()->bearer($connection));
         self::assertSame([], $this->sent);
     }
 
-    public function testStoredSessionOfAnotherSiteOrUserIsNotUsed(): void
-    {
-        $this->store($this->clock->now()->getTimestamp() + 3600, baseUrl: 'https://other.test');
-
-        self::assertNull($this->authenticator()->bearer($this->connection()));
-        self::assertNull($this->authenticator()->bearer($this->connection(new Credentials('other:someone@site.test'))));
-    }
-
-    public function testSessionsCanBeDisabled(): void
-    {
-        $this->store($this->clock->now()->getTimestamp() + 3600);
-        $authenticator = $this->authenticator();
-
-        self::assertNull($authenticator->bearer($this->connection(useSession: false)));
-        self::assertNull($authenticator->stored($this->connection(useSession: false)));
-    }
-
-    public function testStoredWithoutPathIsNoSession(): void
-    {
-        $connection = new Connection(self::URL, new Endpoints(), new Credentials(), true, null);
-
-        self::assertNull($this->authenticator()->stored($connection));
-    }
-
-    public function testStoredReturnsTheMatchingSession(): void
-    {
-        $this->store(1_800_003_600);
-
-        $session = $this->authenticator()->stored($this->connection(new Credentials(self::USERNAME)));
-
-        self::assertNotNull($session);
-        self::assertSame('stored-jwt', $session->token);
-    }
-
-    public function testNoCredentialsAndNoSessionGivesNoBearer(): void
+    public function testNoJwtAndNoApiKeyGivesNoBearer(): void
     {
         self::assertNull($this->authenticator()->bearer($this->connection()));
+        self::assertNull($this->authenticator()->bearer($this->connection(new Credentials(token: ''))));
+        self::assertSame([], $this->sent);
     }
 
-    public function testLoginPostsTheCredentialsAndStoresTheSession(): void
+    public function testNoJwtWithAnApiKeyLogsIn(): void
+    {
+        $jwt = ApiHarness::jwt($this->valid());
+        $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
+
+        self::assertSame($jwt, $authenticator->bearer($this->connection(new Credentials(self::USERNAME, 'secret'))));
+        self::assertCount(1, $this->sent);
+    }
+
+    public function testBearerLogsInOnlyOnceForSeveralCalls(): void
+    {
+        $jwt = ApiHarness::jwt($this->valid());
+        $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'stored-jwt', $this->expired()));
+
+        self::assertSame($jwt, $authenticator->bearer($connection));
+        self::assertSame($jwt, $authenticator->bearer($connection), 'The second call must reuse the JWT of the login');
+        self::assertCount(1, $this->sent);
+    }
+
+    public function testTheJwtOfTheLastLoginWinsOverTheOneOfTheConnection(): void
+    {
+        $jwt = ApiHarness::jwt($this->valid());
+        $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'stored-jwt', $this->valid()));
+
+        $authenticator->relogin($connection);
+
+        self::assertSame($jwt, $authenticator->bearer($connection));
+    }
+
+    public function testAnExpiredJwtOfTheLastLoginFallsBackToTheConnection(): void
+    {
+        $authenticator = $this->authenticator([$this->loginResponse(ApiHarness::jwt($this->valid()))]);
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'stored-jwt', $this->valid() + 7200));
+
+        $authenticator->login($connection);
+        $this->clock->advance(3600);
+
+        self::assertSame('stored-jwt', $authenticator->bearer($connection));
+        self::assertCount(1, $this->sent);
+    }
+
+    public function testLoginPostsTheCredentialsAndReturnsTheConnectionWithTheNewJwt(): void
     {
         $jwt = ApiHarness::jwt(1_800_003_600);
         $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
+        $connection = $this->connection(new Credentials(self::USERNAME, 'secret', 'old-jwt', $this->expired()));
 
-        $session = $authenticator->login($this->connection(new Credentials(self::USERNAME, 'secret')));
+        $logged = $authenticator->login($connection);
 
         self::assertSame('POST', $this->sent[0]['method']);
         self::assertSame(self::URL . '/api/v1/login', $this->sent[0]['url']);
         self::assertSame('{"username":"key:me@site.test","token":"secret"}', $this->sent[0]['body']);
 
-        self::assertSame($jwt, $session->token);
-        self::assertSame(self::URL, $session->baseUrl);
-        self::assertSame(self::USERNAME, $session->username);
-        self::assertSame(1_800_003_600, $session->expiresAt);
-
-        $stored = (new SessionFile($this->temp->path('session.json')))->read();
-        self::assertNotNull($stored);
-        self::assertSame($jwt, $stored->token);
-        self::assertSame([], $this->warnings->all());
+        self::assertSame($jwt, $logged->credentials->token);
+        self::assertSame(1_800_003_600, $logged->credentials->expiresAt);
+        self::assertSame(self::USERNAME, $logged->credentials->username);
+        self::assertSame('secret', $logged->credentials->apiKey());
+        self::assertSame(self::URL, $logged->baseUrl);
+        self::assertSame($this->configPath(), $logged->configFile);
+        self::assertTrue($logged->configured);
+        self::assertSame('old-jwt', $connection->credentials->token, 'The connection is immutable');
+        self::assertFileDoesNotExist($this->configPath(), 'The login alone writes nothing');
     }
 
     public function testLoginUsesTheConfiguredFieldNames(): void
@@ -277,27 +300,30 @@ class AuthenticatorTest extends TestCase
     {
         $authenticator = $this->authenticator([$this->loginResponse('opaque-token')]);
 
-        $session = $authenticator->login($this->connection(new Credentials(self::USERNAME, 'secret')));
+        $logged = $authenticator->login($this->connection(new Credentials(self::USERNAME, 'secret')));
 
-        self::assertNull($session->expiresAt);
+        self::assertSame('opaque-token', $logged->credentials->token);
+        self::assertNull($logged->credentials->expiresAt);
     }
 
-    public function testLoginWithoutSessionStorageStoresNothing(): void
+    /**
+     * @return iterable<string, array{Credentials}>
+     */
+    public static function incompleteCredentials(): iterable
     {
-        $authenticator = $this->authenticator([$this->loginResponse('opaque-token')]);
-
-        $authenticator->login($this->connection(new Credentials(self::USERNAME, 'secret'), useSession: false));
-
-        self::assertFileDoesNotExist($this->temp->path('session.json'));
-        self::assertSame([], $this->warnings->all());
+        yield 'no api key' => [new Credentials(self::USERNAME)];
+        yield 'empty api key' => [new Credentials(self::USERNAME, '')];
+        yield 'no username' => [new Credentials(null, 'secret')];
+        yield 'empty username' => [new Credentials('', 'secret')];
     }
 
-    public function testLoginWithoutCredentialsIsAUsageErrorWithTheHint(): void
+    #[DataProvider('incompleteCredentials')]
+    public function testLoginWithoutCredentialsIsAUsageErrorWithTheHint(Credentials $credentials): void
     {
         $authenticator = $this->authenticator();
 
         try {
-            $authenticator->login($this->connection(new Credentials(self::USERNAME)));
+            $authenticator->login($this->connection($credentials));
             self::fail('An exception was expected');
         } catch (ApiException $error) {
             self::assertSame(ErrorKind::Usage, $error->kind);
@@ -323,7 +349,7 @@ class AuthenticatorTest extends TestCase
             self::assertSame(Authenticator::USERNAME_HINT, $error->extra['hint']);
         }
 
-        self::assertFileDoesNotExist($this->temp->path('session.json'));
+        self::assertFileDoesNotExist($this->configPath());
     }
 
     public function testLoginFailureWhichIsNotAnAuthErrorHasNoHint(): void
@@ -377,7 +403,7 @@ class AuthenticatorTest extends TestCase
             self::assertSame('The login response does not contain a token', $error->getMessage());
         }
 
-        self::assertFileDoesNotExist($this->temp->path('session.json'));
+        self::assertFileDoesNotExist($this->configPath());
     }
 
     public function testCanRelogin(): void
@@ -385,10 +411,10 @@ class AuthenticatorTest extends TestCase
         $authenticator = $this->authenticator();
 
         self::assertTrue($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME, 'secret'))));
+        self::assertTrue($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME, 'secret', 'jwt', $this->valid()))));
         self::assertFalse($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME))));
+        self::assertFalse($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME, 'secret'), configured: false)));
         self::assertFalse($authenticator->canRelogin($this->connection()));
-        self::assertFalse($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME, 'secret', 'given-jwt'))));
-        self::assertTrue($authenticator->canRelogin($this->connection(new Credentials(self::USERNAME, 'secret', ''))));
     }
 
     public function testCanNotReloginAfterALoginOfThisProcess(): void
@@ -402,68 +428,76 @@ class AuthenticatorTest extends TestCase
         self::assertFalse($authenticator->canRelogin($connection));
     }
 
-    public function testBearerLogsInOnlyOnceForSeveralCalls(): void
+    public function testReloginLogsInAndStoresTheWholeConfiguration(): void
     {
         $jwt = ApiHarness::jwt(1_800_003_600);
         $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
-        $connection = $this->connection(new Credentials(self::USERNAME, 'secret'));
-
-        self::assertSame($jwt, $authenticator->bearer($connection));
-        self::assertSame($jwt, $authenticator->bearer($connection), 'The second call must reuse the stored session');
-        self::assertCount(1, $this->sent);
-    }
-
-    public function testPersistWithoutSessionsDoesNothing(): void
-    {
-        $this->authenticator()->persist(
-            $this->connection(useSession: false),
-            new Session(self::URL, self::USERNAME, 'jwt', null),
+        $connection = new Connection(
+            self::URL,
+            new Endpoints('/api/v2', '/api/v2/cms', '/auth'),
+            new Credentials(self::USERNAME, 'secret', 'revoked', $this->valid()),
+            $this->configPath(),
+            true,
+            insecure: true,
+            timeout: 12,
+            usernameField: 'login',
+            tokenField: 'apikey',
         );
 
-        self::assertFileDoesNotExist($this->temp->path('session.json'));
+        $logged = $authenticator->relogin($connection);
+
+        self::assertSame($jwt, $logged->credentials->token);
+        self::assertSame(self::URL . '/auth', $this->sent[0]['url']);
+
+        $stored = (new ConfigFile($this->configPath()))->read();
+        self::assertNotNull($stored);
+        self::assertSame($jwt, $stored->credentials->token);
+        self::assertSame(1_800_003_600, $stored->credentials->expiresAt);
+        self::assertSame(self::USERNAME, $stored->credentials->username);
+        self::assertSame('secret', $stored->credentials->apiKey());
+        self::assertSame('/api/v2', $stored->endpoints->apiPrefix());
+        self::assertSame('/api/v2/cms', $stored->endpoints->adminPrefix());
+        self::assertSame('/auth', $stored->endpoints->login());
+        self::assertTrue($stored->insecure);
+        self::assertSame(12, $stored->timeout);
+        self::assertSame('login', $stored->usernameField);
+        self::assertSame('apikey', $stored->tokenField);
         self::assertSame([], $this->warnings->all());
     }
 
-    public function testPersistWithoutPathWarns(): void
+    public function testPersistWritesTheConfigurationFile(): void
     {
-        $connection = new Connection(self::URL, new Endpoints(), new Credentials(), true, null);
+        $this->authenticator()->persist($this->connection(new Credentials(self::USERNAME, 'secret', 'jwt', 1_800_003_600)));
 
-        $this->authenticator()->persist($connection, new Session(self::URL, self::USERNAME, 'jwt', null));
-
-        self::assertCount(1, $this->warnings->all());
-        self::assertStringContainsString('EAST_WEBSITE_SESSION_FILE', $this->warnings->all()[0]);
-    }
-
-    public function testPersistWritesTheSession(): void
-    {
-        $this->authenticator()->persist($this->connection(), new Session(self::URL, self::USERNAME, 'jwt', 1_800_003_600));
-
-        self::assertSame('jwt', (new SessionFile($this->temp->path('session.json')))->read()?->token);
+        $stored = (new ConfigFile($this->configPath()))->read();
+        self::assertNotNull($stored);
+        self::assertSame('jwt', $stored->credentials->token);
         self::assertSame([], $this->warnings->all());
     }
 
     public function testPersistFailureIsAWarningAndNotAnError(): void
     {
         $blocker = $this->temp->write('blocker', 'I am a file');
-        $connection = $this->connection(sessionPath: $blocker . '/state/session.json');
 
-        $this->authenticator()->persist($connection, new Session(self::URL, self::USERNAME, 'jwt', null));
+        $this->authenticator()->persist(
+            $this->connection(new Credentials(self::USERNAME, 'secret', 'jwt'), configFile: $blocker . '/sub/east-website.json'),
+        );
 
         self::assertCount(1, $this->warnings->all());
         self::assertStringContainsString('can not be written', $this->warnings->all()[0]);
     }
 
-    public function testLoginSurvivesAnUnwritableSessionStorage(): void
+    public function testBearerSurvivesAnUnwritableConfigurationFile(): void
     {
         $blocker = $this->temp->write('blocker', 'I am a file');
-        $jwt = ApiHarness::jwt(1_800_003_600);
+        $jwt = ApiHarness::jwt($this->valid());
         $authenticator = $this->authenticator([$this->loginResponse($jwt)]);
 
-        $session = $authenticator->login(
-            $this->connection(new Credentials(self::USERNAME, 'secret'), sessionPath: $blocker . '/state/session.json'),
+        $bearer = $authenticator->bearer(
+            $this->connection(new Credentials(self::USERNAME, 'secret'), configFile: $blocker . '/sub/east-website.json'),
         );
 
-        self::assertSame($jwt, $session->token);
+        self::assertSame($jwt, $bearer);
         self::assertCount(1, $this->warnings->all());
     }
 
