@@ -55,6 +55,26 @@ test:
 
 .PHONY: test
 
+### Tools
+# The CLI client of the remote API (experimental) lives in tools/api-client with its own dependencies, it is not part
+# of the library, see tools/api-client/README.md. Its targets are not run by `make qa` and `make test`.
+tools-depend:
+	${MAKE} -C tools/api-client depend
+
+tools-qa:
+	${MAKE} -C tools/api-client qa
+
+tools-qa-offline:
+	${MAKE} -C tools/api-client qa-offline
+
+tools-test:
+	${MAKE} -C tools/api-client test
+
+tools-phar:
+	${MAKE} -C tools/api-client phar
+
+.PHONY: tools-depend tools-qa tools-qa-offline tools-test tools-phar
+
 ### Cleaning
 clean:
 	rm -rf vendor
