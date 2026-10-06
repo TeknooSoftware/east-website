@@ -18,10 +18,10 @@ composer.lock
 /tests/var/logs/*
 /.phpunit.cache/
 /graphify-out/
-/tools/vendor/
-/tools/build/
-/tools/.phpunit.cache/
-/tools/dist/*.phar
-!/tools/composer.lock
-# Configuration file of the CLI client (tools/), written by website:auth:login, it contains an API key
+/tools/api-client/vendor/
+/tools/api-client/build/
+/tools/api-client/.phpunit.cache/
+/tools/api-client/dist/*.phar
+!/tools/api-client/composer.lock
+# Configuration file of the CLI client (tools/api-client/), written by website:auth:login, it contains an API key
 east-website.json

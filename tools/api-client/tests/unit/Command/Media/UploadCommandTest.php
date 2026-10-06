@@ -137,7 +137,7 @@ class UploadCommandTest extends TestCase
 
         $code = $tester->run(
             ['command' => 'website:media:create', '--file' => $file, '--name' => 'Logo', '--alternative' => 'Alt text', '--compact' => true],
-            ['capture_stderr_separately' => true],
+            ['capture_stderr_separately' => true, 'decorated' => false],
         );
 
         self::assertSame(0, $code, $tester->getErrorOutput());
@@ -172,7 +172,7 @@ class UploadCommandTest extends TestCase
         $captured = [];
         $tester = $this->capturingApplication($captured);
 
-        $code = $tester->run(['command' => 'website:media:create', '--file' => $file]);
+        $code = $tester->run(['command' => 'website:media:create', '--file' => $file], ['decorated' => false]);
 
         self::assertSame(0, $code);
         self::assertIsString($captured[0]['body']);
@@ -186,7 +186,10 @@ class UploadCommandTest extends TestCase
         $captured = [];
         $tester = $this->capturingApplication($captured);
 
-        $code = $tester->run(['command' => 'website:media:create', '--file' => $file, '--alternative' => '']);
+        $code = $tester->run(
+            ['command' => 'website:media:create', '--file' => $file, '--alternative' => ''],
+            ['decorated' => false],
+        );
 
         self::assertSame(0, $code);
         self::assertIsString($captured[0]['body']);
@@ -199,7 +202,7 @@ class UploadCommandTest extends TestCase
         $captured = [];
         $tester = $this->capturingApplication($captured);
 
-        $code = $tester->run(['command' => 'website:media:create', '--file' => $file]);
+        $code = $tester->run(['command' => 'website:media:create', '--file' => $file], ['decorated' => false]);
 
         self::assertSame(0, $code);
         self::assertIsString($captured[0]['body']);

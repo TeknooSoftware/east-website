@@ -31,8 +31,8 @@
 - Behat tests of the JSON API.
 - Requires `teknoo/east-common` 4.6.
 - New optional dependencies: `symfony/serializer` and `symfony/twig-bundle` 7.3+.
-- CLI client of the JSON API in `tools/` (standalone Symfony Console application, phar built with `make tools-phar`,
-  not part of the library package): every function of the API grouped by domain (`website:type:create`,
+- Experimental CLI client of the JSON API in `tools/api-client/` (standalone Symfony Console application, phar built
+  with `make tools-phar`, not part of the library package): every function of the API grouped by domain (`website:type:create`,
   `website:post:list`, `website:front:post:get`...), configured by `website:auth:login` (username and API key) which
   writes `./east-website.json` read by the other commands, JSON output and stable exit codes, to be used by scripts and
   AI agents.

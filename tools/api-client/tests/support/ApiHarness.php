@@ -189,9 +189,12 @@ class ApiHarness
      */
     public function run(array $arguments, array $options = []): array
     {
+        // Never decorated: with capture_stderr_separately, the Console enables the colors when the tests are run from a
+        // terminal, and the outputs would contain ANSI codes
         $code = $this->tester->run(['command' => $arguments[0]] + $this->parse($arguments), $options + [
             'capture_stderr_separately' => true,
             'interactive' => false,
+            'decorated' => false,
         ]);
 
         return [$code, $this->tester->getDisplay(), $this->tester->getErrorOutput()];

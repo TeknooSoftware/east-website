@@ -1,8 +1,13 @@
 East Website CLI
 ================
 
+> **Experimental.** This client is provided as an experimental tool: its commands, its options and the format of its
+> configuration file may change at any time, outside of the semantic versioning of the library.
+>
+> This client was co-written with Claude Fable 5.1.
+
 Command line client of the remote JSON API of East Website (see the section *JSON API* of the
-[main README](../README.md)), built with the Symfony Console. It exposes every function of the API, grouped by
+[main README](../../README.md)), built with the Symfony Console. It exposes every function of the API, grouped by
 domain (`website:<domain>:<action>`), and it is designed to be used by **scripts and AI agents** as well as by humans:
 
 * the result is always **one JSON document on stdout** (the envelope of the API is passed through unchanged),
@@ -17,11 +22,11 @@ archives.
 ## Install
 
 ```bash
-make tools-depend      # or: cd tools && composer install
-make tools-phar        # builds tools/dist/east-website.phar (needs PHP 8.4+, curl to download Box)
-php tools/dist/east-website.phar list
+make tools-depend      # or: cd tools/api-client && composer install
+make tools-phar        # builds tools/api-client/dist/east-website.phar (needs PHP 8.4+, curl to download Box)
+php tools/api-client/dist/east-website.phar list
 # or, from the sources
-php tools/bin/east-website list
+php tools/api-client/bin/east-website list
 ```
 
 The phar is built by [Box](https://github.com/box-project/box) from a staging directory where only the production
@@ -188,19 +193,19 @@ Non fatal problems (a new JWT that can not be written in the configuration file)
 ## Development
 
 ```bash
-make tools-depend      # install the dependencies in tools/vendor
+make tools-depend      # install the dependencies in tools/api-client/vendor
 make tools-qa          # lint, PHPStan (max), PHPCS (PSR-12), composer audit
 make tools-test        # PHPUnit: unit tests and end to end tests, with coverage
-make tools-phar        # builds tools/dist/east-website.phar, then run: make -C tools phar-test
+make tools-phar        # builds tools/api-client/dist/east-website.phar, then run: make -C tools/api-client phar-test
 ```
 
-* `tools/src` is the code, `tools/tests` the tests: `unit` (the whole application against a `MockHttpClient`), `e2e`
-  (a real PHP process, the real HTTP client and a fake API served by the PHP built-in server) and `phar` (the same
-  scenarios on the built phar, which must not embed any development dependency).
+* `tools/api-client/src` is the code, `tools/api-client/tests` the tests: `unit` (the whole application against a
+  `MockHttpClient`), `e2e` (a real PHP process, the real HTTP client and a fake API served by the PHP built-in server)
+  and `phar` (the same scenarios on the built phar, which must not embed any development dependency).
 * The commands are generated from the catalogue `src/Resource/Registry.php`. To support a new resource or a new
   field of the API, describe it there: the commands, the options, `website:schema` and the tests of the catalogue
   follow.
 * `BlockTypes::INDEXES` must follow the order of the choices of `BlockType` (the Symfony form of the bundle): a test
   compares them.
-* The phar is built with Box, downloaded and verified by `tools/Makefile` (Box can not be a dependency of this project,
-  it conflicts with PHPUnit).
+* The phar is built with Box, downloaded and verified by `tools/api-client/Makefile` (Box can not be a dependency of
+  this project, it conflicts with PHPUnit).

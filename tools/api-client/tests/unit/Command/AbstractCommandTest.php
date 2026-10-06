@@ -107,7 +107,10 @@ class AbstractCommandTest extends TestCase
         }
 
         $tester->setInputs($inputs);
-        $code = $tester->run($input, ['capture_stderr_separately' => true, 'interactive' => $interactive]);
+        $code = $tester->run(
+            $input,
+            ['capture_stderr_separately' => true, 'interactive' => $interactive, 'decorated' => false],
+        );
 
         return [$code, $tester->getDisplay(), $tester->getErrorOutput()];
     }
@@ -334,7 +337,10 @@ class AbstractCommandTest extends TestCase
         $application->setCatchExceptions(false);
         $tester = new ApplicationTester($application);
 
-        $code = $tester->run(['command' => 'website:tag:list'], ['capture_stderr_separately' => true]);
+        $code = $tester->run(
+            ['command' => 'website:tag:list'],
+            ['capture_stderr_separately' => true, 'decorated' => false],
+        );
 
         self::assertSame(1, $code);
         self::assertSame('', $tester->getDisplay());

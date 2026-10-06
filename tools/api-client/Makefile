@@ -48,7 +48,7 @@ audit:
 ifeq ($(shell ${PHP} -r 'echo (int) extension_loaded("xdebug");'),1)
 PHP_WITH_XDEBUG = XDEBUG_MODE=coverage ${PHP}
 else
-PHP_WITH_XDEBUG = XDEBUG_MODE=coverage PHP_INI_SCAN_DIR=":$(CURDIR)/../tests/support/xdebug" ${PHP}
+PHP_WITH_XDEBUG = XDEBUG_MODE=coverage PHP_INI_SCAN_DIR=":$(CURDIR)/../../tests/support/xdebug" ${PHP}
 endif
 
 test:

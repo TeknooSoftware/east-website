@@ -105,7 +105,7 @@ class ApplicationTest extends TestCase
     private function execute(Application $application, array $input): array
     {
         $tester = new ApplicationTester($application);
-        $code = $tester->run($input, ['capture_stderr_separately' => true, 'interactive' => false]);
+        $code = $tester->run($input, ['capture_stderr_separately' => true, 'interactive' => false, 'decorated' => false]);
 
         return [$code, $tester->getDisplay(), $tester->getErrorOutput()];
     }

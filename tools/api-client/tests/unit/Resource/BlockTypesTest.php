@@ -69,7 +69,7 @@ class BlockTypesTest extends TestCase
      */
     public function testIndexesMatchTheChoicesOfTheSymfonyForm(): void
     {
-        $file = dirname(__DIR__, 4) . '/infrastructures/symfony/Form/Type/BlockType.php';
+        $file = dirname(__DIR__, 5) . '/infrastructures/symfony/Form/Type/BlockType.php';
         if (!is_file($file)) {
             self::markTestSkipped('The form of the library is not available next to the CLI');
         }

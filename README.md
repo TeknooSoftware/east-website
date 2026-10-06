@@ -139,12 +139,15 @@ Applications should also rate-limit the public comment endpoint.
 
 ### CLI client
 
-A command line client of this API lives in [`tools/`](tools/README.md): a Symfony Console application, distributed as
-a phar (`make tools-phar`), exposing every function of the API grouped by domain (`website:type:create`,
-`website:post:list`, `website:front:post:get`...). `website:auth:login` logs in with a username and an API key, gets a
-JWT and writes the configuration file `./east-website.json`, read by all the other commands (`website:auth:logout`
-deletes it). It prints JSON on stdout and errors on stderr with stable exit codes, so it can be used by scripts and AI
-agents. See [`tools/README.md`](tools/README.md).
+**Experimental**: a command line client of this API lives in [`tools/api-client/`](tools/api-client/README.md). It is
+provided as an experimental tool: its commands, its options and its configuration file may change at any time, outside
+of the semantic versioning of the library.
+
+It is a Symfony Console application, distributed as a phar (`make tools-phar`), exposing every function of the API
+grouped by domain (`website:type:create`, `website:post:list`, `website:front:post:get`...). `website:auth:login` logs
+in with a username and an API key, gets a JWT and writes the configuration file `./east-website.json`, read by all the
+other commands (`website:auth:logout` deletes it). It prints JSON on stdout and errors on stderr with stable exit codes,
+so it can be used by scripts and AI agents. See [`tools/api-client/README.md`](tools/api-client/README.md).
 
 Support this project
 ---------------------
