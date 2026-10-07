@@ -36,6 +36,8 @@ use Teknoo\East\Website\Recipe\Step\LoadContent;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\RecipeInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
 /**
@@ -126,11 +128,29 @@ class RenderDynamicContentEndPointTest extends TestCase
     {
         return new RenderDynamicContentEndPoint(
             $this->getRecipe(true),
+            $this->createStub(LoadAuthenticatedUserInterface::class),
+            $this->createStub(LoadEnvironmentInterface::class),
             $this->getExtractSlug(true),
             $this->getLoadContent(true),
             $this->createStub(LoadTranslationsInterface::class),
             $this->getRender(true),
             $this->getRenderError(true)
         );
+    }
+
+    public function testBuildPlanWithoutAuthenticatedUserStep(): void
+    {
+        $plan = new RenderDynamicContentEndPoint(
+            $this->getRecipe(true),
+            null,
+            $this->createStub(LoadEnvironmentInterface::class),
+            $this->getExtractSlug(true),
+            $this->getLoadContent(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
+        );
+
+        $this->assertInstanceOf(RenderDynamicContentEndPoint::class, $plan);
     }
 }

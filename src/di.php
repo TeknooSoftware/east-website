@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website;
 
+use DomainException;
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
@@ -65,6 +66,8 @@ use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicContentEndPointInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\East\Website\Loader\CommentLoader;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
@@ -72,6 +75,7 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Middleware\MenuMiddleware;
+use Teknoo\East\Website\Object\Environments;
 use Teknoo\East\Website\Recipe\Plan\DeleteCommentOfPostEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsEndPoint;
 use Teknoo\East\Website\Recipe\Plan\ListAllPostsOfTagsEndPoint;
@@ -84,9 +88,11 @@ use Teknoo\East\Website\Recipe\Step\ExtractTag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
+use Teknoo\East\Website\Recipe\Step\LoadEnvironment;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Website\Recipe\Step\LoadPostFromRequest;
 use Teknoo\East\Website\Recipe\Step\PrepareCriteriaFromPost;
+use Teknoo\East\Website\Service\EnvironmentsFactory;
 use Teknoo\East\Website\Service\MenuGenerator;
 use Teknoo\East\Website\Writer\CommentWriter;
 use Teknoo\East\Website\Writer\ContentWriter;
@@ -101,6 +107,7 @@ use function DI\create;
 use function DI\decorate;
 use function DI\get;
 use function DI\value;
+use function is_array;
 
 return [
     //Loaders
@@ -144,6 +151,24 @@ return [
         ->constructor(get(TagWriter::class), get(DatesService::class)),
     'teknoo.east.website.deleting.type' => create(DeletingService::class)
         ->constructor(get(TypeWriter::class), get(DatesService::class)),
+
+    //Environments
+    /*
+     * `teknoo.east.website.definitions.environments` is an optional array `['env-name' => 'parent-name or default']`
+     * The service returns all environments, indexed by name, with the default environment
+     */
+    'teknoo.east.website.environments' => static function (ContainerInterface $container): Environments {
+        $definitions = [];
+        if ($container->has('teknoo.east.website.definitions.environments')) {
+            $definitions = $container->get('teknoo.east.website.definitions.environments');
+        }
+
+        if (!is_array($definitions)) {
+            throw new DomainException('`teknoo.east.website.definitions.environments` must be an array');
+        }
+
+        return EnvironmentsFactory::fromDefinitions($definitions);
+    },
 
     //Menu
     MenuGenerator::class => static function (ContainerInterface $container): MenuGenerator {
@@ -198,6 +223,34 @@ return [
             get(ContentLoader::class),
             get(DatesService::class),
         ),
+    /*
+     * `teknoo.east.website.definitions.environments_access` is an optional array `['env-name' => ['ROLE_1', ...]]`,
+     * environments absent from it are public
+     */
+    LoadEnvironmentInterface::class => get(LoadEnvironment::class),
+    LoadEnvironment::class => static function (ContainerInterface $container): LoadEnvironment {
+        $environments = $container->get('teknoo.east.website.environments');
+        if (!$environments instanceof Environments) {
+            throw new DomainException(
+                '`teknoo.east.website.environments` must be an instance of ' . Environments::class
+            );
+        }
+
+        $access = [];
+        if ($container->has('teknoo.east.website.definitions.environments_access')) {
+            $access = $container->get('teknoo.east.website.definitions.environments_access');
+        }
+
+        if (!is_array($access)) {
+            throw new DomainException('`teknoo.east.website.definitions.environments_access` must be an array');
+        }
+
+        return new LoadEnvironment(
+            environments: $environments,
+            environmentsAccess: EnvironmentsFactory::validateAccess($environments, $access),
+            menuGenerator: $container->get(MenuGenerator::class),
+        );
+    },
     LoadPost::class => create()
         ->constructor(
             get(PostLoader::class),
@@ -223,8 +276,15 @@ return [
             $loadTranslations = $container->get(LoadTranslationsInterface::class);
         }
 
+        $loadAuthenticatedUser = null;
+        if ($container->has(LoadAuthenticatedUserInterface::class)) {
+            $loadAuthenticatedUser = $container->get(LoadAuthenticatedUserInterface::class);
+        }
+
         return new ListAllPostsOfTagsEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
+            loadAuthenticatedUser: $loadAuthenticatedUser,
+            loadEnvironment: $container->get(LoadEnvironmentInterface::class),
             extractPage: $container->get(ExtractPage::class),
             extractTag: $container->get(ExtractTag::class),
             listPosts: $container->get(ListPosts::class),
@@ -244,8 +304,15 @@ return [
             $loadTranslations = $container->get(LoadTranslationsInterface::class);
         }
 
+        $loadAuthenticatedUser = null;
+        if ($container->has(LoadAuthenticatedUserInterface::class)) {
+            $loadAuthenticatedUser = $container->get(LoadAuthenticatedUserInterface::class);
+        }
+
         return new ListAllPostsEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
+            loadAuthenticatedUser: $loadAuthenticatedUser,
+            loadEnvironment: $container->get(LoadEnvironmentInterface::class),
             extractPage: $container->get(ExtractPage::class),
             listPosts: $container->get(ListPosts::class),
             listTags: $container->get(ListTags::class),
@@ -346,10 +413,17 @@ return [
             $loadTranslations = $container->get(LoadTranslationsInterface::class);
         }
 
+        $loadAuthenticatedUser = null;
+        if ($container->has(LoadAuthenticatedUserInterface::class)) {
+            $loadAuthenticatedUser = $container->get(LoadAuthenticatedUserInterface::class);
+        }
+
         $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
 
         return new PostCommentOnPostEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
+            loadAuthenticatedUser: $loadAuthenticatedUser,
+            loadEnvironment: $container->get(LoadEnvironmentInterface::class),
             loadPost: $container->get(LoadPost::class),
             listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,
@@ -373,8 +447,15 @@ return [
             $loadTranslations = $container->get(LoadTranslationsInterface::class);
         }
 
+        $loadAuthenticatedUser = null;
+        if ($container->has(LoadAuthenticatedUserInterface::class)) {
+            $loadAuthenticatedUser = $container->get(LoadAuthenticatedUserInterface::class);
+        }
+
         return new RenderDynamicContentEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
+            loadAuthenticatedUser: $loadAuthenticatedUser,
+            loadEnvironment: $container->get(LoadEnvironmentInterface::class),
             extractSlug: $container->get(ExtractSlug::class),
             loadContent: $container->get(LoadContent::class),
             loadTranslationsInterface: $loadTranslations,
@@ -391,8 +472,15 @@ return [
             $loadTranslations = $container->get(LoadTranslationsInterface::class);
         }
 
+        $loadAuthenticatedUser = null;
+        if ($container->has(LoadAuthenticatedUserInterface::class)) {
+            $loadAuthenticatedUser = $container->get(LoadAuthenticatedUserInterface::class);
+        }
+
         return new RenderDynamicPostEndPoint(
             recipe: $container->get(OriginalRecipeInterface::class),
+            loadAuthenticatedUser: $loadAuthenticatedUser,
+            loadEnvironment: $container->get(LoadEnvironmentInterface::class),
             loadPost: $container->get(LoadPost::class),
             listTags: $container->get(ListTags::class),
             loadTranslationsInterface: $loadTranslations,

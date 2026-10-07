@@ -33,6 +33,9 @@ use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
+use Teknoo\East\Website\Object\Environment;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -62,8 +65,34 @@ class TopItemByLocationQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['location' => 'fooBar',], $promise);
+            ->with(['location' => 'fooBar', 'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null])], $promise);
 
         $this->assertInstanceOf(TopItemByLocationQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
+    }
+    public function testExecuteWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+
+        $loader = $this->createStub(LoaderInterface::class);
+        $repository = $this->createMock(RepositoryInterface::class);
+        $promise = $this->createStub(PromiseInterface::class);
+
+        $repository->expects($this->once())
+            ->method('findBy')
+            ->with(
+                [
+                    'location' => 'fooBar',
+                    'environment' => new InclusiveOr(
+                        ['environment' => new In(['validation', 'default'])],
+                        ['environment' => null],
+                    ),
+                ],
+                $promise,
+            );
+
+        $query = new TopItemByLocationQuery('fooBar', $validation);
+        $this->assertInstanceOf(TopItemByLocationQuery::class, $query->execute($loader, $repository, $promise));
+
+        Environment::reset();
     }
 }

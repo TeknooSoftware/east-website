@@ -19,6 +19,42 @@ Feature: Rendering and return an HTML dynamic post stored into a database server
     Then The client must accept a response
     And I should get "list: foo-bar-3:foo-bar-2:foo-bar-1"
 
+  Scenario: Render and Serve a list of posts of the default environment
+    Given I have DI initialized
+    And the environments definitions:
+      | name       | parent  |
+      | validation | default |
+    And I register a router
+    And a Content Loader
+    And a templating engine
+    And a type of post, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1:{block1} block2:{block2}"
+    And a Endpoint able to render and serve list of posts.
+    And an available post with the slug "foo-bar-1" of type "type1"
+    And an available post with the slug "foo-bar-2" of type "type1" in the environment "validation"
+    And an available post with the slug "foo-bar-3" of type "type1"
+    And The router can process the request "#/posts/?(?P<tag>[a-zA-Z0-9\.\-]+)?#is" to controller "postsEndPoint"
+    When The server will receive the request "https://foo.com/posts"
+    Then The client must accept a response
+    And I should get "list: foo-bar-3:foo-bar-1"
+
+  Scenario: Render and Serve a list of posts of a selected environment
+    Given I have DI initialized
+    And the environments definitions:
+      | name       | parent  |
+      | validation | default |
+    And I register a router
+    And a Content Loader
+    And a templating engine
+    And a type of post, called "type1" with "2" blocks "block1,block2" and template "Acme:MyBundle:type1.html.twig" with "block1:{block1} block2:{block2}"
+    And a Endpoint able to render and serve list of posts.
+    And an available post with the slug "foo-bar-1" of type "type1"
+    And an available post with the slug "foo-bar-2" of type "type1" in the environment "validation"
+    And an available post with the slug "foo-bar-3" of type "type1"
+    And The router can process the request "#/posts/?(?P<tag>[a-zA-Z0-9\.\-]+)?#is" to controller "postsEndPoint"
+    When The server will receive the request "https://foo.com/posts?website-env=validation"
+    Then The client must accept a response
+    And I should get "list: foo-bar-3:foo-bar-2:foo-bar-1"
+
   Scenario: Render and Serve a post
     Given I have DI initialized
     And I register a router

@@ -33,6 +33,9 @@ use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Common\Service\FindSlugService;
 use Teknoo\Tests\East\Website\Object\Traits\ObjectTestTrait;
+use Teknoo\East\Website\Object\Environment;
+use stdClass;
+use Throwable;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -300,6 +303,7 @@ class ItemTest extends TestCase
                 'location' => 'top',
                 'hidden' => false,
                 'parent' => ['id' => 'i1', 'name' => 'Top'],
+                'environment' => 'default',
             ],
             $data,
         );
@@ -309,5 +313,49 @@ class ItemTest extends TestCase
         $data = $this->exportData($parent, ['api']);
         $this->assertNull($data['content']);
         $this->assertNull($data['parent']);
+    }
+    public function testGetEnvironmentOfALegacyDocument(): void
+    {
+        $this->assertSame(
+            Environment::default(),
+            $this->generateObjectPopulated(['environment' => null])->getEnvironment(),
+        );
+    }
+
+    public function testGetEnvironment(): void
+    {
+        $environment = Environment::get('validation');
+        $this->assertSame(
+            $environment,
+            $this->generateObjectPopulated(['environment' => $environment])->getEnvironment(),
+        );
+    }
+
+    public function testSetEnvironment(): void
+    {
+        $environment = Environment::get('validation');
+
+        $object = $this->buildObject();
+        $this->assertSame(Environment::default(), $object->getEnvironment());
+        $this->assertInstanceOf(Item::class, $object->setEnvironment($environment));
+        $this->assertSame($environment, $object->getEnvironment());
+
+        $this->assertInstanceOf(Item::class, $object->setEnvironment(null));
+        $this->assertSame(Environment::default(), $object->getEnvironment());
+    }
+
+    public function testSetEnvironmentExceptionOnBadArgument(): void
+    {
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setEnvironment(new stdClass());
+    }
+
+    public function testExportEnvironment(): void
+    {
+        $item = (new Item())->setName('Menu')->setEnvironment(Environment::get('validation'));
+        $item->setId('i2');
+
+        $this->assertEquals('validation', $this->exportData($item, ['api'])['environment']);
+        $this->assertEquals('validation', $this->exportData($item, ['crud'])['environment']);
     }
 }

@@ -50,11 +50,18 @@ use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Post;
 use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
 return [
+    /*
+     * Contents, posts and items have an `environment` field, stored thanks to the custom ODM type `environment`:
+     * `EnvironmentType::prepare()` registers the type and loads the environments definitions before the first
+     * hydration (closures of definitions can not import variables, to stay compilable by PHP-DI).
+     */
     ContentRepositoryInterface::class => static function (ContainerInterface $container): ContentRepositoryInterface {
+        EnvironmentType::prepare($container);
         $repository = $container->get(ObjectManager::class)->getRepository(Content::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmContentRepository($repository);
@@ -64,6 +71,7 @@ return [
     },
 
     PostRepositoryInterface::class => static function (ContainerInterface $container): PostRepositoryInterface {
+        EnvironmentType::prepare($container);
         $repository = $container->get(ObjectManager::class)->getRepository(Post::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmPostRepository($repository);
@@ -82,6 +90,7 @@ return [
     },
 
     ItemRepositoryInterface::class => static function (ContainerInterface $container): ItemRepositoryInterface {
+        EnvironmentType::prepare($container);
         $repository = $container->get(ObjectManager::class)->getRepository(Item::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmItemRepository($repository);

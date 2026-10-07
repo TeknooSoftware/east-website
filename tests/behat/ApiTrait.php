@@ -46,6 +46,7 @@ use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
+use Teknoo\East\Website\Object\Environment as WebsiteEnvironment;
 
 use function array_keys;
 use function base64_decode;
@@ -218,6 +219,12 @@ trait ApiTrait
             ],
             $content,
         );
+    }
+
+    #[Given('it is in the environment :environment')]
+    public function itIsInTheEnvironment(string $environment): void
+    {
+        $this->apiContent->setEnvironment(WebsiteEnvironment::get($environment));
     }
 
     #[Given('a draft :kind :id with the slug :slug and the title :title')]

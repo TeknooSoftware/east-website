@@ -104,6 +104,12 @@ use Teknoo\East\Website\Loader\TypeLoader;
 use Teknoo\East\Website\Object\Block;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Type;
+use Teknoo\East\Website\Object\Environment as WebsiteEnvironment;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Foundation\Session\SessionInterface;
+use Teknoo\East\Common\Contracts\User\UserInterface;
+use Teknoo\East\Foundation\Manager\ManagerInterface as EastManagerInterface;
+use Behat\Gherkin\Node\TableNode;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicContentEndPoint;
 use Teknoo\East\Website\Recipe\Plan\RenderDynamicPostEndPoint;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -111,8 +117,10 @@ use Throwable;
 use Twig\Environment;
 
 use function array_key_exists;
+use function array_filter;
 use function array_pop;
 use function array_reverse;
+use function array_values;
 use function bin2hex;
 use function current;
 use function define;
@@ -124,7 +132,9 @@ use function fopen;
 use function in_array;
 use function is_numeric;
 use function json_decode;
+use function is_string;
 use function json_encode;
+use function method_exists;
 use function parse_str;
 use function preg_match;
 use function random_bytes;
@@ -198,10 +208,15 @@ class FeatureContext implements Context
 
     private ?DateTimeInterface $now = null;
 
+    private ?MemorySession $session = null;
+
     #[BeforeScenario]
     public function prepareScenario(): void
     {
         error_reporting(E_ALL);
+
+        WebsiteEnvironment::reset();
+        $this->session = null;
 
         //Common Doctrine repositories, used with the in-memory object manager, can not hydrate references
         if (!defined('TEKNOO_EAST_IN_TEST_MODE')) {
@@ -455,6 +470,11 @@ class FeatureContext implements Context
 
             private array $allObjects = [];
 
+            /**
+             * @var array<int, array{0: array, 1: object}>
+             */
+            private array $objectsWithCriteria = [];
+
             private array $criteria = [];
 
             public function __construct(string $className)
@@ -471,8 +491,35 @@ class FeatureContext implements Context
                 $this->criteria = $criteria;
                 $this->object = $object;
                 $this->allObjects[] = $object;
+                $this->objectsWithCriteria[] = [$criteria, $object];
 
                 return $this;
+            }
+
+            /**
+             * Extract from the criteria the names of the environments to filter (`'environment' => InclusiveOr(...)`
+             * is converted to `'or' => [['environment' => [names]], ['environment' => null]]` by the common
+             * repository), and remove them from the criteria
+             */
+            private function extractEnvironments(array &$criteria): ?array
+            {
+                if (!isset($criteria['or'][0]['environment']) || !is_array($criteria['or'][0]['environment'])) {
+                    return null;
+                }
+
+                $environments = $criteria['or'][0]['environment'];
+                unset($criteria['or']);
+
+                return $environments;
+            }
+
+            private function isInEnvironments(object $object, ?array $environments): bool
+            {
+                if (null === $environments || !method_exists($object, 'getEnvironment')) {
+                    return true;
+                }
+
+                return in_array($object->getEnvironment()->getName(), $environments, true);
             }
 
             public function find($id): ?object
@@ -486,7 +533,14 @@ class FeatureContext implements Context
 
             public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
             {
-                return array_reverse($this->allObjects);
+                $environments = $this->extractEnvironments($criteria);
+
+                return array_values(
+                    array_filter(
+                        array_reverse($this->allObjects),
+                        fn (object $object): bool => $this->isInEnvironments($object, $environments),
+                    )
+                );
             }
 
             public function findOneBy(array $criteria): ?object
@@ -499,6 +553,8 @@ class FeatureContext implements Context
                     unset($criteria['or']);
                 }
 
+                $environments = $this->extractEnvironments($criteria);
+
                 if (
                     isset($criteria['slug'])
                     && ('page-with-error' === $criteria['slug'] || 'post-with-error' === $criteria['slug'])
@@ -506,8 +562,11 @@ class FeatureContext implements Context
                     throw new Exception('Error', 404);
                 }
 
-                if ($this->criteria == $criteria) {
-                    return $this->object;
+                //The last registered object first
+                foreach (array_reverse($this->objectsWithCriteria) as [$objectCriteria, $object]) {
+                    if ($objectCriteria == $criteria && $this->isInEnvironments($object, $environments)) {
+                        return $object;
+                    }
                 }
 
                 return null;
@@ -800,6 +859,10 @@ class FeatureContext implements Context
         parse_str($request->getUri()->getQuery(), $query);
         $request = $request->withQueryParams($query);
 
+        if (null !== $this->session) {
+            $request = $request->withAttribute(SessionInterface::ATTRIBUTE_KEY, $this->session);
+        }
+
         $this->buildManager($request);
     }
 
@@ -821,6 +884,89 @@ class FeatureContext implements Context
     {
         Assert::assertNull($this->response);
         Assert::assertInstanceOf(Throwable::class, $this->error);
+    }
+
+    #[Then('The client must accept an error with the code :code')]
+    public function theClientMustAcceptAnErrorWithTheCode(string $code): void
+    {
+        $this->theClientMustAcceptAnError();
+        Assert::assertEquals((int) $code, $this->error->getCode());
+    }
+
+    #[Given('the environments definitions:')]
+    public function theEnvironmentsDefinitions(TableNode $table): void
+    {
+        $definitions = [];
+        foreach ($table->getHash() as $row) {
+            $definitions[$row['name']] = $row['parent'];
+        }
+
+        $this->container->set('teknoo.east.website.definitions.environments', $definitions);
+    }
+
+    #[Given('the environment :name is restricted to the roles :roles')]
+    public function theEnvironmentIsRestrictedToTheRoles(string $name, string $roles): void
+    {
+        $access = [];
+        if ($this->container->has('teknoo.east.website.definitions.environments_access')) {
+            $access = $this->container->get('teknoo.east.website.definitions.environments_access');
+        }
+
+        $access[$name] = explode(',', $roles);
+        $this->container->set('teknoo.east.website.definitions.environments_access', $access);
+    }
+
+    #[Given('a session storage')]
+    public function aSessionStorage(): void
+    {
+        $this->session = new MemorySession();
+    }
+
+    #[Given('the session contains the environment :name')]
+    public function theSessionContainsTheEnvironment(string $name): void
+    {
+        $this->session ??= new MemorySession();
+        $this->session->set('website-env', $name);
+    }
+
+    #[Then('the session must contain the environment :name')]
+    public function theSessionMustContainTheEnvironment(string $name): void
+    {
+        Assert::assertInstanceOf(MemorySession::class, $this->session);
+        Assert::assertTrue($this->session->has('website-env'));
+        Assert::assertEquals($name, $this->session->value('website-env'));
+    }
+
+    #[Then('the session must not contain an environment')]
+    public function theSessionMustNotContainAnEnvironment(): void
+    {
+        Assert::assertInstanceOf(MemorySession::class, $this->session);
+        Assert::assertFalse($this->session->has('website-env'));
+    }
+
+    #[Given('an authenticated user with the roles :roles')]
+    public function anAuthenticatedUserWithTheRoles(string $roles): void
+    {
+        $user = (new User())
+            ->setEmail('visitor@teknoo.software')
+            ->setRoles(explode(',', $roles));
+
+        $this->container->set(
+            LoadAuthenticatedUserInterface::class,
+            new class ($user) implements LoadAuthenticatedUserInterface {
+                public function __construct(
+                    private readonly UserInterface $user,
+                ) {
+                }
+
+                public function __invoke(EastManagerInterface $manager): LoadAuthenticatedUserInterface
+                {
+                    $manager->updateWorkPlan([UserInterface::class => $this->user]);
+
+                    return $this;
+                }
+            }
+        );
     }
 
     #[Given('a Content Loader')]
@@ -860,11 +1006,13 @@ class FeatureContext implements Context
 
     #[Given('an available :contentType with the slug :slug of type :type')]
     #[Given('an available :contentType with the slug :slug of type :type and tag :tag')]
+    #[Given('an available :contentType with the slug :slug of type :type in the environment :environment')]
     public function anAvailablePageWithTheSlugOfType(
         string $contentType,
         string $slug,
         string $type,
-        ?string $tag = null
+        ?string $tag = null,
+        ?string $environment = null,
     ): void {
         $className = match($contentType) {
             'post' => Post::class,
@@ -877,6 +1025,10 @@ class FeatureContext implements Context
             ->setParts(['block1' => 'hello', 'block2' => 'world'])
             ->setSanitizedParts(['block1' => 'hello', 'block2' => 'world'], 'fooBar')
             ->setPublishedAt(new DateTime('2017-11-25'));
+
+        if (null !== $environment) {
+            $object->setEnvironment(WebsiteEnvironment::get($environment));
+        }
 
         if ($tag !== null && $tag !== '' && $tag !== '0') {
             $object->setTags([$this->getTag($tag)]);
@@ -1012,7 +1164,7 @@ class FeatureContext implements Context
             public function render(PromiseInterface $promise, $view, array $parameters = []): EngineInterface
             {
                 if ('404-error' === $view) {
-                    $promise->fail(new Exception('Error 404'));
+                    $promise->fail(new Exception('Error 404', 404));
 
                     return $this;
                 }
@@ -1073,7 +1225,7 @@ class FeatureContext implements Context
             public function render(PromiseInterface $promise, $view, array $parameters = []): EngineInterface
             {
                 if ('404-error' === $view) {
-                    $promise->fail(new Exception('Error 404'));
+                    $promise->fail(new Exception('Error 404', 404));
 
                     return $this;
                 }
@@ -1252,6 +1404,10 @@ class FeatureContext implements Context
 
             $rp = $ro->getProperty($name);
             $isAccessible = !($rp->isPrivate() || $rp->isProtected());
+            if ('environment' === $name && is_string($value)) {
+                $value = WebsiteEnvironment::get($value);
+            }
+
             $rp->setValue($object, $value);
         }
 

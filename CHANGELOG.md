@@ -4,6 +4,26 @@
 ### Stable Release
 
 #### Evolutions
+- Environments: contents, posts and items belong to an environment of the website (value object
+  `Teknoo\East\Website\Object\Environment`, root `default`, others declared with their parent in the DI key
+  `teknoo.east.website.definitions.environments`, listed by the service `teknoo.east.website.environments`), to
+  prepare new versions on the same instance. See the README section "Environments".
+  - Front: the environment is selected with the request parameter `website-env` (POST or GET), kept in the session
+    (`website-env`) and checked on each request (new step `LoadEnvironment`, in the plans of contents, posts, lists
+    of posts and comments posting). Only the chain of the selected environment (itself and its ancestors) is served
+    by the front queries, the lists of tags and the menu generator. An unknown environment, or an environment
+    restricted by the DI key `teknoo.east.website.definitions.environments_access` to roles the user does not own, is
+    an error 404; a stale value in session is removed and the default environment is used.
+  - Admin: dropdown `environment` in the forms of contents, posts and items; the JSON API accepts and returns the
+    name (`environment`, groups `api` and `crud`).
+  - Persistence: the environment is stored as a string in MongoDB (custom ODM type `environment`, registered by the
+    bundle via `doctrine_mongodb.types` or by `infrastructures/doctrine/di.php`). Documents created before this
+    version belong to the default environment, no migration is needed.
+  - New step contract `LoadAuthenticatedUserInterface` (Symfony implementation on the security token, does nothing
+    for anonymous visitors), used by the front plans to check the roles.
+  - CLI client: field `--environment` on contents, posts and items, and column `environment` in the tables.
+  - `ItemType` form is now a declared service (`ItemType` has a constructor), and its duplicated field `slug` is
+    removed.
 - Experimental CLI client (`tools/api-client/`): interactive mode `--format=tui` for humans, built on `symfony/tui`
   (tables for the lists, forms to read, create and update the objects). The JSON output stays the default, see
   [its README](tools/api-client/README.md#interactive-mode---formattui).

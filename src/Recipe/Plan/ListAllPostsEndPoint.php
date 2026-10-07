@@ -31,6 +31,8 @@ use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\Bowl\Bowl;
@@ -52,6 +54,8 @@ class ListAllPostsEndPoint implements ListAllPostsEndPointInterface
 
     public function __construct(
         RecipeInterface $recipe,
+        private readonly ?LoadAuthenticatedUserInterface $loadAuthenticatedUser,
+        private readonly LoadEnvironmentInterface $loadEnvironment,
         private readonly ExtractPage $extractPage,
         private readonly ListPosts $listPosts,
         private readonly ListTags $listTags,
@@ -68,6 +72,12 @@ class ListAllPostsEndPoint implements ListAllPostsEndPointInterface
         $recipe = $recipe->require(new Ingredient('int', 'itemsPerPage'));
 
         $recipe = $recipe->cook($this->extractPage, ExtractPage::class, [], 00);
+
+        if (null !== $this->loadAuthenticatedUser) {
+            $recipe = $recipe->cook($this->loadAuthenticatedUser, LoadAuthenticatedUserInterface::class, [], 1);
+        }
+
+        $recipe = $recipe->cook($this->loadEnvironment, LoadEnvironmentInterface::class, [], 2);
 
         $recipe = $recipe->cook($this->listPosts, ListPosts::class, [], 20);
 

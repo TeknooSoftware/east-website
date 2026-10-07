@@ -107,10 +107,61 @@ Feature: Create an element, from the admin JSON API
           "slug": "foo",
           "publishedAt": null,
           "parts": [],
-          "tags": []
+          "tags": [],
+          "environment": "default"
         }
       }
       """
+
+  Scenario: Create a content in an environment with a JSON body
+    When the API client sends a "POST" JSON request to "https://foo.com/api/v1/admin/content/new" with:
+      """
+      {
+        "title": "Foo",
+        "subtitle": "Bar",
+        "environment": "validation"
+      }
+      """
+    Then It is redirect to "/api/v1/admin/content/[a-zA-Z0-9]+"
+    And An object "Content" must be persisted
+    When the client follows the redirection
+    Then the API response status code is 200
+    And the API response contains:
+      """
+      {
+        "data": {
+          "@class": "Teknoo\\East\\Website\\Object\\Content",
+          "title": "Foo",
+          "slug": "foo",
+          "environment": "validation"
+        }
+      }
+      """
+
+  Scenario: Create a content in an unknown environment with a JSON body
+    When the API client sends a "POST" JSON request to "https://foo.com/api/v1/admin/content/new" with:
+      """
+      {
+        "title": "Foo",
+        "subtitle": "Bar",
+        "environment": "unknown"
+      }
+      """
+    Then the API response status code is 400
+    And the API response is a JSON response
+    And the API response contains:
+      """
+      {
+        "meta": {
+          "@class": "Teknoo\\East\\Website\\Object\\Content"
+        },
+        "data": {
+          "title": "Foo",
+          "environment": "default"
+        }
+      }
+      """
+    And there are 0 objects "Content" persisted
 
   Scenario: Create and publish a post with a JSON body
     When the API client sends a "POST" JSON request to "https://foo.com/api/v1/admin/post/new" with:
@@ -145,7 +196,8 @@ Feature: Create an element, from the admin JSON API
         "name": "Menu",
         "location": "top",
         "position": 2,
-        "hidden": false
+        "hidden": false,
+        "environment": "testing"
       }
       """
     Then It is redirect to "/api/v1/admin/item/[a-zA-Z0-9]+"
@@ -162,7 +214,8 @@ Feature: Create an element, from the admin JSON API
           "position": 2,
           "hidden": false,
           "content": null,
-          "parent": null
+          "parent": null,
+          "environment": "testing"
         }
       }
       """

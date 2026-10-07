@@ -36,6 +36,9 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
 use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
+use Teknoo\East\Website\Object\Environment;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -65,7 +68,7 @@ class PublishedContentFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), ], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
+            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null])], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
 
         $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }
@@ -156,5 +159,33 @@ class PublishedContentFromSlugQueryTest extends TestCase
             });
 
         $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
+    }
+    public function testFetchWithEnvironment(): void
+    {
+        $testing = Environment::define('testing', Environment::default());
+        $testA = Environment::define('test-a', $testing);
+
+        $loader = $this->createStub(LoaderInterface::class);
+        $repository = $this->createMock(RepositoryInterface::class);
+        $promise = $this->createStub(PromiseInterface::class);
+
+        $repository->expects($this->once())
+            ->method('findOneBy')
+            ->with(
+                [
+                    'slug' => 'fooBar',
+                    'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(
+                        ['environment' => new In(['test-a', 'testing', 'default'])],
+                        ['environment' => null],
+                    ),
+                ],
+                $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface),
+            );
+
+        $query = new PublishedContentFromSlugQuery('fooBar', new DateTimeImmutable('2025-03-24'), $testA);
+        $this->assertInstanceOf(PublishedContentFromSlugQuery::class, $query->fetch($loader, $repository, $promise));
+
+        Environment::reset();
     }
 }

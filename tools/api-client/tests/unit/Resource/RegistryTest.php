@@ -150,12 +150,12 @@ class RegistryTest extends TestCase
         self::assertSame(['name', 'slug', 'is-highlighted'], $options('tag'));
         self::assertSame(['name', 'template', 'block'], $options('type'));
         self::assertSame(
-            ['author', 'type', 'tag', 'title', 'subtitle', 'slug', 'description', 'locale-field'],
+            ['author', 'type', 'tag', 'title', 'subtitle', 'slug', 'description', 'environment', 'locale-field'],
             $options('content'),
         );
         self::assertSame($options('content'), $options('post'));
         self::assertSame(
-            ['name', 'location', 'parent', 'content', 'slug', 'hidden', 'position', 'locale-field'],
+            ['name', 'location', 'parent', 'content', 'slug', 'hidden', 'position', 'environment', 'locale-field'],
             $options('item'),
         );
         self::assertSame(['first-name', 'last-name', 'email', 'role', 'active'], $options('user'));
@@ -283,7 +283,7 @@ class RegistryTest extends TestCase
 
     public function testListColumns(): void
     {
-        $columns = ['id', 'title', 'slug', 'type', 'author', 'tags', 'publishedAt'];
+        $columns = ['id', 'title', 'slug', 'type', 'author', 'tags', 'publishedAt', 'environment'];
 
         self::assertSame($columns, $this->resource('content')->listColumns);
         self::assertSame($columns, $this->resource('post')->listColumns);

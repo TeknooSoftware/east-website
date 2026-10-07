@@ -141,6 +141,14 @@ php east-website.phar website:type:create --name=Article --template=article.html
 php east-website.phar website:content:create --title="Hello" --type=0198... --author=0198... --part=intro="Welcome" --publish
 ```
 
+### Environments
+
+Contents, posts and items belong to an environment of the website (`default`, or one of the environments defined by
+the server, like `validation`): `--environment=validation` on `create` and `update`, the name is returned by `get` and
+`list`. The CLI does not know the environments of the server: an unknown name is rejected by the server (error 400 on
+the field `environment`). The public API (`website:front:*`) serves the default environment, the selection of another
+environment (`website-env`) is not supported by the CLI yet.
+
 ### Lists
 
 `--page` (from 1), `--order=<field>`, `--direction=ASC|DESC` (validated by the CLI: an invalid value makes the server

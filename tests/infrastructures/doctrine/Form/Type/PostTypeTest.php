@@ -27,6 +27,10 @@ namespace Teknoo\Tests\East\Website\Doctrine\Form\Type;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use Teknoo\East\Website\Doctrine\Form\Type\PostType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Object\Environments;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -39,5 +43,55 @@ class PostTypeTest extends ContentTypeTest
     public function buildForm(): PostType
     {
         return new PostType();
+    }
+    public function testBuildFormAddsTheEnvironmentField(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+        $environments = new Environments([$validation]);
+
+        $fields = [];
+        $builder = $this->createStub(FormBuilderInterface::class);
+        $builder
+            ->method('add')
+            ->willReturnCallback(
+                function ($child, $type, array $options = []) use ($builder, &$fields) {
+                    $fields[$child] = [$type, $options];
+
+                    return $builder;
+                }
+            );
+
+        (new PostType(environments: $environments))->buildForm($builder, ['doctrine_type' => ChoiceType::class]);
+
+        $this->assertArrayHasKey('environment', $fields);
+        [$type, $options] = $fields['environment'];
+        $this->assertSame(ChoiceType::class, $type);
+        $this->assertTrue($options['required']);
+        $this->assertSame(['default' => Environment::default(), 'validation' => $validation], $options['choices']);
+        $this->assertSame('validation', $options['choice_label']($validation));
+        $this->assertSame('validation', $options['choice_value']($validation));
+        $this->assertSame('', $options['choice_value'](null));
+        $this->assertSame('default', $options['empty_data']);
+
+        Environment::reset();
+    }
+
+    public function testBuildFormWithoutEnvironmentsListsOnlyTheDefaultEnvironment(): void
+    {
+        $fields = [];
+        $builder = $this->createStub(FormBuilderInterface::class);
+        $builder
+            ->method('add')
+            ->willReturnCallback(
+                function ($child, $type, array $options = []) use ($builder, &$fields) {
+                    $fields[$child] = [$type, $options];
+
+                    return $builder;
+                }
+            );
+
+        (new PostType())->buildForm($builder, ['doctrine_type' => ChoiceType::class]);
+
+        $this->assertSame(['default' => Environment::default()], $fields['environment'][1]['choices']);
     }
 }

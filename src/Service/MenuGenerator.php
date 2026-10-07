@@ -28,6 +28,7 @@ namespace Teknoo\East\Website\Service;
 use Teknoo\East\Common\Contracts\Object\ObjectInterface;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Object\Content;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
@@ -38,6 +39,7 @@ use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use function array_diff;
 use function array_keys;
 use function array_unique;
+use function in_array;
 
 /**
  * Service to generate a menu from persisted item and loader. It will use the query TopItemByLocationQuery to extract
@@ -47,6 +49,10 @@ use function array_unique;
  * Content instance linked to Item instance are also fetched during the main query `TopItemByLocationQuery\.
  * To avoid multiple queries, all Content ids are extracted to fetch all required instances in a single query via
  * `PublishedContentFromIdsQuery`, then redispatched to each item.
+ *
+ * The generator is scoped to an environment (`default` by default, see `withEnvironment()`): only items of the
+ * environment's chain are fetched, and items linked to a content out of this chain are skipped (the content would
+ * not be available).
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -60,6 +66,8 @@ class MenuGenerator
      */
     private array $cache = [];
 
+    private ?Environment $environment = null;
+
     /**
      * @param array<string> $preloadItemsLocations
      */
@@ -70,13 +78,44 @@ class MenuGenerator
     ) {
     }
 
+    public function __clone()
+    {
+        $this->cache = [];
+    }
+
+    /*
+     * Return a copy of this generator, with an empty cache, scoped to the environment
+     */
+    public function withEnvironment(Environment $environment): static
+    {
+        $that = clone $this;
+        $that->environment = $environment;
+
+        return $that;
+    }
+
+    public function getEnvironment(): Environment
+    {
+        return $this->environment ?? Environment::default();
+    }
+
     private function fetch(string $location): void
     {
         $itemsStacks = [];
+        $environment = $this->getEnvironment();
+        $chain = $environment->getChain();
 
-        $itemsSorting = function (iterable $items) use (&$itemsStacks): void {
+        $itemsSorting = function (iterable $items) use (&$itemsStacks, $chain): void {
             /** @var Item[] $items */
             foreach ($items as $item) {
+                $content = $item->getContent();
+                if (
+                    null !== $content
+                    && !in_array($content->getEnvironment()->getName(), $chain, true)
+                ) {
+                    continue;
+                }
+
                 if (!($parent = $item->getParent())) {
                     $itemsStacks['top'][] = $item;
 
@@ -96,7 +135,7 @@ class MenuGenerator
         $locations = array_diff(array_unique($locations), array_keys($this->cache));
 
         $this->translationManager?->deferringTranslationsLoading();
-        $this->itemLoader->query(new TopItemByLocationQuery($locations), $promise);
+        $this->itemLoader->query(new TopItemByLocationQuery($locations, $environment), $promise);
         $this->translationManager?->stopDeferringTranslationsLoading();
 
         if (empty($itemsStacks['top'])) {

@@ -142,6 +142,12 @@ class Content implements
     #[Normalize(['public', 'api', 'crud'], loader: 'exportTags')]
     protected iterable $tags = [];
 
+    /*
+     * Null for documents created before the environments feature, they belong to the default environment
+     */
+    #[Normalize(['api', 'crud'], loader: 'exportEnvironment')]
+    protected ?Environment $environment = null;
+
     protected ?string $localeField = null;
 
     /**
@@ -149,6 +155,7 @@ class Content implements
      */
     public function __construct()
     {
+        $this->environment = Environment::default();
         $this->initializeStateProxy();
         $this->updateStates();
     }
@@ -193,6 +200,11 @@ class Content implements
         }
 
         return $tags;
+    }
+
+    protected static function exportEnvironment(self $content): string
+    {
+        return $content->getEnvironment()->getName();
     }
 
     public function getAuthor(): ?User
@@ -278,6 +290,21 @@ class Content implements
     public function setType(?Type $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getEnvironment(): Environment
+    {
+        return $this->environment ?? Environment::default();
+    }
+
+    /*
+     * Null (a form submitted without the field) means the default environment
+     */
+    public function setEnvironment(?Environment $environment): self
+    {
+        $this->environment = $environment ?? Environment::default();
 
         return $this;
     }

@@ -4,6 +4,11 @@ parameters:
   locale: 'en'
   teknoo.east.common.form_type.doctrine.class: 'Teknoo\Tests\East\Website\Behat\MockDoctrineType'
   teknoo.east.website.admin.rendering.clean_html: false
+  teknoo.east.website.definitions.environments:
+    validation: 'default'
+    testing: 'default'
+  teknoo.east.website.definitions.environments_access:
+    testing: ['ROLE_TESTER']
 
 services:
   Doctrine\Persistence\ObjectRepository:

@@ -28,6 +28,7 @@ namespace Teknoo\Tests\East\Website\Doctrine;
 use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\ODM\MongoDB\Repository\DocumentRepository;
+use Doctrine\ODM\MongoDB\Types\Type as OdmType;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\TestCase;
@@ -43,6 +44,8 @@ use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Post;
 use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
+use Teknoo\East\Website\Object\Environments;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\Recipe\RecipeInterface as OriginalRecipeInterface;
@@ -164,5 +167,29 @@ class ContainerTest extends TestCase
         $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(OriginalRecipeInterface::class, $container->get(OriginalRecipeInterface::class . ':Static'));
+    }
+    public function testContentRepositoryRegistersTheEnvironmentTypeAndLoadsTheEnvironments(): void
+    {
+        $container = $this->buildContainer();
+        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager->expects($this->atLeastOnce())->method('getRepository')->with(Content::class)->willReturn(
+            $this->createStub(DocumentRepository::class)
+        );
+
+        $container->set(ObjectManager::class, $objectManager);
+        $loaded = false;
+        $container->set(
+            'teknoo.east.website.environments',
+            static function () use (&$loaded): Environments {
+                $loaded = true;
+
+                return new Environments();
+            }
+        );
+
+        $this->assertInstanceOf(ContentRepositoryInterface::class, $container->get(ContentRepositoryInterface::class));
+        $this->assertTrue($loaded);
+        $this->assertTrue(OdmType::hasType(EnvironmentType::NAME));
+        $this->assertInstanceOf(EnvironmentType::class, OdmType::getType(EnvironmentType::NAME));
     }
 }
