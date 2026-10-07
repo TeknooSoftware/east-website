@@ -33,8 +33,8 @@ use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
 
 /**
  * Step to put into the workplan, under the key `UserInterface::class`, the East Common user wrapped by the Symfony
- * user of the current security token. Nothing is done when there is no token or when the user is not an East Common
- * user (anonymous visitors, other providers).
+ * user of the current security token. Nothing is done when a user is already in the workplan, when there is no
+ * token or when the user is not an East Common user (anonymous visitors, other providers).
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -50,7 +50,12 @@ class LoadAuthenticatedUser implements LoadAuthenticatedUserInterface
 
     public function __invoke(
         ManagerInterface $manager,
+        ?UserInterface $currentUser = null,
     ): LoadAuthenticatedUserInterface {
+        if (null !== $currentUser) {
+            return $this;
+        }
+
         $user = $this->tokenStorage->getToken()?->getUser();
         if (!$user instanceof AbstractUser) {
             return $this;

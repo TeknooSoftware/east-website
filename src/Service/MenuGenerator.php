@@ -103,7 +103,7 @@ class MenuGenerator
     {
         $itemsStacks = [];
         $environment = $this->getEnvironment();
-        $chain = $environment->getChain();
+        $chain = [...$environment->getChain()];
 
         $itemsSorting = function (iterable $items) use (&$itemsStacks, $chain): void {
             /** @var Item[] $items */

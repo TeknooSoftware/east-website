@@ -118,4 +118,16 @@ class LoadAuthenticatedUserTest extends TestCase
         $step = $this->buildStep();
         $this->assertSame($step, $step($manager));
     }
+    public function testWithAUserAlreadyInTheWorkplan(): void
+    {
+        $this->getTokenStorage()
+            ->method('getToken')
+            ->willReturn($this->createStub(TokenInterface::class));
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('updateWorkPlan');
+
+        $step = $this->buildStep();
+        $this->assertSame($step, $step($manager, new User()));
+    }
 }

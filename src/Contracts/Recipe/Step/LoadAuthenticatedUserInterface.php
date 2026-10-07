@@ -25,12 +25,14 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Contracts\Recipe\Step;
 
+use Teknoo\East\Common\Contracts\User\UserInterface;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 
 /**
  * Interface to define a step to use into a front HTTP EndPoint Recipe to put into the workplan, under the key
  * `UserInterface::class`, the East Common user instance of the current authenticated user, when there is one.
- * Unlike `LoadCurrentUserInterface` of East Common, the step must do nothing for an anonymous visitor.
+ * Unlike `LoadCurrentUserInterface` of East Common, the step must do nothing for an anonymous visitor, nor when a
+ * user is already present in the workplan (`$currentUser`, loaded by a previous step).
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -41,5 +43,6 @@ interface LoadAuthenticatedUserInterface
 {
     public function __invoke(
         ManagerInterface $manager,
+        ?UserInterface $currentUser = null,
     ): LoadAuthenticatedUserInterface;
 }

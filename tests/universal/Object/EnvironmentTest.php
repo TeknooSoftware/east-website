@@ -55,7 +55,7 @@ class EnvironmentTest extends TestCase
         $this->assertSame('default', $default->getName());
         $this->assertTrue($default->isDefault());
         $this->assertNull($default->getParent());
-        $this->assertSame(['default'], $default->getChain());
+        $this->assertSame(['default'], [...$default->getChain()]);
         $this->assertSame($default, Environment::default());
         $this->assertSame($default, Environment::get('default'));
         $this->assertTrue(Environment::isDefined('default'));
@@ -77,7 +77,7 @@ class EnvironmentTest extends TestCase
 
         $this->assertFalse(Environment::isDefined('validation'));
         $this->assertSame(Environment::default(), $environment->getParent());
-        $this->assertSame(['validation', 'default'], $environment->getChain());
+        $this->assertSame(['validation', 'default'], [...$environment->getChain()]);
     }
 
     public function testGetWithAnInvalidName(): void
@@ -105,8 +105,8 @@ class EnvironmentTest extends TestCase
         $this->assertSame($validation, Environment::get('validation'));
         $this->assertSame(Environment::default(), $validation->getParent());
         $this->assertSame($testing, $testA->getParent());
-        $this->assertSame(['test-a', 'testing', 'default'], $testA->getChain());
-        $this->assertSame(['validation', 'default'], $validation->getChain());
+        $this->assertSame(['test-a', 'testing', 'default'], [...$testA->getChain()]);
+        $this->assertSame(['validation', 'default'], [...$validation->getChain()]);
     }
 
     public function testDefineIsIdempotentWithTheSameParent(): void
@@ -121,12 +121,12 @@ class EnvironmentTest extends TestCase
     {
         //Hydrated from the database before the definitions are loaded
         $testA = Environment::get('test-a');
-        $this->assertSame(['test-a', 'default'], $testA->getChain());
+        $this->assertSame(['test-a', 'default'], [...$testA->getChain()]);
 
         $testing = Environment::define('testing', Environment::default());
         $this->assertSame($testA, Environment::define('test-a', $testing));
         $this->assertSame($testing, $testA->getParent());
-        $this->assertSame(['test-a', 'testing', 'default'], $testA->getChain());
+        $this->assertSame(['test-a', 'testing', 'default'], [...$testA->getChain()]);
     }
 
     public function testDefineWithAnotherParent(): void

@@ -37,20 +37,4 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 class TeknooEastWebsiteBundle extends Bundle
 {
-    /**
-     * Load the environments definitions at boot, so the `Environment` flyweights are defined before any document
-     * is hydrated by Doctrine (the hydration can not access to the container).
-     */
-    #[\Override]
-    public function boot(): void
-    {
-        parent::boot();
-
-        if (
-            isset($this->container)
-            && $this->container->has('teknoo.east.website.environments')
-        ) {
-            $this->container->get('teknoo.east.website.environments');
-        }
-    }
 }

@@ -463,6 +463,10 @@ class ContentTest extends TestCase
 
         $this->assertInstanceOf(Content::class, $object->setEnvironment(null));
         $this->assertSame(Environment::default(), $object->getEnvironment());
+
+        //From a name, like the forms and the API do
+        $this->assertInstanceOf(Content::class, $object->setEnvironment('validation'));
+        $this->assertSame($environment, $object->getEnvironment());
     }
 
     public function testSetEnvironmentExceptionOnBadArgument(): void
@@ -476,8 +480,8 @@ class ContentTest extends TestCase
         $content = $this->buildObject()->setTitle('About')->setEnvironment(Environment::get('validation'));
         $content->setId('c1');
 
-        $this->assertEquals('validation', $this->exportData($content, ['api'])['environment']);
-        $this->assertEquals('validation', $this->exportData($content, ['crud'])['environment']);
+        $this->assertSame(Environment::get('validation'), $this->exportData($content, ['api'])['environment']);
+        $this->assertSame(Environment::get('validation'), $this->exportData($content, ['crud'])['environment']);
         $this->assertArrayNotHasKey('environment', $this->exportData($content, ['public']));
         $this->assertArrayNotHasKey('environment', $this->exportData($content, ['digest']));
     }

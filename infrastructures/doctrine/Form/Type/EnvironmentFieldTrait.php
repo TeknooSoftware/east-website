@@ -27,13 +27,15 @@ namespace Teknoo\East\Website\Doctrine\Form\Type;
 
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Environments;
 
+use function array_combine;
+use function array_keys;
+
 /**
- * Add to a form the dropdown `environment`, listing the environments defined in the DI (service
- * `teknoo.east.website.environments`). The value submitted is the name of the environment, also by the JSON API.
- * A form submitted without the field selects the default environment.
+ * Add to a form the dropdown `environment`, listing the names of the environments defined in the DI (service
+ * `teknoo.east.website.environments`). The form handles only names (also for the JSON API): `Environment` is
+ * stringable, and the objects accept a name in `setEnvironment()`, there is no conversion in the form.
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -47,15 +49,14 @@ trait EnvironmentFieldTrait
      */
     private function addEnvironmentField(FormBuilderInterface $builder, ?Environments $environments): void
     {
+        $names = array_keys(($environments ?? new Environments())->toArray());
+
         $builder->add(
             'environment',
             ChoiceType::class,
             [
                 'required' => true,
-                'choices' => ($environments ?? new Environments())->toArray(),
-                'choice_label' => static fn (Environment $environment): string => $environment->getName(),
-                'choice_value' => static fn (?Environment $environment): string => $environment?->getName() ?? '',
-                'empty_data' => Environment::DEFAULT_NAME,
+                'choices' => array_combine($names, $names),
             ]
         );
     }

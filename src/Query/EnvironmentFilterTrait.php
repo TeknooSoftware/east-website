@@ -47,7 +47,7 @@ trait EnvironmentFilterTrait
     private function buildEnvironmentExpr(?Environment $environment): InclusiveOr
     {
         return new InclusiveOr(
-            ['environment' => new In(($environment ?? Environment::default())->getChain())],
+            ['environment' => new In([...($environment ?? Environment::default())->getChain()])],
             ['environment' => null],
         );
     }

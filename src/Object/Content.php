@@ -53,6 +53,7 @@ use Teknoo\States\Automated\AutomatedTrait;
 use Teknoo\States\Proxy\ProxyTrait;
 
 use function hash;
+use function is_string;
 use function json_decode;
 use function json_encode;
 
@@ -300,10 +301,15 @@ class Content implements
     }
 
     /*
-     * Null (a form submitted without the field) means the default environment
+     * Accept also the name of the environment (submitted by the forms and the API), null (a form submitted without
+     * the field) means the default environment
      */
-    public function setEnvironment(?Environment $environment): self
+    public function setEnvironment(Environment|string|null $environment): self
     {
+        if (is_string($environment)) {
+            $environment = Environment::get($environment);
+        }
+
         $this->environment = $environment ?? Environment::default();
 
         return $this;

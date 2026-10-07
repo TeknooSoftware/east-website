@@ -260,11 +260,10 @@ class ContentTypeTest extends TestCase
         [$type, $options] = $fields['environment'];
         $this->assertSame(ChoiceType::class, $type);
         $this->assertTrue($options['required']);
-        $this->assertSame(['default' => Environment::default(), 'validation' => $validation], $options['choices']);
-        $this->assertSame('validation', $options['choice_label']($validation));
-        $this->assertSame('validation', $options['choice_value']($validation));
-        $this->assertSame('', $options['choice_value'](null));
-        $this->assertSame('default', $options['empty_data']);
+        //Only names, the objects accept a name in `setEnvironment()`: no conversion in the form
+        $this->assertSame(['default' => 'default', 'validation' => 'validation'], $options['choices']);
+        $this->assertArrayNotHasKey('choice_label', $options);
+        $this->assertArrayNotHasKey('choice_value', $options);
 
         Environment::reset();
     }
@@ -285,6 +284,6 @@ class ContentTypeTest extends TestCase
 
         (new ContentType())->buildForm($builder, ['doctrine_type' => ChoiceType::class]);
 
-        $this->assertSame(['default' => Environment::default()], $fields['environment'][1]['choices']);
+        $this->assertSame(['default' => 'default'], $fields['environment'][1]['choices']);
     }
 }

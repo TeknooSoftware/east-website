@@ -28,7 +28,6 @@ namespace Teknoo\East\Website\Doctrine\Types;
 use Doctrine\ODM\MongoDB\Types\ClosureToPHP;
 use Doctrine\ODM\MongoDB\Types\Type;
 use InvalidArgumentException;
-use Psr\Container\ContainerInterface;
 use Teknoo\East\Website\Object\Environment;
 
 use function get_debug_type;
@@ -60,19 +59,6 @@ class EnvironmentType extends Type
     {
         if (!Type::hasType(self::NAME)) {
             Type::addType(self::NAME, self::class);
-        }
-    }
-
-    /**
-     * Register this type and load the environments definitions (the service `teknoo.east.website.environments`,
-     * absent when `src/di.php` is not loaded, defines the flyweights) before the first hydration of a document.
-     */
-    public static function prepare(ContainerInterface $container): void
-    {
-        self::register();
-
-        if ($container->has('teknoo.east.website.environments')) {
-            $container->get('teknoo.east.website.environments');
         }
     }
 

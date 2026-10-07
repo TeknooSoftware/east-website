@@ -30,11 +30,9 @@ use Doctrine\ODM\MongoDB\Types\Type;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use stdClass;
 use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
 use Teknoo\East\Website\Object\Environment;
-use Teknoo\East\Website\Object\Environments;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -108,35 +106,5 @@ class EnvironmentTypeTest extends TestCase
     public function testClosureToPHPUsesConvertToPHPValue(): void
     {
         $this->assertStringContainsString('convertToPHPValue', $this->buildType()->closureToPHP());
-    }
-    public function testPrepareWithoutTheEnvironmentsService(): void
-    {
-        $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())
-            ->method('has')
-            ->with('teknoo.east.website.environments')
-            ->willReturn(false);
-        $container->expects($this->never())->method('get');
-
-        EnvironmentType::prepare($container);
-
-        $this->assertTrue(Type::hasType(EnvironmentType::NAME));
-    }
-
-    public function testPrepareLoadsTheEnvironmentsService(): void
-    {
-        $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())
-            ->method('has')
-            ->with('teknoo.east.website.environments')
-            ->willReturn(true);
-        $container->expects($this->once())
-            ->method('get')
-            ->with('teknoo.east.website.environments')
-            ->willReturn(new Environments());
-
-        EnvironmentType::prepare($container);
-
-        $this->assertTrue(Type::hasType(EnvironmentType::NAME));
     }
 }

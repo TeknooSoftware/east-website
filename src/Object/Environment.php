@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace Teknoo\East\Website\Object;
 
+use Generator;
 use JsonSerializable;
 use Stringable;
 use Teknoo\East\Website\Object\Environment\Exception\CyclicEnvironmentException;
@@ -33,7 +34,6 @@ use Teknoo\East\Website\Object\Environment\Exception\InvalidEnvironmentNameExcep
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 
-use function array_keys;
 use function preg_match;
 
 /**
@@ -44,10 +44,9 @@ use function preg_match;
  * declared in the DI under the key `teknoo.east.website.definitions.environments`. The chain of an environment is the
  * environment itself and all its ancestors until `default`.
  *
- * Instances are flyweights: an environment name always returns the same instance. Because objects are hydrated from
- * the database without access to the DI, an unknown name returns an instance too, with `default` as implicit parent,
- * but such an environment is never selectable by a visitor (the selection is checked against the DI definitions).
- * The parent relation is kept in the static registry, so the definitions can be loaded after a first hydration.
+ * Instances are flyweights: a name always returns the same instance. Because objects are hydrated from the database
+ * without access to the DI, an unknown name returns an instance too, with `default` as parent until its definition is
+ * loaded; such an environment is never selectable by a visitor (the selection is checked against the DI definitions).
  *
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
  * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
@@ -67,12 +66,11 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
      */
     private static array $instances = [];
 
-    /**
-     * Parents explicitly defined, indexed by the name of the child
-     *
-     * @var array<string, string>
+    /*
+     * Set once, by `define()`. Null for the default environment, and for an environment not defined yet (hydrated
+     * from the database before the definitions are loaded), whose parent is then the default environment.
      */
-    private static array $parents = [];
+    private ?self $parent = null;
 
     private function __construct(
         private readonly string $name,
@@ -86,8 +84,7 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
     }
 
     /**
-     * Return the environment instance for this name, create it when it does not exist yet. An environment created
-     * here, without an explicit definition, has `default` as parent.
+     * Return the environment instance for this name, create it when it does not exist yet.
      *
      * @throws InvalidEnvironmentNameException
      */
@@ -121,10 +118,10 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
 
         $environment = self::get($name);
 
-        if (isset(self::$parents[$name])) {
-            if ($parent->name !== self::$parents[$name]) {
+        if (null !== $environment->parent) {
+            if ($parent !== $environment->parent) {
                 throw new EnvironmentAlreadyDefinedException(
-                    "The environment `$name` is already defined with the parent `" . self::$parents[$name] . '`'
+                    "The environment `$name` is already defined with the parent `{$environment->parent->name}`"
                 );
             }
 
@@ -139,7 +136,7 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
             }
         }
 
-        self::$parents[$name] = $parent->name;
+        $environment->parent = $parent;
 
         return $environment;
     }
@@ -149,7 +146,7 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
      */
     public static function isDefined(string $name): bool
     {
-        return self::DEFAULT_NAME === $name || isset(self::$parents[$name]);
+        return self::DEFAULT_NAME === $name || null !== (self::$instances[$name] ?? null)?->parent;
     }
 
     /**
@@ -161,7 +158,6 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
     public static function reset(): void
     {
         self::$instances = [];
-        self::$parents = [];
     }
 
     public function getName(): string
@@ -180,28 +176,22 @@ final class Environment implements ImmutableInterface, Stringable, JsonSerializa
             return null;
         }
 
-        return self::get(self::$parents[$this->name] ?? self::DEFAULT_NAME);
+        return $this->parent ?? self::default();
     }
 
     /**
      * Names of this environment and of all its ancestors, from this environment to `default`.
      *
-     * @return list<string>
+     * @return Generator<int, string>
      */
-    public function getChain(): array
+    public function getChain(): Generator
     {
-        $chain = [];
-        $current = $this;
-        while (null !== $current) {
-            if (isset($chain[$current->name])) {
-                throw new CyclicEnvironmentException("The environment `{$current->name}` is one of its own ancestors");
-            }
+        yield $this->name;
 
-            $chain[$current->name] = true;
-            $current = $current->getParent();
+        $parent = $this->getParent();
+        if (null !== $parent) {
+            yield from $parent->getChain();
         }
-
-        return array_keys($chain);
     }
 
     public function __toString(): string

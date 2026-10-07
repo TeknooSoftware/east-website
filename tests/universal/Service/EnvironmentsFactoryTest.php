@@ -68,9 +68,9 @@ class EnvironmentsFactoryTest extends TestCase
         $this->assertSame(['default', 'testing', 'test-b', 'validation', 'test-a'], array_keys($environments->toArray()));
         $this->assertSame(Environment::default(), $environments['default']);
         $this->assertSame(Environment::get('test-a'), $environments['test-a']);
-        $this->assertSame(['test-a', 'testing', 'default'], $environments['test-a']->getChain());
-        $this->assertSame(['test-b', 'testing', 'default'], $environments['test-b']->getChain());
-        $this->assertSame(['validation', 'default'], $environments['validation']->getChain());
+        $this->assertSame(['test-a', 'testing', 'default'], [...$environments['test-a']->getChain()]);
+        $this->assertSame(['test-b', 'testing', 'default'], [...$environments['test-b']->getChain()]);
+        $this->assertSame(['validation', 'default'], [...$environments['validation']->getChain()]);
         $this->assertTrue(Environment::isDefined('test-b'));
     }
 

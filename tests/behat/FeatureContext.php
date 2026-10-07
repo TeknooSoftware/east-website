@@ -959,8 +959,10 @@ class FeatureContext implements Context
                 ) {
                 }
 
-                public function __invoke(EastManagerInterface $manager): LoadAuthenticatedUserInterface
-                {
+                public function __invoke(
+                    EastManagerInterface $manager,
+                    ?UserInterface $currentUser = null,
+                ): LoadAuthenticatedUserInterface {
                     $manager->updateWorkPlan([UserInterface::class => $this->user]);
 
                     return $this;

@@ -482,7 +482,7 @@ class ContainerTest extends TestCase
         $this->assertInstanceOf(Environments::class, $environments);
         //parents are defined before their children
         $this->assertSame(['default', 'testing', 'test-a', 'validation'], array_keys($environments->toArray()));
-        $this->assertSame(['test-a', 'testing', 'default'], $environments['test-a']->getChain());
+        $this->assertSame(['test-a', 'testing', 'default'], [...$environments['test-a']->getChain()]);
         $this->assertSame($environments['testing'], $environments['test-a']->getParent());
     }
 
