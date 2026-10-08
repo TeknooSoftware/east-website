@@ -34,6 +34,7 @@ use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -63,7 +64,7 @@ class TopItemByLocationQueryWithArrayTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['location' => new In(['fooBar']),], $promise);
+            ->with(['location' => new In(['fooBar']), 'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null])], $promise);
 
         $this->assertInstanceOf(TopItemByLocationQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }

@@ -38,7 +38,16 @@ use function implode;
  */
 class Registry
 {
-    private const array CONTENT_COLUMNS = ['id', 'title', 'slug', 'type', 'author', 'tags', 'publishedAt'];
+    private const array CONTENT_COLUMNS = [
+        'id',
+        'title',
+        'slug',
+        'type',
+        'author',
+        'tags',
+        'publishedAt',
+        'environment',
+    ];
 
     /**
      * @return list<ResourceDefinition>
@@ -125,6 +134,11 @@ class Registry
                     new FieldDefinition('slug', FieldKind::String, 'Slug of the item'),
                     new FieldDefinition('hidden', FieldKind::Bool, 'Hide the item (--no-hidden to show it)'),
                     new FieldDefinition('position', FieldKind::Int, 'Position of the item in its menu'),
+                    new FieldDefinition(
+                        'environment',
+                        FieldKind::String,
+                        'Environment of the item (default when empty), among those defined by the website',
+                    ),
                     new FieldDefinition('localeField', FieldKind::String, 'Locale of the submitted translation'),
                 ],
                 operations: $all,
@@ -230,6 +244,11 @@ class Registry
             new FieldDefinition('subtitle', FieldKind::String, 'Subtitle'),
             new FieldDefinition('slug', FieldKind::String, 'Slug, generated from the title when empty'),
             new FieldDefinition('description', FieldKind::String, 'Description', multiline: true),
+            new FieldDefinition(
+                'environment',
+                FieldKind::String,
+                'Environment of the content (default when empty), among those defined by the website',
+            ),
             new FieldDefinition('localeField', FieldKind::String, 'Locale of the submitted translation'),
         ];
     }

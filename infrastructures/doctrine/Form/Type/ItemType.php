@@ -37,6 +37,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Teknoo\East\Translation\Doctrine\Form\Type\TranslatableTrait;
 use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
+use Teknoo\East\Website\Object\Environments;
 
 /**
  * Symfony Form dedicated to manage translatable Item Object in a Symfony Website.
@@ -51,6 +52,12 @@ use Teknoo\East\Website\Doctrine\Object\Item;
 class ItemType extends AbstractType
 {
     use TranslatableTrait;
+    use EnvironmentFieldTrait;
+
+    public function __construct(
+        private readonly ?Environments $environments = null,
+    ) {
+    }
 
     /**
      * @param FormBuilderInterface<Item> $builder
@@ -97,9 +104,9 @@ class ItemType extends AbstractType
         );
 
         $builder->add('slug', TextType::class, ['required' => false]);
-        $builder->add('slug', TextType::class, ['required' => false]);
         $builder->add('hidden', CheckboxType::class, ['required' => false]);
         $builder->add('position', IntegerType::class, ['required' => false]);
+        $this->addEnvironmentField($builder, $this->environments);
 
         $this->addTranslatableLocaleFieldHidden($builder);
     }

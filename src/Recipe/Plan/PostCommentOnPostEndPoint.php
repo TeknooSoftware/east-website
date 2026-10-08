@@ -36,6 +36,8 @@ use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Common\Recipe\Step\SaveObject;
 use Teknoo\East\Website\Contracts\Recipe\Plan\PostCommentOnPostEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Recipe\Step\ListTags;
@@ -59,6 +61,8 @@ class PostCommentOnPostEndPoint implements PostCommentOnPostEndPointInterface
 
     public function __construct(
         RecipeInterface $recipe,
+        private readonly ?LoadAuthenticatedUserInterface $loadAuthenticatedUser,
+        private readonly LoadEnvironmentInterface $loadEnvironment,
         private readonly LoadPost $loadPost,
         private readonly ListTags $listTags,
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
@@ -81,6 +85,12 @@ class PostCommentOnPostEndPoint implements PostCommentOnPostEndPointInterface
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'objectClass'));
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'formClass'));
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'route'));
+
+        if (null !== $this->loadAuthenticatedUser) {
+            $recipe = $recipe->cook($this->loadAuthenticatedUser, LoadAuthenticatedUserInterface::class, [], 1);
+        }
+
+        $recipe = $recipe->cook($this->loadEnvironment, LoadEnvironmentInterface::class, [], 2);
 
         $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 10);
 

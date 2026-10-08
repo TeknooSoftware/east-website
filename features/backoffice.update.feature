@@ -16,7 +16,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3&post%5Bslug%5D=foo"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo","type":null,"parts":"{}","tags":[],"description":null,"environment":"default"}'
 
   Scenario: Update a post and update slug
     Given I have DI With Symfony initialized
@@ -25,7 +25,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null,"environment":"default"}'
 
   Scenario: Update a post with an empty locale
     Given I have DI With Symfony initialized
@@ -35,7 +35,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/post/edit/foo" with "post%5Btitle%5D=foo2&post%5Bsubtitle%5D=bar3"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null}'
+    And I should get in the form '{"author":null,"comments":[],"title":"foo2","subtitle":"bar3","slug":"foo2","type":null,"parts":"{}","tags":[],"description":null,"environment":"default"}'
 
   Scenario: Update an item without update slug
     Given I have DI With Symfony initialized
@@ -44,7 +44,7 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/item/edit/foo" with "item%5Bname%5D=foo2&item%5Blocation%5D=bar3&item%5Bposition%5D=1&item%5Bslug%5D=foo"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"name":"foo2","slug":"foo","content":null,"position":1,"location":"bar3","hidden":false,"parent":null,"children":[]}'
+    And I should get in the form '{"name":"foo2","slug":"foo","content":null,"position":1,"location":"bar3","hidden":false,"parent":null,"children":[],"environment":"default"}'
 
   Scenario: Update an item and update slug
     Given I have DI With Symfony initialized
@@ -53,4 +53,4 @@ Feature: Update an element, with slug or not stored into a the dbms server via a
     When Symfony will receive the POST request "https://foo.com/admin/item/edit/foo" with "item%5Bname%5D=foo2&item%5Blocation%5D=bar3&item%5Bposition%5D=1"
     Then The client must accept a response
     And An object "foo" must be updated
-    And I should get in the form '{"name":"foo2","slug":"foo2","content":null,"position":1,"location":"bar3","hidden":false,"parent":null,"children":[]}'
+    And I should get in the form '{"name":"foo2","slug":"foo2","content":null,"position":1,"location":"bar3","hidden":false,"parent":null,"children":[],"environment":"default"}'

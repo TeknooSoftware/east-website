@@ -19,6 +19,7 @@
         <field field-name="createdAt" name="created_at" type="date" nullable="false"/>
         <field field-name="updatedAt" name="updated_at" type="date"/>
         <field field-name="deletedAt" name="deleted_at" type="date" nullable="true" index="true"/>
+        <field field-name="environment" type="environment" index="true"/>
         <reference-one
                 field="parent"
                 target-document="Teknoo\East\Website\Object\Item"

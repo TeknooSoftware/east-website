@@ -39,6 +39,9 @@ use Teknoo\East\Website\Loader\PostLoader;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Recipe\Step\ListPosts;
 use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\Post\PublishedPostsListInTagQuery;
+use Teknoo\East\Website\Query\Post\PublishedPostsListQuery;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -202,5 +205,89 @@ class ListPostsTest extends TestCase
             $this->createStub(ParametersBag::class),
             $this->createStub(Tag::class),
         ));
+    }
+    public function testInvokeWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getPostLoader()
+            ->expects($this->once())
+            ->method('query')
+            ->with(new PublishedPostsListQuery(new DateTimeImmutable('2025-03-24'), 10, 10, $validation))
+            ->willReturnCallback(
+                function (QueryCollectionInterface $query, PromiseInterface $promise): PostLoader {
+                    $promise->success(new ArrayObject([]));
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        $this->assertInstanceOf(ListPosts::class, $this->buildStep()(
+            $manager,
+            10,
+            2,
+            $this->createStub(ParametersBag::class),
+            null,
+            $validation,
+        ));
+
+        Environment::reset();
+    }
+
+    public function testInvokeWithTagAndEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+        $tag = new Tag();
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getPostLoader()
+            ->expects($this->once())
+            ->method('query')
+            ->with(new PublishedPostsListInTagQuery($tag, new DateTimeImmutable('2025-03-24'), 10, 0, $validation))
+            ->willReturnCallback(
+                function (QueryCollectionInterface $query, PromiseInterface $promise): PostLoader {
+                    $promise->success(new ArrayObject([]));
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        $this->assertInstanceOf(ListPosts::class, $this->buildStep()(
+            $manager,
+            10,
+            1,
+            $this->createStub(ParametersBag::class),
+            $tag,
+            $validation,
+        ));
+
+        Environment::reset();
     }
 }

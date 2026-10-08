@@ -173,6 +173,7 @@ services:
             - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
             - '%teknoo.east.website.sanitize.default_context%'
             - '%teknoo.east.website.sanitize.salt%'
+            - '@teknoo.east.website.environments'
         tags:
             - {name: form.type}
 
@@ -182,8 +183,26 @@ services:
             - '@?Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface'
             - '%teknoo.east.website.sanitize.default_context%'
             - '%teknoo.east.website.sanitize.salt%'
+            - '@teknoo.east.website.environments'
         tags:
             - {name: form.type}
+
+    Teknoo\East\Website\Doctrine\Form\Type\ItemType:
+        class: 'Teknoo\East\Website\Doctrine\Form\Type\ItemType'
+        arguments:
+            - '@teknoo.east.website.environments'
+        tags:
+            - {name: form.type}
+
+    Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface:
+        alias: 'Teknoo\East\WebsiteBundle\Recipe\Step\LoadAuthenticatedUser'
+        public: true
+
+    Teknoo\East\WebsiteBundle\Recipe\Step\LoadAuthenticatedUser:
+        class: 'Teknoo\East\WebsiteBundle\Recipe\Step\LoadAuthenticatedUser'
+        public: true
+        arguments:
+            - '@security.token_storage'
 
     Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType:
         class: 'Teknoo\East\WebsiteBundle\Form\Type\ModerateCommentType'

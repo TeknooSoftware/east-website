@@ -32,6 +32,8 @@ use Teknoo\East\Common\Recipe\Step\CreateObject;
 use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Contracts\Recipe\Plan\RenderDynamicPostEndPointInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\East\Translation\Contracts\Recipe\Step\LoadTranslationsInterface;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Recipe\Step\ListTags;
@@ -56,6 +58,8 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
 
     public function __construct(
         RecipeInterface $recipe,
+        private readonly ?LoadAuthenticatedUserInterface $loadAuthenticatedUser,
+        private readonly LoadEnvironmentInterface $loadEnvironment,
         private readonly LoadPost $loadPost,
         private readonly ListTags $listTags,
         private readonly ?LoadTranslationsInterface $loadTranslationsInterface,
@@ -69,6 +73,12 @@ class RenderDynamicPostEndPoint implements RenderDynamicPostEndPointInterface
     {
         $recipe = $recipe->require(new Ingredient(ServerRequestInterface::class, 'request'));
         $recipe = $recipe->require(new Ingredient('string', 'slug'));
+
+        if (null !== $this->loadAuthenticatedUser) {
+            $recipe = $recipe->cook($this->loadAuthenticatedUser, LoadAuthenticatedUserInterface::class, [], 1);
+        }
+
+        $recipe = $recipe->cook($this->loadEnvironment, LoadEnvironmentInterface::class, [], 2);
 
         $recipe = $recipe->cook($this->loadPost, LoadPost::class, [], 20);
 

@@ -1,0 +1,55 @@
+<?php
+
+/*
+ * East Website.
+ *
+ * LICENSE
+ *
+ * This source file is subject to the 3-Clause BSD license
+ * it is available in LICENSE file at the root of this package
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to richard@teknoo.software so we can send you a copy immediately.
+ *
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ *
+ * @link        https://teknoo.software/east-collection/website Project website
+ *
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
+
+declare(strict_types=1);
+
+namespace Teknoo\East\Website\Contracts\Recipe\Step;
+
+use Psr\Http\Message\ServerRequestInterface;
+use Teknoo\East\Common\Contracts\User\UserInterface;
+use Teknoo\East\Common\View\ParametersBag;
+use Teknoo\East\Foundation\Manager\ManagerInterface;
+use Teknoo\East\Foundation\Session\SessionInterface;
+
+/**
+ * Interface to define a step to use into a front HTTP EndPoint Recipe to select the environment of the website for
+ * the request, from the parameter `website-env` (POST or GET) or from the session, check that it is defined and that
+ * the current user is allowed to access to it, then put it into the workplan (under the keys `environment` and
+ * `Environment::class`) and into the view parameters bag (`environment`, and a `menuGenerator` scoped to it).
+ * An unknown or forbidden environment is an error 404.
+ *
+ * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
+ * @copyright   Copyright (c) SASU Teknoo Software (https://teknoo.software - contact@teknoo.software)
+ * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
+ * @author      Richard Déloge <richard@teknoo.software>
+ */
+interface LoadEnvironmentInterface
+{
+    public function __invoke(
+        ManagerInterface $manager,
+        ServerRequestInterface $request,
+        ParametersBag $bag,
+        ?SessionInterface $session = null,
+        ?UserInterface $currentUser = null,
+    ): LoadEnvironmentInterface;
+}

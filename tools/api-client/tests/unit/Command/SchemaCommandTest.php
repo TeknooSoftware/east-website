@@ -140,7 +140,7 @@ class SchemaCommandTest extends TestCase
 
         $fields = array_column($content['fields'], null, 'name');
         self::assertSame(
-            ['author', 'type', 'tags', 'title', 'subtitle', 'slug', 'description', 'localeField'],
+            ['author', 'type', 'tags', 'title', 'subtitle', 'slug', 'description', 'environment', 'localeField'],
             array_keys($fields),
         );
         self::assertSame('--tag', $fields['tags']['option']);
@@ -169,6 +169,7 @@ class SchemaCommandTest extends TestCase
         self::assertSame('int', $itemFields['position']);
         self::assertSame('bool', $itemFields['hidden']);
         self::assertSame('id', $itemFields['parent']);
+        self::assertSame('string', $itemFields['environment']);
 
         self::assertSame('--is-highlighted', array_column($tag['fields'], 'option', 'name')['isHighlighted']);
 

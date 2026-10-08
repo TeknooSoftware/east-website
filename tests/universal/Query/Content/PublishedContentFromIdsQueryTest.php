@@ -37,6 +37,7 @@ use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -66,7 +67,7 @@ class PublishedContentFromIdsQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findBy')
-            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
+            ->with(['id' => new In(['fooBar']), 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null])], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
 
         $this->assertInstanceOf(PublishedContentFromIdsQuery::class, $this->buildQuery()->execute($loader, $repository, $promise));
     }

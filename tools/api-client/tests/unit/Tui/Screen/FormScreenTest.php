@@ -485,8 +485,8 @@ class FormScreenTest extends TestCase
         self::assertSame('  publish           [ ]', self::line($harness, 'publish'));
         self::assertSame([], $harness->api->calls());
 
-        // author, type, tags, title, subtitle, slug, description, localeField, then the first block
-        $harness->keys(...array_fill(0, 8, Keys::TAB));
+        // author, type, tags, title, subtitle, slug, description, environment, localeField, then the first block
+        $harness->keys(...array_fill(0, 9, Keys::TAB));
         self::assertSame('> intro (textarea)', self::line($harness, 'intro (textarea)'));
 
         // Like a document opened in an editor, the cursor of a text on several lines is at its start
@@ -507,9 +507,9 @@ class FormScreenTest extends TestCase
         self::assertSame(['GET /api/v1/admin/type/ty1'], $harness->api->calls());
         self::assertSame('  count (numeric)   3', self::line($harness, 'count (numeric)'));
 
-        $harness->keys(...array_fill(0, 10, Keys::TAB));
+        $harness->keys(...array_fill(0, 11, Keys::TAB));
         self::assertSame('> publish           [ ]', self::line($harness, 'publish'));
-        self::assertSame('    Publish the content again (published at 2026-03-01)', $harness->lines()[13]);
+        self::assertSame('    Publish the content again (published at 2026-03-01)', $harness->lines()[14]);
     }
 
     public function testAContentWhoseTypeCanNotBeLoadedIsEditedWithoutItsBlocks(): void
@@ -544,8 +544,8 @@ class FormScreenTest extends TestCase
         self::assertSame('  title             New', self::line($harness, 'title'));
         self::assertSame('  count (numeric)', self::line($harness, 'count (numeric)'));
 
-        // tags, title, subtitle, slug, description, localeField, intro, count
-        $harness->keys(...array_fill(0, 8, Keys::TAB));
+        // tags, title, subtitle, slug, description, environment, localeField, intro, count
+        $harness->keys(...array_fill(0, 9, Keys::TAB));
         $harness->type('7')->keys(Keys::CTRL_S);
 
         self::assertSame(

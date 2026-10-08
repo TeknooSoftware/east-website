@@ -40,6 +40,8 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 use Teknoo\Tests\East\Website\Query\QueryElementTestTrait;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -69,7 +71,7 @@ class PublishedPostFromSlugQueryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('findOneBy')
-            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
+            ->with(['slug' => 'fooBar', 'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')), 'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null])], $this->callback(fn ($pr): bool => $pr instanceof PromiseInterface));
 
         $this->assertInstanceOf(PublishedPostFromSlugQuery::class, $this->buildQuery()->fetch($loader, $repository, $promise));
     }

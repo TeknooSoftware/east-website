@@ -31,6 +31,7 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Common\View\ParametersBag;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Query\Post\PublishedPostsListInTagQuery;
@@ -69,6 +70,7 @@ class ListPosts
         int $page,
         ParametersBag $bag,
         ?Tag $tag = null,
+        ?Environment $environment = null,
     ): self {
         if ($itemsPerPage < 1) {
             $itemsPerPage = 1;
@@ -97,12 +99,14 @@ class ListPosts
         );
 
         $this->datesService->passMeTheDate(
-            function (DateTimeInterface $now) use ($tag, $promise, $itemsPerPage, $page): void {
+            function (DateTimeInterface $now) use ($tag, $promise, $itemsPerPage, $page, $environment): void {
+                $environment ??= Environment::default();
                 if (null === $tag) {
                     $query = new PublishedPostsListQuery(
                         $now,
                         $itemsPerPage,
                         ($page - 1) * $itemsPerPage,
+                        $environment,
                     );
                 } else {
                     $query = new PublishedPostsListInTagQuery(
@@ -110,6 +114,7 @@ class ListPosts
                         $now,
                         $itemsPerPage,
                         ($page - 1) * $itemsPerPage,
+                        $environment,
                     );
                 }
 

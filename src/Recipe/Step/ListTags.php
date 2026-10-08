@@ -31,6 +31,7 @@ use Teknoo\East\Foundation\Manager\ManagerInterface;
 use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Loader\TagLoader;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Query\Tag\PublishedTagQuery;
 use Teknoo\Recipe\ChefInterface;
@@ -58,6 +59,7 @@ class ListTags
     public function __invoke(
         ManagerInterface $manager,
         ParametersBag $bag,
+        ?Environment $environment = null,
     ): self {
         /** @var Promise<iterable<Tag>, mixed, mixed> $promise */
         $promise = new Promise(
@@ -69,11 +71,12 @@ class ListTags
         );
 
         $this->datesService->passMeTheDate(
-            function (DateTimeInterface $now) use ($promise): void {
+            function (DateTimeInterface $now) use ($promise, $environment): void {
                 $this->tagLoader->query(
                     new PublishedTagQuery(
                         $this->postRepository,
                         $now,
+                        $environment ?? Environment::default(),
                     ),
                     $promise,
                 );

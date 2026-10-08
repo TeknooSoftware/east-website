@@ -58,6 +58,14 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\ItemRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TagRepositoryInterface;
 use Teknoo\East\Website\Contracts\DBSource\Repository\TypeRepositoryInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Object\Environments;
+use Teknoo\East\Website\Object\Environment\Exception\CyclicEnvironmentException;
+use Teknoo\East\Website\Object\Environment\Exception\InvalidEnvironmentNameException;
+use Teknoo\East\Website\Object\Environment\Exception\UnknownParentEnvironmentException;
+use Teknoo\East\Website\Recipe\Step\LoadEnvironment;
 use Teknoo\East\Translation\Contracts\DBSource\TranslationManagerInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\DeleteCommentOfPostEndPointInterface;
 use Teknoo\East\Website\Contracts\Recipe\Plan\ListAllPostsEndPointInterface;
@@ -303,6 +311,7 @@ class ContainerTest extends TestCase
         $container->set(ListTags::class, $this->createStub(ListTags::class));
         $container->set(Render::class, $this->createStub(Render::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
         $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(ListAllPostsEndPoint::class, $container->get(ListAllPostsEndPoint::class));
@@ -380,6 +389,7 @@ class ContainerTest extends TestCase
         $container->set(ListTags::class, $this->createStub(ListTags::class));
         $container->set(Render::class, $this->createStub(Render::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
         $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(ListAllPostsOfTagsEndPoint::class, $container->get(ListAllPostsOfTagsEndPoint::class));
@@ -401,6 +411,7 @@ class ContainerTest extends TestCase
         $container->set(RedirectClientInterface::class, $this->createStub(RedirectClientInterface::class));
         $container->set(RenderFormInterface::class, $this->createStub(RenderFormInterface::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(PostCommentOnPostEndPoint::class, $container->get(PostCommentOnPostEndPoint::class));
@@ -416,6 +427,7 @@ class ContainerTest extends TestCase
         $container->set(LoadContent::class, $this->createStub(LoadContent::class));
         $container->set(Render::class, $this->createStub(Render::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
         $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(RenderDynamicContentEndPoint::class, $container->get(RenderDynamicContentEndPoint::class));
@@ -432,10 +444,152 @@ class ContainerTest extends TestCase
         $container->set(ListTags::class, $this->createStub(ListTags::class));
         $container->set(Render::class, $this->createStub(Render::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
         $container->set(LoadTranslationsInterface::class, $this->createStub(LoadTranslationsInterface::class));
 
         $this->assertInstanceOf(RenderDynamicPostEndPoint::class, $container->get(RenderDynamicPostEndPoint::class));
 
         $this->assertInstanceOf(RenderDynamicPostEndPointInterface::class, $container->get(RenderDynamicPostEndPointInterface::class));
+    }
+    protected function tearDown(): void
+    {
+        Environment::reset();
+        parent::tearDown();
+    }
+
+    public function testEnvironmentsWithoutDefinitions(): void
+    {
+        $container = $this->buildContainer();
+
+        $environments = $container->get('teknoo.east.website.environments');
+        $this->assertInstanceOf(Environments::class, $environments);
+        $this->assertSame([Environment::DEFAULT_NAME => Environment::default()], $environments->toArray());
+    }
+
+    public function testEnvironmentsWithDefinitions(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(
+            'teknoo.east.website.definitions.environments',
+            [
+                'test-a' => 'testing',
+                'validation' => 'default',
+                'testing' => 'default',
+            ],
+        );
+
+        $environments = $container->get('teknoo.east.website.environments');
+        $this->assertInstanceOf(Environments::class, $environments);
+        //parents are defined before their children
+        $this->assertSame(['default', 'testing', 'test-a', 'validation'], array_keys($environments->toArray()));
+        $this->assertSame(['test-a', 'testing', 'default'], [...$environments['test-a']->getChain()]);
+        $this->assertSame($environments['testing'], $environments['test-a']->getParent());
+    }
+
+    public function testEnvironmentsWithNonArrayDefinitions(): void
+    {
+        $container = $this->buildContainer();
+        $container->set('teknoo.east.website.definitions.environments', 'foo');
+
+        $this->expectException(\DomainException::class);
+        $container->get('teknoo.east.website.environments');
+    }
+
+    public function testEnvironmentsWithUnknownParent(): void
+    {
+        $container = $this->buildContainer();
+        $container->set('teknoo.east.website.definitions.environments', ['validation' => 'foo']);
+
+        $this->expectException(UnknownParentEnvironmentException::class);
+        $container->get('teknoo.east.website.environments');
+    }
+
+    public function testEnvironmentsWithCycle(): void
+    {
+        $container = $this->buildContainer();
+        $container->set('teknoo.east.website.definitions.environments', ['a' => 'b', 'b' => 'a']);
+
+        $this->expectException(CyclicEnvironmentException::class);
+        $container->get('teknoo.east.website.environments');
+    }
+
+    public function testLoadEnvironmentWithoutAccess(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.definitions.environments', ['validation' => 'default']);
+
+        $this->assertInstanceOf(LoadEnvironment::class, $container->get(LoadEnvironment::class));
+        $this->assertInstanceOf(LoadEnvironmentInterface::class, $container->get(LoadEnvironmentInterface::class));
+    }
+
+    public function testLoadEnvironmentWithAccess(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.definitions.environments', ['validation' => 'default']);
+        $container->set('teknoo.east.website.definitions.environments_access', ['validation' => ['ROLE_ADMIN']]);
+
+        $this->assertInstanceOf(LoadEnvironment::class, $container->get(LoadEnvironment::class));
+    }
+
+    public function testLoadEnvironmentWithNonArrayAccess(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.definitions.environments_access', 'foo');
+
+        $this->expectException(\DomainException::class);
+        $container->get(LoadEnvironment::class);
+    }
+
+    public function testLoadEnvironmentWithInvalidEnvironmentsService(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.environments', 'foo');
+
+        $this->expectException(\DomainException::class);
+        $container->get(LoadEnvironment::class);
+    }
+
+    public function testLoadEnvironmentWithAccessOnUndefinedEnvironment(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.definitions.environments_access', ['validation' => ['ROLE_ADMIN']]);
+
+        $this->expectException(UnknownParentEnvironmentException::class);
+        $container->get(LoadEnvironment::class);
+    }
+
+    public function testLoadEnvironmentWithAccessOnDefaultEnvironment(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(ItemRepositoryInterface::class, $this->createStub(ItemRepositoryInterface::class));
+        $container->set('teknoo.east.website.definitions.environments_access', ['default' => ['ROLE_ADMIN']]);
+
+        $this->expectException(InvalidEnvironmentNameException::class);
+        $container->get(LoadEnvironment::class);
+    }
+
+    public function testRenderDynamicContentEndPointWithAuthenticatedUserStep(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class, $this->createStub(OriginalRecipeInterface::class));
+        $container->set(ExtractSlug::class, $this->createStub(ExtractSlug::class));
+        $container->set(LoadContent::class, $this->createStub(LoadContent::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(LoadEnvironmentInterface::class, $this->createStub(LoadEnvironmentInterface::class));
+        $container->set(
+            LoadAuthenticatedUserInterface::class,
+            $this->createStub(LoadAuthenticatedUserInterface::class),
+        );
+
+        $this->assertInstanceOf(
+            RenderDynamicContentEndPoint::class,
+            $container->get(RenderDynamicContentEndPoint::class),
+        );
     }
 }

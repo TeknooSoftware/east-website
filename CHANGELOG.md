@@ -1,9 +1,20 @@
 # Teknoo Software - Website - Change Log
 
-## [11.4.0] - Pending release
+## [11.4.0] - 2026-10-08
 ### Stable Release
 
 #### Evolutions
+- Environments: contents, posts and items belong to an environment of the website (`default`, or those declared in
+  the DI key `teknoo.east.website.definitions.environments` with their parent), to prepare new versions on the same
+  instance. See the section "Environments" of the README.
+- Front: a visitor selects an environment with the request parameter `website-env`, kept in the session. Pages,
+  posts, lists and menus show only the selected environment and its parents. The access to an environment can be
+  limited to roles with the DI key `teknoo.east.website.definitions.environments_access`.
+- Front: new optional step `LoadAuthenticatedUserInterface` to load the logged user, needed to check these roles.
+  Its Symfony implementation extends `LoadCurrentUser` of East Common and does nothing for anonymous visitors.
+- Admin: a dropdown `environment` in the forms of contents, posts and items, a field `environment` in the JSON API.
+- Existing documents belong to the default environment, no migration is needed.
+- CLI client: option `--environment` on contents, posts and items.
 - Experimental CLI client (`tools/api-client/`): interactive mode `--format=tui` for humans, built on `symfony/tui`
   (tables for the lists, forms to read, create and update the objects). The JSON output stays the default, see
   [its README](tools/api-client/README.md#interactive-mode---formattui).

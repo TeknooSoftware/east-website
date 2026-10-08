@@ -70,6 +70,46 @@ Example with Symfony
     website:
         resource: '@TeknooEastWebsiteBundle/config/routing.yaml'
 
+Environments
+------------
+
+Contents, posts and items belong to an environment of the website, to prepare new versions of the pages, menus and
+posts on the same instance, visible only when their environment is selected. The root environment is `default`,
+always available, without parent. Other environments are declared in the DI (a PHP-DI value or a Symfony parameter,
+each environment has exactly one parent):
+
+    //In config/services.yaml
+    parameters:
+        teknoo.east.website.definitions.environments:
+            validation: 'default'
+            testing: 'default'
+            test-a: 'testing'
+        //Optional, environments absent from this list are public, `default` is always public
+        teknoo.east.website.definitions.environments_access:
+            testing: ['ROLE_TESTER', 'ROLE_ADMIN']
+            test-a: ['ROLE_TESTER']
+
+The service `teknoo.east.website.environments` (`Teknoo\East\Website\Object\Environments`, iterable and read only)
+lists all defined environments, indexed by name, with `default`. The admin forms of contents, posts and items have a
+dropdown `environment` (the JSON API accepts and returns the name under the key `environment`, groups `api` and `crud`).
+
+On the front, a visitor selects an environment with the request parameter `website-env` (`POST` or `GET`); the choice
+is stored into the session (East Foundation session, key `website-env`) and reused by the next requests. The chain of
+the selected environment (itself and its ancestors until `default`) is the only one visible: with `test-a`, the
+contents of `test-a`, `testing` and `default` are served, those of `validation` are not. The front queries, the lists
+of posts and tags, and the menu generator (items linked to a content out of the chain are skipped) are filtered.
+
+* An unknown environment, or an environment restricted to roles the current user (an East Common `UserInterface`)
+  does not own, is an error 404, the session is not changed.
+* A value in session that is no longer valid is removed from the session, and the default environment is used.
+* Slugs stay unique for the whole website: an environment is a visibility scope, not a copy of a page per environment.
+
+The environment is stored as a string in MongoDB (custom ODM type `environment`, registered by the Symfony bundle
+when the Doctrine MongoDB bundle is enabled, or by `infrastructures/doctrine/di.php` with a plain PHP-DI container).
+Documents created before this feature, without the field, belong to the default environment: no migration is needed.
+The selected environment is available to the steps as the ingredient `Teknoo\East\Website\Object\Environment`
+(and `environment`), and to the views in the parameters bag (`environment`, and a `menuGenerator` scoped to it).
+
 JSON API
 --------
 

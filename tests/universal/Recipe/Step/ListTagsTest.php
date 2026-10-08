@@ -39,6 +39,8 @@ use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
 use Teknoo\East\Website\Loader\TagLoader;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\Promise\PromiseInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\Tag\PublishedTagQuery;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -131,5 +133,49 @@ class ListTagsTest extends TestCase
             $manager,
             $this->createStub(ParametersBag::class),
         ));
+    }
+    public function testInvokeWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getTagLoader()
+            ->expects($this->once())
+            ->method('query')
+            ->with(
+                new PublishedTagQuery(
+                    $this->getPostRepository(true),
+                    new DateTimeImmutable('2025-03-24'),
+                    $validation,
+                ),
+            )
+            ->willReturnCallback(
+                function (QueryCollectionInterface $query, PromiseInterface $promise): TagLoader {
+                    $promise->success(new ArrayObject([]));
+
+                    return $this->getTagLoader();
+                }
+            );
+
+        $this->assertInstanceOf(ListTags::class, $this->buildStep()(
+            $manager,
+            $this->createStub(ParametersBag::class),
+            $validation,
+        ));
+
+        Environment::reset();
     }
 }

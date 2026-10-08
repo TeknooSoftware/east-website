@@ -32,8 +32,10 @@ use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
 use Teknoo\East\Common\Query\Enum\Direction;
 use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\East\Common\Query\Expr\ObjectReference;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Object\Tag;
+use Teknoo\East\Website\Query\EnvironmentFilterTrait;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 use Teknoo\Recipe\Promise\PromiseInterface;
@@ -53,12 +55,14 @@ class PublishedPostsListInTagQuery implements QueryCollectionInterface, Immutabl
 {
     use ImmutableTrait;
     use PublishedPostListQueryTrait;
+    use EnvironmentFilterTrait;
 
     public function __construct(
         private readonly Tag $tag,
         private readonly DateTimeInterface $now,
         private readonly int $limit,
         private readonly int $offset,
+        private readonly ?Environment $environment = null,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -72,6 +76,7 @@ class PublishedPostsListInTagQuery implements QueryCollectionInterface, Immutabl
             criteria: [
                 'tags' => new ObjectReference($this->tag),
                 'publishedAt' => new Lower($this->now),
+                'environment' => $this->buildEnvironmentExpr($this->environment),
             ],
             orderBy: [
                 'publishedAt' => Direction::Desc,
