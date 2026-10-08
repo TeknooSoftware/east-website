@@ -48,8 +48,6 @@ use Teknoo\States\Automated\AutomatedInterface;
 use Teknoo\States\Automated\AutomatedTrait;
 use Teknoo\States\Proxy\ProxyTrait;
 
-use function is_string;
-
 /**
  * Stated class representing a menu item in the website. They can be linked to a Content instance and is a child of
  * another menu item instance.
@@ -243,15 +241,10 @@ class Item implements
     }
 
     /*
-     * Accept also the name of the environment (submitted by the forms and the API), null (a form submitted without
-     * the field) means the default environment
+     * Null (a form submitted without the field) means the default environment
      */
-    public function setEnvironment(Environment|string|null $environment): self
+    public function setEnvironment(?Environment $environment): self
     {
-        if (is_string($environment)) {
-            $environment = Environment::get($environment);
-        }
-
         $this->environment = $environment ?? Environment::default();
 
         return $this;

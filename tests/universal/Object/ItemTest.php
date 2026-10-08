@@ -303,7 +303,7 @@ class ItemTest extends TestCase
                 'location' => 'top',
                 'hidden' => false,
                 'parent' => ['id' => 'i1', 'name' => 'Top'],
-                'environment' => Environment::default(),
+                'environment' => 'default',
             ],
             $data,
         );
@@ -342,10 +342,6 @@ class ItemTest extends TestCase
 
         $this->assertInstanceOf(Item::class, $object->setEnvironment(null));
         $this->assertSame(Environment::default(), $object->getEnvironment());
-
-        //From a name, like the forms and the API do
-        $this->assertInstanceOf(Item::class, $object->setEnvironment('validation'));
-        $this->assertSame($environment, $object->getEnvironment());
     }
 
     public function testSetEnvironmentExceptionOnBadArgument(): void
@@ -359,7 +355,7 @@ class ItemTest extends TestCase
         $item = (new Item())->setName('Menu')->setEnvironment(Environment::get('validation'));
         $item->setId('i2');
 
-        $this->assertSame(Environment::get('validation'), $this->exportData($item, ['api'])['environment']);
-        $this->assertSame(Environment::get('validation'), $this->exportData($item, ['crud'])['environment']);
+        $this->assertSame('validation', $this->exportData($item, ['api'])['environment']);
+        $this->assertSame('validation', $this->exportData($item, ['crud'])['environment']);
     }
 }
