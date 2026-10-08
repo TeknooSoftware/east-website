@@ -32,7 +32,6 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface as SymfonyUserInterface;
-use Teknoo\East\Common\Contracts\User\UserInterface;
 use Teknoo\East\Common\Object\User;
 use Teknoo\East\CommonBundle\Object\AbstractUser;
 use Teknoo\East\Foundation\Manager\ManagerInterface;
@@ -112,12 +111,13 @@ class LoadAuthenticatedUserTest extends TestCase
         $manager = $this->createMock(ManagerInterface::class);
         $manager->expects($this->once())
             ->method('updateWorkPlan')
-            ->with([UserInterface::class => $user])
+            ->with([User::class => $user])
             ->willReturnSelf();
 
         $step = $this->buildStep();
         $this->assertSame($step, $step($manager));
     }
+
     public function testWithAUserAlreadyInTheWorkplan(): void
     {
         $this->getTokenStorage()

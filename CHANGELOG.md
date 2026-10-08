@@ -10,6 +10,8 @@
 - Front: a visitor selects an environment with the request parameter `website-env`, kept in the session. Pages,
   posts, lists and menus show only the selected environment and its parents. The access to an environment can be
   limited to roles with the DI key `teknoo.east.website.definitions.environments_access`.
+- Front: new optional step `LoadAuthenticatedUserInterface` to load the logged user, needed to check these roles.
+  Its Symfony implementation extends `LoadCurrentUser` of East Common and does nothing for anonymous visitors.
 - Admin: a dropdown `environment` in the forms of contents, posts and items, a field `environment` in the JSON API.
 - Existing documents belong to the default environment, no migration is needed.
 - CLI client: option `--environment` on contents, posts and items.
