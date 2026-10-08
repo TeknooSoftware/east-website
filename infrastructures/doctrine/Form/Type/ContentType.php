@@ -44,6 +44,7 @@ use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Object\Content as OriginalContent;
 use Teknoo\East\Website\Object\BlockType;
 use Teknoo\East\Website\Object\Content\Published;
+use Teknoo\East\Website\Object\Environments;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
@@ -62,6 +63,7 @@ use function str_replace;
 class ContentType extends AbstractType
 {
     use TranslatableTrait;
+    use EnvironmentFieldTrait;
 
     public const BLOCK_PREFIX = 'block_';
 
@@ -69,6 +71,7 @@ class ContentType extends AbstractType
         private readonly ?HtmlSanitizerInterface $sanitizer = null,
         private readonly ?string $sanitizeContext = null,
         private readonly ?string $contentSanitzedSalt = null,
+        private readonly ?Environments $environments = null,
     ) {
     }
 
@@ -236,6 +239,7 @@ class ContentType extends AbstractType
         $builder->add('subtitle', TextType::class, ['required' => false]);
         $builder->add('slug', TextType::class, ['required' => false]);
         $builder->add('description', TextareaType::class, ['required' => false]);
+        $this->addEnvironmentField($builder, $this->environments);
         $builder->add(
             'publishedAt',
             DateTimeType::class,

@@ -117,6 +117,12 @@ class Item implements
      */
     protected iterable $children = [];
 
+    /*
+     * Null for documents created before the environments feature, they belong to the default environment
+     */
+    #[Normalize(['api', 'crud'], loader: 'exportEnvironment')]
+    protected ?Environment $environment = null;
+
     protected ?string $localeField = null;
 
     /*
@@ -154,8 +160,14 @@ class Item implements
         ];
     }
 
+    protected static function exportEnvironment(self $item): string
+    {
+        return $item->getEnvironment()->getName();
+    }
+
     public function __construct()
     {
+        $this->environment = Environment::default();
         $this->initializeStateProxy();
         $this->updateStates();
     }
@@ -219,6 +231,21 @@ class Item implements
     public function setContent(?Content $content): self
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    public function getEnvironment(): Environment
+    {
+        return $this->environment ?? Environment::default();
+    }
+
+    /*
+     * Null (a form submitted without the field) means the default environment
+     */
+    public function setEnvironment(?Environment $environment): self
+    {
+        $this->environment = $environment ?? Environment::default();
 
         return $this;
     }

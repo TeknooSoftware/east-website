@@ -39,6 +39,7 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -100,6 +101,7 @@ class PublishedTagQueryTest extends TestCase
                     $this->assertEquals('tags.id', $field);
                     $this->assertEquals([
                         'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                        'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                     ], $criteria);
 
                     $aPromise->success(['foo', 'bar']);
@@ -130,6 +132,7 @@ class PublishedTagQueryTest extends TestCase
                     $this->assertEquals('tags.id', $field);
                     $this->assertEquals([
                         'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                        'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                     ], $criteria);
 
                     $aPromise->success([]);

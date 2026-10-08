@@ -36,6 +36,8 @@ use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\Recipe\RecipeInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
 /**
@@ -122,11 +124,29 @@ class RenderDynamicPostEndPointTest extends TestCase
     {
         return new RenderDynamicPostEndPoint(
             $this->getRecipe(true),
+            $this->createStub(LoadAuthenticatedUserInterface::class),
+            $this->createStub(LoadEnvironmentInterface::class),
             $this->getLoadPost(true),
             $this->getListTags(true),
             $this->createStub(LoadTranslationsInterface::class),
             $this->getRender(true),
             $this->getRenderError(true)
         );
+    }
+
+    public function testBuildPlanWithoutAuthenticatedUserStep(): void
+    {
+        $plan = new RenderDynamicPostEndPoint(
+            $this->getRecipe(true),
+            null,
+            $this->createStub(LoadEnvironmentInterface::class),
+            $this->getLoadPost(true),
+            $this->getListTags(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
+        );
+
+        $this->assertInstanceOf(RenderDynamicPostEndPoint::class, $plan);
     }
 }

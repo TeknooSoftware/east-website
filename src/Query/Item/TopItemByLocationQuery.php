@@ -30,8 +30,10 @@ use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Website\Query\EnvironmentFilterTrait;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 
@@ -51,12 +53,14 @@ use function is_array;
 class TopItemByLocationQuery implements QueryCollectionInterface, ImmutableInterface
 {
     use ImmutableTrait;
+    use EnvironmentFilterTrait;
 
     /**
      * @param string|array<string> $location
      */
     public function __construct(
         private readonly string|array $location,
+        private readonly ?Environment $environment = null,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -74,6 +78,7 @@ class TopItemByLocationQuery implements QueryCollectionInterface, ImmutableInter
         $repository->findBy(
             criteria: [
                 'location' => $locations,
+                'environment' => $this->buildEnvironmentExpr($this->environment),
             ],
             promise: $promise,
             orderBy: [

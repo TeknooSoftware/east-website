@@ -43,6 +43,7 @@ use Throwable;
 
 use function hash;
 use function json_encode;
+use Teknoo\East\Website\Object\Environment;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -433,5 +434,51 @@ class ContentTest extends TestCase
         $this->assertEquals(['body' => 'Other'], $data['parts']);
         $this->assertNull($data['author']);
         $this->assertEquals([], $data['tags']);
+    }
+    public function testGetEnvironmentOfALegacyDocument(): void
+    {
+        $this->assertSame(
+            Environment::default(),
+            $this->generateObjectPopulated(['environment' => null])->getEnvironment(),
+        );
+    }
+
+    public function testGetEnvironment(): void
+    {
+        $environment = Environment::get('validation');
+        $this->assertSame(
+            $environment,
+            $this->generateObjectPopulated(['environment' => $environment])->getEnvironment(),
+        );
+    }
+
+    public function testSetEnvironment(): void
+    {
+        $environment = Environment::get('validation');
+
+        $object = $this->buildObject();
+        $this->assertSame(Environment::default(), $object->getEnvironment());
+        $this->assertInstanceOf(Content::class, $object->setEnvironment($environment));
+        $this->assertSame($environment, $object->getEnvironment());
+
+        $this->assertInstanceOf(Content::class, $object->setEnvironment(null));
+        $this->assertSame(Environment::default(), $object->getEnvironment());
+    }
+
+    public function testSetEnvironmentExceptionOnBadArgument(): void
+    {
+        $this->expectException(Throwable::class);
+        $this->buildObject()->setEnvironment(new stdClass());
+    }
+
+    public function testExportEnvironment(): void
+    {
+        $content = $this->buildObject()->setTitle('About')->setEnvironment(Environment::get('validation'));
+        $content->setId('c1');
+
+        $this->assertSame('validation', $this->exportData($content, ['api'])['environment']);
+        $this->assertSame('validation', $this->exportData($content, ['crud'])['environment']);
+        $this->assertArrayNotHasKey('environment', $this->exportData($content, ['public']));
+        $this->assertArrayNotHasKey('environment', $this->exportData($content, ['digest']));
     }
 }

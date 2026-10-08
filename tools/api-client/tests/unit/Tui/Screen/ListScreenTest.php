@@ -134,7 +134,7 @@ class ListScreenTest extends TestCase
         ]]));
 
         $lines = $harness->lines();
-        self::assertSame('  id    title     slug  type  author  tags          publishedAt', $lines[1]);
+        self::assertSame('  id    title     slug  type  author  tags          publishedAt  environment', $lines[1]);
         self::assertSame('> c1    Home[31m  home  Page  Ada L   PHP, Symfony', $lines[3]);
     }
 

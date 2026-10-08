@@ -31,7 +31,9 @@ use Teknoo\East\Common\Query\Enum\Direction;
 use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\East\Common\Query\Expr\Lower;
 use Teknoo\East\Website\Contracts\DBSource\Repository\PostRepositoryInterface;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Tag;
+use Teknoo\East\Website\Query\EnvironmentFilterTrait;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
@@ -52,10 +54,12 @@ use Teknoo\Immutable\ImmutableTrait;
 class PublishedTagQuery implements QueryCollectionInterface, ImmutableInterface
 {
     use ImmutableTrait;
+    use EnvironmentFilterTrait;
 
     public function __construct(
         private readonly PostRepositoryInterface $postRepository,
         private readonly DateTimeInterface $now,
+        private readonly ?Environment $environment = null,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -95,6 +99,7 @@ class PublishedTagQuery implements QueryCollectionInterface, ImmutableInterface
             'tags.id',
             [
                 'publishedAt' => new Lower($this->now),
+                'environment' => $this->buildEnvironmentExpr($this->environment),
             ],
             $distinctPromise,
         );

@@ -44,6 +44,8 @@ use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Recipe\Step\LoadContent;
 use TypeError;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -293,5 +295,50 @@ class LoadContentTest extends TestCase
             $manager,
             $this->createStub(ParametersBag::class),
         ));
+    }
+    public function testInvokeWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+        $type = (new Type())->setTemplate('foo');
+        $content = (new Content())->setType($type);
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getContentLoader()
+            ->expects($this->once())
+            ->method('fetch')
+            ->with(new PublishedContentFromSlugQuery('foo', new DateTimeImmutable('2025-03-24'), $validation))
+            ->willReturnCallback(
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($content): ContentLoader {
+                    $promise->success($content);
+
+                    return $this->getContentLoader();
+                }
+            );
+
+        $bag = $this->createMock(ParametersBag::class);
+        $bag->expects($this->once())->method('set')->with('content');
+
+        $this->assertInstanceOf(LoadContent::class, $this->buildStep()(
+            'foo',
+            $manager,
+            $bag,
+            null,
+            $validation,
+        ));
+
+        Environment::reset();
     }
 }

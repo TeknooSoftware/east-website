@@ -38,6 +38,8 @@ use Teknoo\East\Common\Recipe\Step\Render;
 use Teknoo\East\Common\Recipe\Step\RenderError;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\Recipe\RecipeInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
 /**
@@ -158,6 +160,8 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
     {
         return new ListAllPostsOfTagsEndPoint(
             $this->getRecipe(true),
+            $this->createStub(LoadAuthenticatedUserInterface::class),
+            $this->createStub(LoadEnvironmentInterface::class),
             $this->getExtractPage(true),
             $this->getExtractTag(true),
             $this->getListPosts(true),
@@ -166,5 +170,23 @@ class ListAllPostsOfTagsEndPointTest extends TestCase
             $this->getRender(true),
             $this->getRenderError(true)
         );
+    }
+
+    public function testBuildPlanWithoutAuthenticatedUserStep(): void
+    {
+        $plan = new ListAllPostsOfTagsEndPoint(
+            $this->getRecipe(true),
+            null,
+            $this->createStub(LoadEnvironmentInterface::class),
+            $this->getExtractPage(true),
+            $this->getExtractTag(true),
+            $this->getListPosts(true),
+            $this->getListTags(true),
+            $this->createStub(LoadTranslationsInterface::class),
+            $this->getRender(true),
+            $this->getRenderError(true)
+        );
+
+        $this->assertInstanceOf(ListAllPostsOfTagsEndPoint::class, $plan);
     }
 }

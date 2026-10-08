@@ -37,6 +37,7 @@ use Teknoo\East\Foundation\Time\DatesService;
 use Teknoo\Recipe\Promise\Promise;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Object\Content;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Query\Content\PublishedContentFromSlugQuery;
 use Throwable;
 
@@ -65,6 +66,7 @@ class LoadContent
         ManagerInterface $manager,
         ParametersBag $bag,
         ?ServerRequestInterface $request = null,
+        ?Environment $environment = null,
     ): self {
         //To avoid argument injection from HTTP request, the api flag is read only from request's attributes
         $isApi = !empty($request?->getAttribute('api'));
@@ -105,7 +107,7 @@ class LoadContent
 
         $this->datesService->passMeTheDate(
             fn (DateTimeInterface $date): LoaderInterface => $this->contentLoader->fetch(
-                new PublishedContentFromSlugQuery($slug, $date),
+                new PublishedContentFromSlugQuery($slug, $date, $environment ?? Environment::default()),
                 $fetchPromise
             ),
         );

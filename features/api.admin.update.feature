@@ -95,6 +95,28 @@ Feature: Read and update an element, from the admin JSON API
       }
       """
 
+  Scenario: Move a content to another environment with a JSON body
+    Given a type "type1" named "page" with the blocks "body,header"
+    And a draft content "c1" with the slug "foo" and the title "Foo"
+    When the API client sends a "PUT" JSON request to "https://foo.com/api/v1/admin/content/c1" with:
+      """
+      {
+        "environment": "validation"
+      }
+      """
+    Then the API response status code is 200
+    And An object "c1" must be updated
+    And the API response contains:
+      """
+      {
+        "data": {
+          "id": "c1",
+          "title": "Foo",
+          "environment": "validation"
+        }
+      }
+      """
+
   Scenario: Publish a draft post with a JSON body
     Given a draft post "p1" with the slug "foo" and the title "Foo"
     When the API client sends a "PUT" JSON request to "https://foo.com/api/v1/admin/post/p1" with:

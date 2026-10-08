@@ -44,6 +44,8 @@ use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Website\Object\Type;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use TypeError;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\Post\PublishedPostFromSlugQuery;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -287,5 +289,47 @@ class LoadPostTest extends TestCase
             $manager,
             $this->createStub(ParametersBag::class),
         ));
+    }
+    public function testInvokeWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+        $type = (new Type())->setTemplate('foo');
+        $post = (new Post())->setType($type);
+
+        $manager = $this->createMock(ManagerInterface::class);
+        $manager->expects($this->never())->method('error');
+        $manager->expects($this->once())->method('updateWorkPlan');
+
+        $this->getDatesService(true)
+            ->method('passMeTheDate')
+            ->willReturnCallback(
+                function (callable $callable): DatesService&Stub {
+                    $callable(new DateTimeImmutable('2025-03-24'));
+
+                    return $this->getDatesService();
+                }
+            );
+
+        $this->getPostLoader()
+            ->expects($this->once())
+            ->method('fetch')
+            ->with(new PublishedPostFromSlugQuery('foo', new DateTimeImmutable('2025-03-24'), $validation))
+            ->willReturnCallback(
+                function (QueryElementInterface $query, PromiseInterface $promise) use ($post): PostLoader {
+                    $promise->success($post);
+
+                    return $this->getPostLoader();
+                }
+            );
+
+        $this->assertInstanceOf(LoadPost::class, $this->buildStep()(
+            'foo',
+            $manager,
+            $this->createStub(ParametersBag::class),
+            null,
+            $validation,
+        ));
+
+        Environment::reset();
     }
 }

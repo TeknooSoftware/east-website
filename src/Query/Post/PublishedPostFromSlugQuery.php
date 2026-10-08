@@ -35,6 +35,8 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Post;
 use Teknoo\East\Common\Contracts\Object\PublishableInterface;
 use Teknoo\East\Common\Contracts\Query\QueryElementInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\EnvironmentFilterTrait;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 
@@ -52,10 +54,12 @@ use Teknoo\Immutable\ImmutableTrait;
 class PublishedPostFromSlugQuery implements QueryElementInterface, ImmutableInterface
 {
     use ImmutableTrait;
+    use EnvironmentFilterTrait;
 
     public function __construct(
         private readonly string $slug,
         private readonly DateTimeInterface $now,
+        private readonly ?Environment $environment = null,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -84,6 +88,7 @@ class PublishedPostFromSlugQuery implements QueryElementInterface, ImmutableInte
             criteria: [
                 'slug' => $this->slug,
                 'publishedAt' => new Lower($this->now),
+                'environment' => $this->buildEnvironmentExpr($this->environment),
             ],
             promise: $fetchingPromise->next(
                 promise: $promise,

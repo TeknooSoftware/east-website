@@ -30,6 +30,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
 use Teknoo\East\WebsiteBundle\DependencyInjection\TeknooEastWebsiteExtension;
 
 /**
@@ -80,5 +81,33 @@ class TeknooEastWebsiteExtensionTest extends TestCase
     {
         $this->expectException(\TypeError::class);
         $this->buildExtension()->load(new \stdClass(), $this->getContainerBuilderMock(true));
+    }
+    public function testPrependWithoutDoctrineMongoDbExtension(): void
+    {
+        $container = $this->getContainerBuilderMock();
+        $container->expects($this->once())
+            ->method('hasExtension')
+            ->with('doctrine_mongodb')
+            ->willReturn(false);
+        $container->expects($this->never())->method('prependExtensionConfig');
+
+        $this->buildExtension()->prepend($container);
+    }
+
+    public function testPrependWithDoctrineMongoDbExtension(): void
+    {
+        $container = $this->getContainerBuilderMock();
+        $container->expects($this->once())
+            ->method('hasExtension')
+            ->with('doctrine_mongodb')
+            ->willReturn(true);
+        $container->expects($this->once())
+            ->method('prependExtensionConfig')
+            ->with(
+                'doctrine_mongodb',
+                ['types' => [EnvironmentType::NAME => EnvironmentType::class]],
+            );
+
+        $this->buildExtension()->prepend($container);
     }
 }

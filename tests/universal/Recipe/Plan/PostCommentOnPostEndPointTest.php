@@ -41,6 +41,8 @@ use Teknoo\East\Website\Recipe\Plan\PostCommentOnPostEndPoint;
 use Teknoo\East\Website\Recipe\Step\ListTags;
 use Teknoo\East\Website\Recipe\Step\LoadPost;
 use Teknoo\Recipe\RecipeInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadAuthenticatedUserInterface;
+use Teknoo\East\Website\Contracts\Recipe\Step\LoadEnvironmentInterface;
 use Teknoo\Tests\Recipe\Plan\EditablePlanTestTrait;
 
 /**
@@ -221,6 +223,8 @@ class PostCommentOnPostEndPointTest extends TestCase
     {
         return new PostCommentOnPostEndPoint(
             $this->getRecipe(true),
+            $this->createStub(LoadAuthenticatedUserInterface::class),
+            $this->createStub(LoadEnvironmentInterface::class),
             $this->getLoadPost(true),
             $this->getListTags(true),
             $this->getLoadTranslations(true),
@@ -233,5 +237,27 @@ class PostCommentOnPostEndPointTest extends TestCase
             $this->getRenderError(true),
             'foo',
         );
+    }
+
+    public function testBuildPlanWithoutAuthenticatedUserStep(): void
+    {
+        $plan = new PostCommentOnPostEndPoint(
+            $this->getRecipe(true),
+            null,
+            $this->createStub(LoadEnvironmentInterface::class),
+            $this->getLoadPost(true),
+            $this->getListTags(true),
+            $this->getLoadTranslations(true),
+            $this->getCreateObject(true),
+            $this->getFormHandling(true),
+            $this->getFormProcessing(true),
+            $this->getSaveObject(true),
+            $this->getRedirectClient(true),
+            $this->getRenderForm(true),
+            $this->getRenderError(true),
+            'foo',
+        );
+
+        $this->assertInstanceOf(PostCommentOnPostEndPoint::class, $plan);
     }
 }

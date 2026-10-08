@@ -33,6 +33,8 @@ use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\East\Website\Object\Content;
 use Teknoo\East\Common\Query\Expr\In;
 use Teknoo\East\Common\Contracts\Query\QueryCollectionInterface;
+use Teknoo\East\Website\Object\Environment;
+use Teknoo\East\Website\Query\EnvironmentFilterTrait;
 use Teknoo\Immutable\ImmutableInterface;
 use Teknoo\Immutable\ImmutableTrait;
 
@@ -50,6 +52,7 @@ use Teknoo\Immutable\ImmutableTrait;
 class PublishedContentFromIdsQuery implements QueryCollectionInterface, ImmutableInterface
 {
     use ImmutableTrait;
+    use EnvironmentFilterTrait;
 
     /**
      * @param array<int, string|int> $ids
@@ -57,6 +60,7 @@ class PublishedContentFromIdsQuery implements QueryCollectionInterface, Immutabl
     public function __construct(
         private readonly array $ids,
         private readonly DateTimeInterface $now,
+        private readonly ?Environment $environment = null,
     ) {
         $this->uniqueConstructorCheck();
     }
@@ -70,6 +74,7 @@ class PublishedContentFromIdsQuery implements QueryCollectionInterface, Immutabl
             [
                 'id' => new In($this->ids),
                 'publishedAt' => new Lower($this->now),
+                'environment' => $this->buildEnvironmentExpr($this->environment),
             ],
             $promise
         );

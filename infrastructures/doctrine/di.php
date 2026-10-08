@@ -50,11 +50,17 @@ use Teknoo\East\Website\Doctrine\Object\Content;
 use Teknoo\East\Website\Doctrine\Object\Item;
 use Teknoo\East\Website\Doctrine\Object\Post;
 use Teknoo\East\Website\Doctrine\Object\Comment;
+use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
 use Teknoo\East\Website\Object\Tag;
 use Teknoo\East\Website\Object\Type;
 
 return [
+    /*
+     * Contents, posts and items have an `environment` field, stored thanks to the custom ODM type `environment`,
+     * registered before the first use of the repositories
+     */
     ContentRepositoryInterface::class => static function (ContainerInterface $container): ContentRepositoryInterface {
+        EnvironmentType::register();
         $repository = $container->get(ObjectManager::class)->getRepository(Content::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmContentRepository($repository);
@@ -64,6 +70,7 @@ return [
     },
 
     PostRepositoryInterface::class => static function (ContainerInterface $container): PostRepositoryInterface {
+        EnvironmentType::register();
         $repository = $container->get(ObjectManager::class)->getRepository(Post::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmPostRepository($repository);
@@ -82,6 +89,7 @@ return [
     },
 
     ItemRepositoryInterface::class => static function (ContainerInterface $container): ItemRepositoryInterface {
+        EnvironmentType::register();
         $repository = $container->get(ObjectManager::class)->getRepository(Item::class);
         if ($repository instanceof DocumentRepository) {
             return new OdmItemRepository($repository);

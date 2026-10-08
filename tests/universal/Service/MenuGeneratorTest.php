@@ -33,6 +33,7 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Website\Loader\ContentLoader;
 use Teknoo\East\Website\Loader\ItemLoader;
 use Teknoo\East\Website\Object\Content;
+use Teknoo\East\Website\Object\Environment;
 use Teknoo\East\Website\Object\Item;
 use Teknoo\East\Website\Query\Content\PublishedContentFromIdsQuery;
 use Teknoo\East\Website\Query\Item\TopItemByLocationQuery;
@@ -99,7 +100,7 @@ class MenuGeneratorTest extends TestCase
         $this->getItemLoader()
             ->expects($this->once())
             ->method('query')
-            ->with(new TopItemByLocationQuery(['foo', 'location1']))
+            ->with(new TopItemByLocationQuery(['foo', 'location1'], Environment::default()))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([$item1, $item2, $item3, $item4]);
 
@@ -127,7 +128,7 @@ class MenuGeneratorTest extends TestCase
         $this->getItemLoader()
             ->expects($this->atLeastOnce())
             ->method('query')
-            ->with(new TopItemByLocationQuery(['foo', 'location1']))
+            ->with(new TopItemByLocationQuery(['foo', 'location1'], Environment::default()))
             ->willReturnCallback(function ($value, PromiseInterface $promise): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([]);
 
@@ -151,7 +152,7 @@ class MenuGeneratorTest extends TestCase
         $this->getItemLoader()
             ->expects($this->once())
             ->method('query')
-            ->with(new TopItemByLocationQuery(['foo', 'location1']))
+            ->with(new TopItemByLocationQuery(['foo', 'location1'], Environment::default()))
             ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3): \Teknoo\East\Website\Loader\ItemLoader {
                 $promise->success([$item1, $item2, $item3]);
 
@@ -164,5 +165,59 @@ class MenuGeneratorTest extends TestCase
         }
 
         $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item3]], $stack);
+    }
+    public function testWithEnvironment(): void
+    {
+        $validation = Environment::define('validation', Environment::default());
+        $testing = Environment::define('testing', Environment::default());
+
+        $item1 = (new Item())->setId('i1')->setLocation('location1');
+        //content in the chain of the selected environment
+        $item2 = (new Item())->setId('i2')->setLocation('location1')->setContent(
+            (new Content())->setId('c1')->setEnvironment($validation),
+        );
+        //content out of the chain, the item must be skipped
+        $item3 = (new Item())->setId('i3')->setLocation('location1')->setParent($item1)->setContent(
+            (new Content())->setId('c2')->setEnvironment($testing),
+        );
+        $item4 = (new Item())->setId('i4')->setLocation('location1')->setParent($item1)->setContent(
+            (new Content())->setId('c3'),
+        );
+
+        //called twice: the cache is not shared with a new scoped copy
+        $this->getItemLoader()
+            ->expects($this->exactly(2))
+            ->method('query')
+            ->with(new TopItemByLocationQuery(['foo', 'location1'], $validation))
+            ->willReturnCallback(function ($value, PromiseInterface $promise) use ($item1, $item2, $item3, $item4): \Teknoo\East\Website\Loader\ItemLoader {
+                $promise->success([$item1, $item2, $item3, $item4]);
+
+                return $this->getItemLoader();
+            });
+
+        $service = $this->buildService();
+        $this->assertSame(Environment::default(), $service->getEnvironment());
+
+        $scoped = $service->withEnvironment($validation);
+        $this->assertNotSame($service, $scoped);
+        $this->assertSame(Environment::default(), $service->getEnvironment());
+        $this->assertSame($validation, $scoped->getEnvironment());
+
+        $stack = [];
+        foreach ($scoped->extract('location1') as $key => $element) {
+            $stack[$key][] = $element;
+        }
+
+        $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item4]], $stack);
+
+        $copy = $scoped->withEnvironment($validation);
+        $stack = [];
+        foreach ($copy->extract('location1') as $key => $element) {
+            $stack[$key][] = $element;
+        }
+
+        $this->assertEquals(['parent' => [$item1], 'top' => [$item2], 'i1' => [$item4]], $stack);
+
+        Environment::reset();
     }
 }

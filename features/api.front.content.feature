@@ -58,3 +58,41 @@ Feature: Read a published content, from the public JSON API
   Scenario: Get an unknown content
     When the API client sends a "GET" request to "https://foo.com/api/v1/content/unknown"
     Then the API response is the error 404
+
+  Scenario: Get a published content of a selected environment
+    Given a type "type1" named "page" with the blocks "body,header"
+    And a published content "c2" with the slug "new-about", the title "New About", the parts '{"body": "<p>Hello</p>", "header": "Welcome"}' and the sanitized parts '{"body": "<p>Hello</p>", "header": "Welcome"}'
+    And it is in the environment "validation"
+    When the API client sends a "GET" request to "https://foo.com/api/v1/content/new-about?website-env=validation"
+    Then the API response status code is 200
+    And the API response contains:
+      """
+      {
+        "data": {
+          "@class": "Teknoo\\East\\Website\\Object\\Content",
+          "id": "c2",
+          "title": "New About",
+          "slug": "new-about"
+        }
+      }
+      """
+    And the API response does not contain the key "environment" in "data"
+
+  Scenario: A published content of another environment is not available without selection
+    Given a type "type1" named "page" with the blocks "body,header"
+    And a published content "c2" with the slug "new-about", the title "New About", the parts '{"body": "<p>Hello</p>", "header": "Welcome"}' and the sanitized parts '{"body": "<p>Hello</p>", "header": "Welcome"}'
+    And it is in the environment "validation"
+    When the API client sends a "GET" request to "https://foo.com/api/v1/content/new-about"
+    Then the API response is the error 404
+
+  Scenario: Select an unknown environment
+    Given a type "type1" named "page" with the blocks "body,header"
+    And a published content "c1" with the slug "about", the title "About", the parts '{"body": "<p>Hello</p>", "header": "Welcome"}' and the sanitized parts '{"body": "<p>Hello</p>", "header": "Welcome"}'
+    When the API client sends a "GET" request to "https://foo.com/api/v1/content/about?website-env=unknown"
+    Then the API response is the error 404
+
+  Scenario: Select a restricted environment as an anonymous visitor
+    Given a type "type1" named "page" with the blocks "body,header"
+    And a published content "c1" with the slug "about", the title "About", the parts '{"body": "<p>Hello</p>", "header": "Welcome"}' and the sanitized parts '{"body": "<p>Hello</p>", "header": "Welcome"}'
+    When the API client sends a "GET" request to "https://foo.com/api/v1/content/about?website-env=testing"
+    Then the API response is the error 404

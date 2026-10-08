@@ -30,6 +30,8 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
+use Teknoo\East\Website\Doctrine\Types\EnvironmentType;
 
 /**
  * @copyright   Copyright (c) EIRL Richard Déloge (https://deloge.io - richard@deloge.io)
@@ -37,8 +39,28 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
  * @author      Richard Déloge <richard@teknoo.software>
  */
-class TeknooEastWebsiteExtension extends Extension
+class TeknooEastWebsiteExtension extends Extension implements PrependExtensionInterface
 {
+    /**
+     * Register the custom ODM type `environment` (used by the mappings of contents, posts and items) in the Doctrine
+     * MongoDB bundle, when it is enabled.
+     */
+    public function prepend(ContainerBuilder $container): void
+    {
+        if (!$container->hasExtension('doctrine_mongodb')) {
+            return;
+        }
+
+        $container->prependExtensionConfig(
+            'doctrine_mongodb',
+            [
+                'types' => [
+                    EnvironmentType::NAME => EnvironmentType::class,
+                ],
+            ],
+        );
+    }
+
     /**
      * @param array<string, mixed> $configs
      * @throws Exception

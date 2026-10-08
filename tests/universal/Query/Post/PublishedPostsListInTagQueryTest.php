@@ -38,6 +38,8 @@ use Teknoo\Recipe\Promise\PromiseInterface;
 use Teknoo\East\Common\Contracts\DBSource\RepositoryInterface;
 use Teknoo\East\Common\Contracts\Loader\LoaderInterface;
 use Teknoo\Tests\East\Website\Query\QueryCollectionTestTrait;
+use Teknoo\East\Common\Query\Expr\In;
+use Teknoo\East\Common\Query\Expr\InclusiveOr;
 
 /**
  * @license     http://teknoo.software/license/bsd-3         3-Clause BSD License
@@ -80,6 +82,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ],
                 self::callback(
                     fn ($p): bool => $p instanceof PromiseInterface
@@ -98,6 +101,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ]
             )->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
@@ -134,6 +138,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ],
                 self::callback(
                     fn ($p): bool => $p instanceof PromiseInterface
@@ -152,6 +157,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ]
             )->willReturnCallback(
                 function (array $criteria, PromiseInterface $promise) use ($repository): \PHPUnit\Framework\MockObject\MockObject {
@@ -179,6 +185,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ],
                 self::callback(
                     fn ($p): bool => $p instanceof PromiseInterface
@@ -197,6 +204,7 @@ class PublishedPostsListInTagQueryTest extends TestCase
                 [
                     'tags' => new ObjectReference(new Tag()),
                     'publishedAt' => new Lower(new DateTimeImmutable('2025-03-24')),
+                    'environment' => new InclusiveOr(['environment' => new In(['default'])], ['environment' => null]),
                 ],
                 self::callback(
                     fn ($p): bool => $p instanceof PromiseInterface

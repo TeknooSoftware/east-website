@@ -161,6 +161,7 @@ class DocumentMapperTest extends TestCase
                 'count' => 3,
                 'legacy' => 'Not in the type anymore',
             ],
+            'environment' => 'validation',
             'localeField' => 'en',
             'publishedAt' => '2026-01-02T03:04:05+00:00',
             'updatedAt' => '2026-01-03T00:00:00+00:00',
@@ -191,6 +192,7 @@ class DocumentMapperTest extends TestCase
                 'subtitle' => 'World',
                 'slug' => 'hello',
                 'description' => "First\nSecond",
+                'environment' => 'validation',
                 'localeField' => 'en',
                 'publishedAt' => '2026-01-02T03:04:05+00:00',
                 'updatedAt' => '2026-01-03T00:00:00+00:00',
@@ -277,6 +279,7 @@ class DocumentMapperTest extends TestCase
                 'slug' => 'blog',
                 'hidden' => 'no',
                 'position' => '3',
+                'environment' => 'validation',
                 'localeField' => 'en',
             ],
             $this->values($rows),
@@ -375,6 +378,7 @@ class DocumentMapperTest extends TestCase
                 'subtitle' => RowKind::Text,
                 'slug' => RowKind::Text,
                 'description' => RowKind::Multiline,
+                'environment' => RowKind::Text,
                 'localeField' => RowKind::Text,
                 'block_intro' => RowKind::Multiline,
                 'block_body' => RowKind::Multiline,
@@ -396,6 +400,7 @@ class DocumentMapperTest extends TestCase
                 'subtitle' => 'World',
                 'slug' => 'hello',
                 'description' => "First\nSecond",
+                'environment' => 'validation',
                 'localeField' => 'en',
                 'block_intro' => "<p>Hi</p>\n<p>there</p>",
                 'block_body' => '',
@@ -465,7 +470,7 @@ class DocumentMapperTest extends TestCase
         $rows = $this->mapper()->rows($this->definition('content'), self::content(), FormMode::Edit);
 
         self::assertSame(
-            ['id', 'author', 'type', 'tags', 'title', 'subtitle', 'slug', 'description', 'localeField', 'publish'],
+            ['id', 'author', 'type', 'tags', 'title', 'subtitle', 'slug', 'description', 'environment', 'localeField', 'publish'],
             array_keys($this->named($rows)),
         );
     }
@@ -518,6 +523,7 @@ class DocumentMapperTest extends TestCase
                 'subtitle' => '',
                 'slug' => '',
                 'description' => '',
+                'environment' => '',
                 'localeField' => '',
                 'block_intro' => '',
                 'block_body' => '',
@@ -626,6 +632,7 @@ class DocumentMapperTest extends TestCase
             'parent' => ['@class' => 'Teknoo\\East\\Website\\Object\\Item', 'id' => 'i0', 'name' => 'Home'],
             'hidden' => false,
             'position' => 3,
+            'environment' => 'validation',
             'localeField' => 'en',
         ];
     }
@@ -678,6 +685,7 @@ class DocumentMapperTest extends TestCase
                 'slug' => RowKind::Text,
                 'hidden' => RowKind::Bool,
                 'position' => RowKind::Text,
+                'environment' => RowKind::Text,
                 'localeField' => RowKind::Text,
             ],
             $this->kinds($rows),
@@ -692,6 +700,7 @@ class DocumentMapperTest extends TestCase
                 'slug' => 'blog',
                 'hidden' => false,
                 'position' => '3',
+                'environment' => 'validation',
                 'localeField' => 'en',
             ],
             $this->values($rows),
@@ -719,6 +728,7 @@ class DocumentMapperTest extends TestCase
                 'slug' => '',
                 'hidden' => false,
                 'position' => '',
+                'environment' => '',
                 'localeField' => '',
             ],
             $created,
