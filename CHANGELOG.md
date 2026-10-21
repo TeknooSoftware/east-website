@@ -1,6 +1,6 @@
 # Teknoo Software - Website - Change Log
 
-## [11.5.0] - Pending release
+## [11.5.0] - 2026-10-21
 ### Stable Release
 
 #### Security
