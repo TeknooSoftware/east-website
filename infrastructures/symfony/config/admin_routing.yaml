@@ -45,9 +45,10 @@ _teknoo_website_admin_item_new:
 
 _teknoo_website_admin_item_delete:
     path: '/item/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.website.deleting.item'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Website\Loader\ItemLoader'
@@ -100,9 +101,10 @@ _teknoo_website_admin_content_new:
 
 _teknoo_website_admin_content_delete:
     path: '/content/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.website.deleting.content'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Website\Loader\ContentLoader'
@@ -138,9 +140,10 @@ _teknoo_website_admin_media_new:
 
 _teknoo_website_admin_media_delete:
     path: '/media/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.common.deleting.media'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Common\Loader\MediaLoader'
@@ -189,9 +192,10 @@ _teknoo_website_admin_type_new:
 
 _teknoo_website_admin_type_delete:
     path: '/type/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.website.deleting.type'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Website\Loader\TypeLoader'
@@ -242,9 +246,10 @@ _teknoo_website_admin_tag_new:
 
 _teknoo_website_admin_tag_delete:
     path: '/tag/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.website.deleting.tag'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Website\Loader\TagLoader'
@@ -293,9 +298,10 @@ _teknoo_website_admin_user_new:
 
 _teknoo_website_admin_user_delete:
     path: '/user/delete/{id}'
-    methods:  ['GET', 'DELETE']
+    methods:  ['GET', 'POST', 'DELETE']
     defaults:
         _controller: 'teknoo.east.common.endpoint.crud.delete'
+        csrfTokenId: 'teknoo_east_website_admin_delete'
         deleter: '@teknoo.east.common.deleting.user'
         errorTemplate: '@@TeknooEastCommon/Error/<error>.html.twig'
         loader: '@Teknoo\East\Common\Loader\UserLoader'

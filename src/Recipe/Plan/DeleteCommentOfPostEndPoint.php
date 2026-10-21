@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace Teknoo\East\Website\Recipe\Plan;
 
 use Stringable;
+use Teknoo\East\Common\Contracts\Recipe\Step\CheckCsrfTokenInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\ObjectAccessControlInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Recipe\Plan\DeleteObjectEndPoint;
@@ -66,6 +67,7 @@ class DeleteCommentOfPostEndPoint extends DeleteObjectEndPoint implements Delete
         public readonly ?ObjectAccessControlInterface $objectAccessControl,
         public readonly string|Stringable|null $defaultErrorTemplate = null,
         public readonly array $loadObjectWiths = [],
+        public readonly ?CheckCsrfTokenInterface $checkCsrfToken = null,
     ) {
         parent::__construct(
             recipe: $recipe,
@@ -78,6 +80,7 @@ class DeleteCommentOfPostEndPoint extends DeleteObjectEndPoint implements Delete
             objectAccessControl: $objectAccessControl,
             defaultErrorTemplate: $defaultErrorTemplate,
             loadObjectWiths: $loadObjectWiths,
+            checkCsrfToken: $checkCsrfToken,
         );
     }
 
@@ -87,8 +90,8 @@ class DeleteCommentOfPostEndPoint extends DeleteObjectEndPoint implements Delete
         $recipe = parent::populateRecipe($recipe);
         $recipe = $recipe->require(new Ingredient(requiredType: 'string', name: 'postId'));
 
-        $recipe = $recipe->cook($this->loadAccountFromRequest, LoadPostFromRequest::class, ['id' => 'postId'], 04);
-        $recipe = $recipe->cook($this->prepareCriteriaFromPost, PrepareCriteriaFromPost::class, [], 05);
+        $recipe = $recipe->cook($this->loadAccountFromRequest, LoadPostFromRequest::class, ['id' => 'postId'], 06);
+        $recipe = $recipe->cook($this->prepareCriteriaFromPost, PrepareCriteriaFromPost::class, [], 07);
 
         return $recipe;
     }

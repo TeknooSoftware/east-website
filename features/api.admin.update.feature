@@ -174,7 +174,7 @@ Feature: Read and update an element, from the admin JSON API
       """
     And the API response does not contain the key "authData" in "data"
 
-  Scenario: Update a user with an invalid role, errors not bubbled to the root form are not returned, only the user
+  Scenario: Update a user with an invalid role, errors not bubbled to the root form are returned
     Given a object of type "Teknoo\East\Common\Object\User" with id "u1" and '{"firstName": "Max", "lastName": "Doe", "email": "max@teknoo.software", "roles": ["ROLE_USER"]}'
     When the API client sends a "PUT" JSON request to "https://foo.com/api/v1/admin/user/u1" with:
       """
@@ -183,15 +183,15 @@ Feature: Read and update an element, from the admin JSON API
       }
       """
     Then the API response status code is 400
-    And the API response contains:
+    And the API response is a JSON response
+    And the API response is:
       """
       {
         "meta": {
-          "id": "u1"
+          "errors": true
         },
         "data": {
-          "id": "u1",
-          "firstName": "Max"
+          ".roles": "The selected choice is invalid."
         }
       }
       """

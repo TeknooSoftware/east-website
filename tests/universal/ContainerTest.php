@@ -29,6 +29,7 @@ use DI\Container;
 use DI\ContainerBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\CheckCsrfTokenInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\ListObjectsAccessControlInterface;
@@ -372,6 +373,27 @@ class ContainerTest extends TestCase
         $container->set(Render::class, $this->createStub(Render::class));
         $container->set(RenderError::class, $this->createStub(RenderError::class));
         $container->set(ObjectAccessControlInterface::class, $this->createStub(ObjectAccessControlInterface::class));
+        $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
+
+        $this->assertInstanceOf(DeleteCommentOfPostEndPoint::class, $container->get(DeleteCommentOfPostEndPoint::class));
+
+        $this->assertInstanceOf(DeleteCommentOfPostEndPointInterface::class, $container->get(DeleteCommentOfPostEndPointInterface::class));
+    }
+
+    public function testDeleteCommentOfPostEndPointWithCsrfTokenCheck(): void
+    {
+        $container = $this->buildContainer();
+        $container->set(OriginalRecipeInterface::class . ':CRUD', $this->createStub(OriginalRecipeInterface::class));
+        $container->set(LoadPostFromRequest::class, $this->createStub(LoadPostFromRequest::class));
+        $container->set(PrepareCriteriaFromPost::class, $this->createStub(PrepareCriteriaFromPost::class));
+        $container->set(LoadObject::class, $this->createStub(LoadObject::class));
+        $container->set(DeleteObject::class, $this->createStub(DeleteObject::class));
+        $container->set(JumpIf::class, $this->createStub(JumpIf::class));
+        $container->set(RedirectClientInterface::class, $this->createStub(RedirectClientInterface::class));
+        $container->set(Render::class, $this->createStub(Render::class));
+        $container->set(RenderError::class, $this->createStub(RenderError::class));
+        $container->set(ObjectAccessControlInterface::class, $this->createStub(ObjectAccessControlInterface::class));
+        $container->set(CheckCsrfTokenInterface::class, $this->createStub(CheckCsrfTokenInterface::class));
         $container->set('teknoo.east.common.get_default_error_template', 'foo.bar');
 
         $this->assertInstanceOf(DeleteCommentOfPostEndPoint::class, $container->get(DeleteCommentOfPostEndPoint::class));

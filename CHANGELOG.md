@@ -1,5 +1,31 @@
 # Teknoo Software - Website - Change Log
 
+## [11.5.0] - Pending release
+### Stable Release
+
+#### Security
+- Admin routes deleting elements (`admin_routing.yaml` and `admin_routing_blog.yaml`) check the CSRF token
+  `teknoo_east_website_admin_delete`, sent in the field `_token` of the body or of the query string, with the step
+  `CheckCsrfToken` of East Common 4.8. An invalid or a missing token returns a 403 error. Links must add the token
+  (`_token: csrf_token('teknoo_east_website_admin_delete')`). These routes accept also `POST` requests. Routes of the
+  JSON API (authenticated by JWT) are not checked. The check can be disabled when importing routes, with the default
+  `csrfTokenId: ~`. See the section "CSRF protection of routes deleting objects" of the README.
+- `DeleteCommentOfPostEndPoint` accepts the step `CheckCsrfTokenInterface` (registered by the DI when available) and
+  checks the token before loading the post: `LoadPostFromRequest` and `PrepareCriteriaFromPost` move to the positions
+  6 and 7, after the CSRF check (5) and before `LoadObject` (10).
+
+#### Fixes
+- JSON API: invalid forms return errors when a field has errors not bubbled to the root form, instead of the element
+  (`east_api_object_with_form_serialization` of East Common 4.8).
+- `Comment.mongodb.xml`, `Content.mongodb.xml`, `Post.mongodb.xml` and `Item.mongodb.xml` (universal): remove the
+  inheritance type `COLLECTION_PER_CLASS`, deprecated by Doctrine ODM 2.17 without replacement (each class is already
+  mapped to its own collection, the Doctrine documents keep `SINGLE_COLLECTION` on the same collection, no migration
+  needed).
+
+#### Evolutions
+- Requires `teknoo/east-common` 4.8 and `teknoo/east-foundation` 9.4.
+- Requires `teknoo/bridge-phpdi-symfony` 7.2 in dev.
+
 ## [11.4.0] - 2026-10-08
 ### Stable Release
 

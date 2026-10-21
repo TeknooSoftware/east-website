@@ -1,0 +1,8 @@
+# Only for the HTML mode : CSRF protection is enabled to check tokens of routes deleting objects (route default
+# `csrfTokenId`), but not on forms, these tests do not read CSRF tokens of forms
+framework:
+  csrf_protection:
+    enabled: true
+  form:
+    csrf_protection:
+      enabled: false

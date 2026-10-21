@@ -70,6 +70,37 @@ Example with Symfony
     website:
         resource: '@TeknooEastWebsiteBundle/config/routing.yaml'
 
+CSRF protection of routes deleting objects
+------------------------------------------
+
+The admin routes shipped by the bundle which delete an element (`admin_routing.yaml`: items, contents, media, types,
+tags and users, `admin_routing_blog.yaml`: posts and comments of posts) check a CSRF token, with the Symfony CSRF
+protection (`framework.csrf_protection` must be enabled) and the step `CheckCsrfToken` of East Common. The token id is
+`teknoo_east_website_admin_delete` (route's default `csrfTokenId`), the token is read from the field `_token` of the
+body, or else of the query string. An invalid or a missing token returns a 403 error. Routes of the JSON API,
+authenticated by a JWT token, are not checked.
+
+These routes accept `GET`, `POST` and `DELETE` requests, links can be kept, with the token in the query string:
+
+    <a href="{{ path('_teknoo_website_admin_type_delete', {
+        'id': type.id,
+        '_token': csrf_token('teknoo_east_website_admin_delete')
+    }) }}">Delete</a>
+
+    <form method="post" action="{{ path('_teknoo_website_admin_type_delete', {'id': type.id}) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('teknoo_east_website_admin_delete') }}">
+        <button type="submit">Delete</button>
+    </form>
+
+The check can be disabled when importing routes:
+
+    //In routes/website.yaml
+    admin_website:
+        resource: '@TeknooEastWebsiteBundle/config/admin_routing.yaml'
+        prefix: '/admin'
+        defaults:
+            csrfTokenId: ~
+
 Environments
 ------------
 
@@ -164,8 +195,8 @@ Responses use the envelope `{"meta": {...}, "data": ...}`:
 
 * an element: `meta` contains its `id` and its class,
 * a list: `meta` contains `totalPages`, `page` and `count`,
-* invalid forms: status 400, `{"meta": {"errors": true}, "data": {".field": "message"}}` when the root form has errors
-  (including errors bubbled from its fields), else the element is returned with the status 400 (like in Space),
+* invalid forms: status 400, `{"meta": {"errors": true}, "data": {".field": "message"}}` when the form or one of its
+  fields has errors (bubbled or not),
 * errors: `{"meta": {"error": true}, "data": {"code": 404, "message": "..."}}`.
 
 Objects are normalized according to groups: `api` (admin lists), `crud` (admin elements), `digest` (deleted

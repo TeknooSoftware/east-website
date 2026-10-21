@@ -60,6 +60,8 @@ use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder as SfContainerBuilder;
 use Symfony\Component\HttpFoundation\Request as SfRequest;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\PasswordHasher\Hasher\SodiumPasswordHasher;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -1339,6 +1341,12 @@ class FeatureContext implements Context
         Assert::assertNotEmpty(current($this->updatedObjects)->getDeletedAt());
     }
 
+    #[Then('no object must be deleted')]
+    public function noObjectMustBeDeleted(): void
+    {
+        Assert::assertEmpty($this->updatedObjects);
+    }
+
     #[Then('An object :id must be updated')]
     public function anObjectMustBeUpdated(string $id): void
     {
@@ -1379,6 +1387,29 @@ class FeatureContext implements Context
     public function symfonyWillReceiveTheDeleteRequest(string $url): void
     {
         $serverRequest = SfRequest::create($url, 'DELETE', []);
+
+        $this->runSymfony($serverRequest);
+    }
+
+    #[When('Symfony will receive the :method request :url with the CSRF token :tokenId')]
+    public function symfonyWillReceiveTheRequestWithTheCsrfToken(string $method, string $url, string $tokenId): void
+    {
+        //The token is stored into the session, and its namespace depends on the main request (`https-` for secured
+        //requests) : it is generated with a request to the same url and the same session
+        $session = new Session(new MockArraySessionStorage());
+        $tokenRequest = SfRequest::create($url, $method);
+        $tokenRequest->setSession($session);
+
+        $this->symfonyKernel->boot();
+        $testContainer = $this->symfonyKernel->getContainer()->get('test.service_container');
+        $requestStack = $testContainer->get('request_stack');
+        $requestStack->push($tokenRequest);
+        $token = $testContainer->get('security.csrf.token_manager')->getToken($tokenId)->getValue();
+        $requestStack->pop();
+
+        //In the query string for `GET` requests (links), in the body for others
+        $serverRequest = SfRequest::create($url, $method, ['_token' => $token]);
+        $serverRequest->setSession($session);
 
         $this->runSymfony($serverRequest);
     }

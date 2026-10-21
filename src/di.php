@@ -28,6 +28,7 @@ namespace Teknoo\East\Website;
 use DomainException;
 use Psr\Container\ContainerInterface;
 use Teknoo\East\Common\Contracts\DBSource\ManagerInterface;
+use Teknoo\East\Common\Contracts\Recipe\Step\CheckCsrfTokenInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormHandlingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\FormProcessingInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\ListObjectsAccessControlInterface;
@@ -387,6 +388,11 @@ return [
             $accessControl = $container->get(ObjectAccessControlInterface::class);
         }
 
+        $checkCsrfToken = null;
+        if ($container->has(CheckCsrfTokenInterface::class)) {
+            $checkCsrfToken = $container->get(CheckCsrfTokenInterface::class);
+        }
+
         $defaultErrorTemplate = $container->get('teknoo.east.common.get_default_error_template');
 
         return new DeleteCommentOfPostEndPoint(
@@ -401,6 +407,7 @@ return [
             renderError: $container->get(RenderError::class),
             objectAccessControl: $accessControl,
             defaultErrorTemplate: $defaultErrorTemplate,
+            checkCsrfToken: $checkCsrfToken,
         );
     },
 

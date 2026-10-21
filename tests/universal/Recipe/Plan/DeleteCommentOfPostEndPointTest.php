@@ -29,6 +29,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use Teknoo\East\Common\Contracts\Recipe\Step\CheckCsrfTokenInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\ObjectAccessControlInterface;
 use Teknoo\East\Common\Contracts\Recipe\Step\RedirectClientInterface;
 use Teknoo\East\Common\Recipe\Step\DeleteObject;
@@ -216,6 +217,7 @@ class DeleteCommentOfPostEndPointTest extends TestCase
             $this->getRender(true),
             $this->getRenderError(true),
             $this->getObjectAccessControl(true),
+            checkCsrfToken: $this->createStub(CheckCsrfTokenInterface::class),
         );
     }
 }

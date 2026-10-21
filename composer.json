@@ -60,8 +60,8 @@
         "teknoo/immutable": "^3.0.22",
         "teknoo/states": "^7.1.11",
         "teknoo/recipe": "^7.3",
-        "teknoo/east-common": "^4.6.1",
-        "teknoo/east-foundation": "^9.2.4",
+        "teknoo/east-common": "^4.8",
+        "teknoo/east-foundation": "^9.4",
         "teknoo/east-translation": "^2.1"
     },
     "require-dev": {
@@ -75,7 +75,7 @@
         "symfony/property-access": "^6.4.24||^7.4||^8.1",
         "behat/behat": "^4.0",
         "behat/phpunit-assertions-extension": "^1.0",
-        "teknoo/bridge-phpdi-symfony": "^7.1.2",
+        "teknoo/bridge-phpdi-symfony": "^7.2",
         "psr/cache": "^3",
         "guzzlehttp/guzzle": "^7.15.1||^8",
         "symfony/cache": "^6.4.24||^7.4||^8.1",

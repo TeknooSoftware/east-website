@@ -39,7 +39,7 @@ Feature: Comment a published post, from the public JSON API
     Then It is redirect to "/api/v1/post/hello-world\?id=[a-zA-Z0-9]+"
     And An object "Comment" must be persisted
 
-  Scenario: Comment a post with an invalid comment, errors not bubbled to the root form are not returned, only the post
+  Scenario: Comment a post with an invalid comment, errors not bubbled to the root form are returned
     Given a type "type1" named "article" with the blocks "body"
     And a published post "p1" with the slug "hello-world", the title "Hello World", the parts '{"body": "Hi"}' and the sanitized parts '{"body": "Hi"}'
     When the API client sends a "POST" JSON request to "https://foo.com/api/v1/post/hello-world/comment" with:
@@ -52,15 +52,15 @@ Feature: Comment a published post, from the public JSON API
       """
     Then the API response status code is 400
     And the API response is a JSON response
-    And the API response contains:
+    And the API response is:
       """
       {
         "meta": {
-          "id": "p1"
+          "errors": true
         },
         "data": {
-          "id": "p1",
-          "title": "Hello World"
+          ".title": "This value should not be blank.",
+          ".content": "This value should not be blank."
         }
       }
       """

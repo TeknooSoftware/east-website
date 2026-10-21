@@ -149,15 +149,14 @@ Feature: Create an element, from the admin JSON API
       """
     Then the API response status code is 400
     And the API response is a JSON response
-    And the API response contains:
+    And the API response is:
       """
       {
         "meta": {
-          "@class": "Teknoo\\East\\Website\\Object\\Content"
+          "errors": true
         },
         "data": {
-          "title": "Foo",
-          "environment": "default"
+          ".environment": "The selected choice is invalid."
         }
       }
       """
@@ -269,7 +268,7 @@ Feature: Create an element, from the admin JSON API
       """
     And the API response does not contain the key "localPath" in "data.metadata"
 
-  Scenario: Create a type with an invalid block, errors not bubbled to the root form are not returned, only the object
+  Scenario: Create a type with an invalid block, errors not bubbled to the root form are returned
     When the API client sends a "POST" JSON request to "https://foo.com/api/v1/admin/type/new" with:
       """
       {
@@ -285,15 +284,14 @@ Feature: Create an element, from the admin JSON API
       """
     Then the API response status code is 400
     And the API response is a JSON response
-    And the API response contains:
+    And the API response is:
       """
       {
         "meta": {
-          "@class": "Teknoo\\East\\Website\\Object\\Type"
+          "errors": true
         },
         "data": {
-          "name": "Page",
-          "template": "page.html.twig"
+          ".blocks.0.type": "The selected choice is invalid."
         }
       }
       """
