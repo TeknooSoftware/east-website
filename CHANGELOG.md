@@ -1,5 +1,10 @@
 # Teknoo Software - Website - Change Log
 
+## [11.5.1] - 2026-11-10
+### Stable Release
+#### Fix
+- Remove doctrine/common
+
 ## [11.5.0] - 2026-10-21
 ### Stable Release
 
